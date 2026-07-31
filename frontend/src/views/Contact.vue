@@ -95,14 +95,24 @@ onMounted(() => {
   }
 });
 
-const submitForm = () => {
-  alert('Cảm ơn bạn! Yêu cầu của bạn đã được gửi đi thành công.');
-  formData.value = {
-    name: '',
-    email: '',
-    courseHandle: '',
-    message: ''
-  };
+const submitForm = async () => {
+  try {
+    await courseStore.sendContact(
+      formData.value.name,
+      formData.value.email,
+      formData.value.courseHandle,
+      formData.value.message
+    );
+    alert('Cảm ơn bạn! Yêu cầu của bạn đã được gửi đi thành công và đã được lưu vào cơ sở dữ liệu.');
+    formData.value = {
+      name: '',
+      email: '',
+      courseHandle: '',
+      message: ''
+    };
+  } catch (err) {
+    alert('Có lỗi xảy ra khi gửi yêu cầu: ' + err.message);
+  }
 };
 </script>
 
