@@ -20,7 +20,7 @@ onMounted(() => {
           "type": "oaid",
           "oaid": "2007401187233041513",
           "number": "+84902335354",
-          "message": "Bạn cần Skills Bridge hỗ trợ thông tin nào?",
+          "message": "Bạn cần ACC Academy hỗ trợ thông tin nào?",
           "autopopup": "0"
         },
         "position": {

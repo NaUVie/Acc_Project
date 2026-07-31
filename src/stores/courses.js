@@ -430,7 +430,7 @@ export const useCourseStore = defineStore('courses', {
         title: "Khi AI Copilot Trở Thành Trợ Lý Chiến Lược Tại Amway",
         handle: "khi-ai-copilot-tro-thanh-tro-ly-chien-luoc",
         category: "Lãnh đạo & Quản lý",
-        excerpt: "Nhằm hiện thực hóa chiến lược này, Skills Bridge đã vinh dự đồng hành cùng đội ngũ nhân sự Amway...",
+        excerpt: "Nhằm hiện thực hóa chiến lược này, ACC Academy đã vinh dự đồng hành cùng đội ngũ nhân sự Amway...",
         image: "/images/Blog_Thumbnail_12_39a02613-d986-43b8-8462-bdb4046a2153.png",
         date: "Jul 14, 2026",
         link: "#/blog/khi-ai-copilot-tro-thanh-tro-ly-chien-luoc"

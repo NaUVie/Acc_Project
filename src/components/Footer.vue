@@ -11,7 +11,7 @@
             <p>Các chuyên gia giàu kinh nghiệm của chúng tôi chia sẻ những phương pháp và công cụ thực tế, có thể áp dụng ngay vào công việc hằng ngày để tạo ra kết quả rõ ràng.</p>
           </div>
           <div class="custom-footer-gcn">
-            <p>CÔNG TY TNHH SKILLS BRIDGE (ACC ACADEMY)</p>
+            <p>CÔNG TY TNHH ACC ACADEMY</p>
             <p>Ngày cấp GCNĐKDN: 26/07/2022</p>
             <p>Nơi cấp GCNĐKDN: Sở KH&amp;ĐT TP. HCM (nay là Sở Tài Chính TP. HCM)</p>
             <p>MST: 0317402205</p>
@@ -73,7 +73,7 @@
       </div>
       <div class="custom-footer-bottom">
         <div class="custom-footer-copyright">
-          © 2026 - Bản quyền của Công ty TNHH Skills Bridge (ACC Academy)
+          © 2026 - Bản quyền của Công ty TNHH ACC Academy
         </div>
       </div>
     </div>

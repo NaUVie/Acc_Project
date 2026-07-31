@@ -57,7 +57,7 @@
           <div class="eco-left">
             <h2 class="eco-title">Kiến tạo hệ sinh thái chuyển đổi vững chắc</h2>
             <div class="eco-content">
-              <p class="eco-desc">Skills Bridge thiết lập một hệ sinh thái cộng hưởng, nơi Năng lực con người được nâng tầm và Quy trình vận hành được tối ưu hóa đồng bộ.</p>
+              <p class="eco-desc">ACC Academy thiết lập một hệ sinh thái cộng hưởng, nơi Năng lực con người được nâng tầm và Quy trình vận hành được tối ưu hóa đồng bộ.</p>
               <p class="eco-desc">Kết quả mang lại là một cấu trúc tổ chức tinh gọn, linh hoạt và sở hữu lợi thế cạnh tranh tuyệt đối trong kỷ nguyên Trí tuệ nhân tạo (AI).</p>
             </div>
             <div class="eco-counter-box">
@@ -67,7 +67,7 @@
           </div>
 
           <div class="eco-center">
-            <img src="/images/Ecosystem_1.png" alt="Skills Bridge Ecosystem" class="eco-img" />
+            <img src="/images/Ecosystem_1.png" alt="ACC Academy Ecosystem" class="eco-img" />
           </div>
 
           <div class="eco-right">
@@ -169,7 +169,7 @@
     <section class="bento-grid-section">
       <div class="container">
         <div class="bento-header">
-          <h2 class="bento-title">Năng lực cốt lõi của Skills Bridge</h2>
+          <h2 class="bento-title">Năng lực cốt lõi của ACC Academy</h2>
           <p class="bento-subtitle">Các chuyên gia của chúng tôi mang đến sự kết hợp giữa kinh nghiệm thực chiến đa ngành và những góc nhìn đổi mới để khơi mào cho sự thay đổi toàn diện</p>
         </div>
 
@@ -392,7 +392,7 @@
         <div class="blogs-header-row">
           <div class="blogs-header-left">
             <span class="blogs-ui-tag">Thư viện bài viết</span>
-            <h2 class="blogs-heading">Cập nhật thông tin mới nhất cùng Skills Bridge</h2>
+            <h2 class="blogs-heading">Cập nhật thông tin mới nhất cùng ACC Academy</h2>
           </div>
           <router-link to="/library/blog" class="blogs-view-all-btn">
             Xem thêm bài viết
@@ -431,7 +431,7 @@
       <div class="container">
         <div class="cta-banner-box">
           <div class="cta-banner-left">
-            <h2 class="cta-banner-heading">Nâng tầm lợi thế cạnh tranh cùng Skills Bridge</h2>
+            <h2 class="cta-banner-heading">Nâng tầm lợi thế cạnh tranh cùng ACC Academy</h2>
             <p class="cta-banner-desc">Nhận lộ trình tư vấn chi tiết từ chuyên gia của chúng tôi và thiết lập nền tảng chuyển đổi số bền vững cho cá nhân & doanh nghiệp của bạn.</p>
             <div class="cta-benefits-list">
               <div class="benefit-item">
@@ -452,7 +452,7 @@
             </router-link>
           </div>
           <div class="cta-banner-right">
-            <img src="/images/Right.png" alt="Skills Bridge Consulting Team" class="cta-right-img" loading="lazy" />
+            <img src="/images/Right.png" alt="ACC Academy Consulting Team" class="cta-right-img" loading="lazy" />
           </div>
         </div>
       </div>
