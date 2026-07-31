@@ -566,11 +566,11 @@ onUnmounted(() => {
   opacity: 0;
   visibility: hidden;
   width: 280px;
-  background-color: var(--bg-secondary);
-  border: 1px solid var(--border-color);
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: var(--radius-md);
   padding: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
   transition: var(--transition);
   z-index: 1001;
 }
@@ -588,19 +588,19 @@ onUnmounted(() => {
 }
 
 .dropdown-item:hover {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(0, 0, 0, 0.03);
 }
 
 .dropdown-title {
   font-weight: 600;
   font-size: 14px;
-  color: var(--text-primary);
+  color: #0f172a;
   margin-bottom: 2px;
 }
 
 .dropdown-desc {
   font-size: 12px;
-  color: var(--text-muted);
+  color: #64748b;
   line-height: 1.4;
 }
 
@@ -616,9 +616,9 @@ onUnmounted(() => {
   top: 100%;
   left: 0;
   width: 100%;
-  background-color: #121212;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  background-color: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
   opacity: 0;
   visibility: hidden;
   transform: translateY(15px);
@@ -641,13 +641,13 @@ onUnmounted(() => {
 
 /* Sidebar Column */
 .mega-menu-sidebar {
-  background-color: #1a1a1a;
+  background-color: #f8fafc;
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   overflow-y: auto;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
 }
 
 .mega-sidebar-item {
@@ -656,7 +656,7 @@ onUnmounted(() => {
   padding: 12px 16px;
   background: transparent;
   border: none;
-  color: #98a2b3;
+  color: #475467;
   font-size: 14px;
   font-weight: 600;
   text-align: left;
@@ -680,8 +680,8 @@ onUnmounted(() => {
 
 .mega-sidebar-item:hover,
 .mega-sidebar-item.active {
-  color: #ffffff;
-  background-color: rgba(2, 43, 159, 0.08);
+  color: #022B9F;
+  background-color: rgba(2, 43, 159, 0.05);
 }
 
 .mega-sidebar-item:hover .indicator-bar,
@@ -690,12 +690,12 @@ onUnmounted(() => {
 }
 
 .mega-sidebar-item.active {
-  background-color: rgba(2, 43, 159, 0.12);
+  background-color: rgba(2, 43, 159, 0.08);
 }
 
 /* Right Content Column */
 .mega-menu-content {
-  background-color: #121212;
+  background-color: #ffffff;
   padding: 32px 40px;
   display: flex;
   flex-direction: column;
@@ -707,14 +707,14 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   padding-bottom: 16px;
 }
 
 .mega-content-title {
   font-size: 20px;
   font-weight: 800;
-  color: #ffffff;
+  color: #0f172a;
   margin: 0;
 }
 
@@ -738,8 +738,8 @@ onUnmounted(() => {
 }
 
 .mega-program-card {
-  background-color: #1a1a1a;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
   border-radius: 10px;
   padding: 16px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -747,9 +747,9 @@ onUnmounted(() => {
 
 .mega-program-card:hover {
   transform: translateY(-2px);
-  background-color: #262626;
-  border-color: rgba(2, 43, 159, 0.3);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  background-color: #f8fafc;
+  border-color: rgba(2, 43, 159, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
 }
 
 .mega-card-link {
@@ -771,7 +771,7 @@ onUnmounted(() => {
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .mega-school-logo img {
@@ -796,7 +796,7 @@ onUnmounted(() => {
 }
 
 .mega-program-title {
-  color: #e2e8f0;
+  color: #1e293b;
   font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
@@ -809,7 +809,7 @@ onUnmounted(() => {
 }
 
 .mega-program-card:hover .mega-program-title {
-  color: #ffffff;
+  color: #022B9F;
 }
 
 /* Custom Scrollbars */
@@ -825,12 +825,12 @@ onUnmounted(() => {
 }
 
 .mega-menu-sidebar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.08);
   border-radius: 3px;
 }
 
 .mega-menu-content::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(0, 0, 0, 0.1);
   border-radius: 3px;
 }
 
@@ -847,7 +847,7 @@ onUnmounted(() => {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   z-index: 1999;
 }
@@ -859,9 +859,9 @@ onUnmounted(() => {
   width: 380px;
   max-width: 100vw;
   height: 100vh;
-  background-color: #121212;
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 20px 0 50px rgba(0, 0, 0, 0.6);
+  background-color: #ffffff;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 20px 0 50px rgba(0, 0, 0, 0.05);
   z-index: 2000;
   padding: 40px;
   display: flex;
@@ -879,9 +879,9 @@ onUnmounted(() => {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #0f172a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -890,8 +890,8 @@ onUnmounted(() => {
 }
 
 .drawer-close-btn:hover {
-  background-color: #ffffff;
-  color: #121212;
+  background-color: #0f172a;
+  color: #ffffff;
   transform: rotate(90deg);
 }
 
@@ -913,9 +913,9 @@ onUnmounted(() => {
 .drawer-title {
   font-size: 24px;
   font-weight: 800;
-  color: #ffffff;
+  color: #0f172a;
   margin-bottom: 40px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   padding-bottom: 16px;
 }
 
@@ -928,7 +928,7 @@ onUnmounted(() => {
 .drawer-link-item {
   font-size: 22px;
   font-weight: 700;
-  color: #e2e8f0;
+  color: #334155;
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-block;
@@ -943,7 +943,7 @@ onUnmounted(() => {
 .drawer-footer {
   margin-top: auto;
   padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -966,13 +966,13 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  box-shadow: 0 4px 12px rgba(0, 104, 255, 0.4);
+  box-shadow: 0 4px 12px rgba(0, 104, 255, 0.3);
   transition: all 0.3s ease;
 }
 
 .zalo-bubble:hover {
   transform: scale(1.08);
-  box-shadow: 0 6px 16px rgba(0, 104, 255, 0.6);
+  box-shadow: 0 6px 16px rgba(0, 104, 255, 0.5);
 }
 
 /* Vue Transitions */
