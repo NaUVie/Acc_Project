@@ -9,18 +9,18 @@ const routes = [
   },
   {
     path: '/courses/ai',
-    name: 'CourseKyNangAI',
-    component: () => import('../views/courses/KyNangAI.vue')
+    name: 'CourseAISkills',
+    component: () => import('../views/courses/AISkills.vue')
   },
   {
     path: '/courses/mem',
-    name: 'CourseKyNangMem',
-    component: () => import('../views/courses/KyNangMem.vue')
+    name: 'CourseSoftSkills',
+    component: () => import('../views/courses/SoftSkills.vue')
   },
   {
     path: '/courses/chuyen-mon',
-    name: 'CourseKyNangChuyenMon',
-    component: () => import('../views/courses/KyNangChuyenMon.vue')
+    name: 'CourseProfessionalSkills',
+    component: () => import('../views/courses/ProfessionalSkills.vue')
   },
   {
     path: '/bundles',
@@ -29,8 +29,8 @@ const routes = [
   },
   {
     path: '/corporate/dao-tao',
-    name: 'CorporateDaoTao',
-    component: () => import('../views/corporate/DaoTao.vue')
+    name: 'CorporateTraining',
+    component: () => import('../views/corporate/CorporateTraining.vue')
   },
   {
     path: '/corporate/coe',

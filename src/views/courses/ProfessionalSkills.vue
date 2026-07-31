@@ -335,7 +335,6 @@ const filteredCourses = computed(() => {
   } else if (sortBy.value === 'price-descending') {
     list.sort((a, b) => b.price - a.price);
   } else if (sortBy.value === 'created-descending') {
-    // Newer first (by ID descending since IDs represent creation order)
     list.sort((a, b) => b.id - a.id);
   } else {
     // default/best-selling: preserve store ordering
@@ -568,11 +567,11 @@ const formatPrice = (value) => {
   padding-bottom: 10px;
   margin-inline: -24px;
   padding-inline: 24px;
-  scrollbar-width: none; /* Hide scrollbar Firefox */
+  scrollbar-width: none;
 }
 
 .collection-list-grid-wrapper::-webkit-scrollbar {
-  display: none; /* Hide scrollbar Chrome/Safari */
+  display: none;
 }
 
 .collection-list-grid {
