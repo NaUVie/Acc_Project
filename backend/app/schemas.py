@@ -31,6 +31,7 @@ class CourseBase(BaseModel):
     description: Optional[str] = None
     duration: Optional[str] = None
     level: Optional[str] = None
+    curriculum_data: Optional[str] = None
 
 class CourseResponse(CourseBase):
     tags: List[CourseTagResponse] = []
@@ -55,17 +56,24 @@ class BlogPostResponse(BlogPostBase):
 
 # Contact Schemas
 class ContactCreate(BaseModel):
-    name: str
+    first_name: str
+    middle_name: Optional[str] = ""
+    last_name: str
     email: str
+    phone: str
     course_handle: Optional[str] = ""
     message: str
 
 class ContactResponse(BaseModel):
     id: int
-    name: str
+    first_name: str
+    middle_name: Optional[str]
+    last_name: str
     email: str
+    phone: str
     course_handle: Optional[str]
     message: str
+    is_resolved: bool
     created_at: datetime
 
     class Config:
@@ -148,3 +156,113 @@ class ReferralSummary(BaseModel):
     total_commission_earned: int
     referral_code: str
     referrals_list: List[ReferralResponse]
+
+# Testimonial Schemas
+class TestimonialResponse(BaseModel):
+    id: int
+    name: str
+    role: str
+    text: str
+    image: Optional[str] = None
+    video_url: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+# Admin Schemas
+class UserAdminCreate(BaseModel):
+    fullname: str
+    email: EmailStr
+    password: str
+    role: str = "student"
+    referred_by_id: Optional[int] = None
+
+class UserAdminUpdate(BaseModel):
+    fullname: Optional[str] = None
+    email: Optional[EmailStr] = None
+    role: Optional[str] = None
+    is_active: Optional[bool] = None
+    referred_by_id: Optional[int] = None
+
+class UserAdminResponse(BaseModel):
+    id: int
+    fullname: str
+    email: EmailStr
+    role: str
+    referral_code: str
+    referred_by_id: Optional[int] = None
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class OrderAdminCreate(BaseModel):
+    user_id: int
+    course_ids: List[int]
+    discount_applied: int = 0
+    total_price: int
+    status: str = "pending"
+
+class OrderAdminUpdate(BaseModel):
+    status: Optional[str] = None
+    discount_applied: Optional[int] = None
+    total_price: Optional[int] = None
+    course_ids: Optional[List[int]] = None
+
+class OrderAdminResponse(BaseModel):
+    id: int
+    user_id: int
+    user_fullname: str
+    user_email: str
+    total_price: int
+    discount_applied: int
+    status: str
+    created_at: datetime
+    items: List[OrderItemResponse] = []
+
+    class Config:
+        from_attributes = True
+
+class CourseAdminCreate(BaseModel):
+    title: str
+    category_slug: str
+    handle: str
+    price: int
+    original_price: Optional[int] = None
+    image: Optional[str] = None
+    description: Optional[str] = None
+    duration: Optional[str] = None
+    level: Optional[str] = None
+    curriculum_data: Optional[str] = None
+
+class CourseAdminUpdate(BaseModel):
+    title: Optional[str] = None
+    category_slug: Optional[str] = None
+    handle: Optional[str] = None
+    price: Optional[int] = None
+    original_price: Optional[int] = None
+    image: Optional[str] = None
+    description: Optional[str] = None
+    duration: Optional[str] = None
+    level: Optional[str] = None
+    curriculum_data: Optional[str] = None
+
+class ContactSettingUpdate(BaseModel):
+    address: Optional[str] = None
+    hotline: Optional[str] = None
+    email: Optional[str] = None
+    zalo: Optional[str] = None
+    viber: Optional[str] = None
+
+class ContactSettingResponse(BaseModel):
+    id: int
+    address: str
+    hotline: str
+    email: str
+    zalo: str
+    viber: str
+
+    class Config:
+        from_attributes = True
+

@@ -54,10 +54,4 @@ onMounted(() => {
 });
 </script>
 
-<style>
-/* Add Judge.me specific overrides here if needed */
-.jdgm-widget {
-  margin: 20px 0;
-  width: 100%;
-}
-</style>
+<style src="@/styles/components/JudgeMeReviews.css"></style>

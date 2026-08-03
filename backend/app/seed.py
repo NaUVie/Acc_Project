@@ -252,6 +252,30 @@ BLOG_POSTS_SEED = [
     }
 ]
 
+TESTIMONIALS_SEED = [
+    {
+        "name": "Lê Hồng Minh",
+        "role": "Founder & CEO, VNG Corporation",
+        "text": "Đội ngũ kỹ sư và nhân viên VNG đã cải thiện vượt bậc hiệu suất làm việc nhờ các khóa học và quy trình tự động hóa được thiết kế bởi ACC Academy. Đây là đòn bẩy thiết thực cho doanh nghiệp công nghệ.",
+        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
+        "video_url": "https://www.w3schools.com/html/mov_bbb.mp4" # Sample MP4 clip
+    },
+    {
+        "name": "Nguyễn Thành Nam",
+        "role": "Cựu CEO FPT, Founder FUNiX",
+        "text": "Năng lực ứng dụng AI thực tế là điều sống còn với mọi nhà quản lý hiện nay. Khóa đào tạo AI Center of Excellence của ACC thực sự đem lại hướng tiếp cận sắc bén cho các doanh nhân hàng đầu.",
+        "image": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&auto=format&fit=crop",
+        "video_url": None
+    },
+    {
+        "name": "Trần Hải Linh",
+        "role": "CEO, Sendo.vn",
+        "text": "Giải pháp đào tạo kỹ năng chuyên môn của ACC giúp hệ thống vận hành trơn tru hơn. Phương pháp đào tạo kết hợp lý thuyết và bài tập thực tiễn tạo động lực học tập cực lớn cho học viên.",
+        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
+        "video_url": "https://www.w3schools.com/html/movie.mp4" # Sample MP4 clip
+    }
+]
+
 def seed_database():
     print("Initializing Database tables...")
     # This will create tables if they do not exist
@@ -309,6 +333,21 @@ def seed_database():
                     link=blog_data["link"]
                 )
                 db.add(blog)
+        db.commit()
+
+        # 4. Seed Testimonials
+        print("Seeding testimonials...")
+        for test_data in TESTIMONIALS_SEED:
+            existing = db.query(models.Testimonial).filter(models.Testimonial.name == test_data["name"]).first()
+            if not existing:
+                testimonial = models.Testimonial(
+                    name=test_data["name"],
+                    role=test_data["role"],
+                    text=test_data["text"],
+                    image=test_data["image"],
+                    video_url=test_data["video_url"]
+                )
+                db.add(testimonial)
         db.commit()
         print("Database seeded successfully!")
     except Exception as e:

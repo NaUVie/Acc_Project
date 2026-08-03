@@ -5,6 +5,6 @@ pymysql==1.1.1
 cryptography==42.0.8
 pydantic==2.7.4
 python-dotenv==1.0.1
-passlib[bcrypt]==1.7.4
+bcrypt
 pyjwt==2.8.0
 python-multipart==0.0.9

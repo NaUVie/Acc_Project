@@ -71,6 +71,44 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: () => import('../views/Login.vue')
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('../views/Register.vue')
+  },
+  {
+    path: '/cart',
+    name: 'Cart',
+    component: () => import('../views/Cart.vue')
+  },
+  {
+    path: '/checkout',
+    name: 'Checkout',
+    component: () => import('../views/Checkout.vue')
+  },
+  {
+    path: '/chia-se-hoc-vien',
+    name: 'Testimonials',
+    component: () => import('../views/TestimonialsView.vue')
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('../views/Dashboard.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/courses/:handle/study',
+    name: 'CourseStudy',
+    component: () => import('../views/courses/CourseStudy.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/admin',
+    name: 'AdminDashboard',
+    component: () => import('../views/admin/AdminDashboard.vue'),
+    meta: { requiresAdmin: true }
   }
 ];
 
@@ -79,6 +117,38 @@ const router = createRouter({
   routes,
   scrollBehavior() {
     return { top: 0 };
+  }
+});
+
+import { useCourseStore } from '../stores/courses';
+
+router.beforeEach(async (to, from, next) => {
+  const courseStore = useCourseStore();
+  
+  if (courseStore.token && !courseStore.user) {
+    try {
+      await courseStore.fetchUserMe();
+    } catch (err) {
+      console.error("Route guard profile fetch error:", err);
+    }
+  }
+
+  if (to.meta.requiresAdmin) {
+    if (courseStore.token && courseStore.user?.role === 'admin') {
+      next();
+    } else {
+      alert('Bạn không có quyền truy cập trang quản trị!');
+      next('/login');
+    }
+  } else if (to.meta.requiresAuth) {
+    if (courseStore.token) {
+      next();
+    } else {
+      alert('Vui lòng đăng nhập để học tập!');
+      next('/login');
+    }
+  } else {
+    next();
   }
 });
 
