@@ -24,7 +24,6 @@ app.add_middleware(
 # Auto-create tables and trigger seeding on startup
 @app.on_event("startup")
 def on_startup():
-    # Schema migration check for contacts and courses tables using SQLAlchemy inspect
     try:
         from sqlalchemy import inspect, text
         inspector = inspect(engine)
@@ -37,8 +36,11 @@ def on_startup():
     except Exception as e:
         print(f"Migration check error: {e}")
 
-    Base.metadata.create_all(bind=engine)
-    
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"Error creating DB tables on startup: {e}")
+
     # Ensure is_resolved & curriculum_data columns exist
     try:
         from sqlalchemy import inspect, text
@@ -57,14 +59,16 @@ def on_startup():
                     print("Added column curriculum_data to courses table.")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
-    # Run seed_database to ensure tables and text fields are properly updated with correct UTF-8 encoding
+
+    # Run seed_database safely
     try:
         seed_database()
     except Exception as e:
         print(f"Error during startup seed: {e}")
-    
+
     # Seed default contact settings if empty
     try:
+        db = next(get_db())
         setting_count = db.query(models.ContactSetting).count()
         if setting_count == 0:
             db_setting = models.ContactSetting(
@@ -77,9 +81,9 @@ def on_startup():
             db.add(db_setting)
             db.commit()
             print("Seeded default contact settings.")
+        db.close()
     except Exception as e:
         print(f"Error seeding default contact settings: {e}")
-    db.close()
 
 # Register the combined modular API router with a global prefix
 app.include_router(api_router, prefix="/api")
