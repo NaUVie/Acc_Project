@@ -101,7 +101,7 @@
           <div v-else-if="activeLesson?.type === 'zoom'" class="zoom-screen-container">
             <div class="zoom-card">
               <div class="zoom-badge-live">LIVE LỚP HỌC TRỰC TUYẾN</div>
-              <img src="/images/logo2.jpg" alt="ACC Logo" class="zoom-logo" style="height: 50px; margin-bottom: 20px;" />
+              <img src="/images/logo3.png" alt="ACC Logo" class="zoom-logo" style="height: 50px; margin-bottom: 20px;" />
               <h2>Lớp Học Trực Tuyến Qua Zoom</h2>
               <p class="zoom-subtitle">Lớp học tương tác trực tiếp với chuyên gia của ACC Academy để giải đáp thắc mắc và chữa bài tập thực hành.</p>
               

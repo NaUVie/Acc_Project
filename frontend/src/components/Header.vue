@@ -3,7 +3,7 @@
     <div class="container header-container">
       <!-- Logo -->
       <router-link to="/" class="logo">
-        <img src="/images/logo2.jpg" alt="ACC Academy Logo" class="logo-image" />
+        <img src="/images/logo3.png" alt="ACC Academy Logo" class="logo-image" />
       </router-link>
 
       <!-- Desktop Nav -->

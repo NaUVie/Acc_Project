@@ -156,7 +156,7 @@ const cartItems = computed(() => {
       price: item.course.price,
       originalPrice: item.course.originalPrice || item.course.price * 1.5,
       quantity: item.quantity || 1,
-      image: item.course.image || '/images/logo2.jpg',
+      image: item.course.image || '/images/logo3.png',
       category: item.course.category,
       isGift: item.course.price === 0
     }))
