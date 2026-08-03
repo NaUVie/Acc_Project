@@ -199,6 +199,31 @@ button {
   background: var(--primary);
 }
 
+/* Global High Contrast Form Controls - Dark Text on Crisp White Background */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+select,
+textarea,
+.form-control {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border: 1px solid var(--border-color, #cbd5e1);
+  font-family: var(--text-font-family, inherit);
+}
+
+input::placeholder, textarea::placeholder {
+  color: #64748b !important;
+  opacity: 0.9 !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #ffffff inset !important;
+  -webkit-text-fill-color: #0f172a !important;
+  caret-color: #0f172a !important;
+}
+
 /* Utility Classes */
 .container {
   max-width: 1600px;
