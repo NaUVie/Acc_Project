@@ -196,6 +196,16 @@ export const useCourseStore = defineStore('courses', {
       }
     },
 
+    async updateProfile(payload) {
+      if (!this.token) return;
+      const data = await this.apiRequest('/auth/me', {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      });
+      this.user = data;
+      return data;
+    },
+
     async fetchReferrals() {
       if (!this.token) return;
       try {

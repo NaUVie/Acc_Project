@@ -88,6 +88,10 @@ class UserCreate(UserBase):
     password: str
     referral_code_used: Optional[str] = None # The code of the friend who referred them
 
+class UserUpdateProfile(BaseModel):
+    fullname: Optional[str] = None
+    password: Optional[str] = None
+
 class UserResponse(UserBase):
     id: int
     referral_code: str
