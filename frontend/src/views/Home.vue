@@ -53,18 +53,30 @@
     <div class="stats-trigger-zone">
       <!-- 2. Ecosystem Section -->
       <section class="ecosystem-section">
-        <div class="container ecosystem-container">
-          <div class="eco-left">
-            <h2 class="eco-title">Kiến tạo hệ sinh thái chuyển đổi vững chắc</h2>
-            <div class="eco-content">
-              <p class="eco-desc">ACC Academy thiết lập một hệ sinh thái cộng hưởng, nơi Năng lực con người được nâng tầm và Quy trình vận hành được tối ưu hóa đồng bộ.</p>
-              <p class="eco-desc">Kết quả mang lại là một cấu trúc tổ chức tinh gọn, linh hoạt và sở hữu lợi thế cạnh tranh tuyệt đối trong kỷ nguyên Trí tuệ nhân tạo (AI).</p>
-            </div>
-            <div class="eco-counter-box">
-              <div class="eco-number">{{ formatNumber(ecoCount) }}+</div>
-              <div class="eco-counter-desc">Dự án & chiến lược đã thực thi thành công</div>
-            </div>
+        <div class="container">
+          <!-- Top Centered Header with Word-by-Word Animation -->
+          <div class="eco-header">
+            <h2 class="eco-main-title" :class="{ 'animated': ecoTitleAnimated }">
+              <span 
+                v-for="(word, idx) in ecoTitleWords" 
+                :key="idx" 
+                class="word-span"
+                :style="{ '--word-delay': `${idx * 0.1}s` }"
+              >{{ word }}&nbsp;</span>
+            </h2>
           </div>
+
+          <div class="ecosystem-container">
+            <div class="eco-left">
+              <div class="eco-content">
+                <p class="eco-desc">ACC Academy thiết lập một hệ sinh thái cộng hưởng, nơi Năng lực con người được nâng tầm và Quy trình vận hành được tối ưu hóa đồng bộ.</p>
+                <p class="eco-desc">Kết quả mang lại là một cấu trúc tổ chức tinh gọn, linh hoạt và sở hữu lợi thế cạnh tranh tuyệt đối trong kỷ nguyên Trí tuệ nhân tạo (AI).</p>
+              </div>
+              <div class="eco-counter-box">
+                <div class="eco-number">{{ formatNumber(ecoCount) }}+</div>
+                <div class="eco-counter-desc">Dự án & chiến lược đã thực thi thành công</div>
+              </div>
+            </div>
 
           <div class="eco-center">
             <img src="/images/Ecosystem_1.png" alt="ACC Academy Ecosystem" class="eco-img" />
@@ -111,7 +123,8 @@
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
       <!-- 3. Stats Section -->
       <section class="stats-section">
@@ -470,6 +483,23 @@ const nextSlide = () => {
 };
 
 // 2. Ecosystem & Stats Counter Animation
+const ecoTitleWords = ['Kiến', 'tạo', 'hệ', 'sinh', 'thái', 'chuyển', 'đổi', 'vững', 'chắc'];
+const ecoTitleAnimated = ref(false);
+
+const setupEcoTitleObserver = () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        ecoTitleAnimated.value = true;
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  const target = document.querySelector('.eco-main-title');
+  if (target) observer.observe(target);
+};
+
 const ecoCount = ref(0);
 const leadersCount = ref(0);
 const businessesCount = ref(0);
@@ -667,6 +697,7 @@ const blogPosts = computed(() => courseStore.getBlogPosts);
 
 onMounted(() => {
   startHeroAutoplay();
+  setupEcoTitleObserver();
   setupCountersObserver();
   setupPartnerObserver();
   startTabProgress();

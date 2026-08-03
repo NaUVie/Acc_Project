@@ -290,6 +290,8 @@ def seed_database():
             if not existing:
                 cat = models.Category(slug=cat_data["slug"], name=cat_data["name"])
                 db.add(cat)
+            else:
+                existing.name = cat_data["name"]
         db.commit()
 
         # 2. Seed Courses
@@ -315,6 +317,16 @@ def seed_database():
                 for tag_name in course_data["tags"]:
                     tag = models.CourseTag(course_id=course.id, tag=tag_name)
                     db.add(tag)
+            else:
+                existing.title = course_data["title"]
+                existing.category_slug = course_data["category_slug"]
+                existing.handle = course_data["handle"]
+                existing.price = course_data["price"]
+                existing.original_price = course_data["original_price"]
+                existing.image = course_data["image"]
+                existing.description = course_data["description"]
+                existing.duration = course_data["duration"]
+                existing.level = course_data["level"]
         db.commit()
 
         # 3. Seed Blogs
@@ -333,6 +345,14 @@ def seed_database():
                     link=blog_data["link"]
                 )
                 db.add(blog)
+            else:
+                existing.title = blog_data["title"]
+                existing.handle = blog_data["handle"]
+                existing.category = blog_data["category"]
+                existing.excerpt = blog_data["excerpt"]
+                existing.image = blog_data["image"]
+                existing.date = blog_data["date"]
+                existing.link = blog_data["link"]
         db.commit()
 
         # 4. Seed Testimonials
@@ -348,6 +368,11 @@ def seed_database():
                     video_url=test_data["video_url"]
                 )
                 db.add(testimonial)
+            else:
+                existing.role = test_data["role"]
+                existing.text = test_data["text"]
+                existing.image = test_data["image"]
+                existing.video_url = test_data["video_url"]
         db.commit()
         print("Database seeded successfully!")
     except Exception as e:

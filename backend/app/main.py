@@ -57,12 +57,11 @@ def on_startup():
                     print("Added column curriculum_data to courses table.")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
-    # Check if we should auto-seed (e.g. if categories table is empty)
-    db = next(get_db())
-    category_count = db.query(models.Category).count()
-    if category_count == 0:
-        print("Database is empty. Initiating automatic seeding...")
+    # Run seed_database to ensure tables and text fields are properly updated with correct UTF-8 encoding
+    try:
         seed_database()
+    except Exception as e:
+        print(f"Error during startup seed: {e}")
     
     # Seed default contact settings if empty
     try:
