@@ -373,7 +373,19 @@ def seed_database():
                 existing.text = test_data["text"]
                 existing.image = test_data["image"]
                 existing.video_url = test_data["video_url"]
-        db.commit()
+        # 5. Repair any corrupted user fullnames in DB
+        try:
+            users = db.query(models.User).all()
+            for u in users:
+                if u.fullname and ('\ufffd' in u.fullname or 'Tri' in u.fullname):
+                    if u.email == 'trieulaquang@gmail.com':
+                        u.fullname = 'La Quang Triệu'
+                    else:
+                        u.fullname = u.fullname.replace('\ufffd', 'ệ')
+            db.commit()
+        except Exception as err:
+            print(f"Error repairing user fullnames: {err}")
+
         print("Database seeded successfully!")
     except Exception as e:
         db.rollback()
