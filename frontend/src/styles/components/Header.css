@@ -47,26 +47,37 @@
 .desktop-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  flex-wrap: nowrap;
 }
 
 .nav-link, .dropdown-toggle {
   display: inline-flex;
   align-items: center;
-  padding: 8px 16px;
+  padding: 6px 12px;
   color: var(--text-secondary);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 500;
   border-radius: var(--radius-sm);
-  gap: 6px;
+  gap: 4px;
   cursor: pointer;
   background: transparent;
   border: none;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .nav-link:hover, .dropdown-toggle:hover, .router-link-active {
   color: var(--text-primary);
-  background-color: rgba(255, 255, 255, 0.05);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.user-btn, .login-btn {
+  white-space: nowrap;
+  max-width: 170px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
 }
 
 .chevron-icon {
