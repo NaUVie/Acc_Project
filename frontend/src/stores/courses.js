@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://acc-project-n4ji.onrender.com/api';
 
 // Helper to clean course properties mapping from API to Frontend camelCase format
 const mapCourse = (c) => ({
