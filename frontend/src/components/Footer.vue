@@ -4,7 +4,7 @@
       <div class="custom-footer-top">
         <div class="custom-footer-col">
           <router-link to="/" class="custom-footer-logo" style="max-width: 160px; display: inline-block;">
-            <img src="/images/logo2.jpg" alt="ACC Academy" style="max-height: 45px; width: auto; object-fit: contain; filter: brightness(0) invert(1);" loading="lazy">
+            <img src="/images/logo3.png" alt="ACC Academy" style="max-height: 45px; width: auto; object-fit: contain; filter: brightness(0) invert(1);" loading="lazy">
           </router-link>
           <div class="custom-footer-text">
             <p>ACC Academy cung cấp các chương trình đào tạo giúp cá nhân và doanh nghiệp nâng cao kỹ năng chuyên môn, phát triển năng lực lãnh đạo, và xây dựng tổ chức vững mạnh.</p>

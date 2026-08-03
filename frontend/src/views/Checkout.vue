@@ -210,7 +210,7 @@ const cartItems = computed(() => {
       name: item.course.title,
       price: item.course.price,
       quantity: item.quantity || 1,
-      image: item.course.image || '/images/logo2.jpg'
+      image: item.course.image || '/images/logo3.png'
     }))
   }
   return sampleCartItems.value
