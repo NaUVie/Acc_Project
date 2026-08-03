@@ -18,8 +18,37 @@
       </div>
 
       <div class="dashboard-grid">
-        <!-- LEFT PANEL: REFERRAL & REWARD CENTER -->
+        <!-- LEFT PANEL: PROFILE & REFERRAL CENTER -->
         <div class="dashboard-column referral-center">
+          <!-- Student Profile Card -->
+          <div class="panel-card glass-card profile-info-card mb-6">
+            <div class="profile-header-row">
+              <h2 class="panel-title">👤 Thông tin Hồ sơ Học viên</h2>
+              <button @click="openEditModal" class="btn btn-outline btn-sm" style="border-radius: 20px; padding: 6px 14px; font-size: 13px;">
+                ✏️ Chỉnh sửa hồ sơ
+              </button>
+            </div>
+            
+            <div class="profile-details-grid">
+              <div class="profile-detail-item">
+                <span class="detail-label">Họ và tên</span>
+                <span class="detail-value">{{ courseStore.userMe?.fullname }}</span>
+              </div>
+              <div class="profile-detail-item">
+                <span class="detail-label">Email tài khoản</span>
+                <span class="detail-value">{{ courseStore.userMe?.email }}</span>
+              </div>
+              <div class="profile-detail-item">
+                <span class="detail-label">Vai trò hệ thống</span>
+                <span class="detail-value">{{ courseStore.userMe?.role === 'admin' ? '👑 Quản trị viên' : '🎓 Học viên' }}</span>
+              </div>
+              <div class="profile-detail-item">
+                <span class="detail-label">Ngày tham gia</span>
+                <span class="detail-value">{{ formatDate(courseStore.userMe?.createdAt) }}</span>
+              </div>
+            </div>
+          </div>
+
           <div class="panel-card glass-card">
             <h2 class="panel-title">🎁 Chương trình Lan tỏa & Nhận quà</h2>
             <p class="panel-subtitle">Chia sẻ mã giới thiệu của bạn để bạn bè nhận ưu đãi học phí cao nhất lên tới 14,5 triệu VND, và nhận hoa hồng lên tới 29 triệu VND khi họ thanh toán thành công.</p>
@@ -206,6 +235,48 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Profile Modal -->
+    <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
+      <div class="modal-content animate-fade-in">
+        <div class="modal-header">
+          <h3 class="modal-title">✏️ Cập nhật Hồ sơ Học viên</h3>
+          <button @click="showEditModal = false" class="remove-btn" style="color: white; font-size: 20px;">✕</button>
+        </div>
+        
+        <form @submit.prevent="handleSaveProfile">
+          <div class="form-group">
+            <label>Họ và tên học viên</label>
+            <input 
+              type="text" 
+              v-model="editFullname" 
+              class="form-control" 
+              placeholder="Nhập họ và tên đầy đủ..." 
+              required 
+            />
+          </div>
+          
+          <div class="form-group">
+            <label>Mật khẩu mới (Để trống nếu không muốn đổi)</label>
+            <input 
+              type="password" 
+              v-model="editPassword" 
+              class="form-control" 
+              placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)..." 
+            />
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" @click="showEditModal = false" class="btn btn-outline btn-sm">
+              Hủy bỏ
+            </button>
+            <button type="submit" class="btn btn-primary btn-sm" :disabled="savingProfile">
+              {{ savingProfile ? 'Đang lưu...' : 'Lưu thay đổi' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -222,6 +293,39 @@ const courseStore = useCourseStore();
 
 const loading = ref(false);
 const copied = ref(false);
+
+// Edit profile reactive state
+const showEditModal = ref(false);
+const editFullname = ref('');
+const editPassword = ref('');
+const savingProfile = ref(false);
+
+const openEditModal = () => {
+  editFullname.value = courseStore.userMe?.fullname || '';
+  editPassword.value = '';
+  showEditModal.value = true;
+};
+
+const handleSaveProfile = async () => {
+  if (!editFullname.value.trim()) {
+    alert('Vui lòng nhập họ và tên!');
+    return;
+  }
+  savingProfile.value = true;
+  try {
+    const payload = { fullname: editFullname.value.trim() };
+    if (editPassword.value.trim()) {
+      payload.password = editPassword.value.trim();
+    }
+    await courseStore.updateProfile(payload);
+    alert('Cập nhật thông tin học viên thành công!');
+    showEditModal.value = false;
+  } catch (err) {
+    alert('Lỗi cập nhật hồ sơ: ' + err.message);
+  } finally {
+    savingProfile.value = false;
+  }
+};
 
 // Reactively bind referrals and orders from store state
 const referralSummary = computed(() => courseStore.referralSummary);

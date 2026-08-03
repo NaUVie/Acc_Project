@@ -47,6 +47,20 @@ def login_user(
 def read_current_user(current_user: models.User = Depends(auth.get_current_user)):
     return current_user
 
+@router.put("/me", response_model=schemas.UserResponse)
+def update_current_user_profile(
+    user_update: schemas.UserUpdateProfile,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    if user_update.fullname is not None and user_update.fullname.strip():
+        current_user.fullname = user_update.fullname.strip()
+    if user_update.password is not None and user_update.password.strip():
+        current_user.hashed_password = auth.get_password_hash(user_update.password)
+    db.commit()
+    db.refresh(current_user)
+    return current_user
+
 @router.get("/referrals", response_model=schemas.ReferralSummary)
 def read_user_referrals(
     current_user: models.User = Depends(auth.get_current_user),
