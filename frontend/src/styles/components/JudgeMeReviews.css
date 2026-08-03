@@ -1,0 +1,5 @@
+/* Add Judge.me specific overrides here if needed */
+.jdgm-widget {
+  margin: 20px 0;
+  width: 100%;
+}

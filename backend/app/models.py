@@ -24,6 +24,7 @@ class Course(Base):
     description = Column(Text, nullable=True)
     duration = Column(String(50), nullable=True)
     level = Column(String(50), nullable=True)
+    curriculum_data = Column(Text, nullable=True)
 
     category = relationship("Category", back_populates="courses")
     tags = relationship("CourseTag", back_populates="course", cascade="all, delete-orphan")
@@ -53,10 +54,14 @@ class Contact(Base):
     __tablename__ = "contacts"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(150), nullable=False)
+    first_name = Column(String(100), nullable=False)
+    middle_name = Column(String(100), nullable=True)
+    last_name = Column(String(100), nullable=False)
     email = Column(String(150), nullable=False)
+    phone = Column(String(50), nullable=False)
     course_handle = Column(String(100), nullable=True)
     message = Column(Text, nullable=False)
+    is_resolved = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
 class User(Base):
@@ -122,3 +127,25 @@ class Referral(Base):
 
     referrer = relationship("User", foreign_keys=[referrer_id])
     referred = relationship("User", foreign_keys=[referred_id])
+
+class Testimonial(Base):
+    __tablename__ = "testimonials"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(150), nullable=False)
+    role = Column(String(150), nullable=False)
+    text = Column(Text, nullable=False)
+    image = Column(String(255), nullable=True)
+    video_url = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+class ContactSetting(Base):
+    __tablename__ = "contact_settings"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    address = Column(String(255), default="Tòa nhà ACC, 123 Đường Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh")
+    hotline = Column(String(50), default="090 123 4567")
+    email = Column(String(150), default="support@accacademy.vn")
+    zalo = Column(String(150), default="https://zalo.me/0901234567")
+    viber = Column(String(150), default="https://viber.click/0901234567")
+

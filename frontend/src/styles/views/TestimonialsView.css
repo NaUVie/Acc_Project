@@ -1,0 +1,5 @@
+.testimonials-page {
+  padding: 40px 0 80px;
+  background-color: #f8fafc;
+  min-height: calc(100vh - 160px);
+}

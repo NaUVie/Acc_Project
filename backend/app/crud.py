@@ -22,8 +22,11 @@ def get_blog_posts(db: Session):
 # --- Contact CRUD ---
 def create_contact(db: Session, contact_in: schemas.ContactCreate):
     db_contact = models.Contact(
-        name=contact_in.name,
+        first_name=contact_in.first_name,
+        middle_name=contact_in.middle_name,
+        last_name=contact_in.last_name,
         email=contact_in.email,
+        phone=contact_in.phone,
         course_handle=contact_in.course_handle,
         message=contact_in.message
     )
@@ -211,3 +214,7 @@ def get_referral_summary(db: Session, user_id: int):
         referral_code=user.referral_code,
         referrals_list=referrals_list
     )
+
+# --- Testimonial CRUD ---
+def get_testimonials(db: Session):
+    return db.query(models.Testimonial).all()

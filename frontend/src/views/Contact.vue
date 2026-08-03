@@ -11,32 +11,51 @@
       <div class="info-section">
         <div class="info-card glass-card animate-slide-up">
           <h3>Trụ sở chính</h3>
-          <p>Tòa nhà ACC, 123 Đường Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh</p>
+          <p>{{ courseStore.contactSettings?.address || 'Tòa nhà ACC, 123 Đường Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh' }}</p>
         </div>
 
         <div class="info-card glass-card animate-slide-up">
           <h3>Thông tin liên lạc</h3>
-          <p>📞 Hotline: 090 123 4567</p>
-          <p>✉️ Email: support@accacademy.vn</p>
+          <p>📞 Hotline: {{ courseStore.contactSettings?.hotline || '090 123 4567' }}</p>
+          <p>✉️ Email: {{ courseStore.contactSettings?.email || 'support@accacademy.vn' }}</p>
+          <p v-if="courseStore.contactSettings?.zalo">💬 Zalo: <a :href="courseStore.contactSettings?.zalo" target="_blank" rel="noopener">{{ courseStore.contactSettings?.zalo }}</a></p>
+          <p v-if="courseStore.contactSettings?.viber">📞 Viber: <a :href="courseStore.contactSettings?.viber" target="_blank" rel="noopener">{{ courseStore.contactSettings?.viber }}</a></p>
         </div>
       </div>
 
       <!-- Contact Form -->
       <form class="contact-form glass-card animate-slide-up" @submit.prevent="submitForm">
-        <div class="form-group">
-          <label for="name">Họ và tên</label>
-          <input v-model="formData.name" type="text" id="name" placeholder="Nguyễn Văn A" required>
+        <h3 class="mb-4 font-bold text-lg text-white" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Nhận tư vấn giải pháp từ Skills Bridge</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="lastName">Họ *</label>
+            <input v-model="formData.lastName" type="text" id="lastName" placeholder="Họ của bạn" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="middleName">Tên đệm *</label>
+            <input v-model="formData.middleName" type="text" id="middleName" placeholder="Tên đệm của bạn" required>
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="firstName">Tên *</label>
+            <input v-model="formData.firstName" type="text" id="firstName" placeholder="Tên của bạn" required>
+          </div>
         </div>
         
         <div class="form-group">
-          <label for="email">Email</label>
-          <input v-model="formData.email" type="email" id="email" placeholder="name@company.com" required>
+          <label for="email">Email *</label>
+          <input v-model="formData.email" type="email" id="email" placeholder="Nhập email của bạn" required>
         </div>
 
         <div class="form-group">
-          <label for="course">Khóa học quan tâm</label>
-          <select v-model="formData.courseHandle" id="course" class="form-select">
-            <option value="">-- Chọn khóa học / dịch vụ </option>
+          <label for="phone">Số điện thoại của bạn là? *</label>
+          <input v-model="formData.phone" type="text" id="phone" placeholder="Nhập số điện thoại" required>
+        </div>
+
+        <div class="form-group">
+          <label for="course">Dịch vụ bạn quan tâm *</label>
+          <select v-model="formData.courseHandle" id="course" class="form-select" required>
+            <option value="">-- Chọn dịch vụ / khóa học --</option>
             <optgroup label="Kỹ năng AI">
               <option v-for="c in aiCourses" :key="c.id" :value="c.handle">{{ c.title }}</option>
             </optgroup>
@@ -53,11 +72,11 @@
         </div>
 
         <div class="form-group">
-          <label for="message">Lời nhắn / Yêu cầu tư vấn</label>
-          <textarea v-model="formData.message" id="message" rows="5" placeholder="Tôi muốn nhận tư vấn về khóa học..." required></textarea>
+          <label for="message">Nội dung yêu cầu *</label>
+          <textarea v-model="formData.message" id="message" rows="5" placeholder="Tôi muốn nhận tư vấn về..." required></textarea>
         </div>
 
-        <button type="submit" class="btn btn-primary">Gửi lời nhắn</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Gửi lời nhắn</button>
       </form>
     </div>
   </div>
@@ -77,13 +96,18 @@ const proCourses = computed(() => courseStore.getCoursesByCategory('ky-nang-chuy
 const comboCourses = computed(() => courseStore.getCoursesByCategory('bundles'));
 
 const formData = ref({
-  name: '',
+  firstName: '',
+  middleName: '',
+  lastName: '',
   email: '',
+  phone: '',
   courseHandle: '',
   message: ''
 });
 
 onMounted(() => {
+  courseStore.fetchContactSettings();
+  
   // Pre-fill course from query param
   const courseParam = route.query.course;
   if (courseParam) {
@@ -98,15 +122,21 @@ onMounted(() => {
 const submitForm = async () => {
   try {
     await courseStore.sendContact(
-      formData.value.name,
+      formData.value.firstName,
+      formData.value.middleName,
+      formData.value.lastName,
       formData.value.email,
+      formData.value.phone,
       formData.value.courseHandle,
       formData.value.message
     );
     alert('Cảm ơn bạn! Yêu cầu của bạn đã được gửi đi thành công và đã được lưu vào cơ sở dữ liệu.');
     formData.value = {
-      name: '',
+      firstName: '',
+      middleName: '',
+      lastName: '',
       email: '',
+      phone: '',
       courseHandle: '',
       message: ''
     };
@@ -116,135 +146,4 @@ const submitForm = async () => {
 };
 </script>
 
-<style scoped>
-.contact-view {
-  padding: 80px 24px;
-}
-
-.header-section {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto 60px auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 20px;
-}
-
-.badge {
-  background: rgba(14, 165, 233, 0.15);
-  border: 1px solid rgba(14, 165, 233, 0.3);
-  color: var(--primary);
-  padding: 8px 20px;
-  border-radius: var(--radius-full);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 1px;
-}
-
-.header-section h1 {
-  font-family: var(--font-display);
-  font-size: 52px;
-  font-weight: 800;
-  line-height: 1.2;
-}
-
-.subtitle {
-  font-size: 18px;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1fr 1.2fr;
-  gap: 40px;
-  align-items: start;
-}
-
-.info-section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.info-card {
-  padding: 30px;
-  border-radius: var(--radius-md);
-}
-
-.info-card h3 {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 12px;
-}
-
-.info-card p {
-  color: var(--text-secondary);
-  font-size: 15px;
-  line-height: 1.6;
-}
-
-.contact-form {
-  padding: 40px;
-  border-radius: var(--radius-lg);
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-group label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  background-color: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-color);
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  color: white;
-  font-family: inherit;
-  font-size: 14px;
-  transition: var(--transition);
-}
-
-.form-group select option {
-  background-color: #0f172a;
-  color: white;
-}
-
-.form-group select optgroup {
-  background-color: #1e293b;
-  color: var(--primary);
-  font-weight: 600;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  border-color: var(--primary);
-  outline: none;
-  background-color: rgba(255, 255, 255, 0.05);
-}
-
-@media (max-width: 768px) {
-  .contact-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .header-section h1 {
-    font-size: 38px;
-  }
-}
-</style>
+<style scoped src="@/styles/views/Contact.css"></style>

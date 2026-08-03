@@ -21,26 +21,4 @@ import ZaloChatWidget from './components/ZaloChatWidget.vue';
 import SamitaLock from './components/SamitaLock.vue';
 </script>
 
-<style scoped>
-.app-wrapper {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
-
-.main-content {
-  flex-grow: 1;
-  padding-top: 80px; /* Offset for sticky header */
-}
-
-/* Page transitions */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.25s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-</style>
+<style scoped src="@/styles/App.css"></style>

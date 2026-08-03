@@ -1,20 +1,14 @@
 import os
 from datetime import datetime, timedelta
 from typing import Optional
-from jose import jwt, JWTError # jose is standard, pyjwt can also be used but jose is often bundled. Since jose can be replaced by jwt, let's use standard `jwt` package.
-# Wait! Let's check which JWT library we declared in requirements.txt. We declared `pyjwt`. 
-# With PyJWT, the import is `import jwt`. PyJWT has `jwt.ExpiredSignatureError` and `jwt.InvalidTokenError`.
-# Let's write the code to use `pyjwt` which is import jwt! This is very important.
+# Using PyJWT instead of python-jose since it has better Python 3.13 support
 import jwt
-from passlib.context import CryptContext
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from .database import get_db
 from . import models
-
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # JWT configuration
 SECRET_KEY = os.getenv("SECRET_KEY", "ACC_ACADEMY_ULTRA_SECRET_KEY_FOR_JWT_TOKEN_123456789")
@@ -24,10 +18,19 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 1440 # 24 hours
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        return bcrypt.checkpw(
+            plain_password.encode("utf-8"),
+            hashed_password.encode("utf-8")
+        )
+    except Exception:
+        return False
 
 def get_password_hash(password: str) -> str:
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(
+        password.encode("utf-8"),
+        bcrypt.gensalt()
+    ).decode("utf-8")
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
@@ -57,3 +60,11 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     if user is None:
         raise credentials_exception
     return user
+
+def get_current_admin(current_user: models.User = Depends(get_current_user)) -> models.User:
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bạn không có quyền thực hiện hành động này."
+        )
+    return current_user
