@@ -24,36 +24,37 @@ app.add_middleware(
 # Auto-create tables and trigger seeding on startup
 @app.on_event("startup")
 def on_startup():
-    # Schema migration check for contacts table before creating tables
+    # Schema migration check for contacts and courses tables using SQLAlchemy inspect
     try:
-        from sqlalchemy import text
-        with engine.connect() as conn:
-            # SQLite check table columns
-            cursor = conn.execute(text("PRAGMA table_info(contacts)"))
-            columns = [row[1] for row in cursor.fetchall()]
-            if columns and "phone" not in columns:
-                conn.execute(text("DROP TABLE contacts"))
+        from sqlalchemy import inspect, text
+        inspector = inspect(engine)
+        if inspector.has_table("contacts"):
+            columns = [c["name"] for c in inspector.get_columns("contacts")]
+            if "phone" not in columns:
+                with engine.begin() as conn:
+                    conn.execute(text("DROP TABLE contacts"))
                 print("Dropped old contacts table to migrate to new layout.")
     except Exception as e:
         print(f"Migration check error: {e}")
 
     Base.metadata.create_all(bind=engine)
     
-    # Ensure is_resolved column exists in contacts table
+    # Ensure is_resolved & curriculum_data columns exist
     try:
-        from sqlalchemy import text
-        with engine.connect() as conn:
-            # Check contacts table
-            result = conn.execute(text("SHOW COLUMNS FROM contacts LIKE 'is_resolved'")).fetchone()
-            if not result:
-                conn.execute(text("ALTER TABLE contacts ADD COLUMN is_resolved BOOLEAN DEFAULT FALSE"))
-                print("Added column is_resolved to contacts table.")
+        from sqlalchemy import inspect, text
+        inspector = inspect(engine)
+        with engine.begin() as conn:
+            if inspector.has_table("contacts"):
+                contacts_cols = [c["name"] for c in inspector.get_columns("contacts")]
+                if "is_resolved" not in contacts_cols:
+                    conn.execute(text("ALTER TABLE contacts ADD COLUMN is_resolved BOOLEAN DEFAULT FALSE"))
+                    print("Added column is_resolved to contacts table.")
             
-            # Check courses table
-            result_curr = conn.execute(text("SHOW COLUMNS FROM courses LIKE 'curriculum_data'")).fetchone()
-            if not result_curr:
-                conn.execute(text("ALTER TABLE courses ADD COLUMN curriculum_data TEXT NULL"))
-                print("Added column curriculum_data to courses table.")
+            if inspector.has_table("courses"):
+                courses_cols = [c["name"] for c in inspector.get_columns("courses")]
+                if "curriculum_data" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN curriculum_data TEXT NULL"))
+                    print("Added column curriculum_data to courses table.")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
     # Check if we should auto-seed (e.g. if categories table is empty)
