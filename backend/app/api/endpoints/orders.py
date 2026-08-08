@@ -1,3 +1,4 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
@@ -5,6 +6,8 @@ from ...database import get_db
 from ... import models, schemas, crud, auth
 
 router = APIRouter()
+
+ALLOW_MOCK_PAYMENT = os.getenv("ALLOW_MOCK_PAYMENT", "true").lower() == "true"
 
 @router.get("", response_model=List[schemas.OrderResponse])
 def read_orders(
@@ -32,12 +35,18 @@ def mock_payment(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
-    # Verify order belongs to current user
-    order = db.query(models.Order).filter(
-        models.Order.id == id,
-        models.Order.user_id == current_user.id
-    ).first()
+    if not ALLOW_MOCK_PAYMENT and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tính năng giả lập thanh toán đã bị tắt trong môi trường Production."
+        )
+
+    # Verify order belongs to current user (or admin)
+    query = db.query(models.Order).filter(models.Order.id == id)
+    if current_user.role != "admin":
+        query = query.filter(models.Order.user_id == current_user.id)
     
+    order = query.first()
     if not order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

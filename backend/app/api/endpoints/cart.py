@@ -28,6 +28,14 @@ def add_item_to_cart(
         )
     return crud.add_to_cart(db, user_id=current_user.id, course_id=cart_in.course_id)
 
+@router.delete("", status_code=status.HTTP_200_OK)
+def clear_user_cart(
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    crud.clear_cart(db, user_id=current_user.id)
+    return {"message": "Cart cleared successfully"}
+
 @router.delete("/{course_id}", status_code=status.HTTP_200_OK)
 def delete_item_from_cart(
     course_id: int,

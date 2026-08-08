@@ -281,6 +281,19 @@ def seed_database():
     # This will create tables if they do not exist
     Base.metadata.create_all(bind=engine)
     
+    # Auto-add missing columns to existing tables
+    try:
+        from sqlalchemy import inspect, text
+        inspector = inspect(engine)
+        with engine.begin() as conn:
+            if inspector.has_table("courses"):
+                courses_cols = [c["name"] for c in inspector.get_columns("courses")]
+                if "program_id" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN program_id INT NULL"))
+                    print("Migrated: Added program_id column to courses table.")
+    except Exception as me:
+        print(f"Migration error: {me}")
+
     db = SessionLocal()
     try:
         # 1. Seed Categories
@@ -294,15 +307,42 @@ def seed_database():
                 existing.name = cat_data["name"]
         db.commit()
 
-        # 2. Seed Courses
+        # 2. Seed Programs & Courses
+        print("Seeding programs...")
+        prog1 = db.query(models.Program).filter(models.Program.slug == "chuong-trinh-chuyen-gia-ai-2026").first()
+        if not prog1:
+            prog1 = models.Program(
+                title="Chương Trình Đào Tạo Chuyên Gia AI & Tự Động Hóa Doanh Nghiệp 2026",
+                slug="chuong-trinh-chuyen-gia-ai-2026",
+                description="Lộ trình đào tạo tổng thể từ tư duy ứng dụng AI, làm chủ ChatGPT/Claude/Gemini đến tự động hóa quy trình vận hành toàn doanh nghiệp.",
+                image="/images/Square-Cover-_1.webp"
+            )
+            db.add(prog1)
+            db.commit()
+            db.refresh(prog1)
+
+        prog2 = db.query(models.Program).filter(models.Program.slug == "chuong-trinh-lanh-dao-quan-tri-2026").first()
+        if not prog2:
+            prog2 = models.Program(
+                title="Chương Trình Kỹ Năng Lãnh Đạo & Quản Trị Dự Án Hiện Đại",
+                slug="chuong-trinh-lanh-dao-quan-tri-2026",
+                description="Lộ trình rèn luyện kỹ năng mềm, thuyết trình thuyết phục, giao tiếp tạo ảnh hưởng và quản lý tiến độ dự án chuyên nghiệp.",
+                image="/images/7_3fd889db-0fdf-43aa-867f-67d166f045c7.png"
+            )
+            db.add(prog2)
+            db.commit()
+            db.refresh(prog2)
+
         print("Seeding courses...")
         for course_data in COURSES_SEED:
             existing = db.query(models.Course).filter(models.Course.id == course_data["id"]).first()
+            p_id = prog1.id if course_data["category_slug"] == "ky-nang-ai" else (prog2.id if course_data["category_slug"] == "ky-nang-mem" else None)
             if not existing:
                 course = models.Course(
                     id=course_data["id"],
                     title=course_data["title"],
                     category_slug=course_data["category_slug"],
+                    program_id=p_id,
                     handle=course_data["handle"],
                     price=course_data["price"],
                     original_price=course_data["original_price"],
@@ -320,6 +360,7 @@ def seed_database():
             else:
                 existing.title = course_data["title"]
                 existing.category_slug = course_data["category_slug"]
+                existing.program_id = p_id
                 existing.handle = course_data["handle"]
                 existing.price = course_data["price"]
                 existing.original_price = course_data["original_price"]
@@ -327,6 +368,67 @@ def seed_database():
                 existing.description = course_data["description"]
                 existing.duration = course_data["duration"]
                 existing.level = course_data["level"]
+        db.commit()
+
+        # Seed Bundles
+        print("Seeding bundles...")
+        all_courses = db.query(models.Course).all()
+        
+        b1 = db.query(models.Bundle).filter(models.Bundle.handle == "bundle-2026-master").first()
+        if not b1:
+            b1 = models.Bundle(
+                title="Bundle 2026 Master VIP Tất Cả Khóa Học",
+                handle="bundle-2026-master",
+                description="Sở hữu trọn bộ tất cả các khóa học cao cấp tại ACC Academy với đặc quyền cập nhật kiến thức mới miễn phí trong suốt năm 2026.",
+                price=5990000,
+                original_price=15900000,
+                image="/images/Data_Bootcamp.png",
+                courses=all_courses
+            )
+            db.add(b1)
+
+        b2 = db.query(models.Bundle).filter(models.Bundle.handle == "ai-master-bundle").first()
+        ai_courses = db.query(models.Course).filter(models.Course.category_slug == "ky-nang-ai").all()
+        if not b2:
+            b2 = models.Bundle(
+                title="AI & Automation Master Bundle",
+                handle="ai-master-bundle",
+                description="Trọn bộ các khóa học AI cốt lõi: ChatGPT Work Automation, AI COE, Gen AI Studio và Claude Productivity.",
+                price=3990000,
+                original_price=9800000,
+                image="/images/Square_Cover_b1dc8f1b-edc2-473f-ada7-6756dae8a281.png",
+                courses=ai_courses
+            )
+            db.add(b2)
+
+        b3 = db.query(models.Bundle).filter(models.Bundle.handle == "data-bootcamp-combo").first()
+        prof_courses = db.query(models.Course).filter(models.Course.category_slug == "ky-nang-chuyen-mon").all()
+        if not b3:
+            b3 = models.Bundle(
+                title="Data Bootcamp - Combo AI For Decision Making & Data Processing",
+                handle="data-bootcamp-combo",
+                description="Combo toàn diện xử lý dữ liệu tự động, xây dựng Dashboard Looker Studio và ứng dụng AI ra quyết định kinh doanh.",
+                price=4500000,
+                original_price=8400000,
+                image="/images/Data_Bootcamp.png",
+                courses=prof_courses
+            )
+            db.add(b3)
+
+        b4 = db.query(models.Bundle).filter(models.Bundle.handle == "leadership-master-combo").first()
+        soft_courses = db.query(models.Course).filter(models.Course.category_slug == "ky-nang-mem").all()
+        if not b4:
+            b4 = models.Bundle(
+                title="Combo Quản Trị & Lãnh Đạo Chuyên Nghiệp",
+                handle="leadership-master-combo",
+                description="Lộ trình nâng cao năng lực lãnh đạo, giao tiếp thuyết phục cấp trên và quản trị dự án hiệu quả.",
+                price=3200000,
+                original_price=6800000,
+                image="/images/Leader_Shift.webp",
+                courses=soft_courses
+            )
+            db.add(b4)
+
         db.commit()
 
         # 3. Seed Blogs
@@ -373,18 +475,7 @@ def seed_database():
                 existing.text = test_data["text"]
                 existing.image = test_data["image"]
                 existing.video_url = test_data["video_url"]
-        # 5. Repair any corrupted user fullnames in DB
-        try:
-            users = db.query(models.User).all()
-            for u in users:
-                if u.fullname and ('\ufffd' in u.fullname or 'Tri' in u.fullname):
-                    if u.email == 'trieulaquang@gmail.com':
-                        u.fullname = 'La Quang Triệu'
-                    else:
-                        u.fullname = u.fullname.replace('\ufffd', 'ệ')
-            db.commit()
-        except Exception as err:
-            print(f"Error repairing user fullnames: {err}")
+        db.commit()
 
         print("Database seeded successfully!")
     except Exception as e:

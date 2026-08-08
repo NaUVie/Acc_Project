@@ -20,8 +20,12 @@ courseStore.fetchBlogs();
 testimonialStore.fetchTestimonials();
 
 if (courseStore.token) {
-  courseStore.fetchUserMe();
-  courseStore.fetchCart();
+  Promise.all([
+    courseStore.fetchUserMe(),
+    courseStore.fetchCart(),
+    courseStore.fetchOrders(),
+    courseStore.fetchReferrals()
+  ]).catch(err => console.error("Error pre-fetching user data:", err));
 }
 
 app.mount('#app');

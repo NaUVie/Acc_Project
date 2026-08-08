@@ -48,13 +48,14 @@ onMounted(() => {
     }
   };
 
-  // If the zalo script is already loaded, we might need to trigger it
-  // Since Zalo live chat initializes itself on page load, let's load it if not loaded
   if (!document.getElementById('zalo-chat-script')) {
     const script = document.createElement('script');
     script.id = 'zalo-chat-script';
     script.src = "/js/zalo.js";
     script.defer = true;
+    script.onerror = () => {
+      console.log('Zalo widget script loading bypassed or blocked by extension.');
+    };
     document.body.appendChild(script);
   }
 });

@@ -195,7 +195,7 @@
               <div v-for="order in orders" :key="order.id" class="order-card">
                 <div class="order-header">
                   <div>
-                    <span class="order-id">Đơn hàng #{{ order.id }}</span>
+                    <span class="order-id">Đơn hàng #{{ String(order.id).padStart(6, '0') }}</span>
                     <span class="order-date">{{ formatDate(order.createdAt) }}</span>
                   </div>
                   <span class="status-badge" :class="order.status">
@@ -219,15 +219,25 @@
                     Tổng cộng: <span class="price">{{ formatPrice(order.totalPrice) }}</span>
                   </div>
                   
-                  <!-- Pay Simulator Button -->
-                  <button 
-                    v-if="order.status === 'pending'" 
-                    @click="handlePayOrder(order.id)" 
-                    class="btn btn-outline btn-sm btn-success w-full mt-3"
-                    :disabled="loading"
-                  >
-                    🏦 Giả lập Thanh toán (VNPay / MoMo)
-                  </button>
+                  <!-- Actions Row -->
+                  <div style="display: flex; gap: 8px; margin-top: 12px;">
+                    <router-link
+                      :to="`/order/${order.id}`"
+                      class="btn btn-outline btn-sm"
+                      style="flex: 1; text-align: center; padding: 6px 10px; font-size: 12px;"
+                    >
+                      📋 Xem chi tiết
+                    </router-link>
+                    <button 
+                      v-if="order.status === 'pending'" 
+                      @click="handlePayOrder(order.id)" 
+                      class="btn btn-outline btn-sm btn-success"
+                      :disabled="loading"
+                      style="flex: 1;"
+                    >
+                      🏦 Thanh toán (Demo)
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -235,6 +245,7 @@
         </div>
       </div>
     </div>
+
 
     <!-- Edit Profile Modal -->
     <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
@@ -332,6 +343,11 @@ const referralSummary = computed(() => courseStore.referralSummary);
 const orders = computed(() => courseStore.orders);
 
 const purchasedCourses = computed(() => {
+  // Prefer enrollments data (direct from backend)
+  if (courseStore.enrollments && courseStore.enrollments.length > 0) {
+    return courseStore.enrollments.map(e => e.course).filter(Boolean);
+  }
+  // Fallback: derive from paid orders
   const list = [];
   const seen = new Set();
   orders.value.forEach(order => {
@@ -354,16 +370,23 @@ onMounted(async () => {
     return;
   }
   
-  await refreshDashboardData();
+  refreshDashboardData();
 });
 
-// Refresh dashboard data
+// Refresh dashboard data in parallel for instant UI responsiveness
 const refreshDashboardData = async () => {
   try {
-    await courseStore.fetchUserMe();
-    await courseStore.fetchCart();
-    await courseStore.fetchReferrals();
-    await courseStore.fetchOrders();
+    const promises = [
+      courseStore.fetchUserMe(),
+      courseStore.fetchCart(),
+      courseStore.fetchReferrals(),
+      courseStore.fetchOrders(),
+      courseStore.fetchEnrollments()
+    ];
+    if (courseStore.courses.length === 0) {
+      promises.push(courseStore.fetchCourses());
+    }
+    await Promise.all(promises);
   } catch (err) {
     console.error("Dashboard refresh error:", err);
   }

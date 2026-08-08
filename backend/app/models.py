@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, BigInteger, ForeignKey, Text, DateTime, Boolean
+from sqlalchemy import Column, String, Integer, BigInteger, ForeignKey, Text, DateTime, Boolean, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from .database import Base
@@ -11,12 +11,56 @@ class Category(Base):
 
     courses = relationship("Course", back_populates="category")
 
+# Junction Table for Bundles <-> Courses
+bundle_courses = Table(
+    'bundle_courses',
+    Base.metadata,
+    Column('bundle_id', Integer, ForeignKey('bundles.id', ondelete="CASCADE"), primary_key=True),
+    Column('course_id', BigInteger, ForeignKey('courses.id', ondelete="CASCADE"), primary_key=True)
+)
+
+# Junction Table for Bundles <-> Gift Courses
+bundle_gift_courses = Table(
+    'bundle_gift_courses',
+    Base.metadata,
+    Column('bundle_id', Integer, ForeignKey('bundles.id', ondelete="CASCADE"), primary_key=True),
+    Column('course_id', BigInteger, ForeignKey('courses.id', ondelete="CASCADE"), primary_key=True)
+)
+
+class Program(Base):
+    __tablename__ = "programs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String(255), nullable=False)
+    slug = Column(String(100), nullable=False, unique=True, index=True)
+    description = Column(Text, nullable=True)
+    image = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    courses = relationship("Course", back_populates="program")
+
+class Bundle(Base):
+    __tablename__ = "bundles"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String(255), nullable=False)
+    handle = Column(String(100), nullable=False, unique=True, index=True)
+    description = Column(Text, nullable=True)
+    price = Column(Integer, nullable=False)
+    original_price = Column(Integer, nullable=True)
+    image = Column(String(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    courses = relationship("Course", secondary=bundle_courses, backref="bundles")
+    gift_courses = relationship("Course", secondary=bundle_gift_courses, backref="gift_bundles")
+
 class Course(Base):
     __tablename__ = "courses"
 
     id = Column(BigInteger, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
     category_slug = Column(String(50), ForeignKey("categories.slug"), nullable=False)
+    program_id = Column(Integer, ForeignKey("programs.id"), nullable=True)
     handle = Column(String(100), nullable=False, unique=True, index=True)
     price = Column(Integer, nullable=False)
     original_price = Column(Integer, nullable=True)
@@ -27,6 +71,7 @@ class Course(Base):
     curriculum_data = Column(Text, nullable=True)
 
     category = relationship("Category", back_populates="courses")
+    program = relationship("Program", back_populates="courses")
     tags = relationship("CourseTag", back_populates="course", cascade="all, delete-orphan")
 
 class CourseTag(Base):
@@ -138,6 +183,20 @@ class Testimonial(Base):
     image = Column(String(255), nullable=True)
     video_url = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class Enrollment(Base):
+    """Tracks which user has access to which course (after payment)."""
+    __tablename__ = "enrollments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    course_id = Column(BigInteger, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    order_id = Column(Integer, ForeignKey("orders.id", ondelete="SET NULL"), nullable=True)
+    enrolled_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", backref="enrollments")
+    course = relationship("Course", backref="enrollments")
+    order = relationship("Order", backref="enrollments")
 
 class ContactSetting(Base):
     __tablename__ = "contact_settings"

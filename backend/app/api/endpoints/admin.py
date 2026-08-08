@@ -273,6 +273,7 @@ def create_course_admin(course_in: schemas.CourseAdminCreate, db: Session = Depe
         id=cid,
         title=course_in.title,
         category_slug=course_in.category_slug,
+        program_id=course_in.program_id,
         handle=course_in.handle,
         price=course_in.price,
         original_price=course_in.original_price,
@@ -300,6 +301,8 @@ def update_course_admin(id: int, course_in: schemas.CourseAdminUpdate, db: Sessi
         db_course.title = course_in.title
     if course_in.category_slug is not None:
         db_course.category_slug = course_in.category_slug
+    if course_in.program_id is not None:
+        db_course.program_id = course_in.program_id if course_in.program_id != 0 else None
     if course_in.handle is not None:
         db_course.handle = course_in.handle
     if course_in.price is not None:
@@ -332,6 +335,161 @@ def delete_course_admin(id: int, db: Session = Depends(get_db)):
     db.delete(db_course)
     db.commit()
     return {"message": "Đã xóa khóa học thành công"}
+
+
+# ==================== PROGRAM MANAGEMENT (CHƯƠNG TRÌNH ĐÀO TẠO) ====================
+
+@router.get("/programs", response_model=List[schemas.ProgramResponse])
+def get_all_programs_admin(db: Session = Depends(get_db)):
+    return db.query(models.Program).all()
+
+@router.post("/programs", response_model=schemas.ProgramResponse, status_code=status.HTTP_201_CREATED)
+def create_program_admin(prog_in: schemas.ProgramCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.Program).filter(models.Program.slug == prog_in.slug).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Slug chương trình đã tồn tại!"
+        )
+    db_prog = models.Program(
+        title=prog_in.title,
+        slug=prog_in.slug,
+        description=prog_in.description,
+        image=prog_in.image
+    )
+    db.add(db_prog)
+    db.commit()
+    db.refresh(db_prog)
+
+    if prog_in.course_ids is not None:
+        db.query(models.Course).filter(models.Course.program_id == db_prog.id).update({"program_id": None})
+        if prog_in.course_ids:
+            db.query(models.Course).filter(models.Course.id.in_(prog_in.course_ids)).update({"program_id": db_prog.id}, synchronize_session=False)
+        db.commit()
+        db.refresh(db_prog)
+
+    return db_prog
+
+@router.put("/programs/{id}", response_model=schemas.ProgramResponse)
+def update_program_admin(id: int, prog_in: schemas.ProgramUpdate, db: Session = Depends(get_db)):
+    db_prog = db.query(models.Program).filter(models.Program.id == id).first()
+    if not db_prog:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chương trình đào tạo không tồn tại"
+        )
+    if prog_in.title is not None:
+        db_prog.title = prog_in.title
+    if prog_in.slug is not None:
+        db_prog.slug = prog_in.slug
+    if prog_in.description is not None:
+        db_prog.description = prog_in.description
+    if prog_in.image is not None:
+        db_prog.image = prog_in.image
+
+    if prog_in.course_ids is not None:
+        db.query(models.Course).filter(models.Course.program_id == id).update({"program_id": None})
+        if prog_in.course_ids:
+            db.query(models.Course).filter(models.Course.id.in_(prog_in.course_ids)).update({"program_id": id}, synchronize_session=False)
+
+    db.commit()
+    db.refresh(db_prog)
+    return db_prog
+
+@router.delete("/programs/{id}", status_code=status.HTTP_200_OK)
+def delete_program_admin(id: int, db: Session = Depends(get_db)):
+    db_prog = db.query(models.Program).filter(models.Program.id == id).first()
+    if not db_prog:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chương trình đào tạo không tồn tại"
+        )
+    db.delete(db_prog)
+    db.commit()
+    return {"message": "Đã xóa chương trình đào tạo thành công"}
+
+
+# ==================== BUNDLE MANAGEMENT (GÓI COMBO BUNDLE) ====================
+
+@router.get("/bundles", response_model=List[schemas.BundleResponse])
+def get_all_bundles_admin(db: Session = Depends(get_db)):
+    return db.query(models.Bundle).all()
+
+@router.post("/bundles", response_model=schemas.BundleResponse, status_code=status.HTTP_201_CREATED)
+def create_bundle_admin(bundle_in: schemas.BundleCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.Bundle).filter(models.Bundle.handle == bundle_in.handle).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Handle gói bundle đã tồn tại!"
+        )
+    db_bundle = models.Bundle(
+        title=bundle_in.title,
+        handle=bundle_in.handle,
+        description=bundle_in.description,
+        price=bundle_in.price,
+        original_price=bundle_in.original_price,
+        image=bundle_in.image
+    )
+    db.add(db_bundle)
+    db.flush()
+
+    if bundle_in.course_ids:
+        courses = db.query(models.Course).filter(models.Course.id.in_(bundle_in.course_ids)).all()
+        db_bundle.courses = courses
+
+    if bundle_in.gift_course_ids:
+        gift_courses = db.query(models.Course).filter(models.Course.id.in_(bundle_in.gift_course_ids)).all()
+        db_bundle.gift_courses = gift_courses
+
+    db.commit()
+    db.refresh(db_bundle)
+    return db_bundle
+
+@router.put("/bundles/{id}", response_model=schemas.BundleResponse)
+def update_bundle_admin(id: int, bundle_in: schemas.BundleUpdate, db: Session = Depends(get_db)):
+    db_bundle = db.query(models.Bundle).filter(models.Bundle.id == id).first()
+    if not db_bundle:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Gói combo bundle không tồn tại"
+        )
+    if bundle_in.title is not None:
+        db_bundle.title = bundle_in.title
+    if bundle_in.handle is not None:
+        db_bundle.handle = bundle_in.handle
+    if bundle_in.description is not None:
+        db_bundle.description = bundle_in.description
+    if bundle_in.price is not None:
+        db_bundle.price = bundle_in.price
+    if bundle_in.original_price is not None:
+        db_bundle.original_price = bundle_in.original_price
+    if bundle_in.image is not None:
+        db_bundle.image = bundle_in.image
+
+    if bundle_in.course_ids is not None:
+        courses = db.query(models.Course).filter(models.Course.id.in_(bundle_in.course_ids)).all()
+        db_bundle.courses = courses
+
+    if bundle_in.gift_course_ids is not None:
+        gift_courses = db.query(models.Course).filter(models.Course.id.in_(bundle_in.gift_course_ids)).all()
+        db_bundle.gift_courses = gift_courses
+
+    db.commit()
+    db.refresh(db_bundle)
+    return db_bundle
+
+@router.delete("/bundles/{id}", status_code=status.HTTP_200_OK)
+def delete_bundle_admin(id: int, db: Session = Depends(get_db)):
+    db_bundle = db.query(models.Bundle).filter(models.Bundle.id == id).first()
+    if not db_bundle:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Gói combo bundle không tồn tại"
+        )
+    db.delete(db_bundle)
+    db.commit()
+    return {"message": "Đã xóa gói combo bundle thành công"}
 
 @router.put("/contact-settings", response_model=schemas.ContactSettingResponse)
 def update_contact_settings(

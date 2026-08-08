@@ -6,38 +6,38 @@
     </div>
 
     <!-- Contact Info Settings Panel -->
-    <div class="glass-card mb-6" style="padding: 20px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
-      <h3 class="font-bold mb-2 text-lg">Cấu hình thông tin liên hệ</h3>
-      <p class="text-muted mb-4" style="font-size: 13px;">Các thông tin hiển thị tại trang Liên hệ (Địa chỉ, Email, Hotline, Zalo, Viber...).</p>
+    <div class="glass-card mb-6" style="padding: 24px; border-radius: 12px; background: #ffffff; border: 1px solid #e2e8f0; box-shadow: 0 2px 10px rgba(0,0,0,0.03);">
+      <h3 class="font-bold mb-2 text-lg" style="color: #0f172a;">Cấu hình thông tin liên hệ</h3>
+      <p class="text-muted mb-4" style="font-size: 13px; color: #64748b;">Các thông tin hiển thị tại trang Liên hệ (Địa chỉ, Email, Hotline, Zalo, Viber...).</p>
       
       <form @submit.prevent="saveSettings" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
         <div class="form-group">
-          <label style="display: block; font-weight: 500; margin-bottom: 5px; font-size: 13px;">Địa chỉ trụ sở chính</label>
-          <input v-model="settingsData.address" type="text" class="form-control" placeholder="123 Điện Biên Phủ..." required style="width: 100%; padding: 8px 12px; border-radius: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #1e293b;">Địa chỉ trụ sở chính</label>
+          <input v-model="settingsData.address" type="text" class="admin-input-style" placeholder="123 Điện Biên Phủ..." required style="width: 100%; padding: 10px 14px; border-radius: 8px; background: #ffffff; border: 1px solid #cbd5e1; color: #0f172a;">
         </div>
         
         <div class="form-group">
-          <label style="display: block; font-weight: 500; margin-bottom: 5px; font-size: 13px;">Hotline điện thoại</label>
-          <input v-model="settingsData.hotline" type="text" class="form-control" placeholder="090 ..." required style="width: 100%; padding: 8px 12px; border-radius: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #1e293b;">Hotline điện thoại</label>
+          <input v-model="settingsData.hotline" type="text" class="admin-input-style" placeholder="090 ..." required style="width: 100%; padding: 10px 14px; border-radius: 8px; background: #ffffff; border: 1px solid #cbd5e1; color: #0f172a;">
         </div>
         
         <div class="form-group">
-          <label style="display: block; font-weight: 500; margin-bottom: 5px; font-size: 13px;">Email liên hệ</label>
-          <input v-model="settingsData.email" type="email" class="form-control" placeholder="support@..." required style="width: 100%; padding: 8px 12px; border-radius: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #1e293b;">Email liên hệ</label>
+          <input v-model="settingsData.email" type="email" class="admin-input-style" placeholder="support@..." required style="width: 100%; padding: 10px 14px; border-radius: 8px; background: #ffffff; border: 1px solid #cbd5e1; color: #0f172a;">
         </div>
 
         <div class="form-group">
-          <label style="display: block; font-weight: 500; margin-bottom: 5px; font-size: 13px;">Zalo Link</label>
-          <input v-model="settingsData.zalo" type="text" class="form-control" placeholder="https://zalo.me/..." style="width: 100%; padding: 8px 12px; border-radius: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #1e293b;">Zalo Link</label>
+          <input v-model="settingsData.zalo" type="text" class="admin-input-style" placeholder="https://zalo.me/..." style="width: 100%; padding: 10px 14px; border-radius: 8px; background: #ffffff; border: 1px solid #cbd5e1; color: #0f172a;">
         </div>
 
         <div class="form-group">
-          <label style="display: block; font-weight: 500; margin-bottom: 5px; font-size: 13px;">Viber Link</label>
-          <input v-model="settingsData.viber" type="text" class="form-control" placeholder="https://viber.click/..." style="width: 100%; padding: 8px 12px; border-radius: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff;">
+          <label style="display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: #1e293b;">Viber Link</label>
+          <input v-model="settingsData.viber" type="text" class="admin-input-style" placeholder="https://viber.click/..." style="width: 100%; padding: 10px 14px; border-radius: 8px; background: #ffffff; border: 1px solid #cbd5e1; color: #0f172a;">
         </div>
 
         <div style="grid-column: 1 / -1; text-align: right; margin-top: 10px;">
-          <button type="submit" class="btn btn-primary" :disabled="savingSettings" style="padding: 8px 20px; font-size: 13px;">
+          <button type="submit" class="btn btn-primary" :disabled="savingSettings" style="padding: 10px 24px; font-size: 14px; font-weight: 700;">
             {{ savingSettings ? 'Đang lưu...' : 'Lưu cấu hình' }}
           </button>
         </div>

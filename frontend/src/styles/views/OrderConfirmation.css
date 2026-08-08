@@ -1,0 +1,404 @@
+/* ===========================
+   Order Confirmation Page
+   =========================== */
+.order-confirmation-page {
+  min-height: 100vh;
+  background: #f8fafc;
+  padding: 40px 0 80px;
+}
+
+.oc-container {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Loading */
+.oc-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80px 0;
+  gap: 16px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #0284c7;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Error Card */
+.oc-error-card {
+  background: #fff;
+  border: 1px solid #fecaca;
+  border-radius: 20px;
+  padding: 60px;
+  text-align: center;
+  max-width: 500px;
+  margin: 60px auto;
+}
+
+.error-icon { font-size: 48px; margin-bottom: 12px; }
+.oc-error-card h2 { font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
+.oc-error-card p { color: #64748b; margin-bottom: 24px; }
+
+/* Banner */
+.oc-banner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 36px;
+  border-radius: 20px;
+  margin-bottom: 28px;
+}
+
+.banner-paid {
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #86efac;
+}
+
+.banner-pending {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #fcd34d;
+}
+
+.banner-icon { font-size: 52px; flex-shrink: 0; }
+
+.banner-title {
+  font-size: 26px;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.banner-desc {
+  font-size: 15px;
+  color: #475569;
+  font-weight: 500;
+  margin: 0;
+}
+
+/* Main Grid */
+.oc-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .oc-grid {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+.oc-main { display: flex; flex-direction: column; gap: 20px; }
+
+/* Card Base */
+.oc-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(15,23,42,.04);
+}
+
+.oc-card-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 20px 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Meta Grid */
+.oc-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .oc-meta-grid { grid-template-columns: 1fr; }
+}
+
+.oc-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.meta-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.meta-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.meta-value.code {
+  font-family: 'Courier New', monospace;
+  color: #0284c7;
+  font-size: 14px;
+}
+
+.meta-value.price { color: #16a34a; font-size: 18px; }
+.meta-value.discount { color: #dc2626; }
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-paid { background: #dcfce7; color: #15803d; }
+.status-pending { background: #fef3c7; color: #b45309; }
+.status-cancelled { background: #fee2e2; color: #dc2626; }
+
+/* Course Items */
+.course-items-list { display: flex; flex-direction: column; gap: 12px; }
+
+.course-item-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.course-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.course-item-info { flex: 1; min-width: 0; }
+
+.course-item-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.course-cat-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.course-item-price {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-study {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  background: #0284c7;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 8px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+
+.btn-study:hover { background: #0369a1; }
+
+.btn-study-disabled {
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* QR Payment */
+.payment-card { border-color: #fcd34d; }
+
+.qr-section {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.qr-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.qr-img {
+  width: 220px;
+  height: 220px;
+  border-radius: 12px;
+  border: 3px solid #e2e8f0;
+}
+
+.qr-hint {
+  font-size: 12px;
+  color: #64748b;
+  text-align: center;
+  max-width: 200px;
+  font-weight: 500;
+}
+
+.bank-info-box { flex: 1; min-width: 240px; }
+
+.bank-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f1f5f9;
+  gap: 12px;
+}
+
+.bank-info-row.highlight { background: #f0fdf4; margin: 4px -8px; padding: 10px 8px; border-radius: 8px; border: none; }
+
+.bank-label { font-size: 13px; color: #64748b; font-weight: 600; flex-shrink: 0; }
+
+.bank-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: right;
+}
+
+.bank-value.code { color: #0284c7; font-family: monospace; }
+.bank-value.price { color: #16a34a; font-size: 16px; }
+
+.btn-mock-pay {
+  width: 100%;
+  margin-top: 16px;
+  padding: 14px;
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-mock-pay:hover:not(:disabled) { background: #15803d; }
+.btn-mock-pay:disabled { opacity: 0.65; cursor: not-allowed; }
+
+/* Sidebar */
+.oc-sidebar-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(15,23,42,.04);
+  position: sticky;
+  top: 100px;
+}
+
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 18px;
+}
+
+.next-steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #0284c7;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-actions { display: flex; flex-direction: column; gap: 10px; }
+
+.btn-action {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.btn-action.primary {
+  background: #0284c7;
+  color: #fff;
+}
+
+.btn-action.primary:hover { background: #0369a1; }
+
+.btn-action.secondary {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-action.secondary:hover { background: #e2e8f0; }
+
+.btn-primary-solid {
+  display: inline-flex;
+  padding: 12px 28px;
+  background: #0284c7;
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}

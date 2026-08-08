@@ -3,25 +3,44 @@
     <!-- STUDY ROOM HEADER -->
     <header class="study-header glass-card">
       <div class="header-left">
-        <router-link to="/login" class="back-btn">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          Quay lại Dashboard
+        <router-link to="/dashboard" class="back-btn" title="Quay lại trang cá nhân">
+          <div class="back-icon-box">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </div>
+          <span class="back-text">Dashboard</span>
         </router-link>
-        <span class="divider">|</span>
-        <h1 class="course-title">{{ course?.title || 'Phòng học ACC Academy' }}</h1>
+        
+        <span class="divider"></span>
+        
+        <div class="course-meta-header">
+          <span class="course-badge">ACC PLATFORM</span>
+          <h1 class="course-title">{{ course?.title || 'Phòng học ACC Academy' }}</h1>
+        </div>
       </div>
       
       <div class="header-right">
-        <!-- Progress Bar -->
-        <div class="progress-container">
-          <div class="progress-label">Tiến độ học: {{ progressPercent }}%</div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" :style="{ width: progressPercent + '%' }"></div>
+        <!-- Progress Widget -->
+        <div class="progress-widget">
+          <div class="progress-text-row">
+            <span class="progress-title">Tiến độ khóa học</span>
+            <span class="progress-percent-badge">{{ progressPercent }}%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
           </div>
         </div>
+
+        <button 
+          class="btn-mark-complete-header" 
+          :class="{ 'completed': activeLesson?.completed }"
+          @click="markActiveLessonCompleted"
+          title="Đánh dấu hoàn thành bài học này"
+        >
+          <span class="check-icon">{{ activeLesson?.completed ? '✓' : '○' }}</span>
+          <span class="btn-label">{{ activeLesson?.completed ? 'Đã hoàn thành' : 'Đánh dấu đã học' }}</span>
+        </button>
       </div>
     </header>
 
@@ -30,8 +49,17 @@
       <!-- SIDEBAR: CURRICULUM ACCORDION -->
       <aside class="study-sidebar glass-card">
         <div class="sidebar-header">
-          <h3>Nội dung khóa học</h3>
-          <span class="lessons-count">{{ completedLessonsCount }}/{{ totalLessonsCount }} bài học</span>
+          <div class="sidebar-title-group">
+            <h3>Nội dung khóa học</h3>
+            <p class="lessons-count">{{ completedLessonsCount }} / {{ totalLessonsCount }} bài đã học</p>
+          </div>
+          <div class="sidebar-progress-ring">
+            <svg class="ring-svg" width="36" height="36" viewBox="0 0 36 36">
+              <path class="ring-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="ring-fill" :stroke-dasharray="progressPercent + ', 100'" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            </svg>
+            <span class="ring-text">{{ progressPercent }}%</span>
+          </div>
         </div>
         
         <div class="chapters-list">
@@ -43,12 +71,15 @@
           >
             <div class="chapter-title-row" @click="chapter.expanded = !chapter.expanded">
               <div class="chapter-info">
-                <span class="chapter-index">Chương {{ cIdx + 1 }}:</span>
+                <span class="chapter-index">CHƯƠNG {{ cIdx + 1 }}</span>
                 <span class="chapter-name">{{ chapter.name }}</span>
               </div>
-              <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 9l6 6 6-6"/>
-              </svg>
+              <div class="chapter-right-meta">
+                <span class="chapter-lessons-badge">{{ chapter.lessons.length }} bài</span>
+                <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
             </div>
             
             <div class="lessons-list" v-show="chapter.expanded">
@@ -56,18 +87,23 @@
                 v-for="lesson in chapter.lessons" 
                 :key="lesson.id" 
                 class="lesson-item-row"
-                :class="{ 'active': activeLesson?.id === lesson.id }"
+                :class="{ 'active': activeLesson?.id === lesson.id, 'is-completed': lesson.completed }"
                 @click="selectLesson(lesson)"
               >
                 <div class="lesson-check-wrapper" @click.stop="toggleLessonCompleted(lesson)">
-                  <span class="checkbox" :class="{ 'checked': lesson.completed }">✓</span>
+                  <span class="custom-checkbox" :class="{ 'checked': lesson.completed }">
+                    <svg v-if="lesson.completed" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </span>
                 </div>
+                
                 <div class="lesson-content-meta">
-                  <span class="lesson-type-icon">
-                    <span v-if="lesson.type === 'video'">🎥</span>
-                    <span v-else-if="lesson.type === 'zoom'">🔗</span>
-                    <span v-else-if="lesson.type === 'document'">📄</span>
-                    <span v-else>📝</span>
+                  <span class="lesson-type-badge" :class="lesson.type">
+                    <span v-if="lesson.type === 'video'">🎥 Video</span>
+                    <span v-else-if="lesson.type === 'zoom'">⚡ Live Zoom</span>
+                    <span v-else-if="lesson.type === 'document'">📄 Slide</span>
+                    <span v-else>📝 Bài tập</span>
                   </span>
                   <span class="lesson-title">{{ lesson.title }}</span>
                 </div>
@@ -77,12 +113,16 @@
         </div>
       </aside>
 
-      <!-- MAIN CONTENT: LESSON VIEW & TABS -->
+      <!-- MAIN CONTENT AREA -->
       <main class="study-main">
-        <!-- LESSON CONTENT SCREEN -->
+        <!-- LESSON CONTENT SCREEN CONTAINER -->
         <div class="lesson-screen glass-card">
           <!-- 1. VIDEO LESSON SCREEN -->
           <div v-if="activeLesson?.type === 'video'" class="video-player-container">
+            <div class="screen-watermark">
+              <span class="watermark-logo">ACC ACADEMY</span>
+              <span class="watermark-status">● HQ VIDEO PLAYER</span>
+            </div>
             <video 
               v-if="videoUrl" 
               controls 
@@ -92,185 +132,261 @@
               @ended="markActiveLessonCompleted"
             ></video>
             <div v-else class="video-placeholder">
-              <span class="play-btn-large">▶</span>
-              <p>Đang tải video bài giảng...</p>
+              <div class="play-pulse-ring">
+                <span class="play-btn-large">▶</span>
+              </div>
+              <p>Đang chuẩn bị video bài giảng HD...</p>
             </div>
           </div>
 
           <!-- 2. ZOOM MEETING LINK SCREEN -->
           <div v-else-if="activeLesson?.type === 'zoom'" class="zoom-screen-container">
-            <div class="zoom-card">
-              <div class="zoom-badge-live">LIVE LỚP HỌC TRỰC TUYẾN</div>
-              <img src="/images/logo3.png" alt="ACC Logo" class="zoom-logo" style="height: 50px; margin-bottom: 20px;" />
-              <h2>Lớp Học Trực Tuyến Qua Zoom</h2>
-              <p class="zoom-subtitle">Lớp học tương tác trực tiếp với chuyên gia của ACC Academy để giải đáp thắc mắc và chữa bài tập thực hành.</p>
+            <div class="zoom-card-glow">
+              <div class="zoom-header-banner">
+                <span class="live-pulsing-badge">
+                  <span class="live-dot"></span> BÀI HỌC TRỰC TUYẾN LIVE
+                </span>
+                <span class="zoom-tag">ZOOM INTERACTIVE CLASS</span>
+              </div>
+
+              <div class="zoom-brand-header">
+                <img src="/images/logo3.png" alt="ACC Logo" class="zoom-logo-img" />
+                <h2>Lớp Học Trực Tuyến Qua Zoom</h2>
+                <p class="zoom-subtitle">Tương tác trực tiếp 1:1 với Chuyên gia ACC Academy. Đặt câu hỏi và cùng giải bài tập thực chiến.</p>
+              </div>
               
-              <div class="zoom-info-box">
-                <div class="info-line">
-                  <strong>🗓️ Lịch học:</strong> <span>{{ activeLesson.zoomTime || 'Thứ 3 & Thứ 5 hàng tuần lúc 19:30' }}</span>
+              <div class="zoom-details-grid">
+                <div class="detail-card">
+                  <div class="detail-icon">🗓️</div>
+                  <div class="detail-info">
+                    <span class="detail-label">Lịch học Live</span>
+                    <strong class="detail-value">{{ activeLesson.zoomTime || 'Thứ 3 & 5 hàng tuần (19:30)' }}</strong>
+                  </div>
                 </div>
-                <div class="info-line">
-                  <strong>🔑 Meeting ID:</strong> <span>{{ activeLesson.meetingId || '888 999 6688' }}</span>
+                <div class="detail-card">
+                  <div class="detail-icon">🔑</div>
+                  <div class="detail-info">
+                    <span class="detail-label">Meeting ID</span>
+                    <strong class="detail-value code-font">{{ activeLesson.meetingId || '888 999 6688' }}</strong>
+                  </div>
                 </div>
-                <div class="info-line">
-                  <strong>🔒 Mật mã (Pass):</strong> <span>{{ activeLesson.passcode || 'ACC2026' }}</span>
+                <div class="detail-card">
+                  <div class="detail-icon">🔒</div>
+                  <div class="detail-info">
+                    <span class="detail-label">Mật mã (Passcode)</span>
+                    <strong class="detail-value code-font">{{ activeLesson.passcode || 'ACC2026' }}</strong>
+                  </div>
+                </div>
+                <div class="detail-card">
+                  <div class="detail-icon">👨‍🏫</div>
+                  <div class="detail-info">
+                    <span class="detail-label">Giảng viên hướng dẫn</span>
+                    <strong class="detail-value">Senior AI Mentor ACC</strong>
+                  </div>
                 </div>
               </div>
               
-              <a :href="activeLesson.zoomLink || 'https://zoom.us'" target="_blank" class="btn btn-primary btn-zoom mt-6">
-                🚀 Tham gia Lớp Zoom Học Ngay
-              </a>
-              
-              <button @click="markActiveLessonCompleted" class="btn btn-outline btn-sm btn-completed-zoom mt-4">
-                Đánh dấu đã hoàn thành buổi học này
-              </button>
+              <div class="zoom-action-box">
+                <a :href="activeLesson.zoomLink || 'https://zoom.us'" target="_blank" class="btn btn-primary btn-zoom-launch">
+                  🚀 VÀO PHÒNG HỌC ZOOM NGAY
+                </a>
+                
+                <button @click="markActiveLessonCompleted" class="btn-mark-zoom">
+                  {{ activeLesson?.completed ? '✓ Đã đánh dấu hoàn thành buổi học' : 'Đánh dấu đã hoàn thành buổi học này' }}
+                </button>
+              </div>
             </div>
           </div>
 
           <!-- 3. DOCUMENT SCREEN -->
           <div v-else-if="activeLesson?.type === 'document'" class="doc-screen-container">
-            <div class="doc-card">
-              <div class="doc-icon">📂</div>
-              <h2>Slide & Tài liệu bài học</h2>
-              <p class="doc-desc">Tải về giáo trình slide PDF và bộ tài liệu hướng dẫn thực hành đi kèm bài học.</p>
+            <div class="doc-card-wrapper">
+              <div class="doc-header-icon">
+                <div class="icon-circle">📂</div>
+              </div>
+              <h2>Giáo trình Slide & Tài liệu thực hành</h2>
+              <p class="doc-desc">Tải giáo trình chi tiết, bộ prompt câu lệnh và bài tập thực hành dành riêng cho bài học này.</p>
               
-              <div class="doc-links-box">
-                <a :href="activeLesson.docUrl || '#'" class="doc-download-link" download @click="markActiveLessonCompleted">
-                  <span>📥 Slide bài giảng (PDF)</span>
-                  <span class="file-size">14.8 MB</span>
+              <div class="doc-download-grid">
+                <a :href="activeLesson.docUrl || '#'" class="doc-card-button" download @click="markActiveLessonCompleted">
+                  <div class="doc-file-type pdf">PDF</div>
+                  <div class="doc-file-info">
+                    <strong>Slide bài giảng chi tiết (PDF)</strong>
+                    <span class="file-meta">Tài liệu chính thức • 14.8 MB</span>
+                  </div>
+                  <span class="download-icon">📥</span>
                 </a>
-                <a :href="activeLesson.srcCodeUrl || '#'" class="doc-download-link" download @click="markActiveLessonCompleted">
-                  <span>📥 Bộ Source Code & Prompt mẫu thực hành</span>
-                  <span class="file-size">4.2 MB</span>
+
+                <a :href="activeLesson.srcCodeUrl || '#'" class="doc-card-button" download @click="markActiveLessonCompleted">
+                  <div class="doc-file-type zip">ZIP</div>
+                  <div class="doc-file-info">
+                    <strong>Bộ Prompt mẫu & Source code thực hành</strong>
+                    <span class="file-meta">Tệp tài nguyên mẫu • 4.2 MB</span>
+                  </div>
+                  <span class="download-icon">📥</span>
                 </a>
               </div>
             </div>
           </div>
 
-          <!-- Lesson Navigation Bar -->
-          <div class="lesson-navigation">
-            <button @click="prevLesson" class="btn btn-outline btn-sm" :disabled="isFirstLesson">
-              ← Bài trước
+          <!-- LESSON NAVIGATION TOOLBAR -->
+          <div class="lesson-navigation-bar">
+            <button @click="prevLesson" class="nav-arrow-btn" :disabled="isFirstLesson">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+              <span>Bài trước</span>
             </button>
-            <div class="lesson-header-info">
-              <h3>{{ activeLesson?.title }}</h3>
+
+            <div class="current-lesson-info">
+              <span class="current-badge">Đang học:</span>
+              <h3 class="current-title">{{ activeLesson?.title }}</h3>
             </div>
-            <button @click="nextLesson" class="btn btn-outline btn-sm" :disabled="isLastLesson">
-              Bài tiếp theo →
+
+            <button @click="nextLesson" class="nav-arrow-btn primary" :disabled="isLastLesson">
+              <span>Bài tiếp theo</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+              </svg>
             </button>
           </div>
         </div>
 
         <!-- TABS CONTAINER -->
         <div class="tabs-container glass-card">
-          <div class="tabs-header">
+          <div class="tabs-header-bar">
             <button 
-              class="tab-btn" 
+              class="tab-nav-item" 
               :class="{ 'active': activeTab === 'overview' }"
               @click="activeTab = 'overview'"
             >
-              📝 Nội dung bài học
+              <span class="tab-icon">📝</span>
+              <span>Nội dung bài học</span>
             </button>
+            
             <button 
-              class="tab-btn" 
+              class="tab-nav-item" 
               :class="{ 'active': activeTab === 'resources' }"
               @click="activeTab = 'resources'"
             >
-              📂 Tài nguyên đính kèm
+              <span class="tab-icon">📂</span>
+              <span>Tài nguyên đính kèm</span>
             </button>
+
             <button 
-              class="tab-btn" 
+              class="tab-nav-item" 
               :class="{ 'active': activeTab === 'qa' }"
               @click="activeTab = 'qa'"
             >
-              💬 Thảo luận & Hỏi đáp ({{ qas.length }})
+              <span class="tab-icon">💬</span>
+              <span>Thảo luận & Hỏi đáp</span>
+              <span class="qa-badge-count">{{ qas.length }}</span>
             </button>
           </div>
 
-          <div class="tab-body">
+          <div class="tab-content-body">
             <!-- TAB 1: OVERVIEW -->
             <div v-if="activeTab === 'overview'" class="tab-pane overview-pane">
-              <h3>Mục tiêu bài học</h3>
-              <p>{{ activeLesson?.objective || 'Tìm hiểu các khái niệm cơ bản và cách vận dụng lý thuyết vào thực tế.' }}</p>
-              
-              <h3 class="mt-4">Nội dung cốt lõi</h3>
-              <ul class="key-points">
-                <li v-for="(point, pIdx) in activeLesson?.keyPoints" :key="pIdx">
-                  {{ point }}
-                </li>
-              </ul>
-              
-              <h3 class="mt-4">Hướng dẫn thực hành</h3>
-              <div class="instructions-box">
-                <p>{{ activeLesson?.instructions || 'Đọc tài liệu đính kèm, thực hành gõ code hoặc áp dụng công thức viết prompt theo hướng dẫn trong video.' }}</p>
+              <div class="content-section-card">
+                <div class="section-title-row">
+                  <span class="section-icon">🎯</span>
+                  <h3>Mục tiêu bài học</h3>
+                </div>
+                <p class="section-paragraph">{{ activeLesson?.objective || 'Nắm vững khái niệm cốt lõi và vận dụng ngay vào công việc thực tế.' }}</p>
+              </div>
+
+              <div class="content-section-card mt-6">
+                <div class="section-title-row">
+                  <span class="section-icon">✨</span>
+                  <h3>Nội dung cốt lõi bài học</h3>
+                </div>
+                <div class="key-points-grid">
+                  <div v-for="(point, pIdx) in activeLesson?.keyPoints" :key="pIdx" class="key-point-item">
+                    <span class="point-check-icon">✓</span>
+                    <span class="point-text">{{ point }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="content-section-card mt-6 highlight-box">
+                <div class="section-title-row">
+                  <span class="section-icon">💡</span>
+                  <h3>Hướng dẫn thực hành</h3>
+                </div>
+                <p class="section-paragraph italic">{{ activeLesson?.instructions || 'Đọc tài liệu đính kèm, làm theo video bài giảng và thực hành lại bài tập mẫu.' }}</p>
               </div>
             </div>
 
             <!-- TAB 2: RESOURCES -->
             <div v-if="activeTab === 'resources'" class="tab-pane resources-pane">
-              <div class="resource-item">
-                <span class="resource-icon">📂</span>
-                <div class="resource-info">
-                  <h4>Slide bài giảng chi tiết</h4>
-                  <p>Tóm tắt toàn bộ lý thuyết và sơ đồ tư duy của chương học.</p>
-                  <a :href="activeLesson?.docUrl || '#'" target="_blank" class="btn btn-outline btn-xs mt-2 inline-block">Tải slide (PDF)</a>
+              <div class="resources-grid">
+                <div class="resource-card">
+                  <div class="resource-card-icon">📂</div>
+                  <div class="resource-card-details">
+                    <h4>Slide bài giảng chi tiết</h4>
+                    <p>Tóm tắt toàn bộ sơ đồ tư duy và lý thuyết cốt lõi dạng slide PDF.</p>
+                    <a :href="activeLesson?.docUrl || '#'" target="_blank" class="resource-btn">📥 Tải slide PDF</a>
+                  </div>
                 </div>
-              </div>
-              
-              <div v-if="activeLesson?.srcCodeUrl" class="resource-item mt-4">
-                <span class="resource-icon">💻</span>
-                <div class="resource-info">
-                  <h4>Tài liệu & Mã nguồn mẫu thực hành</h4>
-                  <p>Tải bộ code mẫu hoặc các template prompts được chia sẻ.</p>
-                  <a :href="activeLesson?.srcCodeUrl" target="_blank" class="btn btn-outline btn-xs mt-2 inline-block">Tải tài nguyên</a>
-                </div>
-              </div>
 
-              <div class="resource-item mt-4">
-                <span class="resource-icon">🔗</span>
-                <div class="resource-info">
-                  <h4>Cộng đồng học viên ACC Academy</h4>
-                  <p>Tham gia group Zalo/Discord hỗ trợ giải đáp 24/7 từ mentor.</p>
-                  <a href="https://zalo.me" target="_blank" class="btn btn-outline btn-xs mt-2 inline-block">Tham gia nhóm</a>
+                <div v-if="activeLesson?.srcCodeUrl" class="resource-card">
+                  <div class="resource-card-icon">💻</div>
+                  <div class="resource-card-details">
+                    <h4>Mã nguồn & Prompt mẫu</h4>
+                    <p>Bộ câu lệnh prompt và source code mẫu dùng trực tiếp cho bài thực hành.</p>
+                    <a :href="activeLesson?.srcCodeUrl" target="_blank" class="resource-btn">📥 Tải bộ Prompt</a>
+                  </div>
+                </div>
+
+                <div class="resource-card">
+                  <div class="resource-card-icon">💬</div>
+                  <div class="resource-card-details">
+                    <h4>Nhóm Hỗ trợ Học viên 24/7</h4>
+                    <p>Tham gia cộng đồng Zalo/Discord để được Mentor hỗ trợ trực tiếp.</p>
+                    <a href="https://zalo.me" target="_blank" class="resource-btn zalo">🚀 Tham gia nhóm Zalo</a>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- TAB 3: Q&A -->
             <div v-if="activeTab === 'qa'" class="tab-pane qa-pane">
-              <!-- Comment Form -->
-              <form @submit.prevent="submitQa" class="qa-form">
+              <form @submit.prevent="submitQa" class="qa-submit-box">
+                <div class="form-header-row">
+                  <div class="user-avatar-sm">{{ getUserInitials(courseStore.userMe?.fullname) }}</div>
+                  <span class="form-hint">Đặt câu hỏi của bạn cho bài học này:</span>
+                </div>
                 <textarea 
                   v-model="newQaText" 
-                  placeholder="Đặt câu hỏi hoặc chia sẻ ý kiến của bạn về bài học này..."
+                  placeholder="Nhập nội dung thắc mắc hoặc câu hỏi cần trợ giúp..."
                   required
                   rows="3"
                 ></textarea>
-                <button type="submit" class="btn btn-primary btn-sm mt-2">Gửi câu hỏi</button>
+                <div class="form-action-row">
+                  <button type="submit" class="btn btn-primary btn-sm">🚀 Gửi câu hỏi cho Mentor</button>
+                </div>
               </form>
 
-              <!-- Comments List -->
-              <div class="qa-list mt-6">
-                <div v-for="qa in currentLessonQas" :key="qa.id" class="qa-item">
-                  <div class="qa-user-meta">
-                    <div class="avatar">{{ getUserInitials(qa.username) }}</div>
-                    <div>
-                      <span class="username">{{ qa.username }}</span>
-                      <span class="date">{{ qa.time }}</span>
+              <div class="qa-comments-feed mt-6">
+                <div v-for="qa in currentLessonQas" :key="qa.id" class="qa-comment-card">
+                  <div class="comment-author-row">
+                    <div class="avatar-circle">{{ getUserInitials(qa.username) }}</div>
+                    <div class="author-meta">
+                      <span class="author-name">{{ qa.username }}</span>
+                      <span class="comment-time">{{ qa.time }}</span>
                     </div>
                   </div>
-                  <p class="qa-text">{{ qa.text }}</p>
-                  
-                  <!-- Reply from teacher if exists -->
-                  <div v-if="qa.reply" class="qa-reply">
-                    <div class="qa-user-meta">
-                      <div class="avatar admin-avatar">👨‍🏫</div>
-                      <div>
-                        <span class="username admin-name">Chuyên gia ACC Academy</span>
-                        <span class="date">Mentor</span>
+                  <p class="comment-body">{{ qa.text }}</p>
+
+                  <div v-if="qa.reply" class="mentor-reply-card">
+                    <div class="comment-author-row">
+                      <div class="avatar-circle mentor-avatar">👨‍🏫</div>
+                      <div class="author-meta">
+                        <span class="author-name mentor-name">Senior Mentor ACC Academy</span>
+                        <span class="comment-time mentor-badge">Chuyên gia giải đáp</span>
                       </div>
                     </div>
-                    <p class="qa-text">{{ qa.reply }}</p>
+                    <p class="comment-body mentor-body">{{ qa.reply }}</p>
                   </div>
                 </div>
               </div>
@@ -279,9 +395,10 @@
         </div>
       </main>
     </div>
-    
+
     <div v-else class="loading-container py-12 text-center">
-      <h2>Đang tải phòng học...</h2>
+      <div class="loading-spinner"></div>
+      <h2>Đang tải không gian học tập...</h2>
     </div>
   </div>
 </template>
@@ -301,9 +418,9 @@ const videoUrl = computed(() => {
   return activeLesson.value?.videoUrl || 'https://www.w3schools.com/html/mov_bbb.mp4';
 });
 
-// Course from route handle
+const studyCourseData = ref(null);
 const course = computed(() => {
-  return courseStore.getCourseByHandle(route.params.handle);
+  return studyCourseData.value || courseStore.getCourseByHandle(route.params.handle);
 });
 
 // Dynamic curriculum generator based on handle
@@ -311,13 +428,27 @@ const curriculum = ref([]);
 
 // Generate syllabus upon mounting
 onMounted(async () => {
-  if (courseStore.courses.length === 0) {
-    await courseStore.fetchCourses();
+  const handle = route.params.handle;
+  try {
+    const data = await courseStore.fetchCourseStudyData(handle);
+    if (data) {
+      studyCourseData.value = data;
+    }
+  } catch (err) {
+    alert(err.message || 'Bạn chưa có quyền truy cập khóa học này!');
+    router.push(`/course/${handle}`);
+    return;
   }
-  
+
+  if (!course.value) {
+    if (courseStore.courses.length === 0) {
+      await courseStore.fetchCourses();
+    }
+  }
+
   if (!course.value) {
     alert('Không tìm thấy khóa học này!');
-    router.push('/login');
+    router.push('/dashboard');
     return;
   }
   
