@@ -1,274 +1,337 @@
 <template>
   <div class="tab-content animate-fade-in">
-    <div class="content-header flex-between">
-      <div>
-        <h2>Quản lý Danh mục Khóa học</h2>
-        <p>Danh sách và thông tin chi tiết các khóa học hiển thị trên website.</p>
+    <!-- VIEW 1: LIST TABLE -->
+    <div v-if="activeView === 'list'">
+      <div class="content-header flex-between">
+        <div>
+          <h2>Quản lý Danh mục Khóa học</h2>
+          <p>Danh sách và thông tin chi tiết các khóa học hiển thị trên website.</p>
+        </div>
+        <button @click="openAddCourseModal" class="btn btn-primary btn-sm">+ Thêm khóa học mới</button>
       </div>
-      <button @click="openAddCourseModal" class="btn btn-primary btn-sm">+ Thêm khóa học</button>
+
+      <!-- Filters -->
+      <div class="filter-bar mt-4">
+        <input 
+          v-model="courseSearch" 
+          type="text" 
+          placeholder="Tìm theo tên khóa học, mô tả..." 
+          class="admin-search-input"
+        />
+        <select v-model="courseFilterCategory" class="admin-select">
+          <option value="all">Tất cả chuyên mục</option>
+          <option value="ky-nang-ai">Kỹ năng AI</option>
+          <option value="ky-nang-mem">Kỹ năng mềm</option>
+          <option value="ky-nang-chuyen-mon">Kỹ năng chuyên môn</option>
+          <option value="bundles">Combo khóa học</option>
+        </select>
+      </div>
+
+      <!-- Courses Table -->
+      <div class="table-responsive mt-6">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Hình ảnh</th>
+              <th>Tên khóa học</th>
+              <th>Chuyên mục</th>
+              <th>Thời lượng</th>
+              <th>Trình độ</th>
+              <th>Giá hiển thị</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="c in filteredCourses" :key="c.id">
+              <td>
+                <img :src="c.image" :alt="c.title" class="admin-course-thumb" />
+              </td>
+              <td class="font-bold">
+                <div>{{ c.title }}</div>
+                <small class="text-muted">Slug: {{ c.handle }}</small>
+              </td>
+              <td>
+                <span class="badge badge-primary">{{ translateCategory(c.category) }}</span>
+              </td>
+              <td>{{ c.duration }}</td>
+              <td>{{ c.level }}</td>
+              <td>
+                <div class="price-text font-bold">{{ formatPrice(c.price) }}</div>
+                <del class="text-muted text-xs" v-if="c.originalPrice > c.price">{{ formatPrice(c.originalPrice) }}</del>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button @click="openCurriculumModal(c)" class="btn-action edit" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; font-size: 13px;" title="Quản lý bài giảng">📚</button>
+                  <button @click="editCourseDetails(c)" class="btn-action edit" title="Sửa thông tin">✏️</button>
+                  <button @click="deleteCourse(c.id)" class="btn-action delete" title="Xóa">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="filteredCourses.length === 0">
+              <td colspan="7" class="text-center py-8 text-muted">Không tìm thấy khóa học nào phù hợp.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
-    <!-- Filters -->
-    <div class="filter-bar mt-4">
-      <input 
-        v-model="courseSearch" 
-        type="text" 
-        placeholder="Tìm theo tên khóa học, mô tả..." 
-        class="admin-search-input"
-      />
-      <select v-model="courseFilterCategory" class="admin-select">
-        <option value="all">Tất cả chuyên mục</option>
-        <option value="ky-nang-ai">Kỹ năng AI</option>
-        <option value="ky-nang-mem">Kỹ năng mềm</option>
-        <option value="ky-nang-chuyen-mon">Kỹ năng chuyên môn</option>
-        <option value="bundles">Combo khóa học</option>
-      </select>
-    </div>
+    <!-- VIEW 2: COURSE ADD/EDIT FORM (TRANG RIÊNG) -->
+    <div v-else-if="activeView === 'course_form'" class="admin-page-card" style="background: #ffffff; color: #0f172a; border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+      <div class="flex-between pb-4 mb-4" style="border-bottom: 1px solid #e2e8f0;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" @click="activeView = 'list'" class="btn btn-secondary btn-sm" style="padding: 8px 16px; font-weight: 600;">
+            ← Quay lại danh sách
+          </button>
+          <h3 style="margin: 0; color: #0f172a; font-size: 20px; font-weight: 800;">
+            {{ isEditingCourse ? 'Chỉnh sửa thông tin khóa học' : 'Thêm khóa học mới' }}
+          </h3>
+        </div>
+        <button type="button" @click="activeView = 'list'" class="btn btn-secondary btn-sm">Hủy</button>
+      </div>
 
-    <!-- Courses Table -->
-    <div class="table-responsive mt-6">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>Hình ảnh</th>
-            <th>Tên khóa học</th>
-            <th>Chuyên mục</th>
-            <th>Thời lượng</th>
-            <th>Trình độ</th>
-            <th>Giá hiển thị</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="c in filteredCourses" :key="c.id">
-            <td>
-              <img :src="c.image" :alt="c.title" class="admin-course-thumb" />
-            </td>
-            <td class="font-bold">
-              <div>{{ c.title }}</div>
-              <small class="text-muted">Slug: {{ c.handle }}</small>
-            </td>
-            <td>
-              <span class="badge badge-primary">{{ translateCategory(c.category) }}</span>
-            </td>
-            <td>{{ c.duration }}</td>
-            <td>{{ c.level }}</td>
-            <td>
-              <div class="price-text font-bold">{{ formatPrice(c.price) }}</div>
-              <del class="text-muted text-xs" v-if="c.originalPrice > c.price">{{ formatPrice(c.originalPrice) }}</del>
-            </td>
-            <td>
-              <div class="action-buttons">
-                <button @click="openCurriculumModal(c)" class="btn-action edit" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; font-size: 13px;" title="Quản lý bài giảng">📚</button>
-                <button @click="editCourseDetails(c)" class="btn-action edit" title="Sửa thông tin">✏️</button>
-                <button @click="deleteCourse(c.id)" class="btn-action delete" title="Xóa">🗑️</button>
-              </div>
-            </td>
-          </tr>
-          <tr v-if="filteredCourses.length === 0">
-            <td colspan="7" class="text-center py-8 text-muted">Không tìm thấy khóa học nào phù hợp.</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <form @submit.prevent="saveCourse">
+        <div class="form-group">
+          <label style="color: #1e293b; font-weight: 600;">Tên khóa học</label>
+          <input v-model="courseForm.title" @input="onTitleInput" type="text" required class="admin-input-style" placeholder="Ví dụ: ChatGPT thực chiến nâng cao" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+        </div>
 
-    <!-- ==================== MODAL: ADD/EDIT COURSE ==================== -->
-    <div v-if="courseModalOpen" class="modal-overlay">
-      <div class="modal-content glass-card">
-        <h3>{{ isEditingCourse ? 'Chỉnh sửa khóa học' : 'Thêm khóa học mới' }}</h3>
-        <form @submit.prevent="saveCourse" class="mt-4">
+        <div class="form-group mt-3">
+          <label style="color: #1e293b; font-weight: 600;">Đường dẫn tĩnh (Slug / Handle - Tự động tạo)</label>
+          <input v-model="courseForm.handle" type="text" required class="admin-input-style" placeholder="chatgpt-nang-cao" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+        </div>
+
+        <div class="grid-2 mt-3">
           <div class="form-group">
-            <label>Tên khóa học</label>
-            <input v-model="courseForm.title" type="text" required class="admin-input-style" placeholder="Ví dụ: ChatGPT thực chiến nâng cao" />
-          </div>
-          <div class="form-group mt-3">
-            <label>Đường dẫn tĩnh (Slug / Handle)</label>
-            <input v-model="courseForm.handle" type="text" required class="admin-input-style" placeholder="chatgpt-nang-cao" />
-          </div>
-          <div class="form-group mt-3">
-            <label>Chuyên mục</label>
-            <select v-model="courseForm.category" class="admin-input-style">
+            <label style="color: #1e293b; font-weight: 600;">Chuyên mục</label>
+            <select v-model="courseForm.category" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
               <option value="ky-nang-ai">Kỹ năng AI</option>
               <option value="ky-nang-mem">Kỹ năng mềm</option>
               <option value="ky-nang-chuyen-mon">Kỹ năng chuyên môn</option>
               <option value="bundles">Combo khóa học</option>
             </select>
           </div>
-          <div class="form-group mt-3">
-            <label>Hình ảnh khóa học (URL)</label>
-            <input v-model="courseForm.image" type="text" required class="admin-input-style" />
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 600;">Chương trình đào tạo mẹ (Program)</label>
+            <select v-model="courseForm.programId" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
+              <option :value="null">-- Không thuộc chương trình --</option>
+              <option v-for="p in programs" :key="p.id" :value="p.id">{{ p.title }}</option>
+            </select>
           </div>
-          <div class="grid-2 mt-3">
-            <div class="form-group">
-              <label>Giá bán (VNĐ)</label>
-              <input v-model.number="courseForm.price" type="number" required class="admin-input-style" />
-            </div>
-            <div class="form-group">
-              <label>Giá gốc niêm yết (VNĐ)</label>
-              <input v-model.number="courseForm.originalPrice" type="number" required class="admin-input-style" />
-            </div>
+        </div>
+
+        <div class="form-group mt-3">
+          <label style="color: #1e293b; font-weight: 600;">Hình ảnh khóa học (Tải ảnh từ máy lên Cloudinary hoặc dán URL)</label>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <input v-model="courseForm.image" type="text" required class="admin-input-style" placeholder="/images/default.jpg hoặc URL Cloudinary" style="flex: 1; min-width: 240px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+            <label class="btn btn-primary btn-sm" style="padding: 10px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600;">
+              <span>Tải ảnh từ máy</span>
+              <input type="file" accept="image/*" @change="uploadCourseImage" style="display: none;" />
+            </label>
           </div>
-          <div class="grid-2 mt-3">
-            <div class="form-group">
-              <label>Thời lượng</label>
-              <input v-model="courseForm.duration" type="text" required class="admin-input-style" placeholder="12 tuần, 24 giờ học..." />
-            </div>
-            <div class="form-group">
-              <label>Trình độ</label>
-              <input v-model="courseForm.level" type="text" required class="admin-input-style" placeholder="Cơ bản, Trung cấp, Nâng cao" />
-            </div>
+          <div v-if="uploadingCourseImage" style="font-size: 12px; color: #0284c7; margin-top: 4px; font-weight: 600;">
+            Đang tải ảnh lên Cloudinary (Thư mục Acc Demo)...
           </div>
-          <div class="form-group mt-3">
-            <label>Mô tả chi tiết khóa học</label>
-            <textarea v-model="courseForm.description" rows="3" required class="admin-input-style" placeholder="Mô tả tóm tắt khóa học..."></textarea>
+          <div v-if="courseForm.image" class="mt-2">
+            <img :src="courseForm.image" alt="Preview" style="max-height: 100px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: cover;" />
           </div>
-          <div class="modal-actions mt-6">
-            <button type="button" @click="courseModalOpen = false" class="btn btn-secondary btn-sm">Hủy</button>
-            <button type="submit" class="btn btn-primary btn-sm">Lưu lại</button>
+        </div>
+
+        <div class="grid-2 mt-3">
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 600;">Giá bán (VNĐ)</label>
+            <input v-model.number="courseForm.price" type="number" required class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: bold;" />
           </div>
-        </form>
-      </div>
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 600;">Giá gốc niêm yết (VNĐ)</label>
+            <input v-model.number="courseForm.originalPrice" type="number" required class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+          </div>
+        </div>
+
+        <div class="grid-2 mt-3">
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 600;">Thời lượng</label>
+            <input v-model="courseForm.duration" type="text" required class="admin-input-style" placeholder="12 tuần, 24 giờ học..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+          </div>
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 600;">Trình độ</label>
+            <input v-model="courseForm.level" type="text" required class="admin-input-style" placeholder="Cơ bản, Trung cấp, Nâng cao" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+          </div>
+        </div>
+
+        <div class="form-group mt-3">
+          <label style="color: #1e293b; font-weight: 600;">Mô tả chi tiết khóa học</label>
+          <textarea v-model="courseForm.description" rows="4" required class="admin-input-style" placeholder="Mô tả tóm tắt khóa học..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
+        </div>
+
+        <div class="flex-between mt-6 pt-4" style="border-top: 1px solid #e2e8f0;">
+          <button type="button" @click="activeView = 'list'" class="btn btn-secondary btn-sm" style="padding: 10px 24px;">Hủy bỏ</button>
+          <button type="submit" class="btn btn-primary btn-sm" style="padding: 10px 32px; font-weight: 700;">Lưu thông tin khóa học</button>
+        </div>
+      </form>
     </div>
 
-    <!-- ==================== MODAL: MANAGE CURRICULUM ==================== -->
-    <div v-if="curriculumModalOpen" class="modal-overlay">
-      <div class="modal-content glass-card" style="max-width: 850px; width: 95%; max-height: 85vh; overflow-y: auto;">
-        <div class="flex-between">
-          <h3>Quản lý bài giảng & tài liệu: {{ selectedCourseForCurriculum?.title }}</h3>
-          <button @click="curriculumModalOpen = false" class="btn btn-outline btn-xs">❌ Đóng</button>
+    <!-- VIEW 3: CURRICULUM FORM (TRANG RIÊNG) -->
+    <div v-else-if="activeView === 'curriculum_form'" class="admin-page-card" style="background: #ffffff; color: #0f172a; border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+      <div class="flex-between pb-4 mb-4" style="border-bottom: 1px solid #e2e8f0;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <button type="button" @click="activeView = 'list'" class="btn btn-secondary btn-sm" style="padding: 8px 16px; font-weight: 600;">
+            ← Quay lại danh sách
+          </button>
+          <div>
+            <h3 style="margin: 0; color: #0f172a; font-size: 20px; font-weight: 800;">
+              Quản lý giáo trình & tài liệu: {{ selectedCourseForCurriculum?.title }}
+            </h3>
+            <p style="margin: 4px 0 0; color: #64748b; font-size: 13px;">
+              Thiết lập các chương học, bài giảng video, phòng học Live Zoom và slide tài liệu đính kèm.
+            </p>
+          </div>
         </div>
-        
-        <p class="text-muted text-sm mt-1">Thiết lập cấu trúc chương trình học, link Zoom, video bài giảng và các tài nguyên đính kèm.</p>
+        <button type="button" @click="activeView = 'list'" class="btn btn-secondary btn-sm">Quay lại</button>
+      </div>
 
-        <!-- Chapter list builder -->
-        <div class="chapters-builder mt-6">
-          <div v-for="(chapter, cIdx) in curriculumForm" :key="cIdx" class="chapter-build-card glass-card mb-6" style="padding: 18px; border: 1px solid var(--border-color); background: rgba(255, 255, 255, 0.03);">
-            <div class="chapter-build-header flex-between" style="gap: 12px;">
-              <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
-                <span style="font-weight: bold; min-width: 80px;">Chương {{ cIdx + 1 }}:</span>
-                <input v-model="chapter.name" type="text" class="admin-input-style" placeholder="Tên chương học..." required />
-              </div>
-              <button type="button" @click="removeChapter(cIdx)" class="btn btn-sm btn-danger" style="padding: 6px 12px;">Xóa chương</button>
+      <!-- Chapter list builder -->
+      <div class="chapters-builder mt-4">
+        <div v-for="(chapter, cIdx) in curriculumForm" :key="cIdx" class="chapter-build-card mb-6" style="padding: 20px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 12px;">
+          <div class="chapter-build-header flex-between" style="gap: 12px;">
+            <div style="flex: 1; display: flex; align-items: center; gap: 12px;">
+              <span style="font-weight: 700; color: #0284c7; min-width: 90px; font-size: 15px;">Chương {{ cIdx + 1 }}:</span>
+              <input v-model="chapter.name" type="text" class="admin-input-style" placeholder="Tên chương học..." required style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 600;" />
             </div>
+            <button type="button" @click="removeChapter(cIdx)" class="btn btn-sm btn-danger" style="padding: 6px 14px; background: #ef4444; color: white; border: none; border-radius: 6px;">Xóa chương</button>
+          </div>
 
-            <!-- Lessons list builder -->
-            <div class="lessons-builder mt-4" style="padding-left: 20px; border-left: 2px dashed var(--border-color);">
-              <div v-for="(lesson, lIdx) in chapter.lessons" :key="lIdx" class="lesson-build-card mt-3" style="padding: 12px; background: rgba(0,0,0,0.05); border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
-                <div class="flex-between" style="gap: 12px;">
-                  <div style="font-weight: 500; font-size: 13px;">Bài học {{ lIdx + 1 }}:</div>
-                  <button type="button" @click="removeLesson(cIdx, lIdx)" class="btn btn-xs btn-danger" style="font-size: 11px;">Xóa bài học</button>
+          <!-- Lessons list builder -->
+          <div class="lessons-builder mt-4" style="padding-left: 20px; border-left: 3px solid #cbd5e1;">
+            <div v-for="(lesson, lIdx) in chapter.lessons" :key="lIdx" class="lesson-build-card mt-3" style="padding: 16px; background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+              <div class="flex-between mb-2" style="gap: 12px;">
+                <div style="font-weight: 700; font-size: 14px; color: #1e293b;">Bài học {{ lIdx + 1 }}:</div>
+                <button type="button" @click="removeLesson(cIdx, lIdx)" class="btn btn-xs btn-danger" style="font-size: 12px; background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; padding: 4px 10px; border-radius: 4px;">Xóa bài học</button>
+              </div>
+
+              <div class="grid-2 mt-2">
+                <div class="form-group">
+                  <label style="font-size: 12px; color: #475569; font-weight: 600;">Tiêu đề bài học</label>
+                  <input v-model="lesson.title" type="text" class="admin-input-style" placeholder="Tên bài giảng..." required style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+                </div>
+                <div class="form-group">
+                  <label style="font-size: 12px; color: #475569; font-weight: 600;">Loại bài học</label>
+                  <select v-model="lesson.type" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
+                    <option value="video">Video bài giảng</option>
+                    <option value="zoom">Lớp học Live Zoom</option>
+                    <option value="document">Slide & Tài liệu</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Custom inputs based on lesson type -->
+              <div class="type-custom-fields mt-3" style="padding: 12px; background: #f1f5f9; border-radius: 6px; border: 1px solid #e2e8f0;">
+                <!-- Video fields -->
+                <div v-if="lesson.type === 'video'" class="form-group">
+                  <label style="font-size: 12px; color: #475569; font-weight: 600;">Đường dẫn Video bài giảng (MP4/HLS Link)</label>
+                  <input v-model="lesson.videoUrl" type="text" class="admin-input-style" placeholder="https://example.com/lecture.mp4" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
                 </div>
 
-                <div class="grid-2 mt-2">
-                  <div class="form-group">
-                    <label style="font-size: 12px;">Tiêu đề bài học</label>
-                    <input v-model="lesson.title" type="text" class="admin-input-style" placeholder="Tên bài giảng..." required />
-                  </div>
-                  <div class="form-group">
-                    <label style="font-size: 12px;">Loại bài học</label>
-                    <select v-model="lesson.type" class="admin-input-style">
-                      <option value="video">🎥 Video bài giảng</option>
-                      <option value="zoom">🔗 Lớp học Live Zoom</option>
-                      <option value="document">📄 Slide & Tài liệu</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Custom inputs based on lesson type -->
-                <div class="type-custom-fields mt-3" style="padding: 10px; background: rgba(255,255,255,0.02); border-radius: 4px; border: 1px solid rgba(255,255,255,0.02);">
-                  <!-- Video fields -->
-                  <div v-if="lesson.type === 'video'" class="form-group">
-                    <label style="font-size: 12px;">Đường dẫn Video bài giảng (MP4/HLS Link)</label>
-                    <input v-model="lesson.videoUrl" type="text" class="admin-input-style" placeholder="https://example.com/lecture.mp4" />
-                  </div>
-
-                  <!-- Zoom fields -->
-                  <div v-if="lesson.type === 'zoom'">
-                    <div class="grid-2">
-                      <div class="form-group">
-                        <label style="font-size: 12px;">Lịch học Zoom</label>
-                        <input v-model="lesson.zoomTime" type="text" class="admin-input-style" placeholder="Thứ Ba tuần tới lúc 19:30" />
-                      </div>
-                      <div class="form-group">
-                        <label style="font-size: 12px;">Zoom Link trực tiếp</label>
-                        <input v-model="lesson.zoomLink" type="text" class="admin-input-style" placeholder="https://zoom.us/j/..." />
-                      </div>
-                    </div>
-                    <div class="grid-2 mt-2">
-                      <div class="form-group">
-                        <label style="font-size: 12px;">Meeting ID</label>
-                        <input v-model="lesson.meetingId" type="text" class="admin-input-style" placeholder="888 999 6688" />
-                      </div>
-                      <div class="form-group">
-                        <label style="font-size: 12px;">Mật mã (Passcode)</label>
-                        <input v-model="lesson.passcode" type="text" class="admin-input-style" placeholder="ACC2026" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Document fields -->
-                  <div v-if="lesson.type === 'document'" class="grid-2">
+                <!-- Zoom fields -->
+                <div v-if="lesson.type === 'zoom'">
+                  <div class="grid-2">
                     <div class="form-group">
-                      <label style="font-size: 12px;">Link tải Slide bài giảng (PDF)</label>
-                      <input v-model="lesson.docUrl" type="text" class="admin-input-style" placeholder="Link tải slide..." />
+                      <label style="font-size: 12px; color: #475569; font-weight: 600;">Lịch học Zoom</label>
+                      <input v-model="lesson.zoomTime" type="text" class="admin-input-style" placeholder="Thứ Ba tuần tới lúc 19:30" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
                     </div>
                     <div class="form-group">
-                      <label style="font-size: 12px;">Link tải Source code / Prompt mẫu</label>
-                      <input v-model="lesson.srcCodeUrl" type="text" class="admin-input-style" placeholder="Link tải code mẫu..." />
+                      <label style="font-size: 12px; color: #475569; font-weight: 600;">Zoom Link trực tiếp</label>
+                      <input v-model="lesson.zoomLink" type="text" class="admin-input-style" placeholder="https://zoom.us/j/..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
                     </div>
-                  </div>
-                </div>
-
-                <!-- Learning detail fields (Objective, Key Points, Instructions) -->
-                <div class="mt-3">
-                  <div class="form-group">
-                    <label style="font-size: 12px;">Mục tiêu bài học</label>
-                    <input v-model="lesson.objective" type="text" class="admin-input-style" placeholder="Mô tả mục tiêu của bài học này..." />
                   </div>
                   <div class="grid-2 mt-2">
                     <div class="form-group">
-                      <label style="font-size: 12px;">Nội dung cốt lõi (Ngăn cách bởi dấu phẩy)</label>
-                      <input 
-                        :value="lesson.keyPoints ? lesson.keyPoints.join(', ') : ''" 
-                        @input="lesson.keyPoints = $event.target.value.split(',').map(x => x.trim()).filter(Boolean)" 
-                        type="text" 
-                        class="admin-input-style" 
-                        placeholder="Nội dung 1, Nội dung 2, Nội dung 3..." 
-                      />
+                      <label style="font-size: 12px; color: #475569; font-weight: 600;">Meeting ID</label>
+                      <input v-model="lesson.meetingId" type="text" class="admin-input-style" placeholder="888 999 6688" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
                     </div>
                     <div class="form-group">
-                      <label style="font-size: 12px;">Hướng dẫn thực hành</label>
-                      <input v-model="lesson.instructions" type="text" class="admin-input-style" placeholder="Các tác vụ thực hành cần làm..." />
+                      <label style="font-size: 12px; color: #475569; font-weight: 600;">Mật mã (Passcode)</label>
+                      <input v-model="lesson.passcode" type="text" class="admin-input-style" placeholder="ACC2026" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
                     </div>
                   </div>
                 </div>
 
+                <!-- Document fields -->
+                <div v-if="lesson.type === 'document'" class="grid-2">
+                  <div class="form-group">
+                    <label style="font-size: 12px; color: #475569; font-weight: 600;">Link tải Slide bài giảng (PDF)</label>
+                    <input v-model="lesson.docUrl" type="text" class="admin-input-style" placeholder="Link tải slide..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+                  </div>
+                  <div class="form-group">
+                    <label style="font-size: 12px; color: #475569; font-weight: 600;">Link tải Source code / Prompt mẫu</label>
+                    <input v-model="lesson.srcCodeUrl" type="text" class="admin-input-style" placeholder="Link tải code mẫu..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+                  </div>
+                </div>
               </div>
 
-              <button type="button" @click="addLesson(cIdx)" class="btn btn-outline btn-xs mt-3">+ Thêm bài học mới</button>
+              <!-- Learning detail fields -->
+              <div class="mt-3">
+                <div class="form-group">
+                  <label style="font-size: 12px; color: #475569; font-weight: 600;">Mục tiêu bài học</label>
+                  <input v-model="lesson.objective" type="text" class="admin-input-style" placeholder="Mô tả mục tiêu của bài học này..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+                </div>
+                <div class="grid-2 mt-2">
+                  <div class="form-group">
+                    <label style="font-size: 12px; color: #475569; font-weight: 600;">Nội dung cốt lõi (Ngăn cách bởi dấu phẩy)</label>
+                    <input 
+                      :value="lesson.keyPoints ? lesson.keyPoints.join(', ') : ''" 
+                      @input="lesson.keyPoints = $event.target.value.split(',').map(x => x.trim()).filter(Boolean)" 
+                      type="text" 
+                      class="admin-input-style" 
+                      placeholder="Nội dung 1, Nội dung 2, Nội dung 3..." 
+                      style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label style="font-size: 12px; color: #475569; font-weight: 600;">Hướng dẫn thực hành</label>
+                    <input v-model="lesson.instructions" type="text" class="admin-input-style" placeholder="Các tác vụ thực hành cần làm..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+                  </div>
+                </div>
+              </div>
+
             </div>
 
+            <button type="button" @click="addLesson(cIdx)" class="btn btn-outline btn-xs mt-3" style="font-weight: 600;">+ Thêm bài học mới</button>
           </div>
-          
-          <button type="button" @click="addChapter" class="btn btn-secondary btn-sm mt-2">+ Thêm chương mới</button>
-        </div>
 
-        <div class="modal-actions mt-8" style="border-top: 1px solid var(--border-color); padding-top: 20px;">
-          <button type="button" @click="curriculumModalOpen = false" class="btn btn-secondary btn-sm">Hủy</button>
-          <button type="button" @click="saveCurriculum" class="btn btn-primary btn-sm">Lưu giáo trình khóa học</button>
         </div>
+        
+        <button type="button" @click="addChapter" class="btn btn-secondary btn-sm mt-2" style="font-weight: 600;">+ Thêm chương mới</button>
+      </div>
+
+      <div class="flex-between mt-8 pt-4" style="border-top: 1px solid #e2e8f0;">
+        <button type="button" @click="activeView = 'list'" class="btn btn-secondary btn-sm" style="padding: 10px 24px;">Hủy bỏ</button>
+        <button type="button" @click="saveCurriculum" class="btn btn-primary btn-sm" style="padding: 10px 32px; font-weight: 700;">Lưu giáo trình khóa học</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import { slugify } from '@/utils/slugify';
 
 const courseStore = useCourseStore();
 
 const courses = computed(() => courseStore.courses);
+const programs = computed(() => courseStore.programs);
+
+const onTitleInput = () => {
+  if (!isEditingCourse.value || !courseForm.value.handle) {
+    courseForm.value.handle = slugify(courseForm.value.title);
+  }
+};
+
+onMounted(() => {
+  if (courseStore.programs.length === 0) {
+    courseStore.fetchPrograms();
+  }
+});
 
 const courseSearch = ref('');
 const courseFilterCategory = ref('all');
@@ -282,14 +345,30 @@ const filteredCourses = computed(() => {
   });
 });
 
-// CRUD Course Modal States
-const courseModalOpen = ref(false);
+// CRUD & Navigation States ('list' | 'course_form' | 'curriculum_form')
+const activeView = ref('list');
 const isEditingCourse = ref(false);
 const editingCourseId = ref(null);
+const uploadingCourseImage = ref(false);
+
+const uploadCourseImage = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  uploadingCourseImage.value = true;
+  try {
+    const url = await courseStore.uploadImage(file);
+    courseForm.value.image = url;
+  } catch (err) {
+    alert('Lỗi khi tải ảnh lên Cloudinary: ' + err.message);
+  } finally {
+    uploadingCourseImage.value = false;
+  }
+};
 const courseForm = ref({
   title: '',
   handle: '',
   category: 'ky-nang-ai',
+  programId: null,
   image: '',
   price: 0,
   originalPrice: 0,
@@ -304,6 +383,7 @@ const openAddCourseModal = () => {
     title: '',
     handle: '',
     category: 'ky-nang-ai',
+    programId: null,
     image: '/images/default.jpg',
     price: 9800000,
     originalPrice: 12000000,
@@ -311,7 +391,7 @@ const openAddCourseModal = () => {
     level: 'Trung cấp',
     description: ''
   };
-  courseModalOpen.value = true;
+  activeView.value = 'course_form';
 };
 
 const editCourseDetails = (c) => {
@@ -321,6 +401,7 @@ const editCourseDetails = (c) => {
     title: c.title,
     handle: c.handle,
     category: c.category,
+    programId: c.programId || null,
     image: c.image,
     price: c.price,
     originalPrice: c.originalPrice,
@@ -328,7 +409,7 @@ const editCourseDetails = (c) => {
     level: c.level,
     description: c.description
   };
-  courseModalOpen.value = true;
+  activeView.value = 'course_form';
 };
 
 const saveCourse = async () => {
@@ -344,7 +425,7 @@ const saveCourse = async () => {
       await courseStore.addAdminCourse(courseForm.value);
       alert('Thêm khóa học mới thành công!');
     }
-    courseModalOpen.value = false;
+    activeView.value = 'list';
   } catch (err) {
     alert(err.message || 'Không thể lưu khóa học.');
   }
@@ -362,7 +443,6 @@ const deleteCourse = async (courseId) => {
 };
 
 // Curriculum Builder State & Methods
-const curriculumModalOpen = ref(false);
 const selectedCourseForCurriculum = ref(null);
 const curriculumForm = ref([]);
 
@@ -426,7 +506,7 @@ const openCurriculumModal = (c) => {
   } else {
     curriculumForm.value = getDefaultCurriculum(c.handle);
   }
-  curriculumModalOpen.value = true;
+  activeView.value = 'curriculum_form';
 };
 
 const addChapter = () => {
@@ -470,7 +550,7 @@ const saveCurriculum = async () => {
       curriculumData: jsonString
     });
     alert('Lưu giáo trình khóa học thành công!');
-    curriculumModalOpen.value = false;
+    activeView.value = 'list';
   } catch (err) {
     alert(err.message || 'Không thể lưu giáo trình.');
   }

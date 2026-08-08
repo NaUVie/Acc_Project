@@ -98,6 +98,11 @@ def remove_from_cart(db: Session, user_id: int, course_id: int):
         return True
     return False
 
+def clear_cart(db: Session, user_id: int):
+    db.query(models.CartItem).filter(models.CartItem.user_id == user_id).delete()
+    db.commit()
+    return True
+
 # --- Order & Checkout CRUD ---
 def get_user_orders(db: Session, user_id: int):
     return db.query(models.Order).filter(models.Order.user_id == user_id).all()
@@ -161,17 +166,27 @@ def pay_order(db: Session, order_id: int):
     # Transition order status to paid
     db_order.status = "paid"
     
+    # Create Enrollment records for each course in this order
+    for item in db_order.items:
+        existing_enrollment = db.query(models.Enrollment).filter(
+            models.Enrollment.user_id == db_order.user_id,
+            models.Enrollment.course_id == item.course_id
+        ).first()
+        if not existing_enrollment:
+            db.add(models.Enrollment(
+                user_id=db_order.user_id,
+                course_id=item.course_id,
+                order_id=order_id
+            ))
+    
     # Check for referral reward
-    # If the user was referred by someone, award the referrer commission
     user = get_user_by_id(db, db_order.user_id)
     if user.referred_by_id:
-        # Check if a referral reward record has already been logged for this pair
         existing_referral = db.query(models.Referral).filter(
             models.Referral.referred_id == user.id
         ).first()
         
         if not existing_referral:
-            # Referrer gets 10% commission on the paid order amount, capped at 29,000,000 VND
             commission = int(db_order.total_price * 0.10)
             commission_capped = min(commission, 29000000)
             
@@ -186,6 +201,33 @@ def pay_order(db: Session, order_id: int):
     db.commit()
     db.refresh(db_order)
     return db_order
+
+# --- Enrollment CRUD ---
+def get_user_enrollments(db: Session, user_id: int):
+    """Get all courses a user is enrolled in (has paid access to)."""
+    return db.query(models.Enrollment).filter(models.Enrollment.user_id == user_id).all()
+
+def check_enrollment(db: Session, user_id: int, course_id: int) -> bool:
+    """Check if a user is enrolled in a specific course."""
+    enrollment = db.query(models.Enrollment).filter(
+        models.Enrollment.user_id == user_id,
+        models.Enrollment.course_id == course_id
+    ).first()
+    return enrollment is not None
+
+def enroll_user_in_course(db: Session, user_id: int, course_id: int, order_id: int = None):
+    """Manually enroll a user in a course (e.g., admin action or mock payment)."""
+    existing = db.query(models.Enrollment).filter(
+        models.Enrollment.user_id == user_id,
+        models.Enrollment.course_id == course_id
+    ).first()
+    if existing:
+        return existing
+    enrollment = models.Enrollment(user_id=user_id, course_id=course_id, order_id=order_id)
+    db.add(enrollment)
+    db.commit()
+    db.refresh(enrollment)
+    return enrollment
 
 # --- Referral CRUD ---
 def get_referral_summary(db: Session, user_id: int):

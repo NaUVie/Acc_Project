@@ -45,6 +45,8 @@ import AdminOrders from './components/AdminOrders.vue';
 import AdminUsers from './components/AdminUsers.vue';
 import AdminContacts from './components/AdminContacts.vue';
 import AdminCourses from './components/AdminCourses.vue';
+import AdminPrograms from './components/AdminPrograms.vue';
+import AdminBundles from './components/AdminBundles.vue';
 
 const courseStore = useCourseStore();
 
@@ -53,17 +55,21 @@ onMounted(async () => {
     courseStore.fetchAdminUsers(),
     courseStore.fetchAdminOrders(),
     courseStore.fetchAdminContacts(),
-    courseStore.fetchCourses()
+    courseStore.fetchCourses(),
+    courseStore.fetchPrograms(),
+    courseStore.fetchBundles()
   ]);
 });
 
 // Setup Tab navigation
 const tabs = [
   { id: 'overview', name: 'Tổng quan', icon: '📊' },
-  { id: 'orders', name: 'Đơn hàng', icon: '📦' },
+  { id: 'courses', name: 'Khóa học', icon: '📚' },
+  { id: 'programs', name: 'Chương trình', icon: '🎓' },
+  { id: 'bundles', name: 'Gói Combo', icon: '📦' },
+  { id: 'orders', name: 'Đơn hàng', icon: '🛍️' },
   { id: 'users', name: 'Học viên', icon: '👥' },
-  { id: 'contacts', name: 'Liên hệ', icon: '✉️' },
-  { id: 'courses', name: 'Khóa học', icon: '📚' }
+  { id: 'contacts', name: 'Liên hệ', icon: '✉️' }
 ];
 
 const activeTab = ref('overview');
@@ -71,10 +77,12 @@ const activeTab = ref('overview');
 const currentTabComponent = computed(() => {
   switch (activeTab.value) {
     case 'overview': return AdminOverview;
+    case 'courses': return AdminCourses;
+    case 'programs': return AdminPrograms;
+    case 'bundles': return AdminBundles;
     case 'orders': return AdminOrders;
     case 'users': return AdminUsers;
     case 'contacts': return AdminContacts;
-    case 'courses': return AdminCourses;
     default: return AdminOverview;
   }
 });

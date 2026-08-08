@@ -7,14 +7,14 @@
 
     <!-- Product Figure (Image + Quick Buy) -->
     <div class="product-card__figure">
-      <a href="#" @click.prevent="handleQuickBuy" class="product-card__image-link">
+      <router-link :to="'/course/' + course.handle" class="product-card__image-link">
         <img 
           :src="course.image" 
           :alt="course.title" 
           class="product-card__image"
           @error="handleImageError"
         />
-      </a>
+      </router-link>
       
       <!-- Quick Buy Buttons -->
       <div class="product-card__quick-buy">
@@ -24,13 +24,13 @@
           class="button button--quick-buy desktop-only" 
           type="button"
         >
-          + Thêm nhanh
+          ⚡ Đăng ký ngay
         </button>
         <!-- Mobile Quick Buy Icon -->
         <button 
           @click="handleQuickBuy"
           class="product-card__mobile-quick-buy-button mobile-only" 
-          aria-label="+ Thêm nhanh"
+          aria-label="Đăng ký ngay"
           type="button"
         >
           <svg role="presentation" fill="none" stroke-width="2" focusable="false" width="16" height="14" class="icon icon-quick-buy-cart" viewBox="0 0 16 14">
@@ -44,9 +44,9 @@
     <div class="product-card__info">
       <div class="product-card__meta">
         <span class="product-card__title">
-          <a href="#" @click.prevent="handleQuickBuy" class="bold">
+          <router-link :to="'/course/' + course.handle" class="bold">
             {{ course.title }}
-          </a>
+          </router-link>
         </span>
         <div class="price-list">
           <span class="price-list__sale text-on-sale">
@@ -91,11 +91,18 @@ const handleImageError = (e) => {
   e.target.src = '/images/LS_Looker_Studio_for_Everyone_SQR.png';
 };
 
-const handleQuickBuy = async () => {
+const handleQuickBuy = (e) => {
+  if (e && e.stopPropagation) e.stopPropagation();
+  if (!courseStore.token) {
+    alert('Vui lòng đăng nhập để đăng ký khóa học!');
+    router.push('/login');
+    return;
+  }
   try {
-    await courseStore.addToCart(props.course.id);
+    courseStore.buyNow(props.course.id);
+    router.push('/checkout');
   } catch (err) {
-    console.error(err);
+    alert(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!');
   }
 };
 </script>

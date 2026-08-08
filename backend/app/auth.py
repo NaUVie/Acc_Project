@@ -11,7 +11,11 @@ from .database import get_db
 from . import models
 
 # JWT configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "ACC_ACADEMY_ULTRA_SECRET_KEY_FOR_JWT_TOKEN_123456789")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", os.getenv("SECRET_KEY", "ACC_ACADEMY_ULTRA_SECRET_KEY_FOR_JWT_TOKEN_123456789"))
+if os.getenv("ENVIRONMENT") == "production" and "ULTRA_SECRET_KEY" in SECRET_KEY:
+    import warnings
+    warnings.warn("CRITICAL SECURITY WARNING: Production environment is using default JWT SECRET_KEY. Please set JWT_SECRET_KEY in environment variables!")
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440 # 24 hours
 

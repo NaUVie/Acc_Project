@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .database import engine, Base, get_db
@@ -13,9 +14,12 @@ app = FastAPI(
 )
 
 # CORS configuration
+cors_origins_raw = os.getenv("CORS_ORIGINS", "*")
+origins = [o.strip() for o in cors_origins_raw.split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Allow all origins in local dev mode
+    allow_origins=origins if origins else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,14 +61,22 @@ def on_startup():
                 if "curriculum_data" not in courses_cols:
                     conn.execute(text("ALTER TABLE courses ADD COLUMN curriculum_data TEXT NULL"))
                     print("Added column curriculum_data to courses table.")
+                if "program_id" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN program_id INT NULL"))
+                    print("Added column program_id to courses table.")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
 
-    # Run seed_database safely
+    # Run seed_database only if database is brand new / empty
     try:
-        seed_database()
+        db = next(get_db())
+        course_count = db.query(models.Course).count()
+        if course_count == 0:
+            print("Database is empty. Running initial seed...")
+            seed_database()
+        db.close()
     except Exception as e:
-        print(f"Error during startup seed: {e}")
+        print(f"Error during startup seed check: {e}")
 
     # Seed default contact settings if empty
     try:

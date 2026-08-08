@@ -24,6 +24,7 @@ class CourseBase(BaseModel):
     id: int
     title: str
     category_slug: str
+    program_id: Optional[int] = None
     handle: str
     price: int
     original_price: Optional[int] = None
@@ -31,10 +32,82 @@ class CourseBase(BaseModel):
     description: Optional[str] = None
     duration: Optional[str] = None
     level: Optional[str] = None
-    curriculum_data: Optional[str] = None
 
-class CourseResponse(CourseBase):
+class CoursePublicResponse(CourseBase):
     tags: List[CourseTagResponse] = []
+
+    class Config:
+        from_attributes = True
+
+class CourseStudyResponse(CourseBase):
+    curriculum_data: Optional[str] = None
+    tags: List[CourseTagResponse] = []
+
+    class Config:
+        from_attributes = True
+
+class CourseResponse(CourseStudyResponse):
+    pass
+
+# Program Schemas
+class ProgramCreate(BaseModel):
+    title: str
+    slug: str
+    description: Optional[str] = None
+    image: Optional[str] = None
+    course_ids: Optional[List[int]] = None
+
+class ProgramUpdate(BaseModel):
+    title: Optional[str] = None
+    slug: Optional[str] = None
+    description: Optional[str] = None
+    image: Optional[str] = None
+    course_ids: Optional[List[int]] = None
+
+class ProgramResponse(BaseModel):
+    id: int
+    title: str
+    slug: str
+    description: Optional[str] = None
+    image: Optional[str] = None
+    created_at: datetime
+    courses: List[CourseResponse] = []
+
+    class Config:
+        from_attributes = True
+
+# Bundle Schemas
+class BundleCreate(BaseModel):
+    title: str
+    handle: str
+    description: Optional[str] = None
+    price: int
+    original_price: Optional[int] = None
+    image: Optional[str] = None
+    course_ids: List[int] = []
+    gift_course_ids: List[int] = []
+
+class BundleUpdate(BaseModel):
+    title: Optional[str] = None
+    handle: Optional[str] = None
+    description: Optional[str] = None
+    price: Optional[int] = None
+    original_price: Optional[int] = None
+    image: Optional[str] = None
+    course_ids: Optional[List[int]] = None
+    gift_course_ids: Optional[List[int]] = None
+
+class BundleResponse(BaseModel):
+    id: int
+    title: str
+    handle: str
+    description: Optional[str] = None
+    price: int
+    original_price: Optional[int] = None
+    image: Optional[str] = None
+    created_at: datetime
+    courses: List[CourseResponse] = []
+    gift_courses: List[CourseResponse] = []
 
     class Config:
         from_attributes = True
@@ -96,6 +169,7 @@ class UserResponse(UserBase):
     id: int
     referral_code: str
     role: str
+    referred_by_id: Optional[int] = None
     created_at: datetime
 
     class Config:
@@ -143,6 +217,19 @@ class OrderResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# Enrollment Schemas
+class EnrollmentResponse(BaseModel):
+    id: int
+    course: CourseResponse
+    enrolled_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class EnrollmentCheckResponse(BaseModel):
+    enrolled: bool
+    course_id: int
 
 # Referral Schemas
 class ReferralResponse(BaseModel):
@@ -231,6 +318,7 @@ class OrderAdminResponse(BaseModel):
 class CourseAdminCreate(BaseModel):
     title: str
     category_slug: str
+    program_id: Optional[int] = None
     handle: str
     price: int
     original_price: Optional[int] = None
@@ -243,6 +331,7 @@ class CourseAdminCreate(BaseModel):
 class CourseAdminUpdate(BaseModel):
     title: Optional[str] = None
     category_slug: Optional[str] = None
+    program_id: Optional[int] = None
     handle: Optional[str] = None
     price: Optional[int] = None
     original_price: Optional[int] = None

@@ -250,13 +250,20 @@ const handlePlaceOrder = async () => {
 
   try {
     if (courseStore.token) {
-      await courseStore.checkout()
+      const order = await courseStore.checkout()
+      if (order && order.id) {
+        // Redirect to order confirmation page
+        router.push(`/order/${order.id}`)
+        return
+      }
     }
+    // Fallback for non-logged-in or mock
+    showSuccessModal.value = true
   } catch (e) {
-    console.log("Mocking order submission for frontend display", e)
+    console.log("Order submission error", e)
+    showSuccessModal.value = true
   } finally {
     loading.value = false
-    showSuccessModal.value = true
   }
 }
 

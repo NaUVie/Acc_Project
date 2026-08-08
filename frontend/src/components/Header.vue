@@ -1,5 +1,5 @@
 <template>
-  <header class="main-header" :class="{ 'scrolled': isScrolled }">
+  <header class="main-header" :class="{ 'scrolled': isScrolled, 'header-hidden': isHidden }">
     <div class="container header-container">
       <!-- Logo -->
       <router-link to="/" class="logo">
@@ -8,10 +8,10 @@
 
       <!-- Desktop Nav -->
       <nav class="desktop-nav">
-        <!-- Mega Menu: Chương trình -->
+        <!-- Mega Menu: Khóa học -->
         <div class="nav-item mega-dropdown">
-          <button class="nav-link dropdown-toggle" aria-haspopup="true" @click.prevent="openDrawer('programs')">
-            Chương trình
+          <button class="nav-link dropdown-toggle" aria-haspopup="true" @click.prevent="openDrawer('courses')">
+            Khóa học
             <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
@@ -39,7 +39,7 @@
                 <div class="mega-content-header">
                   <h3 class="mega-content-title">{{ activeCategoryName }}</h3>
                   <router-link :to="activeCategoryLink" class="mega-view-all-link">
-                    Xem tất cả {{ activeCategoryName }} chương trình &rarr;
+                    Xem tất cả {{ activeCategoryName }} &rarr;
                   </router-link>
                 </div>
                 
@@ -65,10 +65,77 @@
           </div>
         </div>
 
+        <!-- Mega Menu: Chương trình đào tạo (Master Programs) -->
+        <div class="nav-item mega-dropdown">
+          <button class="nav-link dropdown-toggle" aria-haspopup="true" @click.prevent="openDrawer('programs')">
+            Chương trình
+            <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+          
+          <!-- Mega Menu Panel for Programs -->
+          <div class="mega-menu-panel">
+            <div class="container mega-menu-container">
+              <!-- Left Sidebar: Master Programs List -->
+              <div class="mega-menu-sidebar" style="min-width: 280px;">
+                <button 
+                  v-for="prog in courseStore.programs" 
+                  :key="prog.id"
+                  class="mega-sidebar-item"
+                  :class="{ active: (selectedProgramId || (courseStore.programs[0] && courseStore.programs[0].id)) === prog.id }"
+                  @mouseenter="selectedProgramId = prog.id"
+                  style="text-align: left; padding: 12px 16px; border-radius: 8px;"
+                >
+                  <span class="indicator-bar"></span>
+                  <div style="font-weight: 700; font-size: 13px; line-height: 1.3;">{{ prog.title }}</div>
+                </button>
+                <div v-if="courseStore.programs.length === 0" style="padding: 16px; font-size: 13px; color: #64748b;">
+                  Đang cập nhật chương trình...
+                </div>
+              </div>
+              
+              <!-- Right Content: Child Courses inside selected Program -->
+              <div class="mega-menu-content">
+                <div class="mega-content-header" style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px;">
+                  <h3 class="mega-content-title" style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a;">
+                    {{ activeProgram?.title || 'Chương trình đào tạo' }}
+                  </h3>
+                  <span style="font-size: 13px; color: #0284c7; font-weight: 600;">
+                    🎓 Bao gồm {{ activeProgramChildCourses.length }} khóa học chuyên sâu thuộc chương trình này
+                  </span>
+                </div>
+                
+                <div class="mega-programs-grid" style="margin-top: 16px;">
+                  <div 
+                    v-for="course in activeProgramChildCourses" 
+                    :key="course.id"
+                    class="mega-program-card"
+                  >
+                    <router-link :to="getCourseLink(course)" class="mega-card-link">
+                      <div class="mega-school-logo">
+                        <img :src="course.image || '/images/default.jpg'" :alt="course.title" />
+                      </div>
+                      <div class="mega-card-info">
+                        <span class="mega-school-name">{{ translateCategory(course.category) }}</span>
+                        <h4 class="mega-program-title" :title="course.title">{{ course.title }}</h4>
+                      </div>
+                    </router-link>
+                  </div>
+
+                  <div v-if="activeProgramChildCourses.length === 0" style="grid-column: 1 / -1; padding: 32px 16px; text-align: center; color: #64748b; font-size: 14px; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                    Chưa có khóa học con nào được phân vào chương trình này.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Dropdown: Bundle chương trình -->
         <div class="nav-item dropdown">
           <button class="nav-link dropdown-toggle" @click.prevent="openDrawer('bundles')">
-            Bundle chương trình
+            Bundle / Combo
             <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
@@ -316,6 +383,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import { slugify } from '@/utils/slugify';
 import SlideOverCart from '@/components/SlideOverCart.vue';
 
 const router = useRouter();
@@ -323,6 +391,8 @@ const courseStore = useCourseStore();
 
 const isCartOpen = ref(false);
 const isScrolled = ref(false);
+const isHidden = ref(false);
+const lastScrollTop = ref(0);
 const isMobileMenuOpen = ref(false);
 const activeMobileSection = ref('');
 const activeMobileSubSection = ref('');
@@ -383,18 +453,14 @@ const translateCategory = (cat) => {
 // 2. Mega Menu Programs Dataset mapping dynamically from Course Store
 const programs = computed(() => {
   return courseStore.courses.map(c => {
-    let link = '/courses/ai';
-    if (c.category === 'ky-nang-chuyen-mon') link = '/courses/chuyen-mon';
-    else if (c.category === 'ky-nang-mem') link = '/courses/mem';
-    else if (c.category === 'bundles') link = '/bundles';
-
+    const handle = c.handle || c.slug || slugify(c.title || '');
     return {
       id: c.id,
       categoryId: c.category,
       title: c.title,
       school: translateCategory(c.category),
       logo: c.image || '/images/logo2.jpg',
-      link: link
+      link: `/course/${handle}`
     };
   });
 });
@@ -420,7 +486,8 @@ const getProgramsByCategoryId = (catId) => {
 // Drawer Title & Items computation
 const drawerTitle = computed(() => {
   switch (drawerType.value) {
-    case 'programs': return 'Chương trình';
+    case 'courses': return 'Khóa học';
+    case 'programs': return 'Chương trình đào tạo';
     case 'bundles': return 'Gói Combo chương trình';
     case 'corporate': return 'Giải pháp Doanh nghiệp';
     case 'library': return 'Thư viện & Tài liệu';
@@ -430,12 +497,17 @@ const drawerTitle = computed(() => {
 
 const drawerItems = computed(() => {
   switch (drawerType.value) {
-    case 'programs':
+    case 'courses':
       return [
         { title: 'Kỹ năng AI', link: '/courses/ai' },
         { title: 'Kỹ năng mềm', link: '/courses/mem' },
         { title: 'Kỹ năng chuyên môn', link: '/courses/chuyen-mon' }
       ];
+    case 'programs':
+      return courseStore.programs.map(p => ({
+        title: p.title,
+        link: '/courses/chuyen-mon'
+      }));
     case 'bundles':
       return [
         { title: 'Combo khóa học', link: '/bundles' }
@@ -475,23 +547,96 @@ const toggleMobileSubSection = (subSec) => {
   activeMobileSubSection.value = activeMobileSubSection.value === subSec ? '' : subSec;
 };
 
-const handleScroll = () => {
-  isScrolled.value = window.scrollY > 20;
+const handleScroll = (event) => {
+  let scrollTop = window.scrollY;
+  if (event && event.target && event.target !== document && event.target !== window) {
+    scrollTop = event.target.scrollTop;
+  }
+  
+  isScrolled.value = scrollTop > 20;
+  
+  // Prevent hiding header if mobile menu, mega drawer, or cart is open
+  if (isMobileMenuOpen.value || isDrawerOpen.value || isCartOpen.value) {
+    isHidden.value = false;
+    lastScrollTop.value = scrollTop;
+    return;
+  }
+  
+  // Hide header when scrolling down, show when scrolling up
+  if (scrollTop > lastScrollTop.value && scrollTop > 80) {
+    isHidden.value = true;
+  } else if (scrollTop < lastScrollTop.value) {
+    isHidden.value = false;
+  }
+  
+  lastScrollTop.value = scrollTop;
 };
 
+// Real Master Programs from Store & Mega Menu Navigation Logic
+const selectedProgramId = ref(null);
+
+watch(() => courseStore.programs, (newProgs) => {
+  if (newProgs.length > 0 && !selectedProgramId.value) {
+    selectedProgramId.value = newProgs[0].id;
+  }
+}, { immediate: true });
+
+const activeProgram = computed(() => {
+  if (!selectedProgramId.value && courseStore.programs.length > 0) {
+    return courseStore.programs[0];
+  }
+  return courseStore.programs.find(p => p.id === selectedProgramId.value);
+});
+
+const activeProgramChildCourses = computed(() => {
+  if (!activeProgram.value) return [];
+  return courseStore.courses.filter(c => c.programId === activeProgram.value.id);
+});
+
+const getChildCoursesByProgId = (progId) => {
+  return courseStore.courses.filter(c => c.programId === progId);
+};
+
+const getCourseLink = (c) => {
+  if (!c) return '/';
+  const handle = c.handle || c.slug || slugify(c.title || '');
+  return `/course/${handle}`;
+};
+
+const realPrograms = computed(() => {
+  return courseStore.programs.map(p => {
+    const childCourses = courseStore.courses.filter(c => c.programId === p.id);
+    return {
+      id: p.id,
+      title: p.title,
+      slug: p.slug,
+      image: p.image || '/images/default.jpg',
+      description: p.description,
+      childCourses: childCourses,
+      link: '/courses/chuyen-mon'
+    };
+  });
+});
+
 onMounted(async () => {
-  window.addEventListener('scroll', handleScroll);
-  if (courseStore.courses.length === 0) {
-    try {
+  window.addEventListener('scroll', handleScroll, { capture: true, passive: true });
+  try {
+    if (courseStore.courses.length === 0) {
       await courseStore.fetchCourses();
-    } catch (e) {
-      console.error('Failed to fetch courses in Header', e);
     }
+    if (courseStore.programs.length === 0) {
+      await courseStore.fetchPrograms();
+    }
+    if (courseStore.programs.length > 0) {
+      selectedProgramId.value = courseStore.programs[0].id;
+    }
+  } catch (e) {
+    console.error('Failed to fetch catalog data in Header', e);
   }
 });
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll);
+  window.removeEventListener('scroll', handleScroll, { capture: true });
   document.body.classList.remove('lock-scroll'); // teardown scroll lock safety
 });
 </script>
