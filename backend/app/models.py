@@ -208,3 +208,17 @@ class ContactSetting(Base):
     zalo = Column(String(150), default="https://zalo.me/0901234567")
     viber = Column(String(150), default="https://viber.click/0901234567")
 
+class Banner(Base):
+    __tablename__ = "banners"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String(255), nullable=False)
+    desktop_image = Column(String(500), nullable=False)
+    mobile_image = Column(String(500), nullable=True)
+    link = Column(String(500), nullable=True)
+    is_external = Column(Boolean, default=False)
+    position = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+

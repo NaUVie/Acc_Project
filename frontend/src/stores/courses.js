@@ -63,6 +63,8 @@ export const useCourseStore = defineStore('courses', {
     adminUsers: [],
     adminOrders: [],
     adminContacts: [],
+    adminBanners: [],
+    banners: [],
     contactSettings: null
   }),
 
@@ -142,12 +144,60 @@ export const useCourseStore = defineStore('courses', {
       }
     },
 
+    async fetchBanners() {
+      try {
+        const data = await this.apiRequest('/courses/banners');
+        this.banners = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to fetch banners:", err);
+      }
+    },
+
+    async fetchAdminBanners() {
+      try {
+        const data = await this.apiRequest('/admin/banners');
+        this.adminBanners = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to fetch admin banners:", err);
+        throw err;
+      }
+    },
+
+    async createBanner(bannerData) {
+      const data = await this.apiRequest('/admin/banners', {
+        method: 'POST',
+        body: JSON.stringify(bannerData)
+      });
+      await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners().catch(() => {})]);
+      return data;
+    },
+
+    async updateBanner(bannerId, bannerData) {
+      const data = await this.apiRequest(`/admin/banners/${bannerId}`, {
+        method: 'PUT',
+        body: JSON.stringify(bannerData)
+      });
+      await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners().catch(() => {})]);
+      return data;
+    },
+
+    async deleteBanner(bannerId) {
+      const data = await this.apiRequest(`/admin/banners/${bannerId}`, {
+        method: 'DELETE'
+      });
+      await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners().catch(() => {})]);
+      return data;
+    },
+
     async fetchCourses() {
       this.loading = true;
       try {
         const [coursesData] = await Promise.all([
           this.apiRequest('/courses'),
-          this.fetchCategories().catch(() => {})
+          this.fetchCategories().catch(() => {}),
+          this.fetchBanners().catch(() => {})
         ]);
         this.courses = coursesData.map(mapCourse);
       } catch (err) {

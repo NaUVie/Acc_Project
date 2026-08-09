@@ -431,32 +431,44 @@ const testimonialStore = useTestimonialStore();
 
 // 1. Hero Carousel
 const currentSlide = ref(0);
-const heroSlides = [
-  {
-    desktopImage: '/images/CoE-Web.png',
-    mobileImage: '/images/CoE-Mobile.png',
-    link: '/corporate/coe',
-    title: 'AI Center of Excellence'
-  },
-  {
-    desktopImage: '/images/Website_dd1fbf97-8fbe-44ed-bfd9-1eaaa069fdb3.png',
-    mobileImage: '/images/SEB_Mobile.png',
-    link: '/courses/ai',
-    title: 'ChatGPT Work Automation'
-  },
-  {
-    desktopImage: '/images/website_bbadf8f3-a076-4351-ba9e-f9f077fd6271.webp',
-    mobileImage: '/images/mobile_34381454-0cf6-416c-9487-9a341853b38f.webp',
-    link: 'https://teamlacquan.vn/',
-    title: 'teamlacquan.vn',
-    isExternal: true
+const heroSlides = computed(() => {
+  if (courseStore.banners && courseStore.banners.length > 0) {
+    return courseStore.banners.map(b => ({
+      desktopImage: b.desktop_image,
+      mobileImage: b.mobile_image || b.desktop_image,
+      link: b.link || '/',
+      title: b.title,
+      isExternal: !!b.is_external
+    }));
   }
-];
+  return [
+    {
+      desktopImage: '/images/CoE-Web.png',
+      mobileImage: '/images/CoE-Mobile.png',
+      link: '/corporate/coe',
+      title: 'AI Center of Excellence'
+    },
+    {
+      desktopImage: '/images/Website_dd1fbf97-8fbe-44ed-bfd9-1eaaa069fdb3.png',
+      mobileImage: '/images/SEB_Mobile.png',
+      link: '/courses/category/ky-nang-ai',
+      title: 'ChatGPT Work Automation'
+    },
+    {
+      desktopImage: '/images/website_bbadf8f3-a076-4351-ba9e-f9f077fd6271.webp',
+      mobileImage: '/images/mobile_34381454-0cf6-416c-9487-9a341853b38f.webp',
+      link: 'https://teamlacquan.vn/',
+      title: 'teamlacquan.vn',
+      isExternal: true
+    }
+  ];
+});
 
 let heroInterval = null;
 const startHeroAutoplay = () => {
   heroInterval = setInterval(() => {
-    currentSlide.value = (currentSlide.value + 1) % heroSlides.length;
+    const len = heroSlides.value.length || 1;
+    currentSlide.value = (currentSlide.value + 1) % len;
   }, 5000);
 };
 
@@ -471,13 +483,15 @@ const setSlide = (index) => {
 };
 
 const prevSlide = () => {
-  currentSlide.value = (currentSlide.value - 1 + heroSlides.length) % heroSlides.length;
+  const len = heroSlides.value.length || 1;
+  currentSlide.value = (currentSlide.value - 1 + len) % len;
   stopHeroAutoplay();
   startHeroAutoplay();
 };
 
 const nextSlide = () => {
-  currentSlide.value = (currentSlide.value + 1) % heroSlides.length;
+  const len = heroSlides.value.length || 1;
+  currentSlide.value = (currentSlide.value + 1) % len;
   stopHeroAutoplay();
   startHeroAutoplay();
 };

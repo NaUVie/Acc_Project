@@ -359,3 +359,33 @@ class ContactSettingResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# Banner Schemas
+class BannerBase(BaseModel):
+    title: str
+    desktop_image: str
+    mobile_image: Optional[str] = None
+    link: Optional[str] = None
+    is_external: Optional[bool] = False
+    position: Optional[int] = 0
+    is_active: Optional[bool] = True
+
+class BannerCreate(BannerBase):
+    pass
+
+class BannerUpdate(BaseModel):
+    title: Optional[str] = None
+    desktop_image: Optional[str] = None
+    mobile_image: Optional[str] = None
+    link: Optional[str] = None
+    is_external: Optional[bool] = None
+    position: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class BannerResponse(BannerBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+

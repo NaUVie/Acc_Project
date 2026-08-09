@@ -518,3 +518,34 @@ def update_contact_settings(
     db.refresh(db_settings)
     return db_settings
 
+# ==================== BANNER MANAGEMENT ====================
+
+@router.get("/banners", response_model=List[schemas.BannerResponse])
+def get_all_banners_admin(db: Session = Depends(get_db)):
+    return crud.get_banners(db, active_only=False)
+
+@router.post("/banners", response_model=schemas.BannerResponse, status_code=status.HTTP_201_CREATED)
+def create_banner_admin(banner_in: schemas.BannerCreate, db: Session = Depends(get_db)):
+    return crud.create_banner(db, banner_in)
+
+@router.put("/banners/{id}", response_model=schemas.BannerResponse)
+def update_banner_admin(id: int, banner_in: schemas.BannerUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_banner(db, id, banner_in)
+    if not updated:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Banner không tồn tại"
+        )
+    return updated
+
+@router.delete("/banners/{id}", status_code=status.HTTP_200_OK)
+def delete_banner_admin(id: int, db: Session = Depends(get_db)):
+    success = crud.delete_banner(db, id)
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Banner không tồn tại"
+        )
+    return {"message": "Đã xóa banner thành công"}
+
+

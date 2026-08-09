@@ -257,6 +257,40 @@ def get_referral_summary(db: Session, user_id: int):
         referrals_list=referrals_list
     )
 
+# --- Banner CRUD ---
+def get_banners(db: Session, active_only: bool = False):
+    query = db.query(models.Banner)
+    if active_only:
+        query = query.filter(models.Banner.is_active == True)
+    return query.order_by(models.Banner.position.asc(), models.Banner.id.asc()).all()
+
+def create_banner(db: Session, banner_in: schemas.BannerCreate):
+    db_banner = models.Banner(**banner_in.model_dump())
+    db.add(db_banner)
+    db.commit()
+    db.refresh(db_banner)
+    return db_banner
+
+def update_banner(db: Session, banner_id: int, banner_in: schemas.BannerUpdate):
+    db_banner = db.query(models.Banner).filter(models.Banner.id == banner_id).first()
+    if not db_banner:
+        return None
+    update_data = banner_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_banner, key, value)
+    db.commit()
+    db.refresh(db_banner)
+    return db_banner
+
+def delete_banner(db: Session, banner_id: int):
+    db_banner = db.query(models.Banner).filter(models.Banner.id == banner_id).first()
+    if db_banner:
+        db.delete(db_banner)
+        db.commit()
+        return True
+    return False
+
+
 # --- Testimonial CRUD ---
 def get_testimonials(db: Session):
     return db.query(models.Testimonial).all()

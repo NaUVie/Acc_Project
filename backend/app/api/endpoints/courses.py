@@ -18,6 +18,10 @@ def read_courses(
 def read_categories(db: Session = Depends(get_db)):
     return crud.get_categories(db)
 
+@router.get("/banners", response_model=List[schemas.BannerResponse])
+def read_banners(db: Session = Depends(get_db)):
+    return crud.get_banners(db, active_only=True)
+
 @router.get("/programs", response_model=List[schemas.ProgramResponse])
 def read_programs(db: Session = Depends(get_db)):
     return db.query(models.Program).all()

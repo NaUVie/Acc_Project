@@ -477,6 +477,44 @@ def seed_database():
                 existing.video_url = test_data["video_url"]
         db.commit()
 
+        # 5. Seed Banners
+        print("Seeding banners...")
+        BANNERS_SEED = [
+            {
+                "title": "AI Center of Excellence",
+                "desktop_image": "/images/CoE-Web.png",
+                "mobile_image": "/images/CoE-Mobile.png",
+                "link": "/corporate/coe",
+                "is_external": False,
+                "position": 1,
+                "is_active": True
+            },
+            {
+                "title": "ChatGPT Work Automation",
+                "desktop_image": "/images/Website_dd1fbf97-8fbe-44ed-bfd9-1eaaa069fdb3.png",
+                "mobile_image": "/images/SEB_Mobile.png",
+                "link": "/courses/category/ky-nang-ai",
+                "is_external": False,
+                "position": 2,
+                "is_active": True
+            },
+            {
+                "title": "teamlacquan.vn",
+                "desktop_image": "/images/website_bbadf8f3-a076-4351-ba9e-f9f077fd6271.webp",
+                "mobile_image": "/images/mobile_34381454-0cf6-416c-9487-9a341853b38f.webp",
+                "link": "https://teamlacquan.vn/",
+                "is_external": True,
+                "position": 3,
+                "is_active": True
+            }
+        ]
+        for banner_data in BANNERS_SEED:
+            existing = db.query(models.Banner).filter(models.Banner.title == banner_data["title"]).first()
+            if not existing:
+                banner = models.Banner(**banner_data)
+                db.add(banner)
+        db.commit()
+
         print("Database seeded successfully!")
     except Exception as e:
         db.rollback()

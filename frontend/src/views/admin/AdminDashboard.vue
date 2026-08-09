@@ -47,6 +47,7 @@ import AdminContacts from './components/AdminContacts.vue';
 import AdminCourses from './components/AdminCourses.vue';
 import AdminPrograms from './components/AdminPrograms.vue';
 import AdminBundles from './components/AdminBundles.vue';
+import AdminBanners from './components/AdminBanners.vue';
 
 const courseStore = useCourseStore();
 
@@ -57,13 +58,15 @@ onMounted(async () => {
     courseStore.fetchAdminContacts(),
     courseStore.fetchCourses(),
     courseStore.fetchPrograms(),
-    courseStore.fetchBundles()
+    courseStore.fetchBundles(),
+    courseStore.fetchAdminBanners().catch(() => {})
   ]);
 });
 
 // Setup Tab navigation
 const tabs = [
   { id: 'overview', name: 'Tổng quan', icon: '📊' },
+  { id: 'banners', name: 'Banner Hero', icon: '🖼️' },
   { id: 'courses', name: 'Khóa học', icon: '📚' },
   { id: 'programs', name: 'Chương trình', icon: '🎓' },
   { id: 'bundles', name: 'Gói Combo', icon: '📦' },
@@ -77,6 +80,7 @@ const activeTab = ref('overview');
 const currentTabComponent = computed(() => {
   switch (activeTab.value) {
     case 'overview': return AdminOverview;
+    case 'banners': return AdminBanners;
     case 'courses': return AdminCourses;
     case 'programs': return AdminPrograms;
     case 'bundles': return AdminBundles;
