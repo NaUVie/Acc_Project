@@ -48,7 +48,15 @@ export const useCourseStore = defineStore('courses', {
     // Auth states
     token: localStorage.getItem('token') || null,
     user: null,
-    referralSummary: null,
+    userMe: null,
+    isRegistering: false,
+
+    // Toast Notification State
+    toast: {
+      show: false,
+      message: '',
+      type: 'info'
+    },
 
     // Cart states
     cart: [], // holds cart items: { id, course }
@@ -189,6 +197,19 @@ export const useCourseStore = defineStore('courses', {
       });
       await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners().catch(() => {})]);
       return data;
+    },
+
+    showToast(message, type = 'info', duration = 3500) {
+      this.toast.message = message;
+      this.toast.type = type;
+      this.toast.show = true;
+      setTimeout(() => {
+        this.toast.show = false;
+      }, duration);
+    },
+
+    hideToast() {
+      this.toast.show = false;
     },
 
     async fetchCourses() {

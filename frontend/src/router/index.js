@@ -156,13 +156,13 @@ router.beforeEach(async (to, from, next) => {
     if (courseStore.token && courseStore.user?.role === 'admin') {
       next();
     } else {
-      alert('Bạn không có quyền truy cập trang quản trị!');
+      courseStore.showToast('Bạn không có quyền truy cập trang quản trị!', 'error');
       next('/login');
     }
   } else if (to.meta.requiresEnrollment) {
     // Must be logged in AND enrolled in the specific course
     if (!courseStore.token) {
-      alert('Vui lòng đăng nhập để học tập!');
+      courseStore.showToast('Vui lòng đăng nhập để truy cập phòng học!', 'warning');
       next('/login');
       return;
     }
@@ -174,7 +174,7 @@ router.beforeEach(async (to, from, next) => {
         next();
         return;
       }
-      alert('Bạn chưa đăng ký khóa học này. Vui lòng mua khóa học để tiếp tục học tập!');
+      courseStore.showToast('Bạn chưa đăng ký khóa học này. Vui lòng đăng ký để tiếp tục!', 'info');
       next(`/course/${handle}`);
       return;
     }
@@ -183,7 +183,7 @@ router.beforeEach(async (to, from, next) => {
     if (courseStore.token) {
       next();
     } else {
-      alert('Vui lòng đăng nhập để học tập!');
+      courseStore.showToast('Vui lòng đăng nhập để tiếp tục!', 'warning');
       next('/login');
     }
   } else {

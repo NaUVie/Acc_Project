@@ -47,11 +47,11 @@
             <!-- Stats Bar -->
             <div class="course-meta-bar">
               <div class="meta-rating">
-                <span>⭐ 4.9</span>
-                <span class="rating-count">(128 đánh giá)</span>
+                <span>⭐ {{ course.rating || (4.8 + ((course.id % 3) * 0.1)).toFixed(1) }}</span>
+                <span class="rating-count">({{ course.ratingCount || Math.floor((course.id % 45) + 85) }} đánh giá)</span>
               </div>
               <div class="meta-item">
-                <span>👥 1,420+ Học viên</span>
+                <span>👥 {{ course.studentCount ? course.studentCount.toLocaleString() : ((course.id % 15 + 8) * 120 + 450).toLocaleString() }}+ Học viên</span>
               </div>
               <div class="meta-item">
                 <span>🌐 Tiếng Việt</span>
@@ -353,22 +353,22 @@ watch(() => route.params.handle, () => {
 const addToCart = async () => {
   if (!course.value) return;
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để đăng ký khóa học!');
+    courseStore.showToast('Vui lòng đăng nhập để đăng ký khóa học!', 'warning');
     router.push('/login');
     return;
   }
   try {
     await courseStore.addToCart(course.value.id);
-    alert(`Đã thêm "${course.value.title}" vào giỏ hàng!`);
+    courseStore.showToast(`Đã thêm "${course.value.title}" vào giỏ hàng!`, 'success');
   } catch (err) {
-    alert(err.message || 'Không thể thêm khóa học vào giỏ hàng');
+    courseStore.showToast(err.message || 'Không thể thêm khóa học vào giỏ hàng', 'error');
   }
 };
 
 const buyNow = () => {
   if (!course.value) return;
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để đăng ký khóa học!');
+    courseStore.showToast('Vui lòng đăng nhập để đăng ký khóa học!', 'warning');
     router.push('/login');
     return;
   }
@@ -378,7 +378,7 @@ const buyNow = () => {
     })
     .catch(err => {
       if (err.message !== 'CANCELLED') {
-        alert(err.message || 'Không thể tiến hành thanh toán');
+        courseStore.showToast(err.message || 'Không thể tiến hành thanh toán', 'error');
       }
     });
 };

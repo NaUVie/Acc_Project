@@ -75,10 +75,10 @@ const handleLogin = async () => {
   loading.value = true;
   try {
     await courseStore.login(loginData.value.email, loginData.value.password);
-    alert('Đăng nhập thành công! Chào mừng quay trở lại hệ thống học tập.');
+    courseStore.showToast('Đăng nhập thành công! Chào mừng bạn quay trở lại.', 'success');
     router.push('/dashboard');
   } catch (err) {
-    alert('Đăng nhập thất bại: ' + err.message);
+    courseStore.showToast('Đăng nhập thất bại: ' + err.message, 'error');
   } finally {
     loading.value = false;
   }

@@ -10,6 +10,7 @@
     </main>
     <Footer />
     <ZaloChatWidget />
+    <ToastNotification />
   </div>
 </template>
 
@@ -17,6 +18,7 @@
 import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
 import ZaloChatWidget from './components/ZaloChatWidget.vue';
+import ToastNotification from './components/ToastNotification.vue';
 </script>
 
 <style scoped src="@/styles/App.css"></style>

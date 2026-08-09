@@ -87,7 +87,7 @@
               <h3 class="services-card-title">Dịch vụ của chúng tôi</h3>
               <ul class="services-card-links">
                 <li>
-                  <router-link to="/courses/ai" class="service-item-link">
+                  <router-link to="/courses/category/ky-nang-ai" class="service-item-link">
                     <span>Khóa học Cá nhân</span>
                     <span class="arrow-icon">&rarr;</span>
                   </router-link>
@@ -237,7 +237,7 @@
             <div class="bento-card-content content-left text-dark">
               <h3 class="bento-card-title">Khóa học Cá nhân</h3>
               <p class="bento-card-desc">Trang bị hệ thống tư duy và công cụ để mỗi cá nhân trở thành phiên bản xuất sắc nhất trong sự nghiệp của mình</p>
-              <router-link to="/courses/ai" class="bento-arrow-btn btn-teal">
+              <router-link to="/courses/category/ky-nang-ai" class="bento-arrow-btn btn-teal">
                 <span class="btn-text">Khám phá ngay</span>
                 <span class="btn-circle">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

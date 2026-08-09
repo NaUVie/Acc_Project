@@ -459,6 +459,9 @@ onMounted(async () => {
   if (curriculum.value.length > 0 && curriculum.value[0].lessons.length > 0) {
     activeLesson.value = curriculum.value[0].lessons[0];
   }
+
+  // Load persistent QAs
+  loadSavedQas();
 });
 
 const activeLesson = ref(null);
@@ -678,12 +681,41 @@ const nextLesson = () => {
   }
 };
 
-// Mock Q&As database
-const qas = ref([
+// Mock Q&As database + LocalStorage persistence
+const defaultQas = [
   { id: 1, lessonId: 'chat-1', username: 'Lê Văn Nam', time: '1 giờ trước', text: 'Thầy cho em hỏi tài khoản OpenAI Plus hiện tại thanh toán bằng thẻ Visa Việt Nam được không ạ?', reply: 'Được em nhé. OpenAI hiện đã mở rộng hỗ trợ cổng thanh toán cho các thẻ Visa/Mastercard tại Việt Nam rất dễ dàng.' },
   { id: 2, lessonId: 'chat-1', username: 'Trần Thị Mai', time: '3 giờ trước', text: 'Bài học rất hay và trực quan, em cảm ơn thầy!', reply: 'Cảm ơn Mai, chúc em học tốt và ứng dụng thành công nhé!' },
   { id: 3, lessonId: 'chat-2', username: 'Hoàng Long', time: 'Hôm qua', text: 'Em dùng Claude thay ChatGPT để viết prompt theo cấu trúc này có được không ạ?', reply: 'Claude cực kỳ giỏi ngữ cảnh nên áp dụng cấu trúc prompt ROLE-TASK-CONTEXT này còn đem lại kết quả viết xuất sắc hơn nữa em nhé.' }
-]);
+];
+
+const qas = ref([...defaultQas]);
+
+const loadSavedQas = () => {
+  try {
+    const handle = route.params.handle || 'default';
+    const saved = localStorage.getItem(`acc_qas_${handle}`);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        qas.value = [...parsed, ...defaultQas];
+      }
+    }
+  } catch (e) {
+    console.error("Failed to load QAs", e);
+  }
+};
+
+const saveUserQa = (newQa) => {
+  try {
+    const handle = route.params.handle || 'default';
+    const saved = localStorage.getItem(`acc_qas_${handle}`);
+    const existing = saved ? JSON.parse(saved) : [];
+    existing.unshift(newQa);
+    localStorage.setItem(`acc_qas_${handle}`, JSON.stringify(existing));
+  } catch (e) {
+    console.error("Failed to save QA", e);
+  }
+};
 
 const currentLessonQas = computed(() => {
   if (!activeLesson.value) return [];

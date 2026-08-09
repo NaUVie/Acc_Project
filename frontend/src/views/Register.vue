@@ -116,10 +116,10 @@ const handleRegister = async () => {
     
     // Auto login after registration
     await courseStore.login(registerData.value.email, registerData.value.password);
-    alert('Đăng ký tài khoản thành công! Chào mừng bạn đến với ACC Academy.');
+    courseStore.showToast('Đăng ký tài khoản thành công! Chào mừng bạn đến với ACC Academy.', 'success');
     router.push('/dashboard');
   } catch (err) {
-    alert('Đăng ký thất bại: ' + err.message);
+    courseStore.showToast('Đăng ký thất bại: ' + err.message, 'error');
   } finally {
     loading.value = false;
   }
