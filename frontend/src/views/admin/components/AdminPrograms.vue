@@ -173,8 +173,9 @@ const uploadProgramImage = async (e) => {
   try {
     const url = await courseStore.uploadImage(file);
     form.value.image = url;
+    courseStore.showToast('Tải ảnh lên thành công!', 'success');
   } catch (err) {
-    alert('Lỗi khi tải ảnh lên Cloudinary: ' + err.message);
+    courseStore.showToast('Lỗi khi tải ảnh lên Cloudinary: ' + err.message, 'error');
   } finally {
     uploadingProgramImage.value = false;
   }
@@ -240,14 +241,14 @@ const saveProgram = async () => {
   try {
     if (isEditing.value) {
       await courseStore.updateAdminProgram(editingId.value, form.value);
-      alert('Cập nhật chương trình đào tạo thành công!');
+      courseStore.showToast('Cập nhật chương trình đào tạo thành công!', 'success');
     } else {
       await courseStore.addAdminProgram(form.value);
-      alert('Thêm chương trình đào tạo mới thành công!');
+      courseStore.showToast('Thêm chương trình đào tạo mới thành công!', 'success');
     }
     activeView.value = 'list';
   } catch (err) {
-    alert(err.message || 'Không thể lưu chương trình đào tạo.');
+    courseStore.showToast(err.message || 'Không thể lưu chương trình đào tạo.', 'error');
   }
 };
 
@@ -255,9 +256,9 @@ const deleteProgram = async (id) => {
   if (confirm('Bạn có chắc chắn muốn xóa chương trình đào tạo này?')) {
     try {
       await courseStore.deleteAdminProgram(id);
-      alert('Đã xóa chương trình đào tạo.');
+      courseStore.showToast('Đã xóa chương trình đào tạo.', 'success');
     } catch (err) {
-      alert(err.message || 'Không thể xóa chương trình.');
+      courseStore.showToast(err.message || 'Không thể xóa chương trình.', 'error');
     }
   }
 };

@@ -20,10 +20,7 @@
         />
         <select v-model="courseFilterCategory" class="admin-select">
           <option value="all">Tất cả chuyên mục</option>
-          <option value="ky-nang-ai">Kỹ năng AI</option>
-          <option value="ky-nang-mem">Kỹ năng mềm</option>
-          <option value="ky-nang-chuyen-mon">Kỹ năng chuyên môn</option>
-          <option value="bundles">Combo khóa học</option>
+          <option v-for="cat in categories" :key="cat.slug" :value="cat.slug">{{ cat.name }}</option>
         </select>
       </div>
 
@@ -42,7 +39,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="c in filteredCourses" :key="c.id">
+            <tr v-for="c in paginatedCourses" :key="c.id">
               <td>
                 <img :src="c.image" :alt="c.title" class="admin-course-thumb" />
               </td>
@@ -73,6 +70,14 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination Component -->
+      <Pagination 
+        :currentPage="currentPage" 
+        :totalItems="filteredCourses.length" 
+        :pageSize="pageSize" 
+        @update:currentPage="currentPage = $event"
+      />
     </div>
 
     <!-- VIEW 2: COURSE ADD/EDIT FORM (TRANG RIÊNG) -->
@@ -104,11 +109,12 @@
           <div class="form-group">
             <label style="color: #1e293b; font-weight: 600;">Chuyên mục</label>
             <select v-model="courseForm.category" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
-              <option value="ky-nang-ai">Kỹ năng AI</option>
-              <option value="ky-nang-mem">Kỹ năng mềm</option>
-              <option value="ky-nang-chuyen-mon">Kỹ năng chuyên môn</option>
-              <option value="bundles">Combo khóa học</option>
+              <option v-for="cat in categories" :key="cat.slug" :value="cat.slug">{{ cat.name }} ({{ cat.slug }})</option>
+              <option value="custom">+ Nhập chuyên mục tùy chỉnh mới...</option>
             </select>
+            <div v-if="courseForm.category === 'custom'" class="mt-2">
+              <input v-model="customCategorySlug" type="text" placeholder="Nhập mã slug chuyên mục mới (ví dụ: marketing-ai)" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+            </div>
           </div>
           <div class="form-group">
             <label style="color: #1e293b; font-weight: 600;">Chương trình đào tạo mẹ (Program)</label>
@@ -312,14 +318,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import { slugify } from '@/utils/slugify';
+import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
 
 const courses = computed(() => courseStore.courses);
+const categories = computed(() => courseStore.categories || []);
 const programs = computed(() => courseStore.programs);
+const customCategorySlug = ref('');
+
+const currentPage = ref(1);
+const pageSize = ref(8);
 
 const onTitleInput = () => {
   if (!isEditingCourse.value || !courseForm.value.handle) {
@@ -328,6 +340,9 @@ const onTitleInput = () => {
 };
 
 onMounted(() => {
+  if (courseStore.categories.length === 0) {
+    courseStore.fetchCategories();
+  }
   if (courseStore.programs.length === 0) {
     courseStore.fetchPrograms();
   }
@@ -336,6 +351,10 @@ onMounted(() => {
 const courseSearch = ref('');
 const courseFilterCategory = ref('all');
 
+watch([courseSearch, courseFilterCategory], () => {
+  currentPage.value = 1;
+});
+
 const filteredCourses = computed(() => {
   return courses.value.filter(c => {
     const matchesSearch = c.title.toLowerCase().includes(courseSearch.value.toLowerCase()) || 
@@ -343,6 +362,11 @@ const filteredCourses = computed(() => {
     const matchesCat = courseFilterCategory.value === 'all' || c.category === courseFilterCategory.value;
     return matchesSearch && matchesCat;
   });
+});
+
+const paginatedCourses = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredCourses.value.slice(start, start + pageSize.value);
 });
 
 // CRUD & Navigation States ('list' | 'course_form' | 'curriculum_form')
@@ -358,8 +382,9 @@ const uploadCourseImage = async (e) => {
   try {
     const url = await courseStore.uploadImage(file);
     courseForm.value.image = url;
+    courseStore.showToast('Tải ảnh lên thành công!', 'success');
   } catch (err) {
-    alert('Lỗi khi tải ảnh lên Cloudinary: ' + err.message);
+    courseStore.showToast('Lỗi khi tải ảnh lên Cloudinary: ' + err.message, 'error');
   } finally {
     uploadingCourseImage.value = false;
   }
@@ -414,20 +439,28 @@ const editCourseDetails = (c) => {
 
 const saveCourse = async () => {
   try {
-    if (isEditingCourse.value) {
-      await courseStore.updateAdminCourse(editingCourseId.value, courseForm.value);
-      alert('Cập nhật khóa học thành công!');
-    } else {
-      if (courses.value.some(c => c.handle === courseForm.value.handle)) {
-        alert('Đường dẫn tĩnh (Slug) này đã tồn tại!');
+    const payload = { ...courseForm.value };
+    if (payload.category === 'custom') {
+      if (!customCategorySlug.value.trim()) {
+        courseStore.showToast('Vui lòng nhập mã slug cho chuyên mục mới!', 'warning');
         return;
       }
-      await courseStore.addAdminCourse(courseForm.value);
-      alert('Thêm khóa học mới thành công!');
+      payload.category = customCategorySlug.value.trim();
+    }
+    if (isEditingCourse.value) {
+      await courseStore.updateAdminCourse(editingCourseId.value, payload);
+      courseStore.showToast('Cập nhật khóa học thành công!', 'success');
+    } else {
+      if (courses.value.some(c => c.handle === payload.handle)) {
+        courseStore.showToast('Đường dẫn tĩnh (Slug) này đã tồn tại!', 'warning');
+        return;
+      }
+      await courseStore.addAdminCourse(payload);
+      courseStore.showToast('Thêm khóa học mới thành công!', 'success');
     }
     activeView.value = 'list';
   } catch (err) {
-    alert(err.message || 'Không thể lưu khóa học.');
+    courseStore.showToast(err.message || 'Không thể lưu khóa học.', 'error');
   }
 };
 
@@ -435,9 +468,9 @@ const deleteCourse = async (courseId) => {
   if (confirm('Bạn có chắc muốn xóa khóa học này khỏi danh mục?')) {
     try {
       await courseStore.deleteAdminCourse(courseId);
-      alert('Đã xóa khóa học thành công.');
+      courseStore.showToast('Đã xóa khóa học thành công.', 'success');
     } catch (err) {
-      alert(err.message || 'Không thể xóa khóa học.');
+      courseStore.showToast(err.message || 'Không thể xóa khóa học.', 'error');
     }
   }
 };
@@ -549,10 +582,10 @@ const saveCurriculum = async () => {
     await courseStore.updateAdminCourse(selectedCourseForCurriculum.value.id, {
       curriculumData: jsonString
     });
-    alert('Lưu giáo trình khóa học thành công!');
+    courseStore.showToast('Lưu giáo trình khóa học thành công!', 'success');
     activeView.value = 'list';
   } catch (err) {
-    alert(err.message || 'Không thể lưu giáo trình.');
+    courseStore.showToast(err.message || 'Không thể lưu giáo trình.', 'error');
   }
 };
 

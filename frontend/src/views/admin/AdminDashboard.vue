@@ -45,6 +45,7 @@ import AdminOrders from './components/AdminOrders.vue';
 import AdminUsers from './components/AdminUsers.vue';
 import AdminContacts from './components/AdminContacts.vue';
 import AdminCourses from './components/AdminCourses.vue';
+import AdminCategories from './components/AdminCategories.vue';
 import AdminPrograms from './components/AdminPrograms.vue';
 import AdminBundles from './components/AdminBundles.vue';
 import AdminBanners from './components/AdminBanners.vue';
@@ -57,6 +58,7 @@ onMounted(async () => {
     courseStore.fetchAdminOrders(),
     courseStore.fetchAdminContacts(),
     courseStore.fetchCourses(),
+    courseStore.fetchCategories().catch(() => {}),
     courseStore.fetchPrograms(),
     courseStore.fetchBundles(),
     courseStore.fetchAdminBanners().catch(() => {})
@@ -67,6 +69,7 @@ onMounted(async () => {
 const tabs = [
   { id: 'overview', name: 'Tổng quan', icon: '📊' },
   { id: 'banners', name: 'Banner Hero', icon: '🖼️' },
+  { id: 'categories', name: 'Chuyên mục', icon: '🏷️' },
   { id: 'courses', name: 'Khóa học', icon: '📚' },
   { id: 'programs', name: 'Chương trình', icon: '🎓' },
   { id: 'bundles', name: 'Gói Combo', icon: '📦' },
@@ -81,6 +84,7 @@ const currentTabComponent = computed(() => {
   switch (activeTab.value) {
     case 'overview': return AdminOverview;
     case 'banners': return AdminBanners;
+    case 'categories': return AdminCategories;
     case 'courses': return AdminCourses;
     case 'programs': return AdminPrograms;
     case 'bundles': return AdminBundles;

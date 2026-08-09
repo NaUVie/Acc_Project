@@ -18,8 +18,14 @@ cloudinary.config(
     secure=True
 )
 
+from ... import auth, models
+from fastapi import Depends
+
 @router.post("/image")
-async def upload_image(file: UploadFile = File(...)):
+async def upload_image(
+    file: UploadFile = File(...),
+    current_user: models.User = Depends(auth.get_current_user)
+):
     """
     Upload an image file directly to Cloudinary into the 'Acc Demo' folder.
     Returns the secure URL of the uploaded image.

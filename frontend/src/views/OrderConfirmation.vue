@@ -223,9 +223,7 @@ const handleQrError = (e) => {
 
 onMounted(async () => {
   try {
-    if (courseStore.orders.length === 0) {
-      await courseStore.fetchOrders();
-    }
+    await courseStore.fetchOrders();
     const found = courseStore.orders.find(o => o.id === parseInt(orderId.value));
     if (found) {
       order.value = found;
@@ -240,11 +238,11 @@ const mockConfirmPayment = async () => {
   try {
     const updated = await courseStore.payOrder(parseInt(orderId.value));
     if (updated) {
-      // Refresh order from store
       order.value = courseStore.orders.find(o => o.id === parseInt(orderId.value));
+      courseStore.showToast('Xác nhận thanh toán thành công! Khóa học đã được kích hoạt.', 'success');
     }
   } catch (e) {
-    alert('Không thể xác nhận thanh toán: ' + e.message);
+    courseStore.showToast('Không thể xác nhận thanh toán: ' + e.message, 'error');
   } finally {
     paying.value = false;
   }

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from ...database import get_db
 from ... import models, schemas, crud, auth
@@ -15,9 +16,10 @@ def register_user(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
-    # Validate referral code if provided
+    # Validate referral code if provided (case-insensitive)
     if user_in.referral_code_used:
-        referrer = db.query(models.User).filter(models.User.referral_code == user_in.referral_code_used).first()
+        clean_code = user_in.referral_code_used.strip().upper()
+        referrer = db.query(models.User).filter(func.upper(models.User.referral_code) == clean_code).first()
         if not referrer:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -38,6 +40,11 @@ def login_user(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên."
         )
     # Generate token
     access_token = auth.create_access_token(data={"sub": user.email})

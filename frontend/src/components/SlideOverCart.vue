@@ -39,27 +39,27 @@
 
               <div class="progress-tiers">
                 <!-- Mốc 1: 10% -->
-                <div class="tier-item" :class="{ active: currentSubtotal >= 3000000 }">
+                <div class="tier-item" :class="{ active: currentSubtotal >= 300000 }">
                   <div class="tier-node">
-                    <span v-if="currentSubtotal >= 3000000" class="node-icon check">✓</span>
+                    <span v-if="currentSubtotal >= 300000" class="node-icon check">✓</span>
                     <span v-else class="node-icon">🎁</span>
                   </div>
                   <span class="tier-label">Giảm 10%</span>
                 </div>
 
-                <!-- Mốc 2: 20% -->
-                <div class="tier-item" :class="{ active: currentSubtotal >= 6000000 }">
+                <!-- Mốc 2: 22% -->
+                <div class="tier-item" :class="{ active: currentSubtotal >= 600000 }">
                   <div class="tier-node">
-                    <span v-if="currentSubtotal >= 6000000" class="node-icon check">✓</span>
+                    <span v-if="currentSubtotal >= 600000" class="node-icon check">✓</span>
                     <span v-else class="node-icon">%</span>
                   </div>
-                  <span class="tier-label">Giảm 20%</span>
+                  <span class="tier-label">Giảm 22%</span>
                 </div>
 
                 <!-- Mốc 3: 25% -->
-                <div class="tier-item" :class="{ active: currentSubtotal >= 10000000 }">
+                <div class="tier-item" :class="{ active: currentSubtotal >= 1000000 }">
                   <div class="tier-node">
-                    <span v-if="currentSubtotal >= 10000000" class="node-icon check">✓</span>
+                    <span v-if="currentSubtotal >= 1000000" class="node-icon check">✓</span>
                     <span v-else class="node-icon">🎉</span>
                   </div>
                   <span class="tier-label">Giảm 25%</span>
@@ -195,37 +195,37 @@ const currentSubtotal = computed(() => {
   return cartItems.value.reduce((total, item) => total + item.price, 0)
 })
 
-// Tier discounts: 3 triệu (10%), 6 triệu (20%), 10 triệu (25%)
+// Tier discounts: 300k (10%), 600k (22%), 1 triệu (25%)
 const discountRate = computed(() => {
   const subtotal = currentSubtotal.value
-  if (subtotal >= 10000000) return 0.25
-  if (subtotal >= 6000000) return 0.20
-  if (subtotal >= 3000000) return 0.10
+  if (subtotal >= 1000000) return 0.25
+  if (subtotal >= 600000) return 0.22
+  if (subtotal >= 300000) return 0.10
   return 0
 })
 
 const amountToNextTier = computed(() => {
   const subtotal = currentSubtotal.value
-  if (subtotal < 3000000) return 3000000 - subtotal
-  if (subtotal < 6000000) return 6000000 - subtotal
-  if (subtotal < 10000000) return 10000000 - subtotal
+  if (subtotal < 300000) return 300000 - subtotal
+  if (subtotal < 600000) return 600000 - subtotal
+  if (subtotal < 1000000) return 1000000 - subtotal
   return 0
 })
 
 const nextDiscountLabel = computed(() => {
   const subtotal = currentSubtotal.value
-  if (subtotal < 3000000) return 'Giảm 10%'
-  if (subtotal < 6000000) return 'Giảm 20%'
-  if (subtotal < 10000000) return 'Giảm 25%'
+  if (subtotal < 300000) return 'Giảm 10%'
+  if (subtotal < 600000) return 'Giảm 22%'
+  if (subtotal < 1000000) return 'Giảm 25%'
   return ''
 })
 
 const progressPercentage = computed(() => {
   const subtotal = currentSubtotal.value
-  if (subtotal >= 10000000) return 100
-  if (subtotal >= 6000000) return 66 + ((subtotal - 6000000) / 4000000) * 34
-  if (subtotal >= 3000000) return 33 + ((subtotal - 3000000) / 3000000) * 33
-  return (subtotal / 3000000) * 33
+  if (subtotal >= 1000000) return 100
+  if (subtotal >= 600000) return 66 + ((subtotal - 600000) / 400000) * 34
+  if (subtotal >= 300000) return 33 + ((subtotal - 300000) / 300000) * 33
+  return (subtotal / 300000) * 33
 })
 
 const finalTotal = computed(() => {
@@ -238,7 +238,7 @@ const formatCurrency = (val) => {
 
 const removeItem = async (courseId) => {
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để thao tác với giỏ hàng!')
+    courseStore.showToast('Vui lòng đăng nhập để thao tác với giỏ hàng!', 'warning')
     return
   }
   loading.value = true

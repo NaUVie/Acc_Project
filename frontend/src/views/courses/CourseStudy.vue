@@ -435,7 +435,7 @@ onMounted(async () => {
       studyCourseData.value = data;
     }
   } catch (err) {
-    alert(err.message || 'Bạn chưa có quyền truy cập khóa học này!');
+    courseStore.showToast(err.message || 'Bạn chưa có quyền truy cập khóa học này!', 'warning');
     router.push(`/course/${handle}`);
     return;
   }
@@ -447,7 +447,7 @@ onMounted(async () => {
   }
 
   if (!course.value) {
-    alert('Không tìm thấy khóa học này!');
+    courseStore.showToast('Không tìm thấy khóa học này!', 'error');
     router.push('/dashboard');
     return;
   }

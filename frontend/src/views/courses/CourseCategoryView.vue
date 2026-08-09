@@ -10,7 +10,7 @@
     <!-- Filter & Sort Bar (Dynamic) -->
     <div class="category-toolbar glass-card" v-if="categoryCourses.length > 0">
       <div class="results-count">
-        Hiển thị <strong>{{ filteredCourses.length }}</strong> khóa học
+        Hiển thị <strong>{{ displayRange }}</strong> trong <strong>{{ filteredCourses.length }}</strong> khóa học
       </div>
       <div class="toolbar-actions">
         <!-- Level Filter -->
@@ -30,39 +30,49 @@
     </div>
 
     <!-- Courses Grid -->
-    <div class="courses-grid" v-if="filteredCourses.length > 0">
-      <div v-for="course in filteredCourses" :key="course.id" class="course-card glass-card animate-slide-up">
-        <router-link :to="'/course/' + course.handle" class="card-image-container">
-          <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" class="course-image" @error="handleImageError" />
-          <div class="card-image-overlay" v-if="course.tags && course.tags.length">
-            <span v-for="tag in course.tags.slice(0, 2)" :key="tag" class="image-tag">{{ tag }}</span>
-          </div>
-        </router-link>
-        <div class="card-body">
-          <div class="card-header-meta">
-            <span class="course-badge" :class="{ 'best-seller': course.price > 3000000 }">
-              {{ course.price > 3000000 ? 'Chuyên sâu' : 'Hot' }}
-            </span>
-            <span class="level-badge">{{ course.level || 'Tổng quát' }}</span>
-          </div>
-          <h3>
-            <router-link :to="'/course/' + course.handle" class="course-title-link">
-              {{ course.title }}
-            </router-link>
-          </h3>
-          <p>{{ course.description }}</p>
-          <div class="course-meta">
-            <span class="duration">⏱️ {{ course.duration || 'Linh hoạt' }}</span>
-          </div>
-          <div class="card-footer">
-            <div class="price-container">
-              <span class="original-price" v-if="course.originalPrice">{{ formatPrice(course.originalPrice) }}</span>
-              <span class="price">{{ formatPrice(course.price) }}</span>
+    <div class="courses-grid-wrapper" v-if="filteredCourses.length > 0">
+      <div class="courses-grid">
+        <div v-for="course in paginatedCourses" :key="course.id" class="course-card glass-card animate-slide-up">
+          <router-link :to="'/course/' + course.handle" class="card-image-container">
+            <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" class="course-image" @error="handleImageError" />
+            <div class="card-image-overlay" v-if="course.tags && course.tags.length">
+              <span v-for="tag in course.tags.slice(0, 2)" :key="tag" class="image-tag">{{ tag }}</span>
             </div>
-            <button @click.stop="handleEnroll(course.id)" class="btn btn-primary btn-sm">Đăng ký học</button>
+          </router-link>
+          <div class="card-body">
+            <div class="card-header-meta">
+              <span class="course-badge" :class="{ 'best-seller': course.price > 3000000 }">
+                {{ course.price > 3000000 ? 'Chuyên sâu' : 'Hot' }}
+              </span>
+              <span class="level-badge">{{ course.level || 'Tổng quát' }}</span>
+            </div>
+            <h3>
+              <router-link :to="'/course/' + course.handle" class="course-title-link">
+                {{ course.title }}
+              </router-link>
+            </h3>
+            <p>{{ course.description }}</p>
+            <div class="course-meta">
+              <span class="duration">⏱️ {{ course.duration || 'Linh hoạt' }}</span>
+            </div>
+            <div class="card-footer">
+              <div class="price-container">
+                <span class="original-price" v-if="course.originalPrice">{{ formatPrice(course.originalPrice) }}</span>
+                <span class="price">{{ formatPrice(course.price) }}</span>
+              </div>
+              <button @click.stop="handleEnroll(course.id)" class="btn btn-primary btn-sm">Đăng ký học</button>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Pagination Component -->
+      <Pagination 
+        :currentPage="currentPage" 
+        :totalItems="filteredCourses.length" 
+        :pageSize="pageSize" 
+        @update:currentPage="currentPage = $event"
+      />
     </div>
 
     <!-- Empty State -->
@@ -76,9 +86,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import Pagination from '@/components/Pagination.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -86,10 +97,25 @@ const courseStore = useCourseStore();
 
 const selectedLevel = ref('');
 const sortBy = ref('default');
+const currentPage = ref(1);
+const pageSize = ref(6);
+
+onMounted(async () => {
+  if (courseStore.courses.length === 0) {
+    await courseStore.fetchCourses();
+  }
+  if (courseStore.categories && courseStore.categories.length === 0) {
+    await courseStore.fetchCategories();
+  }
+});
 
 // Dynamic category slug from URL
 const currentSlug = computed(() => {
   return route.params.categorySlug || 'ky-nang-ai';
+});
+
+watch([selectedLevel, sortBy, currentSlug], () => {
+  currentPage.value = 1;
 });
 
 // Category Metadata presets & fallback
@@ -150,6 +176,20 @@ const filteredCourses = computed(() => {
   return list;
 });
 
+// Paginated courses slice
+const paginatedCourses = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredCourses.value.slice(start, start + pageSize.value);
+});
+
+const displayRange = computed(() => {
+  const total = filteredCourses.value.length;
+  if (total === 0) return '0';
+  const start = (currentPage.value - 1) * pageSize.value + 1;
+  const end = Math.min(currentPage.value * pageSize.value, total);
+  return `${start}-${end}`;
+});
+
 const formatPrice = (value) => {
   if (!value) return '0đ';
   return value.toLocaleString('vi-VN') + 'đ';
@@ -157,7 +197,7 @@ const formatPrice = (value) => {
 
 const handleEnroll = async (courseId) => {
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để đăng ký khóa học!');
+    courseStore.showToast('Vui lòng đăng nhập để đăng ký khóa học!', 'warning');
     router.push('/login');
     return;
   }
@@ -166,7 +206,7 @@ const handleEnroll = async (courseId) => {
     router.push('/checkout');
   } catch (err) {
     if (err.message !== 'CANCELLED') {
-      alert(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!');
+      courseStore.showToast(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!', 'error');
     }
   }
 };

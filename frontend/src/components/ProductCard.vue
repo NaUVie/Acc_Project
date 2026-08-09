@@ -94,7 +94,7 @@ const handleImageError = (e) => {
 const handleQuickBuy = (e) => {
   if (e && e.stopPropagation) e.stopPropagation();
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để đăng ký khóa học!');
+    courseStore.showToast('Vui lòng đăng nhập để đăng ký khóa học!', 'warning');
     router.push('/login');
     return;
   }
@@ -102,7 +102,7 @@ const handleQuickBuy = (e) => {
     courseStore.buyNow(props.course.id);
     router.push('/checkout');
   } catch (err) {
-    alert(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!');
+    courseStore.showToast(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!', 'error');
   }
 };
 </script>

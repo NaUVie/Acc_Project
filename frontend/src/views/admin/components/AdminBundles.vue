@@ -279,8 +279,9 @@ const uploadBundleImage = async (e) => {
   try {
     const url = await courseStore.uploadImage(file);
     form.value.image = url;
+    courseStore.showToast('Tải ảnh lên thành công!', 'success');
   } catch (err) {
-    alert('Lỗi khi tải ảnh lên Cloudinary: ' + err.message);
+    courseStore.showToast('Lỗi khi tải ảnh lên Cloudinary: ' + err.message, 'error');
   } finally {
     uploadingImage.value = false;
   }
@@ -400,14 +401,14 @@ const saveBundle = async () => {
   try {
     if (isEditing.value) {
       await courseStore.updateAdminBundle(editingId.value, form.value);
-      alert('Cập nhật gói Combo thành công!');
+      courseStore.showToast('Cập nhật gói Combo thành công!', 'success');
     } else {
       await courseStore.addAdminBundle(form.value);
-      alert('Thêm gói Combo mới thành công!');
+      courseStore.showToast('Thêm gói Combo mới thành công!', 'success');
     }
     activeView.value = 'list';
   } catch (err) {
-    alert(err.message || 'Không thể lưu gói Combo.');
+    courseStore.showToast(err.message || 'Không thể lưu gói Combo.', 'error');
   }
 };
 
@@ -415,9 +416,9 @@ const deleteBundle = async (id) => {
   if (confirm('Bạn có chắc muốn xóa gói Combo này?')) {
     try {
       await courseStore.deleteAdminBundle(id);
-      alert('Đã xóa gói Combo thành công.');
+      courseStore.showToast('Đã xóa gói Combo thành công.', 'success');
     } catch (err) {
-      alert(err.message || 'Không thể xóa gói Combo.');
+      courseStore.showToast(err.message || 'Không thể xóa gói Combo.', 'error');
     }
   }
 };

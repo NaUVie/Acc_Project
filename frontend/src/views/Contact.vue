@@ -130,7 +130,7 @@ const submitForm = async () => {
       formData.value.courseHandle,
       formData.value.message
     );
-    alert('Cảm ơn bạn! Yêu cầu của bạn đã được gửi đi thành công và đã được lưu vào cơ sở dữ liệu.');
+    courseStore.showToast('Cảm ơn bạn! Yêu cầu của bạn đã được gửi đi thành công.', 'success');
     formData.value = {
       firstName: '',
       middleName: '',
@@ -141,7 +141,7 @@ const submitForm = async () => {
       message: ''
     };
   } catch (err) {
-    alert('Có lỗi xảy ra khi gửi yêu cầu: ' + err.message);
+    courseStore.showToast('Có lỗi xảy ra khi gửi yêu cầu: ' + err.message, 'error');
   }
 };
 </script>

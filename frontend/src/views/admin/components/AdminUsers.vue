@@ -177,18 +177,18 @@ const saveUser = async () => {
   try {
     if (isEditingUser.value) {
       await courseStore.updateAdminUser(editingUserId.value, userForm.value);
-      alert('Cập nhật thông tin học viên thành công!');
+      courseStore.showToast('Cập nhật thông tin học viên thành công!', 'success');
     } else {
       if (users.value.some(u => u.email === userForm.value.email)) {
-        alert('Email này đã tồn tại trên hệ thống!');
+        courseStore.showToast('Email này đã tồn tại trên hệ thống!', 'warning');
         return;
       }
       await courseStore.addAdminUser(userForm.value);
-      alert('Thêm học viên mới thành công!');
+      courseStore.showToast('Thêm học viên mới thành công!', 'success');
     }
     userModalOpen.value = false;
   } catch (err) {
-    alert(err.message || 'Không thể lưu học viên.');
+    courseStore.showToast(err.message || 'Không thể lưu học viên.', 'error');
   }
 };
 
@@ -196,9 +196,9 @@ const deleteUser = async (userId) => {
   if (confirm('Bạn có chắc chắn muốn xóa học viên này khỏi hệ thống?')) {
     try {
       await courseStore.deleteAdminUser(userId);
-      alert('Đã xóa học viên thành công.');
+      courseStore.showToast('Đã xóa học viên thành công.', 'success');
     } catch (err) {
-      alert(err.message || 'Không thể xóa học viên.');
+      courseStore.showToast(err.message || 'Không thể xóa học viên.', 'error');
     }
   }
 };
@@ -206,18 +206,18 @@ const deleteUser = async (userId) => {
 const changeUserRole = async (userId, role) => {
   try {
     await courseStore.updateAdminUser(userId, { role });
-    alert('Đã cập nhật vai trò người dùng thành công.');
+    courseStore.showToast('Đã cập nhật vai trò người dùng thành công.', 'success');
   } catch (err) {
-    alert('Không thể cập nhật vai trò.');
+    courseStore.showToast('Không thể cập nhật vai trò.', 'error');
   }
 };
 
 const toggleUserStatus = async (u) => {
   try {
     await courseStore.updateAdminUser(u.id, { isActive: !u.isActive });
-    alert('Đã thay đổi trạng thái hoạt động học viên.');
+    courseStore.showToast('Đã thay đổi trạng thái hoạt động học viên.', 'success');
   } catch (err) {
-    alert('Không thể thay đổi trạng thái.');
+    courseStore.showToast('Không thể thay đổi trạng thái.', 'error');
   }
 };
 

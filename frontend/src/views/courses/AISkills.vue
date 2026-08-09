@@ -59,7 +59,7 @@ const formatPrice = (value) => {
 
 const handleEnroll = (courseId) => {
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để đăng ký khóa học!');
+    courseStore.showToast('Vui lòng đăng nhập để đăng ký khóa học!', 'warning');
     router.push('/login');
     return;
   }
@@ -67,7 +67,7 @@ const handleEnroll = (courseId) => {
     courseStore.buyNow(courseId);
     router.push('/checkout');
   } catch (err) {
-    alert(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!');
+    courseStore.showToast(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!', 'error');
   }
 };
 

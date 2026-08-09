@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Integer, BigInteger, ForeignKey, Text, DateTime, Boolean, Table
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timezone
 from .database import Base
 
 class Category(Base):
@@ -35,7 +35,7 @@ class Program(Base):
     slug = Column(String(100), nullable=False, unique=True, index=True)
     description = Column(Text, nullable=True)
     image = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     courses = relationship("Course", back_populates="program")
 
@@ -49,7 +49,7 @@ class Bundle(Base):
     price = Column(Integer, nullable=False)
     original_price = Column(Integer, nullable=True)
     image = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     courses = relationship("Course", secondary=bundle_courses, backref="bundles")
     gift_courses = relationship("Course", secondary=bundle_gift_courses, backref="gift_bundles")
@@ -107,7 +107,7 @@ class Contact(Base):
     course_handle = Column(String(100), nullable=True)
     message = Column(Text, nullable=False)
     is_resolved = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class User(Base):
     __tablename__ = "users"
@@ -120,7 +120,7 @@ class User(Base):
     referred_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     role = Column(String(50), default="student") # student, admin
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     orders = relationship("Order", back_populates="user")
     cart_items = relationship("CartItem", back_populates="user", cascade="all, delete-orphan")
@@ -133,7 +133,7 @@ class Order(Base):
     total_price = Column(Integer, nullable=False)
     discount_applied = Column(Integer, default=0)
     status = Column(String(50), default="pending") # pending, paid, cancelled
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="orders")
     items = relationship("OrderItem", back_populates="order", cascade="all, delete-orphan")
@@ -155,7 +155,7 @@ class CartItem(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     course_id = Column(BigInteger, ForeignKey("courses.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="cart_items")
     course = relationship("Course")
@@ -168,7 +168,7 @@ class Referral(Base):
     referred_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     commission_amount = Column(Integer, default=0)
     status = Column(String(50), default="pending") # pending, completed (paid out)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     referrer = relationship("User", foreign_keys=[referrer_id])
     referred = relationship("User", foreign_keys=[referred_id])
@@ -182,7 +182,7 @@ class Testimonial(Base):
     text = Column(Text, nullable=False)
     image = Column(String(255), nullable=True)
     video_url = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Enrollment(Base):
     """Tracks which user has access to which course (after payment)."""
@@ -192,7 +192,7 @@ class Enrollment(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     course_id = Column(BigInteger, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     order_id = Column(Integer, ForeignKey("orders.id", ondelete="SET NULL"), nullable=True)
-    enrolled_at = Column(DateTime, default=datetime.utcnow)
+    enrolled_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     progress_data = Column(Text, nullable=True) # JSON list of completed lesson IDs
 
     user = relationship("User", backref="enrollments")
@@ -220,6 +220,6 @@ class Banner(Base):
     is_external = Column(Boolean, default=False)
     position = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 

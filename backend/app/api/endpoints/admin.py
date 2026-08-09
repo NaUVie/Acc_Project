@@ -2,8 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
+from sqlalchemy import func
 from ...database import get_db
-from ... import models, schemas, auth
+from ... import models, schemas, auth, crud
 
 router = APIRouter(dependencies=[Depends(auth.get_current_admin)])
 
@@ -71,6 +72,12 @@ def delete_user_admin(id: int, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Học viên không tồn tại"
+        )
+    order_count = db.query(models.Order).filter(models.Order.user_id == id).count()
+    if order_count > 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Học viên đang có {order_count} đơn hàng. Không thể xóa."
         )
     db.delete(db_user)
     db.commit()
@@ -155,19 +162,22 @@ def update_order_admin(id: int, order_in: schemas.OrderAdminUpdate, db: Session 
         if order_in.status == "paid" and db_order.status != "paid":
             user = db_order.user
             if user and user.referred_by_id:
-                existing_referral = db.query(models.Referral).filter(
-                    models.Referral.referred_id == user.id
-                ).first()
-                if not existing_referral:
-                    commission = int(order_in.total_price or db_order.total_price * 0.10)
-                    commission_capped = min(commission, 29000000)
-                    db_referral = models.Referral(
-                        referrer_id=user.referred_by_id,
-                        referred_id=user.id,
-                        commission_amount=commission_capped,
-                        status="completed"
-                    )
-                    db.add(db_referral)
+                referrer_exists = db.query(models.User).filter(models.User.id == user.referred_by_id).first()
+                if referrer_exists:
+                    existing_referral = db.query(models.Referral).filter(
+                        models.Referral.referred_id == user.id
+                    ).first()
+                    if not existing_referral:
+                        base_price = order_in.total_price if order_in.total_price is not None else db_order.total_price
+                        commission = int(base_price * 0.10)
+                        commission_capped = min(commission, 29000000)
+                        db_referral = models.Referral(
+                            referrer_id=user.referred_by_id,
+                            referred_id=user.id,
+                            commission_amount=commission_capped,
+                            status="completed"
+                        )
+                        db.add(db_referral)
         db_order.status = order_in.status
         
     if order_in.discount_applied is not None:
@@ -248,26 +258,64 @@ def delete_contact_admin(id: int, db: Session = Depends(get_db)):
     return {"message": "Đã xóa tin nhắn liên hệ thành công"}
 
 
+# ==================== CATEGORY MANAGEMENT ====================
+
+@router.get("/categories", response_model=List[schemas.CategoryResponse])
+def get_categories_admin(db: Session = Depends(get_db)):
+    return db.query(models.Category).all()
+
+@router.post("/categories", response_model=schemas.CategoryResponse, status_code=status.HTTP_201_CREATED)
+def create_category_admin(cat_in: schemas.CategoryCreate, db: Session = Depends(get_db)):
+    existing = db.query(models.Category).filter(models.Category.slug == cat_in.slug).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Chuyên mục với mã Slug này đã tồn tại.")
+    cat = models.Category(slug=cat_in.slug, name=cat_in.name)
+    db.add(cat)
+    db.commit()
+    db.refresh(cat)
+    return cat
+
+@router.put("/categories/{slug}", response_model=schemas.CategoryResponse)
+def update_category_admin(slug: str, cat_in: schemas.CategoryUpdate, db: Session = Depends(get_db)):
+    cat = db.query(models.Category).filter(models.Category.slug == slug).first()
+    if not cat:
+        raise HTTPException(status_code=404, detail="Không tìm thấy chuyên mục")
+    cat.name = cat_in.name
+    db.commit()
+    db.refresh(cat)
+    return cat
+
+@router.delete("/categories/{slug}")
+def delete_category_admin(slug: str, db: Session = Depends(get_db)):
+    cat = db.query(models.Category).filter(models.Category.slug == slug).first()
+    if not cat:
+        raise HTTPException(status_code=404, detail="Không tìm thấy chuyên mục")
+    course_count = db.query(models.Course).filter(models.Course.category_slug == slug).count()
+    if course_count > 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Chuyên mục đang chứa {course_count} khóa học. Vui lòng di chuyển hoặc xóa khóa học trước khi xóa chuyên mục."
+        )
+    db.delete(cat)
+    db.commit()
+    return {"message": f"Đã xóa chuyên mục '{slug}' thành công"}
+
+
 # ==================== COURSE CATALOG MANAGEMENT ====================
 
 @router.post("/courses", response_model=schemas.CourseResponse, status_code=status.HTTP_201_CREATED)
 def create_course_admin(course_in: schemas.CourseAdminCreate, db: Session = Depends(get_db)):
-    # Verify/create category slug
+    # Verify category slug exists
     cat = db.query(models.Category).filter(models.Category.slug == course_in.category_slug).first()
     if not cat:
-        cat_name = "Kỹ năng AI"
-        if course_in.category_slug == "ky-nang-mem":
-            cat_name = "Kỹ năng mềm"
-        elif course_in.category_slug == "ky-nang-chuyen-mon":
-            cat_name = "Kỹ năng chuyên môn"
-        elif course_in.category_slug == "bundles":
-            cat_name = "Combo / Gói"
-        cat = models.Category(slug=course_in.category_slug, name=cat_name)
-        db.add(cat)
-        db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Chuyên mục '{course_in.category_slug}' chưa tồn tại. Vui lòng tạo chuyên mục trước."
+        )
 
     # Generate big integer ID if not provided
-    cid = db.query(models.Course).count() + 1
+    max_id = db.query(func.max(models.Course.id)).scalar() or 0
+    cid = max_id + 1
     
     db_course = models.Course(
         id=cid,
@@ -331,6 +379,12 @@ def delete_course_admin(id: int, db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Khóa học không tồn tại"
+        )
+    order_item_count = db.query(models.OrderItem).filter(models.OrderItem.course_id == id).count()
+    if order_item_count > 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Khóa học đang nằm trong {order_item_count} đơn hàng. Không thể xóa để bảo toàn dữ liệu lịch sử đơn hàng."
         )
     db.delete(db_course)
     db.commit()
@@ -404,6 +458,8 @@ def delete_program_admin(id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Chương trình đào tạo không tồn tại"
         )
+    db.query(models.Course).filter(models.Course.program_id == id).update({"program_id": None})
+    db.commit()
     db.delete(db_prog)
     db.commit()
     return {"message": "Đã xóa chương trình đào tạo thành công"}

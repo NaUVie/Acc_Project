@@ -293,22 +293,39 @@ const toggleFaq = (idx) => {
 const handleEnrollBundle = async (bundleObj) => {
   if (!bundleObj) return;
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để đăng ký gói Combo!');
+    courseStore.showToast('Vui lòng đăng nhập để đăng ký gói Combo!', 'warning');
     router.push('/login');
     return;
   }
   
-  // If bundle has child courses, add child courses to cart
+  let addedAny = false;
   if (bundleObj.courses && bundleObj.courses.length > 0) {
     for (const c of bundleObj.courses) {
-      await courseStore.addToCart(c.id);
+      if (!courseStore.isEnrolled(c.id)) {
+        try {
+          await courseStore.addToCart(c.id);
+          addedAny = true;
+        } catch (err) {
+          // ignore duplicate cart errors
+        }
+      }
     }
   } else if (bundleObj.handle) {
     const course = courseStore.courses.find(c => c.handle === bundleObj.handle || c.category === 'bundles') || courseStore.courses[0];
-    if (course) {
-      await courseStore.addToCart(course.id);
+    if (course && !courseStore.isEnrolled(course.id)) {
+      try {
+        await courseStore.addToCart(course.id);
+        addedAny = true;
+      } catch (err) {}
     }
   }
+
+  if (!addedAny && bundleObj.courses && bundleObj.courses.every(c => courseStore.isEnrolled(c.id))) {
+    courseStore.showToast('Bạn đã sở hữu tất cả các khóa học trong gói Combo này rồi!', 'info');
+    router.push('/dashboard');
+    return;
+  }
+
   router.push('/cart');
 };
 

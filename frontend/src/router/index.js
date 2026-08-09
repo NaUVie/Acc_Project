@@ -9,10 +9,12 @@ const routes = [
   },
   {
     path: '/courses/category/:categorySlug',
-    alias: ['/courses/ai', '/courses/mem', '/courses/chuyen-mon', '/courses/:categorySlug'],
     name: 'CourseCategoryView',
     component: () => import('../views/courses/CourseCategoryView.vue')
   },
+  { path: '/courses/ai', redirect: '/courses/category/ky-nang-ai' },
+  { path: '/courses/mem', redirect: '/courses/category/ky-nang-mem' },
+  { path: '/courses/chuyen-mon', redirect: '/courses/category/ky-nang-chuyen-mon' },
   {
     path: '/course/:handle',
     alias: ['/courses/detail/:handle'],
@@ -134,17 +136,24 @@ import { useCourseStore } from '../stores/courses';
 
 router.beforeEach(async (to, from, next) => {
   const courseStore = useCourseStore();
-  
+  const isProtected = to.meta.requiresAuth || to.meta.requiresAdmin || to.meta.requiresEnrollment;
+
+  // Background fetch for user profile if token exists but user object is not yet populated
   if (courseStore.token && !courseStore.user) {
-    try {
-      await courseStore.fetchUserMe();
-    } catch (err) {
-      console.error("Route guard profile fetch error:", err);
+    if (isProtected) {
+      try {
+        await courseStore.fetchUserMe();
+      } catch (err) {
+        console.error("Route guard profile fetch error:", err);
+      }
+    } else {
+      // Non-blocking background sync for public routes
+      courseStore.fetchUserMe().catch(() => {});
     }
   }
 
-  // Load enrollments if not yet fetched
-  if (courseStore.token && courseStore.enrollments.length === 0) {
+  // Load enrollments only when accessing protected enrollment room
+  if (to.meta.requiresEnrollment && courseStore.token && courseStore.enrollments.length === 0) {
     try {
       await courseStore.fetchEnrollments();
     } catch (err) {
@@ -187,6 +196,7 @@ router.beforeEach(async (to, from, next) => {
       next('/login');
     }
   } else {
+    // Public routes navigate immediately!
     next();
   }
 });

@@ -26,6 +26,13 @@ def add_item_to_cart(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Course not found"
         )
+    # Prevent adding already owned course to cart
+    already_enrolled = crud.check_enrollment(db, user_id=current_user.id, course_id=cart_in.course_id)
+    if already_enrolled and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Bạn đã sở hữu khóa học này rồi!"
+        )
     return crud.add_to_cart(db, user_id=current_user.id, course_id=cart_in.course_id)
 
 @router.delete("", status_code=status.HTTP_200_OK)

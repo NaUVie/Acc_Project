@@ -128,35 +128,6 @@
         </div>
       </div>
     </div>
-
-    <!-- QR Modal Success / Payment Modal -->
-    <Teleport to="body">
-      <div v-if="showSuccessModal" class="modal-backdrop" @click="showSuccessModal = false">
-        <div class="modal-box" @click.stop>
-          <button class="modal-close" @click="showSuccessModal = false">&times;</button>
-          <div class="modal-body text-center">
-            <div class="success-icon">🎉</div>
-            <h2 class="modal-title">Đặt hàng thành công!</h2>
-            <p class="modal-desc">Mã đơn hàng: <strong>#ACC-{{ Math.floor(100000 + Math.random() * 900000) }}</strong></p>
-
-            <div class="qr-payment-box" v-if="paymentMethod === 'qr'">
-              <p class="qr-instruction">Quét mã QR dưới đây bằng app Ngân hàng để hoàn tất thanh toán:</p>
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=ACC_ACADEMY_PAYMENT" alt="Mã QR Thanh Toán" class="qr-img" />
-              <div class="bank-details">
-                <p>Ngân hàng: <strong>MBBank (Ngân Hàng Quân Đội)</strong></p>
-                <p>Số tài khoản: <strong>999988886666</strong></p>
-                <p>Chủ tài khoản: <strong>ACC ACADEMY CO. LTD</strong></p>
-                <p>Nội dung CK: <strong>ACC {{ form.phone || 'PAY' }}</strong></p>
-              </div>
-            </div>
-
-            <p v-else class="success-note">Hệ thống sẽ gửi thông tin tài khoản học qua Email <strong>{{ form.email }}</strong> của bạn ngay lập tức.</p>
-
-            <button class="btn-dashboard" @click="finishOrder">Đến trang Học tập ngay</button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
   </div>
 </template>
 
@@ -169,7 +140,6 @@ const router = useRouter()
 const courseStore = useCourseStore()
 
 const loading = ref(false)
-const showSuccessModal = ref(false)
 const paymentMethod = ref('qr')
 
 const form = ref({
@@ -181,7 +151,7 @@ const form = ref({
 
 onMounted(() => {
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để tiến hành thanh toán!')
+    courseStore.showToast('Vui lòng đăng nhập để tiến hành thanh toán!', 'warning')
     router.push('/login')
     return
   }
@@ -228,12 +198,12 @@ const formatCurrency = (val) => {
 
 const handlePlaceOrder = async () => {
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để thực hiện thanh toán!')
+    courseStore.showToast('Vui lòng đăng nhập để thực hiện thanh toán!', 'warning')
     router.push('/login')
     return
   }
   if (!form.value.fullname || !form.value.email || !form.value.phone) {
-    alert('Vui lòng điền đầy đủ Họ tên, Email và Số điện thoại!')
+    courseStore.showToast('Vui lòng điền đầy đủ Họ tên, Email và Số điện thoại!', 'warning')
     return
   }
 
@@ -243,20 +213,15 @@ const handlePlaceOrder = async () => {
     const order = await courseStore.checkout()
     if (order && order.id) {
       router.push(`/order/${order.id}`)
-      return
+    } else {
+      router.push('/dashboard')
     }
-    showSuccessModal.value = true
   } catch (e) {
     console.log("Order submission error", e)
-    alert(e.message || "Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại!")
+    courseStore.showToast(e.message || "Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại!", 'error')
   } finally {
     loading.value = false
   }
-}
-
-const finishOrder = () => {
-  showSuccessModal.value = false
-  router.push('/dashboard')
 }
 </script>
 

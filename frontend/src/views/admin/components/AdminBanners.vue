@@ -217,8 +217,9 @@ const editBanner = (b) => {
 const toggleActive = async (b) => {
   try {
     await courseStore.updateBanner(b.id, { is_active: !b.is_active });
+    courseStore.showToast(`Đã ${!b.is_active ? 'bật' : 'tắt'} hiển thị banner "${b.title}"`, 'success');
   } catch (err) {
-    alert("Lỗi khi cập nhật trạng thái banner: " + err.message);
+    courseStore.showToast("Lỗi khi cập nhật trạng thái banner: " + err.message, 'error');
   }
 };
 
@@ -240,8 +241,9 @@ const uploadImage = async (event, targetField) => {
     if (!res.ok) throw new Error('Upload thất bại');
     const data = await res.json();
     form.value[targetField] = data.url;
+    courseStore.showToast('Tải ảnh lên thành công!', 'success');
   } catch (err) {
-    alert('Không thể upload ảnh: ' + err.message);
+    courseStore.showToast('Không thể upload ảnh: ' + err.message, 'error');
   }
 };
 
@@ -250,12 +252,14 @@ const saveBanner = async () => {
   try {
     if (isEditing.value) {
       await courseStore.updateBanner(editingId.value, form.value);
+      courseStore.showToast('Cập nhật banner thành công!', 'success');
     } else {
       await courseStore.createBanner(form.value);
+      courseStore.showToast('Tạo banner mới thành công!', 'success');
     }
     activeView.value = 'list';
   } catch (err) {
-    alert("Có lỗi xảy ra: " + (err.message || err));
+    courseStore.showToast("Có lỗi xảy ra: " + (err.message || err), 'error');
   } finally {
     saving.value = false;
   }
@@ -265,8 +269,9 @@ const deleteBannerItem = async (id) => {
   if (confirm("Bạn có chắc chắn muốn xóa banner này?")) {
     try {
       await courseStore.deleteBanner(id);
+      courseStore.showToast('Đã xóa banner thành công!', 'success');
     } catch (err) {
-      alert("Lỗi khi xóa banner: " + err.message);
+      courseStore.showToast("Lỗi khi xóa banner: " + err.message, 'error');
     }
   }
 };

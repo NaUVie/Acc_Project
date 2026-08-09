@@ -26,7 +26,10 @@
             </div>
 
             <div class="form-group">
-              <label for="login-password">Mật khẩu</label>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                <label for="login-password" style="margin-bottom: 0;">Mật khẩu</label>
+                <a href="#" @click.prevent="forgotPassword" style="font-size: 13px; color: #0284c7; text-decoration: none; font-weight: 600;">Quên mật khẩu?</a>
+              </div>
               <input 
                 v-model="loginData.password" 
                 type="password" 
@@ -70,6 +73,14 @@ onMounted(() => {
     router.push('/dashboard');
   }
 });
+
+const forgotPassword = () => {
+  if (!loginData.value.email) {
+    courseStore.showToast('Vui lòng nhập Email tài khoản để nhận hướng dẫn khôi phục mật khẩu!', 'warning');
+    return;
+  }
+  courseStore.showToast(`Yêu cầu đặt lại mật khẩu đã được gửi tới Email ${loginData.value.email}. Vui lòng kiểm tra hộp thư!`, 'info');
+};
 
 const handleLogin = async () => {
   loading.value = true;

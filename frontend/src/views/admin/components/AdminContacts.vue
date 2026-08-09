@@ -122,9 +122,9 @@ const saveSettings = async () => {
   savingSettings.value = true;
   try {
     await courseStore.updateContactSettings(settingsData.value);
-    alert('Đã cập nhật cấu hình thông tin liên hệ thành công!');
+    courseStore.showToast('Đã cập nhật cấu hình thông tin liên hệ thành công!', 'success');
   } catch (err) {
-    alert('Lỗi khi lưu cấu hình: ' + err.message);
+    courseStore.showToast('Lỗi khi lưu cấu hình: ' + err.message, 'error');
   } finally {
     savingSettings.value = false;
   }
@@ -148,9 +148,9 @@ const filteredContacts = computed(() => {
 const toggleContactStatus = async (contactId) => {
   try {
     await courseStore.toggleContactResolved(contactId);
-    alert('Đã cập nhật trạng thái liên hệ.');
+    courseStore.showToast('Đã cập nhật trạng thái liên hệ.', 'success');
   } catch (err) {
-    alert(err.message || 'Không thể cập nhật liên hệ.');
+    courseStore.showToast(err.message || 'Không thể cập nhật liên hệ.', 'error');
   }
 };
 
@@ -158,9 +158,9 @@ const deleteContact = async (contactId) => {
   if (confirm('Bạn có chắc chắn muốn xóa tin nhắn liên hệ này?')) {
     try {
       await courseStore.deleteAdminContact(contactId);
-      alert('Đã xóa tin nhắn liên hệ thành công.');
+      courseStore.showToast('Đã xóa tin nhắn liên hệ thành công.', 'success');
     } catch (err) {
-      alert(err.message || 'Không thể xóa liên hệ.');
+      courseStore.showToast(err.message || 'Không thể xóa liên hệ.', 'error');
     }
   }
 };

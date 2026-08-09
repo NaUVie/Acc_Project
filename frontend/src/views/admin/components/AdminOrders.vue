@@ -227,11 +227,11 @@ const autoCalculateOrderTotal = () => {
 const saveOrder = async () => {
   const u = users.value.find(user => user.id === orderForm.value.userId);
   if (!u) {
-    alert('Vui lòng chọn học viên!');
+    courseStore.showToast('Vui lòng chọn học viên!', 'warning');
     return;
   }
   if (orderForm.value.selectedCourses.length === 0) {
-    alert('Vui lòng chọn ít nhất một khóa học!');
+    courseStore.showToast('Vui lòng chọn ít nhất một khóa học!', 'warning');
     return;
   }
 
@@ -256,14 +256,14 @@ const saveOrder = async () => {
         body: JSON.stringify(payload)
       });
       await courseStore.fetchAdminOrders();
-      alert('Cập nhật đơn hàng thành công!');
+      courseStore.showToast('Cập nhật đơn hàng thành công!', 'success');
     } else {
       await courseStore.addAdminOrder(orderData);
-      alert('Tạo đơn hàng mới thành công!');
+      courseStore.showToast('Tạo đơn hàng mới thành công!', 'success');
     }
     orderModalOpen.value = false;
   } catch (err) {
-    alert(err.message || 'Không thể lưu đơn hàng.');
+    courseStore.showToast(err.message || 'Không thể lưu đơn hàng.', 'error');
   }
 };
 
@@ -271,9 +271,9 @@ const deleteOrder = async (orderId) => {
   if (confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
     try {
       await courseStore.deleteAdminOrder(orderId);
-      alert('Đã xóa đơn hàng thành công.');
+      courseStore.showToast('Đã xóa đơn hàng thành công.', 'success');
     } catch (err) {
-      alert(err.message || 'Không thể xóa đơn hàng.');
+      courseStore.showToast(err.message || 'Không thể xóa đơn hàng.', 'error');
     }
   }
 };
@@ -281,9 +281,9 @@ const deleteOrder = async (orderId) => {
 const changeOrderStatus = async (orderId, status) => {
   try {
     await courseStore.updateAdminOrderStatus(orderId, status);
-    alert('Đã cập nhật trạng thái đơn hàng.');
+    courseStore.showToast('Đã cập nhật trạng thái đơn hàng.', 'success');
   } catch (err) {
-    alert(err.message || 'Không thể cập nhật trạng thái đơn hàng.');
+    courseStore.showToast(err.message || 'Không thể cập nhật trạng thái đơn hàng.', 'error');
   }
 };
 

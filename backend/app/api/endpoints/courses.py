@@ -77,6 +77,13 @@ def get_course_progress(
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
     
+    is_enrolled = crud.check_enrollment(db, user_id=current_user.id, course_id=course.id)
+    if not is_enrolled and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bạn chưa mua khóa học này."
+        )
+    
     completed_lessons = crud.get_user_course_progress(db, user_id=current_user.id, course_id=course.id)
     return {"course_id": course.id, "completed_lessons": completed_lessons}
 
@@ -90,6 +97,13 @@ def update_course_progress(
     course = crud.get_course_by_handle(db, handle=handle)
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
+    
+    is_enrolled = crud.check_enrollment(db, user_id=current_user.id, course_id=course.id)
+    if not is_enrolled and current_user.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Bạn chưa mua khóa học này."
+        )
     
     crud.update_user_course_progress(
         db, user_id=current_user.id, course_id=course.id, completed_lessons=progress_in.completed_lessons

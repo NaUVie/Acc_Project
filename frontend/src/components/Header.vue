@@ -405,7 +405,7 @@ const handleViewCart = () => {
 const handleCheckout = () => {
   isCartOpen.value = false;
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để tiến hành thanh toán!');
+    courseStore.showToast('Vui lòng đăng nhập để tiến hành thanh toán!', 'warning');
     router.push('/login');
     return;
   }
@@ -483,7 +483,7 @@ const programs = computed(() => {
       categoryId: c.category,
       title: c.title,
       school: translateCategory(c.category),
-      logo: c.image || '/images/logo2.jpg',
+      logo: c.image || '/images/default.jpg',
       link: `/course/${handle}`
     };
   });

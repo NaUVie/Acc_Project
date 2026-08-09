@@ -5,7 +5,7 @@
       <nav class="breadcrumb-nav">
         <router-link to="/" class="breadcrumb-link">Trang chủ</router-link>
         <span class="breadcrumb-separator">&rsaquo;</span>
-        <router-link :to="course ? '/courses/category/' + course.category : '/courses/ai'" class="breadcrumb-link">Khóa học</router-link>
+        <router-link :to="course ? '/courses/category/' + (course.category || 'ky-nang-ai') : '/courses/category/ky-nang-ai'" class="breadcrumb-link">{{ course ? getCategoryName(course.category) : 'Khóa học' }}</router-link>
         <span class="breadcrumb-separator">&rsaquo;</span>
         <span class="breadcrumb-current">{{ course?.title || 'Chi tiết khóa học' }}</span>
       </nav>
@@ -161,8 +161,8 @@
                 <span v-if="course.originalPrice || course.original_price" class="old-price">
                   {{ formatCurrency(course.originalPrice || course.original_price) }}
                 </span>
-                <span v-if="course.originalPrice && course.originalPrice > course.price" class="discount-badge">
-                  Giảm {{ Math.round((1 - course.price / course.originalPrice) * 100) }}%
+                <span v-if="(course.originalPrice || course.original_price) && Number(course.originalPrice || course.original_price) > Number(course.price)" class="discount-badge">
+                  Giảm {{ Math.round((1 - Number(course.price) / Number(course.originalPrice || course.original_price)) * 100) }}%
                 </span>
               </div>
               <p class="urgency-text">🔥 Ưu đãi có hạn - Đăng ký hôm nay tiết kiệm nhất</p>
@@ -249,12 +249,15 @@ const formatCurrency = (val) => {
 };
 
 const getCategoryName = (cat) => {
+  if (!cat) return 'Khóa học';
+  const found = courseStore.categories.find(c => c.slug === cat || c.name === cat);
+  if (found) return found.name;
   switch (cat) {
     case 'ky-nang-ai': return 'Kỹ năng AI';
     case 'ky-nang-mem': return 'Kỹ năng mềm';
     case 'ky-nang-chuyen-mon': return 'Kỹ năng chuyên môn';
     case 'bundles': return 'Gói Combo';
-    default: return cat || 'Khóa học';
+    default: return cat;
   }
 };
 

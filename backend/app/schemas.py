@@ -7,6 +7,12 @@ class CategoryBase(BaseModel):
     slug: str
     name: str
 
+class CategoryCreate(CategoryBase):
+    pass
+
+class CategoryUpdate(BaseModel):
+    name: str
+
 class CategoryResponse(CategoryBase):
     class Config:
         from_attributes = True

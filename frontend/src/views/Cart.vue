@@ -19,7 +19,7 @@
         <div class="empty-icon">🛒</div>
         <h3>Giỏ hàng đang trống</h3>
         <p>Bạn chưa thêm khóa học nào vào giỏ hàng.</p>
-        <router-link to="/courses/ai" class="btn-browse">Khám phá khóa học ngay</router-link>
+        <router-link to="/courses/category/ky-nang-ai" class="btn-browse">Khám phá khóa học ngay</router-link>
       </div>
 
       <div v-else class="cart-layout">
@@ -73,7 +73,7 @@
           </div>
 
           <div class="cart-actions-row">
-            <router-link to="/courses/ai" class="btn-back">
+            <router-link to="/courses/category/ky-nang-ai" class="btn-back">
               &larr; Tiếp tục chọn khóa học
             </router-link>
           </div>
@@ -130,40 +130,18 @@ const router = useRouter()
 const courseStore = useCourseStore()
 const promoCode = ref('')
 
-const sampleCartItems = ref([
-  {
-    id: 1,
-    name: 'Khóa học Thiết kế UI/UX Chuyên Nghiệp',
-    price: 490000,
-    originalPrice: 850000,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&w=300&q=80',
-    category: 'Kỹ năng chuyên môn',
-    isGift: false
-  },
-  {
-    id: 2,
-    name: 'Ebook Sổ Tay Phím Tắt Figma & Adobe XD',
-    price: 0,
-    originalPrice: 150000,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=300&q=80',
-    category: 'Tài liệu tặng kèm',
-    isGift: true
-  }
-])
-
 const cartItems = computed(() => {
   if (!courseStore.token) return [];
   return courseStore.cart.map(item => ({
-    id: item.id || item.course.id,
-    name: item.course.title,
-    price: item.course.price,
-    originalPrice: item.course.originalPrice || null,
+    id: item.course?.id || item.id,
+    cartId: item.id,
+    name: item.course?.title || 'Khóa học',
+    price: item.course?.price || 0,
+    originalPrice: item.course?.originalPrice || null,
     quantity: 1,
-    image: item.course.image || '/images/logo3.png',
-    category: item.course.category,
-    isGift: item.course.price === 0
+    image: item.course?.image || '/images/logo3.png',
+    category: item.course?.category,
+    isGift: item.course?.price === 0
   }));
 })
 
@@ -191,32 +169,23 @@ const formatCurrency = (val) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val)
 }
 
-const updateQty = (id, newQty) => {
-  if (newQty < 1) return
-  const item = sampleCartItems.value.find(i => i.id === id)
-  if (item) item.quantity = newQty
-}
-
 const removeItem = async (id) => {
-  if (courseStore.cart && courseStore.cart.length > 0) {
-    try {
-      await courseStore.removeFromCart(id)
-    } catch (e) {
-      console.error(e)
-    }
-  } else {
-    sampleCartItems.value = sampleCartItems.value.filter(i => i.id !== id)
+  try {
+    await courseStore.removeFromCart(id)
+    courseStore.showToast('Đã xóa khóa học khỏi giỏ hàng', 'success')
+  } catch (e) {
+    console.error(e)
   }
 }
 
 const applyPromo = () => {
   if (!promoCode.value.trim()) return
-  alert(`Mã giảm giá "${promoCode.value}" đã được áp dụng thành công!`)
+  courseStore.showToast(`Mã giảm giá "${promoCode.value}" đã được áp dụng thành công!`, 'success')
 }
 
 const goToCheckout = () => {
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để tiến hành thanh toán!')
+    courseStore.showToast('Vui lòng đăng nhập để tiến hành thanh toán!', 'warning')
     router.push('/login')
     return
   }

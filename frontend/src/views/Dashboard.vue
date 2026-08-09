@@ -17,143 +17,200 @@
         </button>
       </div>
 
-      <div class="dashboard-grid">
-        <!-- LEFT PANEL: PROFILE & REFERRAL CENTER -->
-        <div class="dashboard-column referral-center">
-          <!-- Student Profile Card -->
-          <div class="panel-card glass-card profile-info-card mb-6">
-            <div class="profile-header-row">
-              <h2 class="panel-title">👤 Thông tin Hồ sơ Học viên</h2>
-              <button @click="openEditModal" class="btn btn-outline btn-sm" style="border-radius: 20px; padding: 6px 14px; font-size: 13px;">
-                ✏️ Chỉnh sửa hồ sơ
-              </button>
-            </div>
-            
-            <div class="profile-details-grid">
-              <div class="profile-detail-item">
-                <span class="detail-label">Họ và tên</span>
-                <span class="detail-value">{{ courseStore.userMe?.fullname }}</span>
-              </div>
-              <div class="profile-detail-item">
-                <span class="detail-label">Email tài khoản</span>
-                <span class="detail-value">{{ courseStore.userMe?.email }}</span>
-              </div>
-              <div class="profile-detail-item">
-                <span class="detail-label">Vai trò hệ thống</span>
-                <span class="detail-value">{{ courseStore.userMe?.role === 'admin' ? '👑 Quản trị viên' : '🎓 Học viên' }}</span>
-              </div>
-              <div class="profile-detail-item">
-                <span class="detail-label">Ngày tham gia</span>
-                <span class="detail-value">{{ formatDate(courseStore.userMe?.createdAt) }}</span>
-              </div>
-            </div>
+      <!-- DASHBOARD TAB NAVIGATION BAR -->
+      <div class="dashboard-tabs-nav">
+        <button 
+          class="nav-tab-item" 
+          :class="{ active: activeTab === 'courses' }"
+          @click="activeTab = 'courses'"
+        >
+          <span class="tab-icon">📚</span> Khóa học của tôi
+          <span class="tab-count-badge" v-if="purchasedCourses.length > 0">{{ purchasedCourses.length }}</span>
+        </button>
+
+        <button 
+          class="nav-tab-item" 
+          :class="{ active: activeTab === 'profile' }"
+          @click="activeTab = 'profile'"
+        >
+          <span class="tab-icon">👤</span> Hồ sơ cá nhân
+        </button>
+
+        <button 
+          class="nav-tab-item" 
+          :class="{ active: activeTab === 'referral' }"
+          @click="activeTab = 'referral'"
+        >
+          <span class="tab-icon">🎁</span> Lan tỏa & Nhận quà
+        </button>
+
+        <button 
+          class="nav-tab-item" 
+          :class="{ active: activeTab === 'cart' }"
+          @click="activeTab = 'cart'"
+        >
+          <span class="tab-icon">🛒</span> Giỏ hàng
+          <span class="tab-count-badge" v-if="courseStore.cart.length > 0">{{ courseStore.cart.length }}</span>
+        </button>
+
+        <button 
+          class="nav-tab-item" 
+          :class="{ active: activeTab === 'orders' }"
+          @click="activeTab = 'orders'"
+        >
+          <span class="tab-icon">📋</span> Lịch sử đơn hàng
+          <span class="tab-count-badge" v-if="orders.length > 0">{{ orders.length }}</span>
+        </button>
+      </div>
+
+      <!-- TAB 1: COURSES -->
+      <div v-show="activeTab === 'courses'" class="tab-pane animate-fade-in">
+        <div class="panel-card glass-card">
+          <div class="section-title-row">
+            <h2 class="panel-title">📚 Khóa học của tôi ({{ purchasedCourses.length }})</h2>
+            <router-link to="/courses/ai" class="btn btn-outline btn-sm" style="font-size: 13px;">+ Khám phá khóa học mới</router-link>
           </div>
-
-          <div class="panel-card glass-card">
-            <h2 class="panel-title">🎁 Chương trình Lan tỏa & Nhận quà</h2>
-            <p class="panel-subtitle">Chia sẻ mã giới thiệu của bạn để bạn bè nhận ưu đãi học phí cao nhất lên tới 14,5 triệu VND, và nhận hoa hồng lên tới 29 triệu VND khi họ thanh toán thành công.</p>
-            
-            <!-- Referral Code Display -->
-            <div class="referral-link-box">
-              <div class="link-label">Mã giới thiệu của bạn:</div>
-              <div class="code-badge">{{ referralSummary?.referralCode || 'Đang tạo...' }}</div>
-              
-              <div class="link-label mt-4">Đường dẫn giới thiệu trực tiếp:</div>
-              <div class="link-input-group">
-                <input 
-                  type="text" 
-                  readonly 
-                  :value="getReferralLink(referralSummary?.referralCode)" 
-                  ref="refLinkInput"
-                  class="link-input"
-                />
-                <button @click="copyReferralLink" class="btn btn-primary btn-sm">
-                  {{ copied ? 'Đã chép!' : 'Sao chép' }}
-                </button>
-              </div>
-            </div>
-
-            <!-- Reward Summary Cards -->
-            <div class="stats-cards-grid">
-              <div class="stat-card">
-                <div class="stat-num">{{ referralSummary?.totalReferrals || 0 }}</div>
-                <div class="stat-label">Bạn bè nhập học</div>
-              </div>
-              <div class="stat-card highlighted">
-                <div class="stat-num">{{ formatPrice(referralSummary?.totalCommissionEarned || 0) }}</div>
-                <div class="stat-label">Hoa hồng nhận được</div>
-              </div>
-            </div>
-
-            <!-- Referred Friends Table -->
-            <div class="friends-list-section">
-              <h3>Danh sách bạn bè đã giới thiệu</h3>
-              <div v-if="!referralSummary?.referralsList || referralSummary.referralsList.length === 0" class="empty-state">
-                Chưa có bạn bè nào đăng ký tài khoản qua liên kết của bạn. Hãy gửi link cho họ nhé!
-              </div>
-              <div v-else class="table-container">
-                <table class="friends-table">
-                  <thead>
-                    <tr>
-                      <th>Tên bạn bè</th>
-                      <th>Ngày tham gia</th>
-                      <th>Hoa hồng</th>
-                      <th>Trạng thái</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="ref in referralSummary.referralsList" :key="ref.id">
-                      <td class="font-bold">{{ ref.referredFullname }}</td>
-                      <td>{{ formatDate(ref.createdAt) }}</td>
-                      <td class="price-text">{{ formatPrice(ref.commissionAmount) }}</td>
-                      <td>
-                        <span class="status-badge" :class="ref.status">
-                          {{ ref.status === 'completed' ? 'Thành công' : 'Đang xử lý' }}
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+          
+          <div v-if="purchasedCourses.length === 0" class="empty-state py-12">
+            <div style="font-size: 40px; margin-bottom: 12px;">🎓</div>
+            <p style="font-size: 15px; font-weight: 600; color: #0f172a;">Bạn chưa sở hữu khóa học nào.</p>
+            <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Hãy tham gia ngay các khóa học AI & Kỹ năng tại ACC Academy!</p>
+            <router-link to="/courses/ai" class="btn btn-primary btn-sm mt-4 inline-block">Khám phá các khóa học</router-link>
+          </div>
+          
+          <div v-else class="purchased-courses-grid">
+            <div v-for="course in purchasedCourses" :key="course.id" class="purchased-course-card glass-card">
+              <img :src="course.image" :alt="course.title" class="purchased-card-img" />
+              <div class="purchased-card-body">
+                <h4>{{ course.title }}</h4>
+                <p class="course-meta">Thời lượng: {{ course.duration || '12 tuần' }} • Trình độ: {{ course.level || 'Trung cấp' }}</p>
+                <div class="card-action-row">
+                  <router-link :to="'/courses/' + course.handle + '/study'" class="btn btn-primary btn-sm w-full">
+                    🚀 Vào lớp học ngay
+                  </router-link>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- RIGHT PANEL: CART & ORDER HISTORY -->
-        <div class="dashboard-column shop-center">
-          <!-- My Purchased Courses Section -->
-          <div class="panel-card glass-card mb-6">
-            <h2 class="panel-title">📚 Khóa học của tôi (Đã mua)</h2>
-            
-            <div v-if="purchasedCourses.length === 0" class="empty-state py-8">
-              <p>Bạn chưa sở hữu khóa học nào.</p>
-              <router-link to="/courses/ai" class="btn btn-outline btn-sm mt-3 inline-block">Khám phá các khóa học</router-link>
+      <!-- TAB 2: PROFILE -->
+      <div v-show="activeTab === 'profile'" class="tab-pane animate-fade-in">
+        <div class="panel-card glass-card profile-info-card">
+          <div class="profile-header-row">
+            <h2 class="panel-title">👤 Thông tin Hồ sơ Học viên</h2>
+            <button @click="openEditModal" class="btn btn-outline btn-sm" style="border-radius: 20px; padding: 6px 16px; font-size: 13px;">
+              ✏️ Chỉnh sửa hồ sơ
+            </button>
+          </div>
+          
+          <div class="profile-details-grid">
+            <div class="profile-detail-item">
+              <span class="detail-label">Họ và tên</span>
+              <span class="detail-value">{{ courseStore.userMe?.fullname }}</span>
             </div>
+            <div class="profile-detail-item">
+              <span class="detail-label">Email tài khoản</span>
+              <span class="detail-value">{{ courseStore.userMe?.email }}</span>
+            </div>
+            <div class="profile-detail-item">
+              <span class="detail-label">Vai trò hệ thống</span>
+              <span class="detail-value">{{ courseStore.userMe?.role === 'admin' ? '👑 Quản trị viên' : '🎓 Học viên' }}</span>
+            </div>
+            <div class="profile-detail-item">
+              <span class="detail-label">Ngày tham gia</span>
+              <span class="detail-value">{{ formatDate(courseStore.userMe?.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: REFERRAL -->
+      <div v-show="activeTab === 'referral'" class="tab-pane animate-fade-in">
+        <div class="panel-card glass-card">
+          <h2 class="panel-title">🎁 Chương trình Lan tỏa & Nhận quà</h2>
+          <p class="panel-subtitle">Chia sẻ mã giới thiệu của bạn để bạn bè nhận ưu đãi học phí cao nhất lên tới 14,5 triệu VND, và nhận hoa hồng lên tới 29 triệu VND khi họ thanh toán thành công.</p>
+          
+          <!-- Referral Code Display -->
+          <div class="referral-link-box">
+            <div class="link-label">Mã giới thiệu của bạn:</div>
+            <div class="code-badge">{{ referralSummary?.referralCode || 'Đang tạo...' }}</div>
             
-            <div v-else class="purchased-courses-list">
-              <div v-for="course in purchasedCourses" :key="course.id" class="purchased-course-row">
-                <img :src="course.image" :alt="course.title" class="purchased-course-img" />
-                <div class="purchased-course-info">
-                  <h4>{{ course.title }}</h4>
-                  <p class="text-xs text-muted" style="margin-top: 2px; color: var(--text-muted);">Thời lượng: {{ course.duration || '12 tuần' }} • Trình độ: {{ course.level || 'Trung cấp' }}</p>
-                </div>
-                <router-link :to="'/courses/' + course.handle + '/study'" class="btn btn-primary btn-sm" style="padding: 6px 12px; font-size: 12px; border-radius: var(--radius-sm); border: none;">
-                  Vào học
-                </router-link>
-              </div>
+            <div class="link-label mt-4">Đường dẫn giới thiệu trực tiếp:</div>
+            <div class="link-input-group">
+              <input 
+                type="text" 
+                readonly 
+                :value="getReferralLink(referralSummary?.referralCode)" 
+                ref="refLinkInput"
+                class="link-input"
+              />
+              <button @click="copyReferralLink" class="btn btn-primary btn-sm">
+                {{ copied ? 'Đã chép!' : 'Sao chép' }}
+              </button>
             </div>
           </div>
 
-          <!-- Shopping Cart Section -->
-          <div class="panel-card glass-card mb-6">
-            <h2 class="panel-title">🛒 Giỏ hàng của bạn ({{ courseStore.cart.length }})</h2>
-            
-            <div v-if="courseStore.cart.length === 0" class="empty-state py-8">
-              <p>Giỏ hàng trống.</p>
-              <router-link to="/courses/ai" class="btn btn-outline btn-sm mt-3 inline-block">Khám phá các khóa học</router-link>
+          <!-- Reward Summary Cards -->
+          <div class="stats-cards-grid">
+            <div class="stat-card">
+              <div class="stat-num">{{ referralSummary?.totalReferrals || 0 }}</div>
+              <div class="stat-label">Bạn bè giới thiệu</div>
             </div>
-            
-            <div v-else class="cart-items-list">
+            <div class="stat-card highlighted">
+              <div class="stat-num">{{ formatPrice(referralSummary?.totalCommissionEarned || 0) }}</div>
+              <div class="stat-label">Hoa hồng nhận được</div>
+            </div>
+          </div>
+
+          <!-- Referred Friends Table -->
+          <div class="friends-list-section">
+            <h3>Danh sách bạn bè đã giới thiệu</h3>
+            <div v-if="!referralSummary?.referralsList || referralSummary.referralsList.length === 0" class="empty-state py-6">
+              Chưa có bạn bè nào đăng ký tài khoản qua liên kết của bạn. Hãy gửi link cho họ nhé!
+            </div>
+            <div v-else class="table-container">
+              <table class="friends-table">
+                <thead>
+                  <tr>
+                    <th>Tên bạn bè</th>
+                    <th>Ngày tham gia</th>
+                    <th>Hoa hồng</th>
+                    <th>Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="ref in referralSummary.referralsList" :key="ref.id">
+                    <td class="font-bold">{{ ref.referredFullname }}</td>
+                    <td>{{ formatDate(ref.createdAt) }}</td>
+                    <td class="price-text">{{ formatPrice(ref.commissionAmount) }}</td>
+                    <td>
+                      <span class="status-badge" :class="ref.status">
+                        {{ ref.status === 'completed' ? 'Đã nhập học (Thành công)' : 'Đã đăng ký (Chờ nhập học)' }}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: CART -->
+      <div v-show="activeTab === 'cart'" class="tab-pane animate-fade-in">
+        <div class="panel-card glass-card">
+          <h2 class="panel-title">🛒 Giỏ hàng của bạn ({{ courseStore.cart.length }})</h2>
+          
+          <div v-if="courseStore.cart.length === 0" class="empty-state py-12">
+            <div style="font-size: 40px; margin-bottom: 12px;">🛒</div>
+            <p style="font-size: 15px; font-weight: 600; color: #0f172a;">Giỏ hàng của bạn đang trống.</p>
+            <router-link to="/courses/ai" class="btn btn-primary btn-sm mt-4 inline-block">Khám phá các khóa học</router-link>
+          </div>
+          
+          <div v-else class="cart-tab-wrapper">
+            <div class="cart-items-list">
               <div v-for="item in courseStore.cart" :key="item.id" class="cart-item-row">
                 <img :src="item.course.image" :alt="item.course.title" class="cart-item-img" />
                 <div class="cart-item-info">
@@ -161,91 +218,94 @@
                   <div class="price">{{ formatPrice(item.course.price) }}</div>
                 </div>
                 <button @click="handleRemoveFromCart(item.course.id)" class="remove-btn" title="Xóa khỏi giỏ hàng">
-                  🗑️
+                  🗑️ Xóa
                 </button>
               </div>
+            </div>
 
-              <!-- Checkout discount indicator -->
-              <div class="checkout-summary-box">
-                <div class="summary-row" v-if="hasReferralDiscount">
-                  <span>Giảm giá giới thiệu (10%):</span>
-                  <span class="discount-price">- {{ formatPrice(calculatedDiscount) }}</span>
-                </div>
-                <div class="summary-row total-row">
-                  <span>Tổng tiền thanh toán:</span>
-                  <span class="total-price">{{ formatPrice(calculatedTotal) }}</span>
-                </div>
-                
-                <button @click="handleCheckout" class="btn btn-primary w-full mt-4" :disabled="loading">
-                  {{ loading ? 'Đang tạo đơn hàng...' : 'Xác nhận Đặt hàng & Nhận ưu đãi' }}
-                </button>
+            <!-- Checkout discount indicator -->
+            <div class="checkout-summary-box mt-6">
+              <div class="summary-row" v-if="hasReferralDiscount">
+                <span>Giảm giá giới thiệu (10%):</span>
+                <span class="discount-price">- {{ formatPrice(calculatedDiscount) }}</span>
               </div>
+              <div class="summary-row total-row">
+                <span>Tổng tiền thanh toán:</span>
+                <span class="total-price">{{ formatPrice(calculatedTotal) }}</span>
+              </div>
+              
+              <button @click="handleCheckout" class="btn btn-primary w-full mt-4" :disabled="loading">
+                {{ loading ? 'Đang tạo đơn hàng...' : '⚡ Xác nhận Đặt hàng & Nhận ưu đãi' }}
+              </button>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- Order History Section -->
-          <div class="panel-card glass-card">
-            <h2 class="panel-title">📋 Lịch sử đơn hàng & Thanh toán</h2>
-            
-            <div v-if="orders.length === 0" class="empty-state py-8">
-              Chưa có đơn hàng nào được tạo.
-            </div>
-            
-            <div v-else class="orders-list">
-              <div v-for="order in orders" :key="order.id" class="order-card">
-                <div class="order-header">
-                  <div>
-                    <span class="order-id">Đơn hàng #{{ String(order.id).padStart(6, '0') }}</span>
-                    <span class="order-date">{{ formatDate(order.createdAt) }}</span>
-                  </div>
-                  <span class="status-badge" :class="order.status">
-                    {{ translateOrderStatus(order.status) }}
-                  </span>
+      <!-- TAB 5: ORDERS -->
+      <div v-show="activeTab === 'orders'" class="tab-pane animate-fade-in">
+        <div class="panel-card glass-card">
+          <h2 class="panel-title">📋 Lịch sử đơn hàng & Thanh toán</h2>
+          
+          <div v-if="orders.length === 0" class="empty-state py-12">
+            <div style="font-size: 40px; margin-bottom: 12px;">📋</div>
+            <p style="font-size: 15px; font-weight: 600; color: #0f172a;">Chưa có đơn hàng nào được tạo.</p>
+          </div>
+          
+          <div v-else class="orders-list">
+            <div v-for="order in orders" :key="order.id" class="order-card">
+              <div class="order-header">
+                <div>
+                  <span class="order-id">Đơn hàng #{{ String(order.id).padStart(6, '0') }}</span>
+                  <span class="order-date">{{ formatDate(order.createdAt) }}</span>
+                </div>
+                <span class="status-badge" :class="order.status">
+                  {{ translateOrderStatus(order.status) }}
+                </span>
+              </div>
+              
+              <!-- Items list in this order -->
+              <div class="order-items mt-3">
+                <div v-for="item in order.items" :key="item.id" class="order-item-detail">
+                  <span>• {{ item.course?.title || 'Khóa học ACC' }}</span>
+                  <span>{{ formatPrice(item.price) }}</span>
+                </div>
+              </div>
+
+              <div class="order-footer mt-4">
+                <div class="discount-row" v-if="order.discountApplied > 0">
+                  Đã giảm giá: -{{ formatPrice(order.discountApplied) }}
+                </div>
+                <div class="total-row">
+                  Tổng cộng: <span class="price">{{ formatPrice(order.totalPrice) }}</span>
                 </div>
                 
-                <!-- Items list in this order -->
-                <div class="order-items mt-3">
-                  <div v-for="item in order.items" :key="item.id" class="order-item-detail">
-                    <span>• {{ item.course.title }}</span>
-                    <span>{{ formatPrice(item.price) }}</span>
-                  </div>
-                </div>
-
-                <div class="order-footer mt-4">
-                  <div class="discount-row" v-if="order.discountApplied > 0">
-                    Đã giảm giá: -{{ formatPrice(order.discountApplied) }}
-                  </div>
-                  <div class="total-row">
-                    Tổng cộng: <span class="price">{{ formatPrice(order.totalPrice) }}</span>
-                  </div>
-                  
-                  <!-- Actions Row -->
-                  <div style="display: flex; gap: 8px; margin-top: 12px;">
-                    <router-link
-                      :to="`/order/${order.id}`"
-                      class="btn btn-outline btn-sm"
-                      style="flex: 1; text-align: center; padding: 6px 10px; font-size: 12px;"
-                    >
-                      📋 Xem chi tiết
-                    </router-link>
-                    <button 
-                      v-if="order.status === 'pending'" 
-                      @click="handlePayOrder(order.id)" 
-                      class="btn btn-outline btn-sm btn-success"
-                      :disabled="loading"
-                      style="flex: 1;"
-                    >
-                      🏦 Thanh toán (Demo)
-                    </button>
-                  </div>
+                <!-- Actions Row -->
+                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                  <router-link
+                    :to="`/order/${order.id}`"
+                    class="btn btn-outline btn-sm"
+                    style="flex: 1; text-align: center; padding: 8px 12px; font-size: 13px;"
+                  >
+                    📋 Xem chi tiết
+                  </router-link>
+                  <button 
+                    v-if="order.status === 'pending'" 
+                    @click="handlePayOrder(order.id)" 
+                    class="btn btn-outline btn-sm btn-success"
+                    :disabled="loading"
+                    style="flex: 1;"
+                  >
+                    🏦 Thanh toán (Demo)
+                  </button>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
+    </div>
 
     <!-- Edit Profile Modal -->
     <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
@@ -292,15 +352,24 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 
 // Import separated stylesheet
 import '@/styles/dashboard.css';
 
 const router = useRouter();
+const route = useRoute();
 const courseStore = useCourseStore();
+
+const activeTab = ref(route.query.tab || 'courses');
+
+watch(() => route.query.tab, (newTab) => {
+  if (newTab) {
+    activeTab.value = newTab;
+  }
+});
 
 const loading = ref(false);
 const copied = ref(false);
@@ -319,7 +388,7 @@ const openEditModal = () => {
 
 const handleSaveProfile = async () => {
   if (!editFullname.value.trim()) {
-    alert('Vui lòng nhập họ và tên!');
+    courseStore.showToast('Vui lòng nhập họ và tên!', 'warning');
     return;
   }
   savingProfile.value = true;
@@ -329,10 +398,10 @@ const handleSaveProfile = async () => {
       payload.password = editPassword.value.trim();
     }
     await courseStore.updateProfile(payload);
-    alert('Cập nhật thông tin học viên thành công!');
+    courseStore.showToast('Cập nhật thông tin học viên thành công!', 'success');
     showEditModal.value = false;
   } catch (err) {
-    alert('Lỗi cập nhật hồ sơ: ' + err.message);
+    courseStore.showToast('Lỗi cập nhật hồ sơ: ' + err.message, 'error');
   } finally {
     savingProfile.value = false;
   }
@@ -365,7 +434,7 @@ const purchasedCourses = computed(() => {
 
 onMounted(async () => {
   if (!courseStore.token) {
-    alert('Vui lòng đăng nhập để truy cập Dashboard!');
+    courseStore.showToast('Vui lòng đăng nhập để truy cập Dashboard!', 'warning');
     router.push('/login');
     return;
   }
@@ -413,7 +482,7 @@ const calculatedTotal = computed(() => {
 
 const handleLogout = () => {
   courseStore.logout();
-  alert('Đã đăng xuất khỏi tài khoản.');
+  courseStore.showToast('Đã đăng xuất khỏi tài khoản.', 'info');
   router.push('/login');
 };
 
@@ -422,7 +491,7 @@ const handleRemoveFromCart = async (courseId) => {
   try {
     await courseStore.removeFromCart(courseId);
   } catch (err) {
-    alert('Không thể xóa khóa học: ' + err.message);
+    courseStore.showToast('Không thể xóa khóa học: ' + err.message, 'error');
   }
 };
 
@@ -430,10 +499,10 @@ const handleCheckout = async () => {
   loading.value = true;
   try {
     await courseStore.checkout();
-    alert('Đơn hàng đã được tạo thành công! Hãy bấm Thanh toán giả lập bên dưới để kích hoạt đơn hàng.');
+    courseStore.showToast('Đơn hàng đã được tạo thành công!', 'success');
     await refreshDashboardData();
   } catch (err) {
-    alert('Đơn hàng lỗi: ' + err.message);
+    courseStore.showToast('Đơn hàng lỗi: ' + err.message, 'error');
   } finally {
     loading.value = false;
   }
@@ -443,10 +512,10 @@ const handlePayOrder = async (orderId) => {
   loading.value = true;
   try {
     await courseStore.payOrder(orderId);
-    alert('Thanh toán giả lập thành công! Người giới thiệu bạn đã nhận được hoa hồng trực tiếp.');
+    courseStore.showToast('Thanh toán giả lập thành công! Khóa học đã được kích hoạt.', 'success');
     await refreshDashboardData();
   } catch (err) {
-    alert('Lỗi thanh toán: ' + err.message);
+    courseStore.showToast('Lỗi thanh toán: ' + err.message, 'error');
   } finally {
     loading.value = false;
   }

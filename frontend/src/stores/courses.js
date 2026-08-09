@@ -41,6 +41,7 @@ export const useCourseStore = defineStore('courses', {
     categories: [],
     programs: [],
     bundles: [],
+    contactSettings: null,
     blogPosts: [],
     loading: false,
     error: null,
@@ -48,7 +49,7 @@ export const useCourseStore = defineStore('courses', {
     // Auth states
     token: localStorage.getItem('token') || null,
     user: null,
-    userMe: null,
+    referralSummary: null,
     isRegistering: false,
 
     // Toast Notification State
@@ -100,11 +101,32 @@ export const useCourseStore = defineStore('courses', {
     },
     isAuthenticated: (state) => !!state.token,
     cartCount: (state) => state.cart.length,
-    cartTotal: (state) => state.cart.reduce((sum, item) => sum + item.course.price, 0),
+    cartTotal: (state) => state.cart.reduce((sum, item) => sum + (item.course?.price || 0), 0),
     userMe: (state) => state.user,
     enrolledCourseIds: (state) => state.enrollments.map(e => e.course?.id),
-    isEnrolled: (state) => (courseId) => {
-      return state.enrollments.some(e => e.course?.id === courseId || e.course?.handle === courseId);
+    isEnrolled: (state) => (courseIdOrHandle) => {
+      if (!state.token) return false;
+      if (state.user?.role === 'admin') return true;
+
+      if (state.enrollments && state.enrollments.length > 0) {
+        const match = state.enrollments.some(e => {
+          if (!e.course) return false;
+          return String(e.course.id) === String(courseIdOrHandle) || e.course.handle === courseIdOrHandle;
+        });
+        if (match) return true;
+      }
+
+      if (state.orders && state.orders.length > 0) {
+        const match = state.orders.some(order => {
+          if (order.status !== 'paid') return false;
+          return order.items && order.items.some(item => {
+            return item.course && (String(item.course.id) === String(courseIdOrHandle) || item.course.handle === courseIdOrHandle);
+          });
+        });
+        if (match) return true;
+      }
+
+      return false;
     }
   },
 
@@ -124,6 +146,15 @@ export const useCourseStore = defineStore('courses', {
       try {
         const response = await fetch(url, { ...options, headers });
         if (!response.ok) {
+          if (response.status === 401) {
+            // Token is expired or invalid -> clear local auth state to stop failing requests
+            this.token = null;
+            this.user = null;
+            localStorage.removeItem('token');
+            if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+              window.location.href = '/login';
+            }
+          }
           const errData = await response.json().catch(() => ({}));
           let message = `HTTP error! status: ${response.status}`;
           if (typeof errData.detail === 'string') {
@@ -143,15 +174,6 @@ export const useCourseStore = defineStore('courses', {
     },
 
     // --- Dynamic Catalog Actions ---
-    async fetchCategories() {
-      try {
-        const data = await this.apiRequest('/courses/categories');
-        this.categories = data;
-      } catch (err) {
-        console.error("Failed to fetch categories:", err);
-      }
-    },
-
     async fetchBanners() {
       try {
         const data = await this.apiRequest('/courses/banners');
@@ -210,6 +232,212 @@ export const useCourseStore = defineStore('courses', {
 
     hideToast() {
       this.toast.show = false;
+    },
+
+    async fetchCategories() {
+      try {
+        const data = await this.apiRequest('/courses/categories');
+        this.categories = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+        return [];
+      }
+    },
+
+    async createCategory(catData) {
+      try {
+        const data = await this.apiRequest('/admin/categories', {
+          method: 'POST',
+          body: JSON.stringify(catData)
+        });
+        await this.fetchCategories();
+        this.showToast(`Đã thêm chuyên mục "${data.name}"`, 'success');
+        return data;
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi khi tạo chuyên mục', 'error');
+        throw err;
+      }
+    },
+
+    async updateCategory(slug, name) {
+      try {
+        const data = await this.apiRequest(`/admin/categories/${slug}`, {
+          method: 'PUT',
+          body: JSON.stringify({ name })
+        });
+        await this.fetchCategories();
+        this.showToast(`Đã cập nhật chuyên mục "${name}"`, 'success');
+        return data;
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi khi sửa chuyên mục', 'error');
+        throw err;
+      }
+    },
+
+    async deleteCategory(slug) {
+      try {
+        await this.apiRequest(`/admin/categories/${slug}`, {
+          method: 'DELETE'
+        });
+        await this.fetchCategories();
+        this.showToast('Đã xóa chuyên mục', 'success');
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi khi xóa chuyên mục', 'error');
+        throw err;
+      }
+    },
+
+    // --- Programs Actions ---
+    async fetchPrograms() {
+      try {
+        const data = await this.apiRequest('/courses/programs');
+        this.programs = data.map(p => ({
+          id: p.id,
+          title: p.title,
+          slug: p.slug,
+          description: p.description,
+          image: p.image
+        }));
+        return this.programs;
+      } catch (err) {
+        console.error("Failed to fetch programs:", err);
+        return [];
+      }
+    },
+
+    async addAdminProgram(progData) {
+      const payload = {
+        title: progData.title,
+        slug: progData.slug,
+        image: progData.image,
+        description: progData.description,
+        course_ids: progData.courseIds || []
+      };
+      const data = await this.apiRequest('/admin/programs', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      await this.fetchPrograms();
+      await this.fetchCourses();
+      return data;
+    },
+
+    async updateAdminProgram(id, progData) {
+      const payload = {
+        title: progData.title,
+        slug: progData.slug,
+        image: progData.image,
+        description: progData.description,
+        course_ids: progData.courseIds || []
+      };
+      const data = await this.apiRequest(`/admin/programs/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      });
+      await this.fetchPrograms();
+      await this.fetchCourses();
+      return data;
+    },
+
+    async deleteAdminProgram(id) {
+      const data = await this.apiRequest(`/admin/programs/${id}`, {
+        method: 'DELETE'
+      });
+      await this.fetchPrograms();
+      await this.fetchCourses();
+      return data;
+    },
+
+    // --- Bundles Actions ---
+    async fetchBundles() {
+      try {
+        const data = await this.apiRequest('/courses/bundles');
+        this.bundles = data.map(b => ({
+          id: b.id,
+          title: b.title,
+          handle: b.handle,
+          description: b.description,
+          price: b.price,
+          original_price: b.original_price,
+          originalPrice: b.original_price,
+          image: b.image,
+          courses: (b.courses || []).map(mapCourse),
+          gift_courses: (b.gift_courses || []).map(mapCourse),
+          giftCourses: (b.gift_courses || []).map(mapCourse)
+        }));
+        return this.bundles;
+      } catch (err) {
+        console.error("Failed to fetch bundles:", err);
+        return [];
+      }
+    },
+
+    async addAdminBundle(bundleData) {
+      const payload = {
+        title: bundleData.title,
+        handle: bundleData.handle,
+        price: bundleData.price,
+        original_price: bundleData.originalPrice,
+        image: bundleData.image,
+        description: bundleData.description,
+        course_ids: bundleData.courseIds || [],
+        gift_course_ids: bundleData.giftCourseIds || []
+      };
+      const data = await this.apiRequest('/admin/bundles', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      await this.fetchBundles();
+      return data;
+    },
+
+    async updateAdminBundle(id, bundleData) {
+      const payload = {
+        title: bundleData.title,
+        handle: bundleData.handle,
+        price: bundleData.price,
+        original_price: bundleData.originalPrice,
+        image: bundleData.image,
+        description: bundleData.description,
+        course_ids: bundleData.courseIds || [],
+        gift_course_ids: bundleData.giftCourseIds || []
+      };
+      const data = await this.apiRequest(`/admin/bundles/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      });
+      await this.fetchBundles();
+      return data;
+    },
+
+    async deleteAdminBundle(id) {
+      const data = await this.apiRequest(`/admin/bundles/${id}`, {
+        method: 'DELETE'
+      });
+      await this.fetchBundles();
+      return data;
+    },
+
+    // --- Contact Settings Actions ---
+    async fetchContactSettings() {
+      try {
+        const data = await this.apiRequest('/contacts/settings');
+        this.contactSettings = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to fetch contact settings:", err);
+        return null;
+      }
+    },
+
+    async updateContactSettings(settingsData) {
+      const data = await this.apiRequest('/admin/contact-settings', {
+        method: 'PUT',
+        body: JSON.stringify(settingsData)
+      });
+      this.contactSettings = data;
+      return data;
     },
 
     async fetchCourses() {
@@ -426,6 +654,23 @@ export const useCourseStore = defineStore('courses', {
       }
     },
 
+    async fetchEnrollments() {
+      if (!this.token) return;
+      try {
+        const data = await this.apiRequest('/enrollments');
+        this.enrollments = data.map(item => ({
+          id: item.id,
+          courseId: item.course_id,
+          orderId: item.order_id,
+          enrolledAt: item.enrolled_at,
+          createdAt: item.created_at || item.enrolled_at,
+          course: item.course ? mapCourse(item.course) : null
+        }));
+      } catch (err) {
+        console.error("Failed to load enrollments:", err);
+      }
+    },
+
     // --- Shopping Cart Actions ---
     async fetchCart() {
       if (!this.token) return;
@@ -433,7 +678,8 @@ export const useCourseStore = defineStore('courses', {
         const data = await this.apiRequest('/cart');
         this.cart = data.map(item => ({
           id: item.id,
-          course: mapCourse(item.course)
+          course: mapCourse(item.course),
+          createdAt: item.created_at
         }));
       } catch (err) {
         console.error("Failed to load cart:", err);
@@ -515,40 +761,11 @@ export const useCourseStore = defineStore('courses', {
         rawId = courseIdOrObject.id || courseIdOrObject.course_id;
       }
       const courseId = Number(rawId);
-      const targetCourse = this.courses.find(c => c.id === courseId);
-
-      // Warn user if cart already has OTHER items that will be replaced
-      if (this.cart.length > 0) {
-        const alreadyInCart = this.cart.some(item => item.course?.id === courseId);
-        if (!alreadyInCart) {
-          const cartCourseNames = this.cart.map(i => `• ${i.course?.title || 'Khóa học'}`).join('\n');
-          const confirmed = window.confirm(
-            `⚠️ Giỏ hàng của bạn đang có ${this.cart.length} khóa học:\n${cartCourseNames}\n\nNếu tiếp tục "Đăng ký ngay", giỏ hàng hiện tại sẽ bị thay thế bởi khóa học mới.\n\nBạn có muốn tiếp tục không?`
-          );
-          if (!confirmed) {
-            throw new Error('CANCELLED');
-          }
-        }
+      const alreadyInCart = this.cart.some(item => item.course?.id === courseId);
+      if (!alreadyInCart && courseId) {
+        await this.addToCart(courseId);
       }
-
-      // 1. Optimistic instant cart update in memory (0ms delay!)
-      if (targetCourse) {
-        this.cart = [{ id: Date.now(), course: targetCourse }];
-      }
-
-      // 2. Background network sync to DB
-      try {
-        await this.apiRequest('/cart', { method: 'DELETE' });
-        const data = await this.apiRequest('/cart', {
-          method: 'POST',
-          body: JSON.stringify({ course_id: courseId })
-        });
-        if (data && data.course) {
-          this.cart = [{ id: data.id, course: mapCourse(data.course) }];
-        }
-      } catch (err) {
-        console.error("Buy now sync error:", err);
-      }
+      return true;
     },
 
     // --- Order Checkout Actions ---
@@ -562,7 +779,7 @@ export const useCourseStore = defineStore('courses', {
           discountApplied: order.discount_applied,
           status: order.status,
           createdAt: order.created_at,
-          items: order.items.map(item => ({
+          items: (order.items || []).map(item => ({
             id: item.id,
             price: item.price,
             course: mapCourse(item.course)
@@ -599,20 +816,6 @@ export const useCourseStore = defineStore('courses', {
         return order;
       } catch (err) {
         throw err;
-      }
-    },
-
-    async fetchEnrollments() {
-      if (!this.token) return;
-      try {
-        const data = await this.apiRequest('/enrollments');
-        this.enrollments = data.map(e => ({
-          id: e.id,
-          course: mapCourse(e.course),
-          enrolledAt: e.enrolled_at
-        }));
-      } catch (err) {
-        console.error('Failed to fetch enrollments:', err);
       }
     },
 
@@ -751,7 +954,7 @@ export const useCourseStore = defineStore('courses', {
         const payload = {
           fullname: user.fullname,
           email: user.email,
-          password: 'defaultPassword123!',
+          password: user.password || 'Acc123456!',
           role: user.role,
           referred_by_id: user.referredById ? Number(user.referredById) : null
         };

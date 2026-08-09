@@ -1,4 +1,7 @@
 import uuid
+import json
+from typing import Optional
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from . import models, schemas, auth
 
@@ -6,7 +9,8 @@ from . import models, schemas, auth
 def get_courses(db: Session, category_slug: str = None):
     query = db.query(models.Course)
     if category_slug:
-        query = query.filter(models.Course.category_slug == category_slug)
+        clean_slug = category_slug.strip().lower()
+        query = query.filter(func.lower(models.Course.category_slug) == clean_slug)
     return query.all()
 
 def get_course_by_handle(db: Session, handle: str):
@@ -37,7 +41,8 @@ def create_contact(db: Session, contact_in: schemas.ContactCreate):
 
 # --- User & Auth CRUD ---
 def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
+    clean_email = email.strip().lower() if email else ""
+    return db.query(models.User).filter(func.lower(models.User.email) == clean_email).first()
 
 def get_user_by_id(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
@@ -46,9 +51,11 @@ def create_user(db: Session, user_in: schemas.UserCreate):
     # Check if a referral code was used
     referred_by_id = None
     if user_in.referral_code_used:
-        referrer = db.query(models.User).filter(models.User.referral_code == user_in.referral_code_used).first()
-        if referrer:
-            referred_by_id = referrer.id
+        clean_code = user_in.referral_code_used.strip().upper()
+        if clean_code:
+            referrer = db.query(models.User).filter(func.upper(models.User.referral_code) == clean_code).first()
+            if referrer:
+                referred_by_id = referrer.id
 
     # Generate a unique referral code for the new user (e.g. ACC-XXXXXX)
     unique_ref = f"ACC-{uuid.uuid4().hex[:6].upper()}"
@@ -56,7 +63,7 @@ def create_user(db: Session, user_in: schemas.UserCreate):
     hashed_pwd = auth.get_password_hash(user_in.password)
     db_user = models.User(
         fullname=user_in.fullname,
-        email=user_in.email,
+        email=user_in.email.strip().lower(),
         hashed_password=hashed_pwd,
         referral_code=unique_ref,
         referred_by_id=referred_by_id,
@@ -103,6 +110,7 @@ def clear_cart(db: Session, user_id: int):
     db.commit()
     return True
 
+
 # --- Order & Checkout CRUD ---
 def get_user_orders(db: Session, user_id: int):
     return db.query(models.Order).filter(models.Order.user_id == user_id).all()
@@ -111,6 +119,24 @@ def checkout_cart(db: Session, user_id: int):
     cart_items = get_cart_items(db, user_id=user_id)
     if not cart_items:
         return None
+
+    # Filter out items user is already enrolled in
+    valid_cart_items = []
+    has_removed = False
+    for item in cart_items:
+        if check_enrollment(db, user_id=user_id, course_id=item.course_id):
+            db.delete(item)
+            has_removed = True
+        else:
+            valid_cart_items.append(item)
+            
+    if has_removed:
+        db.commit()
+
+    if not valid_cart_items:
+        return None
+
+    cart_items = valid_cart_items
 
     # Calculate total standard price
     total_price = sum(item.course.price for item in cart_items)
@@ -181,78 +207,28 @@ def pay_order(db: Session, order_id: int):
     
     # Check for referral reward
     user = get_user_by_id(db, db_order.user_id)
-    if user.referred_by_id:
-        existing_referral = db.query(models.Referral).filter(
-            models.Referral.referred_id == user.id
-        ).first()
-        
-        if not existing_referral:
-            commission = int(db_order.total_price * 0.10)
-            commission_capped = min(commission, 29000000)
+    if user and user.referred_by_id:
+        referrer_exists = db.query(models.User).filter(models.User.id == user.referred_by_id).first()
+        if referrer_exists:
+            existing_referral = db.query(models.Referral).filter(
+                models.Referral.referred_id == user.id
+            ).first()
             
-            db_referral = models.Referral(
-                referrer_id=user.referred_by_id,
-                referred_id=user.id,
-                commission_amount=commission_capped,
-                status="completed"
-            )
-            db.add(db_referral)
+            if not existing_referral:
+                commission = int(db_order.total_price * 0.10)
+                commission_capped = min(commission, 29000000)
+                
+                db_referral = models.Referral(
+                    referrer_id=user.referred_by_id,
+                    referred_id=user.id,
+                    commission_amount=commission_capped,
+                    status="completed"
+                )
+                db.add(db_referral)
 
     db.commit()
     db.refresh(db_order)
     return db_order
-
-# --- Enrollment CRUD ---
-def get_user_enrollments(db: Session, user_id: int):
-    """Get all courses a user is enrolled in (has paid access to)."""
-    return db.query(models.Enrollment).filter(models.Enrollment.user_id == user_id).all()
-
-def check_enrollment(db: Session, user_id: int, course_id: int) -> bool:
-    """Check if a user is enrolled in a specific course."""
-    enrollment = db.query(models.Enrollment).filter(
-        models.Enrollment.user_id == user_id,
-        models.Enrollment.course_id == course_id
-    ).first()
-    return enrollment is not None
-
-def enroll_user_in_course(db: Session, user_id: int, course_id: int, order_id: int = None):
-    """Manually enroll a user in a course (e.g., admin action or mock payment)."""
-    existing = db.query(models.Enrollment).filter(
-        models.Enrollment.user_id == user_id,
-        models.Enrollment.course_id == course_id
-    ).first()
-    if existing:
-        return existing
-    enrollment = models.Enrollment(user_id=user_id, course_id=course_id, order_id=order_id)
-    db.add(enrollment)
-    db.commit()
-    db.refresh(enrollment)
-    return enrollment
-
-import json
-
-def get_user_course_progress(db: Session, user_id: int, course_id: int):
-    enrollment = db.query(models.Enrollment).filter(
-        models.Enrollment.user_id == user_id,
-        models.Enrollment.course_id == course_id
-    ).first()
-    if not enrollment or not enrollment.progress_data:
-        return []
-    try:
-        return json.loads(enrollment.progress_data)
-    except Exception:
-        return []
-
-def update_user_course_progress(db: Session, user_id: int, course_id: int, completed_lessons: list):
-    enrollment = db.query(models.Enrollment).filter(
-        models.Enrollment.user_id == user_id,
-        models.Enrollment.course_id == course_id
-    ).first()
-    if enrollment:
-        enrollment.progress_data = json.dumps(completed_lessons)
-        db.commit()
-        return True
-    return False
 
 # --- Referral CRUD ---
 def get_referral_summary(db: Session, user_id: int):
@@ -260,19 +236,35 @@ def get_referral_summary(db: Session, user_id: int):
     if not user:
         return None
         
+    # Query all users who registered using this referrer's code
+    referred_users = db.query(models.User).filter(models.User.referred_by_id == user_id).all()
+    
+    # Query completed/paid referral rewards for this referrer
     referrals_query = db.query(models.Referral).filter(models.Referral.referrer_id == user_id).all()
+    referrals_map = {ref.referred_id: ref for ref in referrals_query}
     
     total_commission = sum(ref.commission_amount for ref in referrals_query if ref.status == "completed")
     
     referrals_list = []
-    for ref in referrals_query:
-        referred_user = get_user_by_id(db, ref.referred_id)
+    for ref_user in referred_users:
+        ref_record = referrals_map.get(ref_user.id)
+        if ref_record:
+            rec_id = ref_record.id
+            commission = ref_record.commission_amount
+            status = ref_record.status
+            created_at = ref_record.created_at
+        else:
+            rec_id = ref_user.id
+            commission = 0
+            status = "pending"
+            created_at = ref_user.created_at
+            
         referrals_list.append(schemas.ReferralResponse(
-            id=ref.id,
-            referred_fullname=referred_user.fullname if referred_user else "Unknown Friend",
-            commission_amount=ref.commission_amount,
-            status=ref.status,
-            created_at=ref.created_at
+            id=rec_id,
+            referred_fullname=ref_user.fullname,
+            commission_amount=commission,
+            status=status,
+            created_at=created_at
         ))
         
     return schemas.ReferralSummary(
@@ -319,3 +311,99 @@ def delete_banner(db: Session, banner_id: int):
 # --- Testimonial CRUD ---
 def get_testimonials(db: Session):
     return db.query(models.Testimonial).all()
+
+# --- Enrollment & Progress CRUD ---
+def get_user_enrollments(db: Session, user_id: int):
+    # Batch sync missing paid order courses into enrollments table efficiently
+    enrolled_course_ids = {
+        e.course_id for e in db.query(models.Enrollment.course_id).filter(models.Enrollment.user_id == user_id).all()
+    }
+    
+    paid_items = db.query(models.OrderItem).join(models.Order).filter(
+        models.Order.user_id == user_id,
+        models.Order.status == "paid"
+    ).all()
+    
+    new_enrollments = []
+    for item in paid_items:
+        if item.course_id and item.course_id not in enrolled_course_ids:
+            new_enrollments.append(models.Enrollment(
+                user_id=user_id,
+                course_id=item.course_id,
+                order_id=item.order_id
+            ))
+            enrolled_course_ids.add(item.course_id)
+            
+    if new_enrollments:
+        db.add_all(new_enrollments)
+        db.commit()
+
+    return db.query(models.Enrollment).filter(models.Enrollment.user_id == user_id).all()
+
+def check_enrollment(db: Session, user_id: int, course_id: int) -> bool:
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+    if user and user.role == "admin":
+        return True
+    
+    existing = db.query(models.Enrollment).filter(
+        models.Enrollment.user_id == user_id,
+        models.Enrollment.course_id == course_id
+    ).first()
+    if existing:
+        return True
+
+    # Fallback to paid order items check
+    paid_order_item = db.query(models.OrderItem).join(models.Order).filter(
+        models.Order.user_id == user_id,
+        models.Order.status == "paid",
+        models.OrderItem.course_id == course_id
+    ).first()
+    if paid_order_item:
+        auto_enr = models.Enrollment(user_id=user_id, course_id=course_id, order_id=paid_order_item.order_id)
+        db.add(auto_enr)
+        db.commit()
+        return True
+
+    return False
+
+def enroll_user_in_course(db: Session, user_id: int, course_id: int, order_id: Optional[int] = None):
+    existing = db.query(models.Enrollment).filter(
+        models.Enrollment.user_id == user_id,
+        models.Enrollment.course_id == course_id
+    ).first()
+    if existing:
+        db.refresh(existing)
+        return existing
+    new_enr = models.Enrollment(
+        user_id=user_id,
+        course_id=course_id,
+        order_id=order_id
+    )
+    db.add(new_enr)
+    db.commit()
+    db.refresh(new_enr)
+    return new_enr
+
+def get_user_course_progress(db: Session, user_id: int, course_id: int) -> list:
+    enr = db.query(models.Enrollment).filter(
+        models.Enrollment.user_id == user_id,
+        models.Enrollment.course_id == course_id
+    ).first()
+    if enr and enr.progress_data:
+        try:
+            return json.loads(enr.progress_data)
+        except Exception:
+            return []
+    return []
+
+def update_user_course_progress(db: Session, user_id: int, course_id: int, completed_lessons: list):
+    enr = db.query(models.Enrollment).filter(
+        models.Enrollment.user_id == user_id,
+        models.Enrollment.course_id == course_id
+    ).first()
+    if not enr:
+        enr = models.Enrollment(user_id=user_id, course_id=course_id)
+        db.add(enr)
+    enr.progress_data = json.dumps(completed_lessons)
+    db.commit()
+    return completed_lessons
