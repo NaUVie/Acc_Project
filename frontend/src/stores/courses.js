@@ -38,6 +38,7 @@ export const useCourseStore = defineStore('courses', {
   state: () => ({
     // Catalog states
     courses: [],
+    categories: [],
     programs: [],
     bundles: [],
     blogPosts: [],
@@ -66,8 +67,20 @@ export const useCourseStore = defineStore('courses', {
   }),
 
   getters: {
-    getCoursesByCategory: (state) => (category) => {
-      return state.courses.filter(course => course.category === category);
+    getCoursesByCategory: (state) => (categorySlug) => {
+      if (!categorySlug) return state.courses;
+      let targetSlug = String(categorySlug).toLowerCase();
+      const ALIASES = {
+        'ai': 'ky-nang-ai',
+        'mem': 'ky-nang-mem',
+        'chuyen-mon': 'ky-nang-chuyen-mon'
+      };
+      if (ALIASES[targetSlug]) {
+        targetSlug = ALIASES[targetSlug];
+      }
+      return state.courses.filter(course => 
+        course.category && String(course.category).toLowerCase() === targetSlug
+      );
     },
     getCourseByHandle: (state) => (handle) => {
       return state.courses.find(course => course.handle === handle);
@@ -120,11 +133,23 @@ export const useCourseStore = defineStore('courses', {
     },
 
     // --- Dynamic Catalog Actions ---
+    async fetchCategories() {
+      try {
+        const data = await this.apiRequest('/courses/categories');
+        this.categories = data;
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    },
+
     async fetchCourses() {
       this.loading = true;
       try {
-        const data = await this.apiRequest('/courses');
-        this.courses = data.map(mapCourse);
+        const [coursesData] = await Promise.all([
+          this.apiRequest('/courses'),
+          this.fetchCategories().catch(() => {})
+        ]);
+        this.courses = coursesData.map(mapCourse);
       } catch (err) {
         this.error = err.message;
       } finally {

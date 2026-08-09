@@ -14,6 +14,10 @@ def read_courses(
     courses = crud.get_courses(db, category_slug=category)
     return courses
 
+@router.get("/categories", response_model=List[schemas.CategoryResponse])
+def read_categories(db: Session = Depends(get_db)):
+    return crud.get_categories(db)
+
 @router.get("/programs", response_model=List[schemas.ProgramResponse])
 def read_programs(db: Session = Depends(get_db)):
     return db.query(models.Program).all()

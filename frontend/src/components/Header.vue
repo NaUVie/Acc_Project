@@ -430,15 +430,34 @@ watch(isDrawerOpen, (val) => {
   }
 });
 
-// 1. Mega Menu Categories Data
-const categories = [
-  { id: 'ky-nang-ai', name: 'Kỹ năng AI', viewAllLink: '/courses/ai' },
-  { id: 'ky-nang-chuyen-mon', name: 'Kỹ năng chuyên môn', viewAllLink: '/courses/chuyen-mon' },
-  { id: 'ky-nang-mem', name: 'Kỹ năng mềm', viewAllLink: '/courses/mem' },
-  { id: 'bundles', name: 'Combo khóa học', viewAllLink: '/bundles' }
-];
+// 1. Mega Menu Categories Data dynamically loaded from store
+const categories = computed(() => {
+  if (courseStore.categories && courseStore.categories.length > 0) {
+    return courseStore.categories.map(c => ({
+      id: c.slug,
+      name: c.name,
+      viewAllLink: c.slug === 'bundles' ? '/bundles' : `/courses/category/${c.slug}`
+    }));
+  }
+  return [
+    { id: 'ky-nang-ai', name: 'Kỹ năng AI', viewAllLink: '/courses/category/ky-nang-ai' },
+    { id: 'ky-nang-chuyen-mon', name: 'Kỹ năng chuyên môn', viewAllLink: '/courses/category/ky-nang-chuyen-mon' },
+    { id: 'ky-nang-mem', name: 'Kỹ năng mềm', viewAllLink: '/courses/category/ky-nang-mem' },
+    { id: 'bundles', name: 'Combo khóa học', viewAllLink: '/bundles' }
+  ];
+});
 
 const selectedCategory = ref('ky-nang-ai');
+
+const activeCategoryName = computed(() => {
+  const cat = categories.value.find(c => c.id === selectedCategory.value);
+  return cat ? cat.name : '';
+});
+
+const activeCategoryLink = computed(() => {
+  const cat = categories.value.find(c => c.id === selectedCategory.value);
+  return cat ? cat.viewAllLink : '/courses/category/ky-nang-ai';
+});
 
 const translateCategory = (cat) => {
   switch (cat) {
@@ -467,16 +486,6 @@ const programs = computed(() => {
 
 const filteredPrograms = computed(() => {
   return programs.value.filter(p => p.categoryId === selectedCategory.value);
-});
-
-const activeCategoryName = computed(() => {
-  const cat = categories.find(c => c.id === selectedCategory.value);
-  return cat ? cat.name : '';
-});
-
-const activeCategoryLink = computed(() => {
-  const cat = categories.find(c => c.id === selectedCategory.value);
-  return cat ? cat.viewAllLink : '/courses/ai';
 });
 
 const getProgramsByCategoryId = (catId) => {

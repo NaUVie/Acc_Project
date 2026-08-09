@@ -8,19 +8,10 @@ const routes = [
     component: Home
   },
   {
-    path: '/courses/ai',
-    name: 'CourseAISkills',
-    component: () => import('../views/courses/AISkills.vue')
-  },
-  {
-    path: '/courses/mem',
-    name: 'CourseSoftSkills',
-    component: () => import('../views/courses/SoftSkills.vue')
-  },
-  {
-    path: '/courses/chuyen-mon',
-    name: 'CourseProfessionalSkills',
-    component: () => import('../views/courses/ProfessionalSkills.vue')
+    path: '/courses/category/:categorySlug',
+    alias: ['/courses/ai', '/courses/mem', '/courses/chuyen-mon', '/courses/:categorySlug'],
+    name: 'CourseCategoryView',
+    component: () => import('../views/courses/CourseCategoryView.vue')
   },
   {
     path: '/course/:handle',
