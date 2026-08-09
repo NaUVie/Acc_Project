@@ -193,6 +193,7 @@ class Enrollment(Base):
     course_id = Column(BigInteger, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     order_id = Column(Integer, ForeignKey("orders.id", ondelete="SET NULL"), nullable=True)
     enrolled_at = Column(DateTime, default=datetime.utcnow)
+    progress_data = Column(Text, nullable=True) # JSON list of completed lesson IDs
 
     user = relationship("User", backref="enrollments")
     course = relationship("Course", backref="enrollments")

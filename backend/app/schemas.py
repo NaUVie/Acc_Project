@@ -388,4 +388,13 @@ class BannerResponse(BannerBase):
     class Config:
         from_attributes = True
 
+# Progress Schemas
+class CourseProgressUpdate(BaseModel):
+    completed_lessons: List[str] = []
+
+class CourseProgressResponse(BaseModel):
+    course_id: int
+    completed_lessons: List[str] = []
+
+
 

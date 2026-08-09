@@ -229,6 +229,31 @@ def enroll_user_in_course(db: Session, user_id: int, course_id: int, order_id: i
     db.refresh(enrollment)
     return enrollment
 
+import json
+
+def get_user_course_progress(db: Session, user_id: int, course_id: int):
+    enrollment = db.query(models.Enrollment).filter(
+        models.Enrollment.user_id == user_id,
+        models.Enrollment.course_id == course_id
+    ).first()
+    if not enrollment or not enrollment.progress_data:
+        return []
+    try:
+        return json.loads(enrollment.progress_data)
+    except Exception:
+        return []
+
+def update_user_course_progress(db: Session, user_id: int, course_id: int, completed_lessons: list):
+    enrollment = db.query(models.Enrollment).filter(
+        models.Enrollment.user_id == user_id,
+        models.Enrollment.course_id == course_id
+    ).first()
+    if enrollment:
+        enrollment.progress_data = json.dumps(completed_lessons)
+        db.commit()
+        return True
+    return False
+
 # --- Referral CRUD ---
 def get_referral_summary(db: Session, user_id: int):
     user = get_user_by_id(db, user_id)

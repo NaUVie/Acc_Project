@@ -234,6 +234,29 @@ export const useCourseStore = defineStore('courses', {
       }
     },
 
+    async fetchLessonProgress(handle) {
+      if (!this.token) return [];
+      try {
+        const data = await this.apiRequest(`/courses/${handle}/progress`);
+        return data.completed_lessons || [];
+      } catch (err) {
+        console.warn(`Could not fetch backend progress for ${handle}:`, err);
+        return [];
+      }
+    },
+
+    async saveLessonProgress(handle, completedLessons) {
+      if (!this.token) return;
+      try {
+        await this.apiRequest(`/courses/${handle}/progress`, {
+          method: 'POST',
+          body: JSON.stringify({ completed_lessons: completedLessons })
+        });
+      } catch (err) {
+        console.warn(`Could not save progress to backend for ${handle}:`, err);
+      }
+    },
+
     async fetchBlogs() {
       try {
         const data = await this.apiRequest('/blogs');

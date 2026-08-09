@@ -453,7 +453,7 @@ onMounted(async () => {
   }
   
   // Build customized curriculum structure
-  generateCurriculum(course.value);
+  await generateCurriculum(course.value);
   
   // Set first lesson active
   if (curriculum.value.length > 0 && curriculum.value[0].lessons.length > 0) {
@@ -463,7 +463,7 @@ onMounted(async () => {
 
 const activeLesson = ref(null);
 
-const generateCurriculum = (c) => {
+const generateCurriculum = async (c) => {
   if (c.curriculumData) {
     try {
       curriculum.value = JSON.parse(c.curriculumData).map(ch => ({
@@ -531,48 +531,76 @@ const generateCurriculum = (c) => {
     ];
   }
   
-  // Load saved progress from localStorage
-  loadProgress();
+  // Load saved progress (DB + localStorage)
+  await loadProgress();
 };
 
-// LocalStorage Progress Persistence
+// Progress Persistence (Backend Database + LocalStorage Cache)
 const getProgressStorageKey = () => {
   const userId = courseStore.userMe?.id || 'guest';
   const handle = route.params.handle || 'default';
   return `acc_progress_${userId}_${handle}`;
 };
 
-const saveProgress = () => {
+const saveProgress = async () => {
   const completedIds = [];
   curriculum.value.forEach(chapter => {
     chapter.lessons.forEach(l => {
       if (l.completed) completedIds.push(l.id);
     });
   });
+
+  // 1. Save to LocalStorage (instant cache)
   try {
     localStorage.setItem(getProgressStorageKey(), JSON.stringify(completedIds));
   } catch (e) {
     console.error("Failed to save lesson progress to localStorage", e);
   }
+
+  // 2. Sync to Backend Database (cross-device sync)
+  const handle = route.params.handle;
+  if (handle && courseStore.token) {
+    await courseStore.saveLessonProgress(handle, completedIds);
+  }
 };
 
-const loadProgress = () => {
-  try {
-    const raw = localStorage.getItem(getProgressStorageKey());
-    if (raw) {
-      const completedIds = JSON.parse(raw);
-      if (Array.isArray(completedIds)) {
-        curriculum.value.forEach(chapter => {
-          chapter.lessons.forEach(l => {
-            if (completedIds.includes(l.id)) {
-              l.completed = true;
-            }
-          });
-        });
+const loadProgress = async () => {
+  const handle = route.params.handle;
+  let completedIds = [];
+
+  // 1. Try fetching from Backend DB (cross-device source of truth)
+  if (handle && courseStore.token) {
+    try {
+      const backendCompleted = await courseStore.fetchLessonProgress(handle);
+      if (backendCompleted && backendCompleted.length > 0) {
+        completedIds = backendCompleted;
       }
+    } catch (err) {
+      console.warn("Backend progress fetch failed, falling back to localStorage", err);
     }
-  } catch (e) {
-    console.error("Failed to load lesson progress from localStorage", e);
+  }
+
+  // 2. Fallback to LocalStorage if backend was empty or offline
+  if (completedIds.length === 0) {
+    try {
+      const raw = localStorage.getItem(getProgressStorageKey());
+      if (raw) {
+        completedIds = JSON.parse(raw) || [];
+      }
+    } catch (e) {
+      console.error("Failed to load lesson progress from localStorage", e);
+    }
+  }
+
+  // Apply completed status to curriculum
+  if (Array.isArray(completedIds) && completedIds.length > 0) {
+    curriculum.value.forEach(chapter => {
+      chapter.lessons.forEach(l => {
+        if (completedIds.includes(l.id)) {
+          l.completed = true;
+        }
+      });
+    });
   }
 };
 

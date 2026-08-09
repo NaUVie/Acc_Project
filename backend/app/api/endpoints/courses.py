@@ -66,3 +66,32 @@ def get_course_study_data(
         )
     
     return course
+
+@router.get("/{handle}/progress", response_model=schemas.CourseProgressResponse)
+def get_course_progress(
+    handle: str,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    course = crud.get_course_by_handle(db, handle=handle)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    completed_lessons = crud.get_user_course_progress(db, user_id=current_user.id, course_id=course.id)
+    return {"course_id": course.id, "completed_lessons": completed_lessons}
+
+@router.post("/{handle}/progress", response_model=schemas.CourseProgressResponse)
+def update_course_progress(
+    handle: str,
+    progress_in: schemas.CourseProgressUpdate,
+    current_user: models.User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    course = crud.get_course_by_handle(db, handle=handle)
+    if not course:
+        raise HTTPException(status_code=404, detail="Course not found")
+    
+    crud.update_user_course_progress(
+        db, user_id=current_user.id, course_id=course.id, completed_lessons=progress_in.completed_lessons
+    )
+    return {"course_id": course.id, "completed_lessons": progress_in.completed_lessons}
