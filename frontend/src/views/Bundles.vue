@@ -292,6 +292,11 @@ const toggleFaq = (idx) => {
 
 const handleEnrollBundle = async (bundleObj) => {
   if (!bundleObj) return;
+  if (!courseStore.token) {
+    alert('Vui lòng đăng nhập để đăng ký gói Combo!');
+    router.push('/login');
+    return;
+  }
   
   // If bundle has child courses, add child courses to cart
   if (bundleObj.courses && bundleObj.courses.length > 0) {

@@ -180,6 +180,11 @@ const form = ref({
 })
 
 onMounted(() => {
+  if (!courseStore.token) {
+    alert('Vui lòng đăng nhập để tiến hành thanh toán!')
+    router.push('/login')
+    return
+  }
   if (courseStore.userMe) {
     form.value.fullname = courseStore.userMe.fullname || ''
     form.value.email = courseStore.userMe.email || ''
@@ -241,6 +246,11 @@ const formatCurrency = (val) => {
 }
 
 const handlePlaceOrder = async () => {
+  if (!courseStore.token) {
+    alert('Vui lòng đăng nhập để thực hiện thanh toán!')
+    router.push('/login')
+    return
+  }
   if (!form.value.fullname || !form.value.email || !form.value.phone) {
     alert('Vui lòng điền đầy đủ Họ tên, Email và Số điện thoại!')
     return
@@ -249,19 +259,15 @@ const handlePlaceOrder = async () => {
   loading.value = true
 
   try {
-    if (courseStore.token) {
-      const order = await courseStore.checkout()
-      if (order && order.id) {
-        // Redirect to order confirmation page
-        router.push(`/order/${order.id}`)
-        return
-      }
+    const order = await courseStore.checkout()
+    if (order && order.id) {
+      router.push(`/order/${order.id}`)
+      return
     }
-    // Fallback for non-logged-in or mock
     showSuccessModal.value = true
   } catch (e) {
     console.log("Order submission error", e)
-    showSuccessModal.value = true
+    alert(e.message || "Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại!")
   } finally {
     loading.value = false
   }

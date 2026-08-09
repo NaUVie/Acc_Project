@@ -298,6 +298,11 @@ watch(() => route.params.handle, () => {
 
 const addToCart = async () => {
   if (!course.value) return;
+  if (!courseStore.token) {
+    alert('Vui lòng đăng nhập để đăng ký khóa học!');
+    router.push('/login');
+    return;
+  }
   try {
     await courseStore.addToCart(course.value.id);
     alert(`Đã thêm "${course.value.title}" vào giỏ hàng!`);
@@ -308,6 +313,11 @@ const addToCart = async () => {
 
 const buyNow = () => {
   if (!course.value) return;
+  if (!courseStore.token) {
+    alert('Vui lòng đăng nhập để đăng ký khóa học!');
+    router.push('/login');
+    return;
+  }
   try {
     courseStore.buyNow(course.value);
     router.push('/checkout');

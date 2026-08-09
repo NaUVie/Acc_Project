@@ -212,6 +212,11 @@ const applyPromo = () => {
 }
 
 const goToCheckout = () => {
+  if (!courseStore.token) {
+    alert('Vui lòng đăng nhập để tiến hành thanh toán!')
+    router.push('/login')
+    return
+  }
   router.push('/checkout')
 }
 </script>
