@@ -530,6 +530,50 @@ const generateCurriculum = (c) => {
       }
     ];
   }
+  
+  // Load saved progress from localStorage
+  loadProgress();
+};
+
+// LocalStorage Progress Persistence
+const getProgressStorageKey = () => {
+  const userId = courseStore.userMe?.id || 'guest';
+  const handle = route.params.handle || 'default';
+  return `acc_progress_${userId}_${handle}`;
+};
+
+const saveProgress = () => {
+  const completedIds = [];
+  curriculum.value.forEach(chapter => {
+    chapter.lessons.forEach(l => {
+      if (l.completed) completedIds.push(l.id);
+    });
+  });
+  try {
+    localStorage.setItem(getProgressStorageKey(), JSON.stringify(completedIds));
+  } catch (e) {
+    console.error("Failed to save lesson progress to localStorage", e);
+  }
+};
+
+const loadProgress = () => {
+  try {
+    const raw = localStorage.getItem(getProgressStorageKey());
+    if (raw) {
+      const completedIds = JSON.parse(raw);
+      if (Array.isArray(completedIds)) {
+        curriculum.value.forEach(chapter => {
+          chapter.lessons.forEach(l => {
+            if (completedIds.includes(l.id)) {
+              l.completed = true;
+            }
+          });
+        });
+      }
+    }
+  } catch (e) {
+    console.error("Failed to load lesson progress from localStorage", e);
+  }
 };
 
 // Selection
@@ -563,11 +607,13 @@ const progressPercent = computed(() => {
 
 const toggleLessonCompleted = (lesson) => {
   lesson.completed = !lesson.completed;
+  saveProgress();
 };
 
 const markActiveLessonCompleted = () => {
   if (activeLesson.value) {
     activeLesson.value.completed = true;
+    saveProgress();
   }
 };
 

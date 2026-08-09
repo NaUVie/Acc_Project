@@ -86,21 +86,9 @@
               <div v-if="activeTab === 'overview'">
                 <h3 class="section-heading">Bạn sẽ đạt được gì sau khóa học này?</h3>
                 <div class="outcomes-grid">
-                  <div class="outcome-item">
+                  <div v-for="(outcome, oIdx) in courseOutcomes" :key="oIdx" class="outcome-item">
                     <span class="check-icon">✓</span>
-                    <span class="outcome-text">Làm chủ công cụ AI & ứng dụng tự động hóa công việc thực tế</span>
-                  </div>
-                  <div class="outcome-item">
-                    <span class="check-icon">✓</span>
-                    <span class="outcome-text">Tối ưu thời gian xử lý dữ liệu và tạo nội dung x5 lần</span>
-                  </div>
-                  <div class="outcome-item">
-                    <span class="check-icon">✓</span>
-                    <span class="outcome-text">Xây dựng quy trình làm việc thông minh cho bản thân & đội ngũ</span>
-                  </div>
-                  <div class="outcome-item">
-                    <span class="check-icon">✓</span>
-                    <span class="outcome-text">Nhận chứng nhận hoàn thành khóa học từ ACC Academy</span>
+                    <span class="outcome-text">{{ outcome }}</span>
                   </div>
                 </div>
 
@@ -269,6 +257,56 @@ const getCategoryName = (cat) => {
     default: return cat || 'Khóa học';
   }
 };
+
+const courseOutcomes = computed(() => {
+  if (!course.value) return [];
+  if (course.value.outcomes) {
+    if (Array.isArray(course.value.outcomes)) return course.value.outcomes;
+    try {
+      return JSON.parse(course.value.outcomes);
+    } catch (e) {
+      return [course.value.outcomes];
+    }
+  }
+  
+  const cat = course.value.category;
+  if (cat === 'ky-nang-ai') {
+    return [
+      'Làm chủ công cụ AI & ứng dụng tự động hóa công việc thực tế',
+      'Tối ưu thời gian xử lý dữ liệu và tạo nội dung x5 lần',
+      'Xây dựng quy trình làm việc thông minh cho bản thân & đội ngũ',
+      'Nhận chứng nhận hoàn thành khóa học từ ACC Academy'
+    ];
+  } else if (cat === 'ky-nang-mem') {
+    return [
+      'Rèn luyện tư duy giao tiếp và thuyết phục hiệu quả trong công việc',
+      'Làm chủ phương pháp quản lý thời gian và giải quyết vấn đề linh hoạt',
+      'Nâng cao khả năng làm việc nhóm và đàm phán chuyên nghiệp',
+      'Nhận chứng nhận hoàn thành khóa học từ ACC Academy'
+    ];
+  } else if (cat === 'ky-nang-chuyen-mon') {
+    return [
+      'Thành thạo kỹ năng chuyên môn ứng dụng trực tiếp vào công việc',
+      'Xây dựng quy trình làm việc chuẩn mực và đạt hiệu suất tối đa',
+      'Nâng cao năng lực phân tích, quản lý và tối ưu hóa kết quả công việc',
+      'Nhận chứng nhận hoàn thành khóa học từ ACC Academy'
+    ];
+  } else if (cat === 'bundles') {
+    return [
+      'Sở hữu lộ trình học tập toàn diện từ cơ bản đến chuyên sâu',
+      'Tiết kiệm chi phí ưu đãi đặc biệt so với đăng ký từng khóa học lẻ',
+      'Truy cập trọn đời tất cả tài liệu và video bài giảng trong gói Combo',
+      'Nhận chứng nhận hoàn thành chương trình từ ACC Academy'
+    ];
+  }
+  
+  return [
+    `Nắm vững kiến thức trọng tâm của khóa ${course.value.title || 'học'}`,
+    'Ứng dụng thực tiễn ngay vào công việc hằng ngày',
+    'Tài liệu giáo trình đính kèm và nhóm hỗ trợ 24/7',
+    'Nhận chứng nhận hoàn thành khóa học từ ACC Academy'
+  ];
+});
 
 const parentProgram = computed(() => {
   if (!course.value || !course.value.programId) return null;
