@@ -155,17 +155,19 @@ const formatPrice = (value) => {
   return value.toLocaleString('vi-VN') + 'đ';
 };
 
-const handleEnroll = (courseId) => {
+const handleEnroll = async (courseId) => {
   if (!courseStore.token) {
     alert('Vui lòng đăng nhập để đăng ký khóa học!');
     router.push('/login');
     return;
   }
   try {
-    courseStore.buyNow(courseId);
+    await courseStore.buyNow(courseId);
     router.push('/checkout');
   } catch (err) {
-    alert(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!');
+    if (err.message !== 'CANCELLED') {
+      alert(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!');
+    }
   }
 };
 

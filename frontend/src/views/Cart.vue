@@ -6,7 +6,16 @@
         <p class="page-subtitle">Kiểm tra lại các khóa học và ưu đãi trước khi tiến hành thanh toán</p>
       </div>
 
-      <div v-if="cartItems.length === 0" class="empty-cart-state">
+      <!-- Trạng thái chưa đăng nhập -->
+      <div v-if="!courseStore.token" class="empty-cart-state">
+        <div class="empty-icon">🔑</div>
+        <h3>Bạn chưa đăng nhập</h3>
+        <p>Vui lòng đăng nhập để xem giỏ hàng của bạn.</p>
+        <router-link to="/login" class="btn-browse">Đăng nhập ngay</router-link>
+      </div>
+
+      <!-- Giỏ hàng trống (đã đăng nhập) -->
+      <div v-else-if="cartItems.length === 0" class="empty-cart-state">
         <div class="empty-icon">🛒</div>
         <h3>Giỏ hàng đang trống</h3>
         <p>Bạn chưa thêm khóa học nào vào giỏ hàng.</p>
@@ -44,11 +53,7 @@
                 </div>
 
                 <div class="col-quantity">
-                  <div class="qty-picker">
-                    <button class="qty-btn" @click="updateQty(item.id, item.quantity - 1)" :disabled="item.quantity <= 1">-</button>
-                    <span class="qty-val">{{ item.quantity }}</span>
-                    <button class="qty-btn" @click="updateQty(item.id, item.quantity + 1)">+</button>
-                  </div>
+                  <span class="qty-val" style="padding: 0 16px; font-weight: 600;">1</span>
                 </div>
 
                 <div class="col-total">
@@ -149,19 +154,17 @@ const sampleCartItems = ref([
 ])
 
 const cartItems = computed(() => {
-  if (courseStore.cart && courseStore.cart.length > 0) {
-    return courseStore.cart.map(item => ({
-      id: item.id || item.course.id,
-      name: item.course.title,
-      price: item.course.price,
-      originalPrice: item.course.originalPrice || item.course.price * 1.5,
-      quantity: item.quantity || 1,
-      image: item.course.image || '/images/logo3.png',
-      category: item.course.category,
-      isGift: item.course.price === 0
-    }))
-  }
-  return sampleCartItems.value
+  if (!courseStore.token) return [];
+  return courseStore.cart.map(item => ({
+    id: item.id || item.course.id,
+    name: item.course.title,
+    price: item.course.price,
+    originalPrice: item.course.originalPrice || null,
+    quantity: 1,
+    image: item.course.image || '/images/logo3.png',
+    category: item.course.category,
+    isGift: item.course.price === 0
+  }));
 })
 
 const currentSubtotal = computed(() => {

@@ -191,34 +191,15 @@ onMounted(() => {
   }
 })
 
-const sampleCartItems = ref([
-  {
-    id: 1,
-    name: 'Khóa học Thiết kế UI/UX Chuyên Nghiệp',
-    price: 490000,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?auto=format&fit=crop&w=200&q=80'
-  },
-  {
-    id: 2,
-    name: 'Ebook Sổ Tay Phím Tắt Figma & Adobe XD',
-    price: 0,
-    quantity: 1,
-    image: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=200&q=80'
-  }
-])
-
 const cartItems = computed(() => {
-  if (courseStore.cart && courseStore.cart.length > 0) {
-    return courseStore.cart.map(item => ({
-      id: item.id || item.course.id,
-      name: item.course.title,
-      price: item.course.price,
-      quantity: item.quantity || 1,
-      image: item.course.image || '/images/logo3.png'
-    }))
-  }
-  return sampleCartItems.value
+  if (!courseStore.token) return [];
+  return courseStore.cart.map(item => ({
+    id: item.id || item.course.id,
+    name: item.course.title,
+    price: item.course.price,
+    quantity: 1,
+    image: item.course.image || '/images/logo3.png'
+  }));
 })
 
 const currentSubtotal = computed(() => {

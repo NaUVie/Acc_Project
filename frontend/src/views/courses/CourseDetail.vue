@@ -5,7 +5,7 @@
       <nav class="breadcrumb-nav">
         <router-link to="/" class="breadcrumb-link">Trang chủ</router-link>
         <span class="breadcrumb-separator">&rsaquo;</span>
-        <router-link to="/courses/ai" class="breadcrumb-link">Khóa học</router-link>
+        <router-link :to="course ? '/courses/category/' + course.category : '/courses/ai'" class="breadcrumb-link">Khóa học</router-link>
         <span class="breadcrumb-separator">&rsaquo;</span>
         <span class="breadcrumb-current">{{ course?.title || 'Chi tiết khóa học' }}</span>
       </nav>
@@ -181,7 +181,18 @@
             </div>
 
             <!-- Action Buttons -->
-            <div class="action-btn-group">
+            <!-- 🎓 Đã đăng ký: Hiển thị nút Vào học ngay -->
+            <div v-if="isAlreadyEnrolled" class="action-btn-group">
+              <router-link :to="'/courses/' + course.handle + '/study'" class="btn-buy-now" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                ▶ Vào học ngay
+              </router-link>
+              <div class="enrolled-badge" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; border-radius: 10px; padding: 10px 16px; text-align: center; font-size: 13px; font-weight: 600; margin-top: 8px;">
+                ✅ Bạn đã đăng ký khóa học này. Chúc bạn học tốt!
+              </div>
+            </div>
+
+            <!-- 🛒 Chưa đăng ký: Hiển thị nút mua -->
+            <div v-else class="action-btn-group">
               <button @click="addToCart" class="btn-add-cart">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
@@ -190,7 +201,6 @@
                 </svg>
                 Thêm vào giỏ hàng
               </button>
-
               <button @click="buyNow" class="btn-buy-now">
                 ⚡ Đăng ký học ngay
               </button>
@@ -236,6 +246,12 @@ const courseStore = useCourseStore();
 
 const course = ref(null);
 const loading = ref(true);
+
+// Check if current user already enrolled in this course
+const isAlreadyEnrolled = computed(() => {
+  if (!course.value || !courseStore.token) return false;
+  return courseStore.isEnrolled(course.value.handle) || courseStore.isEnrolled(course.value.id);
+});
 const error = ref(null);
 const activeTab = ref('overview');
 
@@ -318,12 +334,15 @@ const buyNow = () => {
     router.push('/login');
     return;
   }
-  try {
-    courseStore.buyNow(course.value);
-    router.push('/checkout');
-  } catch (err) {
-    alert(err.message || 'Không thể tiến hành thanh toán');
-  }
+  courseStore.buyNow(course.value)
+    .then(() => {
+      router.push('/checkout');
+    })
+    .catch(err => {
+      if (err.message !== 'CANCELLED') {
+        alert(err.message || 'Không thể tiến hành thanh toán');
+      }
+    });
 };
 </script>
 

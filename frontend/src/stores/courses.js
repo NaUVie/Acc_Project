@@ -473,6 +473,20 @@ export const useCourseStore = defineStore('courses', {
       const courseId = Number(rawId);
       const targetCourse = this.courses.find(c => c.id === courseId);
 
+      // Warn user if cart already has OTHER items that will be replaced
+      if (this.cart.length > 0) {
+        const alreadyInCart = this.cart.some(item => item.course?.id === courseId);
+        if (!alreadyInCart) {
+          const cartCourseNames = this.cart.map(i => `• ${i.course?.title || 'Khóa học'}`).join('\n');
+          const confirmed = window.confirm(
+            `⚠️ Giỏ hàng của bạn đang có ${this.cart.length} khóa học:\n${cartCourseNames}\n\nNếu tiếp tục "Đăng ký ngay", giỏ hàng hiện tại sẽ bị thay thế bởi khóa học mới.\n\nBạn có muốn tiếp tục không?`
+          );
+          if (!confirmed) {
+            throw new Error('CANCELLED');
+          }
+        }
+      }
+
       // 1. Optimistic instant cart update in memory (0ms delay!)
       if (targetCourse) {
         this.cart = [{ id: Date.now(), course: targetCourse }];
