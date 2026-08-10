@@ -7,80 +7,133 @@
       <p class="subtitle">{{ categoryMeta.description }}</p>
     </div>
 
-    <!-- Filter & Sort Bar (Dynamic) -->
-    <div class="category-toolbar glass-card" v-if="categoryCourses.length > 0">
-      <div class="results-count">
-        Hiển thị <strong>{{ displayRange }}</strong> trong <strong>{{ filteredCourses.length }}</strong> khóa học
-      </div>
-      <div class="toolbar-actions">
-        <!-- Level Filter -->
-        <select v-model="selectedLevel" class="filter-select">
-          <option value="">Tất cả cấp độ</option>
-          <option value="Cơ bản">Cơ bản</option>
-          <option value="Trung cấp">Trung cấp</option>
-          <option value="Nâng cao">Nâng cao</option>
-        </select>
-        <!-- Sort Option -->
-        <select v-model="sortBy" class="filter-select">
-          <option value="default">Mới nhất</option>
-          <option value="price-asc">Giá: Thấp đến Cao</option>
-          <option value="price-desc">Giá: Cao đến Thấp</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Courses Grid -->
-    <div class="courses-grid-wrapper" v-if="filteredCourses.length > 0">
-      <div class="courses-grid">
-        <div v-for="course in paginatedCourses" :key="course.id" class="course-card glass-card animate-slide-up">
-          <router-link :to="'/course/' + course.handle" class="card-image-container">
-            <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" class="course-image" @error="handleImageError" />
-            <div class="card-image-overlay" v-if="course.tags && course.tags.length">
-              <span v-for="tag in course.tags.slice(0, 2)" :key="tag" class="image-tag">{{ tag }}</span>
-            </div>
-          </router-link>
-          <div class="card-body">
-            <div class="card-header-meta">
-              <span class="course-badge" :class="{ 'best-seller': course.price > 3000000 }">
-                {{ course.price > 3000000 ? 'Chuyên sâu' : 'Hot' }}
-              </span>
-              <span class="level-badge">{{ course.level || 'Tổng quát' }}</span>
-            </div>
-            <h3>
-              <router-link :to="'/course/' + course.handle" class="course-title-link">
-                {{ course.title }}
+    <!-- Main Two-Column Layout -->
+    <div class="category-main-layout">
+      <!-- Left Sidebar Filters -->
+      <aside class="sidebar-filter-panel glass-card">
+        <!-- Section 1: Categories Navigation -->
+        <div class="filter-group">
+          <h3 class="filter-group-title">Danh Mục Khóa Học</h3>
+          <ul class="category-nav-list">
+            <li v-for="cat in availableCategories" :key="cat.slug">
+              <router-link 
+                :to="'/courses/category/' + cat.slug" 
+                class="cat-nav-link"
+                :class="{ active: currentSlug.toLowerCase() === cat.slug.toLowerCase() }"
+              >
+                <span>{{ cat.name }}</span>
+                <span class="cat-count-badge" v-if="getCategoryCount(cat.slug)">{{ getCategoryCount(cat.slug) }}</span>
               </router-link>
-            </h3>
-            <p>{{ course.description }}</p>
-            <div class="course-meta">
-              <span class="duration">⏱️ {{ course.duration || 'Linh hoạt' }}</span>
-            </div>
-            <div class="card-footer">
-              <div class="price-container">
-                <span class="original-price" v-if="course.originalPrice">{{ formatPrice(course.originalPrice) }}</span>
-                <span class="price">{{ formatPrice(course.price) }}</span>
-              </div>
-              <button @click.stop="handleEnroll(course.id)" class="btn btn-primary btn-sm">Đăng ký học</button>
-            </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Section 2: Level Filter -->
+        <div class="filter-group">
+          <h3 class="filter-group-title">Trình Độ Học</h3>
+          <div class="filter-options-list">
+            <label class="filter-radio-option" :class="{ active: selectedLevel === '' }">
+              <input type="radio" value="" v-model="selectedLevel" />
+              <span>Tất cả cấp độ</span>
+            </label>
+            <label class="filter-radio-option" :class="{ active: selectedLevel === 'Cơ bản' }">
+              <input type="radio" value="Cơ bản" v-model="selectedLevel" />
+              <span>Cơ bản</span>
+            </label>
+            <label class="filter-radio-option" :class="{ active: selectedLevel === 'Trung cấp' }">
+              <input type="radio" value="Trung cấp" v-model="selectedLevel" />
+              <span>Trung cấp</span>
+            </label>
+            <label class="filter-radio-option" :class="{ active: selectedLevel === 'Nâng cao' }">
+              <input type="radio" value="Nâng cao" v-model="selectedLevel" />
+              <span>Nâng cao</span>
+            </label>
           </div>
         </div>
-      </div>
 
-      <!-- Pagination Component -->
-      <Pagination 
-        :currentPage="currentPage" 
-        :totalItems="filteredCourses.length" 
-        :pageSize="pageSize" 
-        @update:currentPage="currentPage = $event"
-      />
-    </div>
+        <!-- Section 3: Sort Options -->
+        <div class="filter-group">
+          <h3 class="filter-group-title">Sắp Xếp Theo</h3>
+          <select v-model="sortBy" class="sidebar-select">
+            <option value="default">Mới nhất</option>
+            <option value="price-asc">Giá: Thấp đến Cao</option>
+            <option value="price-desc">Giá: Cao đến Thấp</option>
+          </select>
+        </div>
 
-    <!-- Empty State -->
-    <div class="empty-category-state glass-card" v-else>
-      <div class="empty-icon">📚</div>
-      <h3>Chưa có khóa học nào</h3>
-      <p>Danh mục này đang được cập nhật thêm các khóa học mới. Vui lòng quay lại sau!</p>
-      <router-link to="/" class="btn btn-primary">Về trang chủ</router-link>
+        <!-- Reset Button -->
+        <button 
+          v-if="selectedLevel || sortBy !== 'default'" 
+          class="btn-reset-filters"
+          @click="resetFilters"
+        >
+          🔄 Xóa bộ lọc
+        </button>
+      </aside>
+
+      <!-- Right Main Content Area -->
+      <main class="category-content-area">
+        <!-- Results Count Header -->
+        <div class="category-toolbar glass-card" v-if="categoryCourses.length > 0">
+          <div class="results-count">
+            Hiển thị <strong>{{ displayRange }}</strong> trong <strong>{{ filteredCourses.length }}</strong> khóa học
+          </div>
+        </div>
+
+        <!-- Courses Grid -->
+        <div class="courses-grid-wrapper" v-if="filteredCourses.length > 0">
+          <div class="courses-grid">
+            <div v-for="course in paginatedCourses" :key="course.id" class="course-card glass-card animate-slide-up">
+              <router-link :to="'/course/' + course.handle" class="card-image-container">
+                <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" class="course-image" @error="handleImageError" />
+                <div class="card-image-overlay" v-if="course.tags && course.tags.length">
+                  <span v-for="tag in course.tags.slice(0, 2)" :key="tag" class="image-tag">{{ tag }}</span>
+                </div>
+              </router-link>
+              <div class="card-body">
+                <div class="card-header-meta">
+                  <span class="course-badge" :class="{ 'best-seller': course.price > 3000000 }">
+                    {{ course.price > 3000000 ? 'Chuyên sâu' : 'Hot' }}
+                  </span>
+                  <span class="level-badge">{{ course.level || 'Tổng quát' }}</span>
+                </div>
+                <h3>
+                  <router-link :to="'/course/' + course.handle" class="course-title-link">
+                    {{ course.title }}
+                  </router-link>
+                </h3>
+                <p>{{ course.description }}</p>
+                <div class="course-meta">
+                  <span class="duration">⏱️ {{ course.duration || 'Linh hoạt' }}</span>
+                </div>
+                <div class="card-footer">
+                  <div class="price-container">
+                    <span class="original-price" v-if="course.originalPrice">{{ formatPrice(course.originalPrice) }}</span>
+                    <span class="price">{{ formatPrice(course.price) }}</span>
+                  </div>
+                  <button @click.stop="handleEnroll(course.id)" class="btn btn-primary btn-sm">Đăng ký học</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pagination Component -->
+          <Pagination 
+            :currentPage="currentPage" 
+            :totalItems="filteredCourses.length" 
+            :pageSize="pageSize" 
+            @update:currentPage="currentPage = $event"
+          />
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-category-state glass-card" v-else>
+          <div class="empty-icon">📚</div>
+          <h3>Chưa tìm thấy khóa học phù hợp</h3>
+          <p>Không có khóa học nào khớp với bộ lọc đã chọn hoặc danh mục này đang cập nhật.</p>
+          <button @click="resetFilters" class="btn btn-primary">Xóa bộ lọc</button>
+        </div>
+      </main>
     </div>
   </div>
 </template>
@@ -118,11 +171,30 @@ watch([selectedLevel, sortBy, currentSlug], () => {
   currentPage.value = 1;
 });
 
+// Categories list for Sidebar
+const availableCategories = computed(() => {
+  if (courseStore.categories && courseStore.categories.length > 0) {
+    return courseStore.categories;
+  }
+  return [
+    { slug: 'ky-nang-ai', name: 'Kỹ năng AI & Tự động hóa' },
+    { slug: 'ky-nang-chuyen-mon', name: 'Kỹ năng chuyên môn' },
+    { slug: 'ky-nang-mem', name: 'Kỹ năng mềm' }
+  ];
+});
+
+const getCategoryCount = (slug) => {
+  return courseStore.getCoursesByCategory(slug).length;
+};
+
+const resetFilters = () => {
+  selectedLevel.value = '';
+  sortBy.value = 'default';
+};
+
 // Category Metadata presets & fallback
 const categoryMeta = computed(() => {
   const slug = currentSlug.value.toLowerCase();
-  
-  // Custom store category check
   const matchedCategory = courseStore.categories?.find(c => c.slug === slug);
   
   if (slug === 'ky-nang-ai' || slug === 'ai') {
@@ -219,34 +291,153 @@ const handleImageError = (e) => {
 <style scoped>
 @import "@/styles/views/courses/AISkills.css";
 
+.category-main-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 28px;
+  align-items: start;
+  margin-top: 30px;
+}
+
+.sidebar-filter-panel {
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  position: sticky;
+  top: 100px;
+}
+
+.filter-group {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.filter-group-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+
+.category-nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cat-nav-link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.cat-nav-link:hover {
+  background: #f8fafc;
+  color: #022B9F;
+}
+
+.cat-nav-link.active {
+  background: #eef2ff;
+  color: #022B9F;
+  font-weight: 700;
+}
+
+.cat-count-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.cat-nav-link.active .cat-count-badge {
+  background: #022B9F;
+  color: white;
+}
+
+.filter-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  transition: background 0.2s ease;
+}
+
+.filter-radio-option:hover {
+  background: #f8fafc;
+}
+
+.filter-radio-option input {
+  accent-color: #022B9F;
+}
+
+.sidebar-select {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: white;
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+.btn-reset-filters {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: none;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-reset-filters:hover {
+  background: #e2e8f0;
+}
+
 .category-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  margin-bottom: 30px;
+  padding: 14px 20px;
+  margin-bottom: 24px;
   border-radius: var(--radius-lg);
 }
 
 .results-count {
   font-size: 14px;
   color: var(--text-secondary);
-}
-
-.toolbar-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.filter-select {
-  padding: 8px 16px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: white;
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
 }
 
 .empty-category-state {
@@ -270,5 +461,14 @@ const handleImageError = (e) => {
 .empty-category-state p {
   color: var(--text-secondary);
   margin-bottom: 24px;
+}
+
+@media (max-width: 992px) {
+  .category-main-layout {
+    grid-template-columns: 1fr;
+  }
+  .sidebar-filter-panel {
+    position: static;
+  }
 }
 </style>

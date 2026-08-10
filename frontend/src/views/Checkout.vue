@@ -99,14 +99,58 @@
 
             <div class="summary-divider"></div>
 
+            <!-- Coupon Input Box -->
+            <div style="margin-bottom: 16px;">
+              <label style="font-size: 12px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">MÃ GIẢM GIÁ (COUPON)</label>
+              <div style="display: flex; gap: 8px;">
+                <input 
+                  type="text" 
+                  v-model="couponCode" 
+                  placeholder="Nhập mã coupon..." 
+                  style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; text-transform: uppercase;"
+                />
+                <button 
+                  @click="applyCouponCode" 
+                  :disabled="applyingCoupon"
+                  style="background: #0284c7; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer;"
+                >
+                  {{ applyingCoupon ? '...' : 'Áp dụng' }}
+                </button>
+              </div>
+              <p v-if="couponMessage" :style="{ color: couponSuccess ? '#16a34a' : '#dc2626' }" style="font-size: 12px; margin: 4px 0 0 0; font-weight: 600;">
+                {{ couponMessage }}
+              </p>
+            </div>
+
+            <!-- Store Credit Wallet Checkbox -->
+            <div v-if="userStoreCredit > 0" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 12px; margin-bottom: 16px;">
+              <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" v-model="useStoreCredit" style="width: 18px; height: 18px; accent-color: #16a34a;" />
+                <div>
+                  <div style="font-size: 13px; font-weight: 700; color: #15803d;">Dùng số dư Ví tích lũy</div>
+                  <div style="font-size: 12px; color: #166534;">Khả dụng: {{ formatCurrency(userStoreCredit) }}</div>
+                </div>
+              </label>
+            </div>
+
             <div class="summary-row">
               <span>Tạm tính</span>
               <span>{{ formatCurrency(currentSubtotal) }}</span>
             </div>
 
-            <div class="summary-row discount" v-if="discountAmount > 0">
-              <span>Ưu đãi áp dụng ({{ discountRate * 100 }}%)</span>
-              <span>-{{ formatCurrency(discountAmount) }}</span>
+            <div class="summary-row discount" v-if="referralDiscountAmount > 0">
+              <span>Ưu đãi Giới thiệu (10%)</span>
+              <span>-{{ formatCurrency(referralDiscountAmount) }}</span>
+            </div>
+
+            <div class="summary-row discount" v-if="couponDiscount > 0">
+              <span>Mã giảm giá ({{ couponCodeApplied }})</span>
+              <span>-{{ formatCurrency(couponDiscount) }}</span>
+            </div>
+
+            <div class="summary-row discount" v-if="storeCreditDiscount > 0">
+              <span>Trừ Ví tích lũy</span>
+              <span>-{{ formatCurrency(storeCreditDiscount) }}</span>
             </div>
 
             <div class="summary-divider"></div>
@@ -149,7 +193,19 @@ const form = ref({
   note: ''
 })
 
-onMounted(() => {
+const couponCode = ref('')
+const couponCodeApplied = ref('')
+const couponDiscount = ref(0)
+const applyingCoupon = ref(false)
+const couponMessage = ref('')
+const couponSuccess = ref(false)
+
+const useStoreCredit = ref(false)
+const userStoreCredit = computed(() => {
+  return courseStore.userMe?.storeCreditBalance || courseStore.referralSummary?.storeCreditBalance || 0
+})
+
+onMounted(async () => {
   if (!courseStore.token) {
     courseStore.showToast('Vui lòng đăng nhập để tiến hành thanh toán!', 'warning')
     router.push('/login')
@@ -159,6 +215,7 @@ onMounted(() => {
     form.value.fullname = courseStore.userMe.fullname || ''
     form.value.email = courseStore.userMe.email || ''
   }
+  await courseStore.fetchMyReferralSummary()
 })
 
 const cartItems = computed(() => {
@@ -176,21 +233,55 @@ const currentSubtotal = computed(() => {
   return cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
 })
 
-const discountRate = computed(() => {
-  const subtotal = currentSubtotal.value
-  if (subtotal >= 1000000) return 0.25
-  if (subtotal >= 600000) return 0.22
-  if (subtotal >= 300000) return 0.10
+const isFirstPurchase = computed(() => {
+  return (courseStore.orders || []).filter(o => o.status === 'paid').length === 0
+})
+
+const isReferredUser = computed(() => {
+  return Boolean(courseStore.userMe?.referredById || courseStore.userMe?.referred_by_id)
+})
+
+const referralDiscountAmount = computed(() => {
+  if (isReferredUser.value && isFirstPurchase.value) {
+    return Math.floor(currentSubtotal.value * 0.10)
+  }
   return 0
 })
 
-const discountAmount = computed(() => {
-  return currentSubtotal.value * discountRate.value
+const storeCreditDiscount = computed(() => {
+  if (!useStoreCredit.value) return 0;
+  const afterPrior = Math.max(0, currentSubtotal.value - referralDiscountAmount.value - couponDiscount.value);
+  return Math.min(userStoreCredit.value, afterPrior);
 })
 
 const finalTotal = computed(() => {
-  return currentSubtotal.value - discountAmount.value
+  const total = currentSubtotal.value - referralDiscountAmount.value - couponDiscount.value - storeCreditDiscount.value;
+  return Math.max(0, total);
 })
+
+const applyCouponCode = async () => {
+  if (!couponCode.value.trim()) {
+    couponMessage.value = 'Vui lòng nhập mã coupon';
+    couponSuccess.value = false;
+    return;
+  }
+  applyingCoupon.value = true;
+  couponMessage.value = '';
+  try {
+    const res = await courseStore.applyCoupon(couponCode.value.trim(), currentSubtotal.value);
+    couponDiscount.value = res.discount_amount;
+    couponCodeApplied.value = res.code;
+    couponMessage.value = res.message;
+    couponSuccess.value = true;
+  } catch (err) {
+    couponDiscount.value = 0;
+    couponCodeApplied.value = '';
+    couponMessage.value = err.message || 'Mã giảm giá không hợp lệ';
+    couponSuccess.value = false;
+  } finally {
+    applyingCoupon.value = false;
+  }
+}
 
 const formatCurrency = (val) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val)
@@ -210,7 +301,7 @@ const handlePlaceOrder = async () => {
   loading.value = true
 
   try {
-    const order = await courseStore.checkout()
+    const order = await courseStore.checkoutWithOptions(couponCodeApplied.value || null, useStoreCredit.value)
     if (order && order.id) {
       router.push(`/order/${order.id}`)
     } else {

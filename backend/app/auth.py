@@ -77,3 +77,5 @@ def get_current_admin(current_user: models.User = Depends(get_current_user)) -> 
             detail="Bạn không có quyền thực hiện hành động này."
         )
     return current_user
+
+get_current_admin_user = get_current_admin

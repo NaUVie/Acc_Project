@@ -1,74 +1,119 @@
 <template>
   <div class="login-view container">
-    <div class="dashboard-wrapper animate-fade-in">
-      <!-- Welcome Header -->
-      <div class="dashboard-header glass-card">
-        <div class="user-intro">
+    <div class="dashboard-sidebar-layout animate-fade-in">
+      
+      <!-- LEFT SIDEBAR NAV -->
+      <aside class="dashboard-sidebar glass-card">
+        <div class="sidebar-user-header">
           <div class="user-avatar-initials">
             {{ getUserInitials(courseStore.userMe?.fullname) }}
           </div>
-          <div>
-            <h1>Xin chào, <span class="gradient-text">{{ courseStore.userMe?.fullname }}</span>!</h1>
-            <p>Học viên ACC Academy • Lớp: {{ courseStore.userMe?.role === 'admin' ? 'Quản trị viên' : 'Lớp tiêu chuẩn' }}</p>
+          <div class="user-info-text">
+            <h3 class="user-name">{{ courseStore.userMe?.fullname || 'Học viên' }}</h3>
+            <span class="user-role-label">{{ courseStore.userMe?.role === 'admin' ? '👑 Quản trị viên' : '🎓 Học viên ACC' }}</span>
           </div>
         </div>
-        <button @click="handleLogout" class="btn btn-outline btn-sm btn-danger">
-          Đăng xuất
-        </button>
-      </div>
 
-      <!-- DASHBOARD TAB NAVIGATION BAR -->
-      <div class="dashboard-tabs-nav">
-        <button 
-          class="nav-tab-item" 
-          :class="{ active: activeTab === 'courses' }"
-          @click="activeTab = 'courses'"
-        >
-          <span class="tab-icon">📚</span> Khóa học của tôi
-          <span class="tab-count-badge" v-if="purchasedCourses.length > 0">{{ purchasedCourses.length }}</span>
-        </button>
+        <div class="sidebar-divider"></div>
 
-        <button 
-          class="nav-tab-item" 
-          :class="{ active: activeTab === 'profile' }"
-          @click="activeTab = 'profile'"
-        >
-          <span class="tab-icon">👤</span> Hồ sơ cá nhân
-        </button>
+        <nav class="sidebar-nav-list">
+          <button 
+            class="sidebar-nav-item" 
+            :class="{ active: activeTab === 'courses' }"
+            @click="activeTab = 'courses'"
+          >
+            <span class="tab-icon">📚</span>
+            <span class="tab-label">Khóa học của tôi</span>
+            <span class="tab-badge" v-if="purchasedCourses.length > 0">{{ purchasedCourses.length }}</span>
+          </button>
 
-        <button 
-          class="nav-tab-item" 
-          :class="{ active: activeTab === 'referral' }"
-          @click="activeTab = 'referral'"
-        >
-          <span class="tab-icon">🎁</span> Lan tỏa & Nhận quà
-        </button>
+          <button 
+            class="sidebar-nav-item" 
+            :class="{ active: activeTab === 'profile' }"
+            @click="activeTab = 'profile'"
+          >
+            <span class="tab-icon">👤</span>
+            <span class="tab-label">Hồ sơ cá nhân</span>
+          </button>
 
-        <button 
-          class="nav-tab-item" 
-          :class="{ active: activeTab === 'cart' }"
-          @click="activeTab = 'cart'"
-        >
-          <span class="tab-icon">🛒</span> Giỏ hàng
-          <span class="tab-count-badge" v-if="courseStore.cart.length > 0">{{ courseStore.cart.length }}</span>
-        </button>
+          <button 
+            class="sidebar-nav-item" 
+            :class="{ active: activeTab === 'referral' }"
+            @click="activeTab = 'referral'"
+          >
+            <span class="tab-icon">🎁</span>
+            <span class="tab-label">Lan tỏa & Nhận quà</span>
+          </button>
 
-        <button 
-          class="nav-tab-item" 
-          :class="{ active: activeTab === 'orders' }"
-          @click="activeTab = 'orders'"
-        >
-          <span class="tab-icon">📋</span> Lịch sử đơn hàng
-          <span class="tab-count-badge" v-if="orders.length > 0">{{ orders.length }}</span>
-        </button>
-      </div>
+          <button 
+            class="sidebar-nav-item" 
+            :class="{ active: activeTab === 'cart' }"
+            @click="activeTab = 'cart'"
+          >
+            <span class="tab-icon">🛒</span>
+            <span class="tab-label">Giỏ hàng</span>
+            <span class="tab-badge" v-if="courseStore.cart.length > 0">{{ courseStore.cart.length }}</span>
+          </button>
+
+          <button 
+            class="sidebar-nav-item" 
+            :class="{ active: activeTab === 'wishlist' }"
+            @click="activeTab = 'wishlist'"
+          >
+            <span class="tab-icon">❤️</span>
+            <span class="tab-label">Yêu thích</span>
+            <span class="tab-badge" v-if="courseStore.wishlist.length > 0">{{ courseStore.wishlist.length }}</span>
+          </button>
+
+          <button 
+            class="sidebar-nav-item" 
+            :class="{ active: activeTab === 'orders' }"
+            @click="activeTab = 'orders'"
+          >
+            <span class="tab-icon">📋</span>
+            <span class="tab-label">Lịch sử đơn hàng</span>
+            <span class="tab-badge" v-if="orders.length > 0">{{ orders.length }}</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button @click="handleLogout" class="sidebar-logout-btn">
+            <span>🚪</span> Đăng xuất tài khoản
+          </button>
+        </div>
+      </aside>
+
+      <!-- RIGHT MAIN CONTENT AREA -->
+      <main class="dashboard-main-content">
 
       <!-- TAB 1: COURSES -->
       <div v-show="activeTab === 'courses'" class="tab-pane animate-fade-in">
         <div class="panel-card glass-card">
           <div class="section-title-row">
-            <h2 class="panel-title">📚 Khóa học của tôi ({{ purchasedCourses.length }})</h2>
-            <router-link to="/courses/ai" class="btn btn-outline btn-sm" style="font-size: 13px;">+ Khám phá khóa học mới</router-link>
+            <h2 class="panel-title">📚 Khóa học của tôi ({{ filteredPurchasedCourses.length }})</h2>
+            
+            <div class="courses-filter-bar">
+              <select v-model="courseCategoryFilter" class="category-select-control">
+                <option v-for="cat in availableCourseCategories" :key="cat.value" :value="cat.value">
+                  {{ cat.label }}
+                </option>
+              </select>
+
+              <div class="search-input-wrapper">
+                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="M21 21l-4.35-4.35"/>
+                </svg>
+                <input 
+                  type="text" 
+                  v-model="courseSearchQuery" 
+                  placeholder="Tìm khóa học của bạn..." 
+                  class="search-control"
+                />
+                <button v-if="courseSearchQuery" @click="courseSearchQuery = ''" class="clear-search-btn">✕</button>
+              </div>
+              <router-link to="/courses/ai" class="btn btn-outline btn-sm" style="font-size: 13px;">+ Khám phá mới</router-link>
+            </div>
           </div>
           
           <div v-if="purchasedCourses.length === 0" class="empty-state py-12">
@@ -77,19 +122,56 @@
             <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Hãy tham gia ngay các khóa học AI & Kỹ năng tại ACC Academy!</p>
             <router-link to="/courses/ai" class="btn btn-primary btn-sm mt-4 inline-block">Khám phá các khóa học</router-link>
           </div>
+
+          <div v-else-if="filteredPurchasedCourses.length === 0" class="empty-state py-12">
+            <div style="font-size: 36px; margin-bottom: 8px;">🔍</div>
+            <p style="font-size: 15px; font-weight: 600; color: #0f172a;">Không tìm thấy khóa học nào khớp với bộ lọc hiện tại.</p>
+            <button @click="courseSearchQuery = ''; courseCategoryFilter = 'all'" class="btn btn-outline btn-sm mt-3">Xóa bộ lọc</button>
+          </div>
           
-          <div v-else class="purchased-courses-grid">
-            <div v-for="course in purchasedCourses" :key="course.id" class="purchased-course-card glass-card">
-              <img :src="course.image" :alt="course.title" class="purchased-card-img" />
-              <div class="purchased-card-body">
-                <h4>{{ course.title }}</h4>
-                <p class="course-meta">Thời lượng: {{ course.duration || '12 tuần' }} • Trình độ: {{ course.level || 'Trung cấp' }}</p>
-                <div class="card-action-row">
-                  <router-link :to="'/courses/' + course.handle + '/study'" class="btn btn-primary btn-sm w-full">
-                    🚀 Vào lớp học ngay
-                  </router-link>
+          <div v-else>
+            <div class="purchased-courses-grid">
+              <div v-for="course in paginatedPurchasedCourses" :key="course.id" class="purchased-course-card glass-card">
+                <img :src="course.image" :alt="course.title" class="purchased-card-img" />
+                <div class="purchased-card-body">
+                  <h4>{{ course.title }}</h4>
+                  <p class="course-meta">Thời lượng: {{ course.duration || '12 tuần' }} • Trình độ: {{ course.level || 'Trung cấp' }}</p>
+                  <div class="card-action-row">
+                    <router-link :to="'/courses/' + course.handle + '/study'" class="btn btn-primary btn-sm w-full">
+                      🚀 Vào lớp học ngay
+                    </router-link>
+                  </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Pagination Controls -->
+            <div v-if="totalCoursePages > 1" class="pagination-wrapper">
+              <button 
+                class="page-btn prev-btn" 
+                :disabled="coursePage === 1" 
+                @click="coursePage--"
+              >
+                ‹ Trước
+              </button>
+              <div class="page-numbers">
+                <button 
+                  v-for="p in totalCoursePages" 
+                  :key="p" 
+                  class="page-num-btn" 
+                  :class="{ active: coursePage === p }"
+                  @click="coursePage = p"
+                >
+                  {{ p }}
+                </button>
+              </div>
+              <button 
+                class="page-btn next-btn" 
+                :disabled="coursePage === totalCoursePages" 
+                @click="coursePage++"
+              >
+                Sau ›
+              </button>
             </div>
           </div>
         </div>
@@ -161,6 +243,10 @@
             <div class="stat-card highlighted">
               <div class="stat-num">{{ formatPrice(referralSummary?.totalCommissionEarned || 0) }}</div>
               <div class="stat-label">Hoa hồng nhận được</div>
+            </div>
+            <div class="stat-card" style="border: 1px solid #bbf7d0; background: #f0fdf4;">
+              <div class="stat-num" style="color: #16a34a;">{{ formatPrice(courseStore.userMe?.storeCreditBalance || referralSummary?.storeCreditBalance || 0) }}</div>
+              <div class="stat-label" style="color: #15803d; font-weight: 700;">Ví giảm giá khả dụng</div>
             </div>
           </div>
 
@@ -242,7 +328,39 @@
         </div>
       </div>
 
-      <!-- TAB 5: ORDERS -->
+      <!-- TAB 5: WISHLIST -->
+      <div v-show="activeTab === 'wishlist'" class="tab-pane animate-fade-in">
+        <div class="panel-card glass-card">
+          <h2 class="panel-title">❤️ Danh sách Khóa học Yêu thích ({{ courseStore.wishlist.length }})</h2>
+          
+          <div v-if="courseStore.wishlist.length === 0" class="empty-state py-12">
+            <div style="font-size: 40px; margin-bottom: 12px;">❤️</div>
+            <p style="font-size: 15px; font-weight: 600; color: #0f172a;">Danh sách yêu thích của bạn đang trống.</p>
+            <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Hãy nhấn biểu tượng trái tim ở trang chi tiết khóa học để lưu lại xem sau!</p>
+            <router-link to="/courses/ai" class="btn btn-primary btn-sm mt-4 inline-block">Khám phá các khóa học</router-link>
+          </div>
+          
+          <div v-else class="purchased-courses-grid">
+            <div v-for="item in courseStore.wishlist" :key="item.id" class="purchased-course-card glass-card">
+              <img :src="item.course?.image || '/images/default.jpg'" :alt="item.course?.title" class="purchased-card-img" />
+              <div class="purchased-card-body">
+                <h4>{{ item.course?.title }}</h4>
+                <p class="course-meta">Giá bán: <strong style="color: #0284c7;">{{ formatPrice(item.course?.price) }}</strong></p>
+                <div class="card-action-row" style="display: flex; gap: 8px; margin-top: 12px;">
+                  <router-link :to="'/course/' + item.course?.handle" class="btn btn-primary btn-sm" style="flex: 1; text-align: center;">
+                    Xem chi tiết
+                  </router-link>
+                  <button @click="handleRemoveWishlist(item.course?.id)" class="btn btn-outline btn-sm btn-danger" title="Xóa khỏi wishlist">
+                    🗑️ Bỏ lưu
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 6: ORDERS -->
       <div v-show="activeTab === 'orders'" class="tab-pane animate-fade-in">
         <div class="panel-card glass-card">
           <h2 class="panel-title">📋 Lịch sử đơn hàng & Thanh toán</h2>
@@ -267,8 +385,8 @@
               <!-- Items list in this order -->
               <div class="order-items mt-3">
                 <div v-for="item in order.items" :key="item.id" class="order-item-detail">
-                  <span>• {{ item.course?.title || 'Khóa học ACC' }}</span>
-                  <span>{{ formatPrice(item.price) }}</span>
+                  <span class="order-item-title">• {{ item.course?.title || 'Khóa học ACC' }}</span>
+                  <span style="font-weight: 600;">{{ formatPrice(item.price) }}</span>
                 </div>
               </div>
 
@@ -305,6 +423,7 @@
         </div>
       </div>
 
+      </main>
     </div>
 
     <!-- Edit Profile Modal -->
@@ -432,6 +551,64 @@ const purchasedCourses = computed(() => {
   return list;
 });
 
+// Search, Category Filtering & Pagination for My Courses
+const courseSearchQuery = ref('');
+const courseCategoryFilter = ref('all');
+const coursePage = ref(1);
+const courseItemsPerPage = 8;
+
+watch([courseSearchQuery, courseCategoryFilter], () => {
+  coursePage.value = 1;
+});
+
+const availableCourseCategories = computed(() => {
+  const catSet = new Map();
+  catSet.set('all', 'Tất cả danh mục');
+  
+  purchasedCourses.value.forEach(c => {
+    const slug = c.category_slug || c.category;
+    if (slug && !catSet.has(slug)) {
+      let label = slug;
+      if (slug === 'ky-nang-ai') label = 'Kỹ năng AI';
+      else if (slug === 'ky-nang-chuyen-mon') label = 'Chuyên môn & Dữ liệu';
+      else if (slug === 'ky-nang-mem') label = 'Kỹ năng mềm';
+      else if (slug === 'bundles') label = 'Gói Combo';
+      else label = slug.charAt(0).toUpperCase() + slug.slice(1);
+      
+      catSet.set(slug, label);
+    }
+  });
+  
+  return Array.from(catSet.entries()).map(([value, label]) => ({ value, label }));
+});
+
+const filteredPurchasedCourses = computed(() => {
+  const q = courseSearchQuery.value.trim().toLowerCase();
+  const cat = courseCategoryFilter.value;
+
+  return purchasedCourses.value.filter(c => {
+    const cCat = c.category_slug || c.category;
+    const catMatch = cat === 'all' || cCat === cat;
+
+    if (!catMatch) return false;
+    if (!q) return true;
+
+    const titleMatch = (c.title || '').toLowerCase().includes(q);
+    const categoryTextMatch = (cCat || '').toLowerCase().includes(q);
+    const descMatch = (c.description || '').toLowerCase().includes(q);
+    return titleMatch || categoryTextMatch || descMatch;
+  });
+});
+
+const totalCoursePages = computed(() => {
+  return Math.ceil(filteredPurchasedCourses.value.length / courseItemsPerPage) || 1;
+});
+
+const paginatedPurchasedCourses = computed(() => {
+  const start = (coursePage.value - 1) * courseItemsPerPage;
+  return filteredPurchasedCourses.value.slice(start, start + courseItemsPerPage);
+});
+
 onMounted(async () => {
   if (!courseStore.token) {
     courseStore.showToast('Vui lòng đăng nhập để truy cập Dashboard!', 'warning');
@@ -450,7 +627,8 @@ const refreshDashboardData = async () => {
       courseStore.fetchCart(),
       courseStore.fetchReferrals(),
       courseStore.fetchOrders(),
-      courseStore.fetchEnrollments()
+      courseStore.fetchEnrollments(),
+      courseStore.fetchWishlist()
     ];
     if (courseStore.courses.length === 0) {
       promises.push(courseStore.fetchCourses());
@@ -459,6 +637,11 @@ const refreshDashboardData = async () => {
   } catch (err) {
     console.error("Dashboard refresh error:", err);
   }
+};
+
+const handleRemoveWishlist = async (courseId) => {
+  if (!courseId) return;
+  await courseStore.toggleWishlist(courseId);
 };
 
 // Calculations for active checkout
@@ -525,7 +708,7 @@ const handlePayOrder = async (orderId) => {
 const getReferralLink = (code) => {
   if (!code) return '';
   const port = window.location.port ? `:${window.location.port}` : '';
-  return `${window.location.protocol}//${window.location.hostname}${port}/#/register?ref=${code}`;
+  return `${window.location.protocol}//${window.location.hostname}${port}/register?ref=${code}`;
 };
 
 const copyReferralLink = () => {

@@ -78,6 +78,12 @@
               >
                 📚 Lộ trình học ({{ parsedCurriculum.length }} bài học)
               </button>
+              <button 
+                @click="activeTab = 'reviews'" 
+                :class="['tab-btn', { active: activeTab === 'reviews' }]"
+              >
+                ⭐ Đánh giá ({{ reviews.length }})
+              </button>
             </div>
 
             <!-- Tab Body -->
@@ -127,6 +133,58 @@
                       </div>
                     </div>
                     <span class="hd-tag">▶ Video HD</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 3: Reviews -->
+              <div v-else-if="activeTab === 'reviews'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+                  <div>
+                    <h3 class="section-heading" style="margin: 0;">Đánh giá từ Học viên</h3>
+                    <p style="font-size: 13px; color: #64748b; margin: 4px 0 0 0;">{{ reviews.length }} nhận xét công khai từ học viên tham gia khóa học</p>
+                  </div>
+                  <div style="font-size: 24px; font-weight: 800; color: #d97706; display: flex; align-items: center; gap: 6px;">
+                    ⭐ {{ averageRating }} / 5.0
+                  </div>
+                </div>
+
+                <!-- Review Submission Box (Only for Enrolled Users or Admins) -->
+                <div v-if="isAlreadyEnrolled" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
+                  <h4 style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 12px;">Viết nhận xét của bạn</h4>
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                    <span style="font-size: 13px; font-weight: 600; color: #475569;">Chọn số sao:</span>
+                    <div style="display: flex; gap: 4px; cursor: pointer;">
+                      <span v-for="star in 5" :key="star" @click="newReview.rating = star" style="font-size: 20px; transition: transform 0.1s;" :style="{ color: star <= newReview.rating ? '#f59e0b' : '#cbd5e1' }">★</span>
+                    </div>
+                  </div>
+                  <textarea v-model="newReview.comment" placeholder="Chia sẻ trải nghiệm học tập của bạn về nội dung bài giảng, giảng viên..." style="width: 100%; min-height: 80px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box; outline: none;"></textarea>
+                  <button @click="submitReview" :disabled="submittingReview" class="btn-add-cart" style="width: auto; padding: 8px 20px; font-size: 13px;">
+                    {{ submittingReview ? 'Đang gửi...' : 'Gửi nhận xét' }}
+                  </button>
+                </div>
+
+                <!-- Reviews List -->
+                <div v-if="reviews.length === 0" style="text-align: center; padding: 40px 0; color: #64748b; font-size: 14px;">
+                  Chưa có nhận xét nào. Hãy là người đầu tiên đánh giá khóa học này!
+                </div>
+                <div v-else style="display: flex; flex-direction: column; gap: 16px;">
+                  <div v-for="rev in reviews" :key="rev.id" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; background: #fff;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">
+                          {{ rev.user_fullname ? rev.user_fullname.charAt(0).toUpperCase() : 'H' }}
+                        </div>
+                        <div>
+                          <div style="font-weight: 700; font-size: 14px; color: #0f172a;">{{ rev.user_fullname }}</div>
+                          <div style="font-size: 11px; color: #94a3b8;">{{ formatDate(rev.created_at) }}</div>
+                        </div>
+                      </div>
+                      <div style="color: #f59e0b; font-size: 14px;">
+                        <span v-for="s in 5" :key="s">{{ s <= rev.rating ? '★' : '☆' }}</span>
+                      </div>
+                    </div>
+                    <p style="font-size: 14px; color: #334155; margin: 0; line-height: 1.5;">{{ rev.comment }}</p>
                   </div>
                 </div>
               </div>
@@ -191,6 +249,9 @@
               </button>
               <button @click="buyNow" class="btn-buy-now">
                 ⚡ Đăng ký học ngay
+              </button>
+              <button @click="handleToggleWishlist" class="btn-wishlist" :style="{ background: isWishlisted ? '#fef2f2' : '#f8fafc', color: isWishlisted ? '#ef4444' : '#475569', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '10px 16px', fontWeight: '600', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', marginTop: '8px' }">
+                <span>{{ isWishlisted ? '❤️ Đã lưu vào Yêu thích' : '🤍 Thêm vào Yêu thích' }}</span>
               </button>
             </div>
 
@@ -317,14 +378,16 @@ const parentProgram = computed(() => {
 });
 
 const parsedCurriculum = computed(() => {
-  if (!course.value || !course.value.curriculum) return [];
+  if (!course.value) return [];
+  const curr = course.value.curriculumData || course.value.curriculum;
+  if (!curr) return [];
   try {
-    if (typeof course.value.curriculum === 'string') {
-      return JSON.parse(course.value.curriculum);
+    if (typeof curr === 'string') {
+      return JSON.parse(curr);
     }
-    return course.value.curriculum;
+    return curr;
   } catch (e) {
-    return [course.value.curriculum];
+    return [curr];
   }
 });
 
@@ -342,15 +405,10 @@ const loadCourse = async () => {
   }
 };
 
-onMounted(() => {
-  loadCourse();
-  if (courseStore.programs.length === 0) {
-    courseStore.fetchPrograms();
-  }
-});
-
 watch(() => route.params.handle, () => {
-  loadCourse();
+  loadCourse().then(() => {
+    loadReviews();
+  });
 });
 
 const addToCart = async () => {
@@ -365,6 +423,57 @@ const addToCart = async () => {
     courseStore.showToast(`Đã thêm "${course.value.title}" vào giỏ hàng!`, 'success');
   } catch (err) {
     courseStore.showToast(err.message || 'Không thể thêm khóa học vào giỏ hàng', 'error');
+  }
+};
+
+const reviews = ref([]);
+const newReview = ref({ rating: 5, comment: '' });
+const submittingReview = ref(false);
+
+const isWishlisted = computed(() => {
+  if (!course.value || !courseStore.wishlist) return false;
+  return courseStore.wishlist.some(w => w.course && (w.course.id === course.value.id || w.course.handle === course.value.handle));
+});
+
+const averageRating = computed(() => {
+  if (reviews.value.length === 0) return (4.8 + ((course.value?.id || 1) % 3) * 0.1).toFixed(1);
+  const sum = reviews.value.reduce((acc, r) => acc + r.rating, 0);
+  return (sum / reviews.value.length).toFixed(1);
+});
+
+const formatDate = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleDateString('vi-VN');
+};
+
+const handleToggleWishlist = async () => {
+  if (!course.value) return;
+  await courseStore.toggleWishlist(course.value.id);
+};
+
+const loadReviews = async () => {
+  if (!course.value) return;
+  reviews.value = await courseStore.fetchCourseReviews(course.value.handle);
+};
+
+const submitReview = async () => {
+  if (!newReview.value.comment.trim()) {
+    courseStore.showToast('Vui lòng viết lời nhận xét trước khi gửi!', 'warning');
+    return;
+  }
+  submittingReview.value = true;
+  try {
+    const rev = await courseStore.addCourseReview(course.value.handle, {
+      rating: newReview.value.rating,
+      comment: newReview.value.comment
+    });
+    reviews.value.unshift(rev);
+    newReview.value.comment = '';
+  } catch (err) {
+    // handled by store toast
+  } finally {
+    submittingReview.value = false;
   }
 };
 
@@ -385,6 +494,19 @@ const buyNow = () => {
       }
     });
 };
+
+onMounted(() => {
+  loadCourse().then(() => {
+    loadReviews();
+  });
+  if (courseStore.token) {
+    courseStore.fetchWishlist();
+  }
+  if (courseStore.programs.length === 0) {
+    courseStore.fetchPrograms();
+  }
+});
+
 </script>
 
 <style scoped src="@/styles/views/courses/CourseDetail.css"></style>

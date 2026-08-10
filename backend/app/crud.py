@@ -1,5 +1,6 @@
 import uuid
 import json
+from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -184,6 +185,20 @@ def checkout_cart(db: Session, user_id: int):
     db.refresh(db_order)
     return db_order
 
+def get_commission_percent_for_user_course(db: Session, user_id: int, course_id: int) -> int:
+    custom = db.query(models.UserCourseCommission).filter(
+        models.UserCourseCommission.user_id == user_id,
+        models.UserCourseCommission.course_id == course_id
+    ).first()
+    if custom:
+        return custom.commission_percent
+    
+    course = db.query(models.Course).filter(models.Course.id == course_id).first()
+    if course and course.default_commission_percent is not None:
+        return course.default_commission_percent
+        
+    return 10
+
 def pay_order(db: Session, order_id: int):
     db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
     if not db_order or db_order.status != "pending":
@@ -204,27 +219,53 @@ def pay_order(db: Session, order_id: int):
                 course_id=item.course_id,
                 order_id=order_id
             ))
+
+        # Check if item is a Bundle and auto-enroll user into all courses in that bundle
+        if item.course:
+            bundle = db.query(models.Bundle).filter(
+                (models.Bundle.handle == item.course.handle) | (models.Bundle.title == item.course.title)
+            ).first()
+            if bundle:
+                for sub_c in bundle.courses:
+                    sub_enr = db.query(models.Enrollment).filter(
+                        models.Enrollment.user_id == db_order.user_id,
+                        models.Enrollment.course_id == sub_c.id
+                    ).first()
+                    if not sub_enr:
+                        db.add(models.Enrollment(
+                            user_id=db_order.user_id,
+                            course_id=sub_c.id,
+                            order_id=order_id
+                        ))
     
     # Check for referral reward
     user = get_user_by_id(db, db_order.user_id)
     if user and user.referred_by_id:
-        referrer_exists = db.query(models.User).filter(models.User.id == user.referred_by_id).first()
-        if referrer_exists:
+        referrer = db.query(models.User).filter(models.User.id == user.referred_by_id).first()
+        if referrer:
             existing_referral = db.query(models.Referral).filter(
                 models.Referral.referred_id == user.id
             ).first()
             
-            if not existing_referral:
-                commission = int(db_order.total_price * 0.10)
-                commission_capped = min(commission, 29000000)
+            # Calculate total custom/default commission for each item in the order
+            total_earned = 0
+            for item in db_order.items:
+                comm_pct = get_commission_percent_for_user_course(db, referrer.id, item.course_id)
+                total_earned += int(item.price * (comm_pct / 100.0))
                 
+            if not existing_referral:
                 db_referral = models.Referral(
-                    referrer_id=user.referred_by_id,
+                    referrer_id=referrer.id,
                     referred_id=user.id,
-                    commission_amount=commission_capped,
+                    commission_amount=total_earned,
                     status="completed"
                 )
                 db.add(db_referral)
+            else:
+                existing_referral.commission_amount += total_earned
+                
+            # Accumulate store credit balance to referrer for discount on future purchases
+            referrer.store_credit_balance += total_earned
 
     db.commit()
     db.refresh(db_order)
@@ -341,10 +382,6 @@ def get_user_enrollments(db: Session, user_id: int):
     return db.query(models.Enrollment).filter(models.Enrollment.user_id == user_id).all()
 
 def check_enrollment(db: Session, user_id: int, course_id: int) -> bool:
-    user = db.query(models.User).filter(models.User.id == user_id).first()
-    if user and user.role == "admin":
-        return True
-    
     existing = db.query(models.Enrollment).filter(
         models.Enrollment.user_id == user_id,
         models.Enrollment.course_id == course_id
@@ -407,3 +444,229 @@ def update_user_course_progress(db: Session, user_id: int, course_id: int, compl
     enr.progress_data = json.dumps(completed_lessons)
     db.commit()
     return completed_lessons
+
+# --- Checkout with Coupon & Store Credit CRUD ---
+def checkout_cart_with_options(db: Session, user_id: int, coupon_code: Optional[str] = None, use_store_credit: bool = False):
+    cart_items = get_cart_items(db, user_id=user_id)
+    if not cart_items:
+        return None
+
+    # Filter out items user is already enrolled in
+    valid_cart_items = []
+    has_removed = False
+    for item in cart_items:
+        if check_enrollment(db, user_id=user_id, course_id=item.course_id):
+            db.delete(item)
+            has_removed = True
+        else:
+            valid_cart_items.append(item)
+            
+    if has_removed:
+        db.commit()
+
+    if not valid_cart_items:
+        return None
+
+    total_price = sum(item.course.price for item in valid_cart_items)
+    discount_applied = 0
+
+    # 1. Referral discount for first purchase if referred
+    user = get_user_by_id(db, user_id)
+    if user.referred_by_id:
+        previous_paid_orders = db.query(models.Order).filter(
+            models.Order.user_id == user_id,
+            models.Order.status == "paid"
+        ).count()
+        if previous_paid_orders == 0:
+            discount_applied += int(total_price * 0.10)
+
+    # 2. Coupon Discount
+    if coupon_code:
+        coupon = get_coupon_by_code(db, coupon_code)
+        now = datetime.now(timezone.utc)
+        if not coupon or not coupon.is_active:
+            raise ValueError("Mã giảm giá không hợp lệ hoặc đã ngừng hoạt động!")
+        if coupon.usage_limit > 0 and coupon.times_used >= coupon.usage_limit:
+            raise ValueError("Mã giảm giá đã hết lượt sử dụng!")
+        if coupon.valid_from:
+            v_from = coupon.valid_from.replace(tzinfo=timezone.utc) if coupon.valid_from.tzinfo is None else coupon.valid_from
+            if now < v_from:
+                raise ValueError("Mã giảm giá chưa đến thời hạn áp dụng!")
+        if coupon.valid_to:
+            v_to = coupon.valid_to.replace(tzinfo=timezone.utc) if coupon.valid_to.tzinfo is None else coupon.valid_to
+            if now > v_to:
+                raise ValueError("Mã giảm giá đã quá hạn sử dụng!")
+        if total_price < coupon.min_order_value:
+            raise ValueError(f"Đơn hàng phải đạt từ {coupon.min_order_value:,} VNĐ mới áp dụng được mã này!")
+
+        if coupon.discount_type == "percent":
+            c_disc = int(total_price * (coupon.discount_value / 100.0))
+            if coupon.max_discount_amount > 0:
+                c_disc = min(c_disc, coupon.max_discount_amount)
+        else:
+            c_disc = coupon.discount_value
+        
+        c_disc = min(c_disc, max(0, total_price - discount_applied))
+        discount_applied += c_disc
+        coupon.times_used += 1
+
+    # 3. Store Credit Discount
+    if use_store_credit and user.store_credit_balance > 0:
+        remaining_payable = max(0, total_price - discount_applied)
+        credit_to_use = min(user.store_credit_balance, remaining_payable)
+        discount_applied += credit_to_use
+        user.store_credit_balance -= credit_to_use
+
+    final_price = max(0, total_price - discount_applied)
+
+    # Create Order
+    db_order = models.Order(
+        user_id=user_id,
+        total_price=final_price,
+        discount_applied=discount_applied,
+        status="pending"
+    )
+    db.add(db_order)
+    db.flush()
+
+    for item in valid_cart_items:
+        db_item = models.OrderItem(
+            order_id=db_order.id,
+            course_id=item.course_id,
+            price=item.course.price
+        )
+        db.add(db_item)
+        db.delete(item)
+
+    db.commit()
+    db.refresh(db_order)
+    return db_order
+
+# --- Review CRUD ---
+def get_course_reviews(db: Session, course_id: int):
+    return db.query(models.CourseReview).filter(
+        models.CourseReview.course_id == course_id,
+        models.CourseReview.is_approved == True
+    ).order_by(models.CourseReview.created_at.desc()).all()
+
+def create_course_review(db: Session, user_id: int, course_id: int, rating: int, comment: str):
+    review = models.CourseReview(
+        user_id=user_id,
+        course_id=course_id,
+        rating=max(1, min(5, rating)),
+        comment=comment,
+        is_approved=True
+    )
+    db.add(review)
+    db.commit()
+    db.refresh(review)
+    return review
+
+# --- Lesson Note CRUD ---
+def get_user_lesson_notes(db: Session, user_id: int, course_id: int):
+    return db.query(models.LessonNote).filter(
+        models.LessonNote.user_id == user_id,
+        models.LessonNote.course_id == course_id
+    ).order_by(models.LessonNote.timestamp_seconds.asc()).all()
+
+def create_lesson_note(db: Session, user_id: int, course_id: int, lesson_id: str, timestamp_seconds: int, note_text: str):
+    note = models.LessonNote(
+        user_id=user_id,
+        course_id=course_id,
+        lesson_id=lesson_id,
+        timestamp_seconds=timestamp_seconds,
+        note_text=note_text
+    )
+    db.add(note)
+    db.commit()
+    db.refresh(note)
+    return note
+
+def delete_lesson_note(db: Session, user_id: int, note_id: int):
+    note = db.query(models.LessonNote).filter(
+        models.LessonNote.id == note_id,
+        models.LessonNote.user_id == user_id
+    ).first()
+    if note:
+        db.delete(note)
+        db.commit()
+        return True
+    return False
+
+# --- Wishlist CRUD ---
+def get_user_wishlists(db: Session, user_id: int):
+    return db.query(models.Wishlist).filter(models.Wishlist.user_id == user_id).all()
+
+def toggle_wishlist(db: Session, user_id: int, course_id: int):
+    existing = db.query(models.Wishlist).filter(
+        models.Wishlist.user_id == user_id,
+        models.Wishlist.course_id == course_id
+    ).first()
+    if existing:
+        db.delete(existing)
+        db.commit()
+        return False # Removed from wishlist
+    else:
+        new_item = models.Wishlist(user_id=user_id, course_id=course_id)
+        db.add(new_item)
+        db.commit()
+        return True # Added to wishlist
+
+# --- Coupon CRUD ---
+def get_coupon_by_code(db: Session, code: str):
+    clean_code = code.strip().upper() if code else ""
+    return db.query(models.Coupon).filter(func.upper(models.Coupon.code) == clean_code).first()
+
+def get_all_coupons(db: Session):
+    return db.query(models.Coupon).order_by(models.Coupon.id.desc()).all()
+
+def create_coupon(db: Session, coupon_in: schemas.CouponCreate):
+    coupon = models.Coupon(
+        code=coupon_in.code.strip().upper(),
+        discount_type=coupon_in.discount_type,
+        discount_value=coupon_in.discount_value,
+        min_order_value=coupon_in.min_order_value or 0,
+        max_discount_amount=coupon_in.max_discount_amount or 0,
+        usage_limit=coupon_in.usage_limit or 0,
+        valid_from=coupon_in.valid_from,
+        valid_to=coupon_in.valid_to,
+        is_active=coupon_in.is_active if coupon_in.is_active is not None else True
+    )
+    db.add(coupon)
+    db.commit()
+    db.refresh(coupon)
+    return coupon
+
+def delete_coupon(db: Session, coupon_id: int):
+    coupon = db.query(models.Coupon).filter(models.Coupon.id == coupon_id).first()
+    if coupon:
+        db.delete(coupon)
+        db.commit()
+        return True
+    return False
+
+# --- Custom Commission CRUD ---
+def get_custom_commissions(db: Session):
+    return db.query(models.UserCourseCommission).all()
+
+def set_custom_commission(db: Session, user_id: int, course_id: int, commission_percent: int):
+    existing = db.query(models.UserCourseCommission).filter(
+        models.UserCourseCommission.user_id == user_id,
+        models.UserCourseCommission.course_id == course_id
+    ).first()
+    if existing:
+        existing.commission_percent = commission_percent
+        db.commit()
+        db.refresh(existing)
+        return existing
+    else:
+        new_comm = models.UserCourseCommission(
+            user_id=user_id,
+            course_id=course_id,
+            commission_percent=commission_percent
+        )
+        db.add(new_comm)
+        db.commit()
+        db.refresh(new_comm)
+        return new_comm
+

@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 import uuid
+from datetime import datetime, timezone, timedelta
 from sqlalchemy import func
 from ...database import get_db
 from ... import models, schemas, auth, crud
@@ -52,7 +53,13 @@ def update_user_admin(id: int, user_in: schemas.UserAdminUpdate, db: Session = D
     
     if user_in.fullname is not None:
         db_user.fullname = user_in.fullname
-    if user_in.email is not None:
+    if user_in.email is not None and user_in.email != db_user.email:
+        existing_user = db.query(models.User).filter(models.User.email == user_in.email).first()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email này đã được sử dụng bởi tài khoản khác."
+            )
         db_user.email = user_in.email
     if user_in.role is not None:
         db_user.role = user_in.role
@@ -162,22 +169,30 @@ def update_order_admin(id: int, order_in: schemas.OrderAdminUpdate, db: Session 
         if order_in.status == "paid" and db_order.status != "paid":
             user = db_order.user
             if user and user.referred_by_id:
-                referrer_exists = db.query(models.User).filter(models.User.id == user.referred_by_id).first()
-                if referrer_exists:
+                referrer = db.query(models.User).filter(models.User.id == user.referred_by_id).first()
+                if referrer:
+                    total_earned = 0
+                    for item in db_order.items:
+                        comm_pct = crud.get_commission_percent_for_user_course(db, referrer.id, item.course_id)
+                        total_earned += int(item.price * (comm_pct / 100.0))
+
                     existing_referral = db.query(models.Referral).filter(
                         models.Referral.referred_id == user.id
                     ).first()
+
                     if not existing_referral:
-                        base_price = order_in.total_price if order_in.total_price is not None else db_order.total_price
-                        commission = int(base_price * 0.10)
-                        commission_capped = min(commission, 29000000)
                         db_referral = models.Referral(
-                            referrer_id=user.referred_by_id,
+                            referrer_id=referrer.id,
                             referred_id=user.id,
-                            commission_amount=commission_capped,
+                            commission_amount=total_earned,
                             status="completed"
                         )
                         db.add(db_referral)
+                    else:
+                        existing_referral.commission_amount += total_earned
+
+                    referrer.store_credit_balance += total_earned
+
         db_order.status = order_in.status
         
     if order_in.discount_applied is not None:
@@ -603,5 +618,102 @@ def delete_banner_admin(id: int, db: Session = Depends(get_db)):
             detail="Banner không tồn tại"
         )
     return {"message": "Đã xóa banner thành công"}
+
+
+# ==================== EXPORT EXCEL / CSV REPORTS ====================
+
+from fastapi.responses import Response
+
+@router.get("/export/orders")
+def export_orders_csv(
+    period: Optional[str] = "all",
+    current_user: models.User = Depends(auth.get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Order)
+    now = datetime.now(timezone.utc)
+    if period == "month":
+        query = query.filter(models.Order.created_at >= now - timedelta(days=30))
+    elif period == "quarter":
+        query = query.filter(models.Order.created_at >= now - timedelta(days=90))
+    elif period == "year":
+        query = query.filter(models.Order.created_at >= now - timedelta(days=365))
+        
+    orders = query.order_by(models.Order.id.desc()).all()
+    lines = ["Mã Đơn,Tên Học Viên,Email,Tổng Tiền (VNĐ),Giảm Giá (VNĐ),Trạng Thái,Ngày Tạo"]
+    for o in orders:
+        uname = o.user.fullname.replace(",", " ") if o.user else "N/A"
+        uemail = o.user.email if o.user else "N/A"
+        created = o.created_at.strftime("%Y-%m-%d %H:%M:%S") if o.created_at else ""
+        lines.append(f'"{o.id}","{uname}","{uemail}",{o.total_price},{o.discount_applied},"{o.status}","{created}"')
+    
+    csv_data = "\ufeff" + "\n".join(lines)
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=danh_sach_don_hang_{period}_acc.csv"}
+    )
+
+@router.get("/export/users")
+def export_users_csv(
+    period: Optional[str] = "all",
+    current_user: models.User = Depends(auth.get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.User)
+    now = datetime.now(timezone.utc)
+    if period == "month":
+        query = query.filter(models.User.created_at >= now - timedelta(days=30))
+    elif period == "quarter":
+        query = query.filter(models.User.created_at >= now - timedelta(days=90))
+    elif period == "year":
+        query = query.filter(models.User.created_at >= now - timedelta(days=365))
+
+    users = query.order_by(models.User.id.desc()).all()
+    lines = ["ID,Họ và Tên,Email,Mã Ref,Ví Giảm Giá (VNĐ),Vai Trò,Trạng Thái,Ngày Đăng Ký"]
+    for u in users:
+        uname = u.fullname.replace(",", " ")
+        created = u.created_at.strftime("%Y-%m-%d %H:%M:%S") if u.created_at else ""
+        st = "Hoạt động" if u.is_active else "Khoá"
+        lines.append(f'"{u.id}","{uname}","{u.email}","{u.referral_code}",{u.store_credit_balance},"{u.role}","{st}","{created}"')
+
+    csv_data = "\ufeff" + "\n".join(lines)
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=danh_sach_hoc_vien_{period}_acc.csv"}
+    )
+
+@router.get("/export/revenue")
+def export_revenue_csv(
+    period: Optional[str] = "all",
+    current_user: models.User = Depends(auth.get_current_admin_user),
+    db: Session = Depends(get_db)
+):
+    query = db.query(models.Order).filter(models.Order.status == "paid")
+    now = datetime.now(timezone.utc)
+    if period == "month":
+        query = query.filter(models.Order.created_at >= now - timedelta(days=30))
+    elif period == "quarter":
+        query = query.filter(models.Order.created_at >= now - timedelta(days=90))
+    elif period == "year":
+        query = query.filter(models.Order.created_at >= now - timedelta(days=365))
+
+    paid_orders = query.order_by(models.Order.created_at.desc()).all()
+    total_rev = sum(o.total_price for o in paid_orders)
+    lines = [f"BÁO CÁO DOANH THU ACC ACADEMY ({period.upper()}),,,Tổng Doanh Thu: {total_rev:,} VNĐ", "Mã Đơn,Tên Học Viên,Email,Doanh Thu Đơn (VNĐ),Ngày Thanh Toán"]
+    for o in paid_orders:
+        uname = o.user.fullname.replace(",", " ") if o.user else "N/A"
+        uemail = o.user.email if o.user else "N/A"
+        created = o.created_at.strftime("%Y-%m-%d %H:%M:%S") if o.created_at else ""
+        lines.append(f'"{o.id}","{uname}","{uemail}",{o.total_price},"{created}"')
+
+    csv_data = "\ufeff" + "\n".join(lines)
+    return Response(
+        content=csv_data,
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=bao_cao_doanh_thu_{period}_acc.csv"}
+    )
+
 
 

@@ -6,10 +6,10 @@
         <div class="cai-top">
           <div class="cai-col-left">
             <h2 class="cai-heading">
-              <magic-text-animate animation="blur-in" split-by="word" stagger="0.05">
+              <div class="magic-text-animate">
                 <span class="cai-heading-1">Từ niềm tin</span>
                 <span class="cai-heading-2">Đến tương lai</span>
-              </magic-text-animate>
+              </div>
             </h2>
           </div>
 
@@ -28,11 +28,11 @@
     <!-- Section 2: Image Banner with Overlay -->
     <section class="image-overlay-section">
       <div class="section section-blends section-full text-custom" style="--text-color: 255 255 255;">
-        <image-banner reveal-on-scroll="true" parallax="0.3" class="content-over-media content-over-media--auto full-bleed text-custom" style="--text-color: 255 255 255;">
+        <div class="image-banner content-over-media content-over-media--auto full-bleed text-custom" style="--text-color: 255 255 255;">
           <picture>
             <img src="/images/About_Us.png" alt="About ACC Academy" width="1920" height="960" sizes="100vw" fetchpriority="low" />
           </picture>
-        </image-banner>
+        </div>
       </div>
     </section>
 
@@ -44,9 +44,9 @@
             Về ACC Academy
           </span>
           <h2 class="cs-main-heading">
-            <magic-text-animate animation="blur-in" split-by="word" stagger="0.05">
+            <div class="magic-text-animate">
               ACC Academy là đối tác chiến lược trong việc giải quyết những thách thức nhân sự phức tạp và nắm bắt các cơ hội tăng trưởng đột phá
-            </magic-text-animate>
+            </div>
           </h2>
         </div>
         <div class="cs-mid"></div>
@@ -55,10 +55,10 @@
       <div class="cs-container">
         <div class="cs-grid">
           <div class="cs-card">
-            <image-banner class="cs-card-bg" parallax="0.3">
+            <div class="image-banner cs-card-bg">
               <img src="/images/Service_5.png" alt="Đào tạo doanh nghiệp" width="800" height="1067" loading="lazy" />
               <div class="cs-card-overlay"></div>
-            </image-banner>
+            </div>
             <div class="cs-card-content">
               <div class="cs-card-center">
                 <div class="cs-card-icon">
@@ -73,10 +73,10 @@
           </div>
 
           <div class="cs-card">
-            <image-banner class="cs-card-bg" parallax="0.3">
+            <div class="image-banner cs-card-bg">
               <img src="/images/Service_05.png" alt="Tư vấn tự động hóa" width="800" height="1067" loading="lazy" />
               <div class="cs-card-overlay"></div>
-            </image-banner>
+            </div>
             <div class="cs-card-content">
               <div class="cs-card-center">
                 <div class="cs-card-icon">
@@ -91,10 +91,10 @@
           </div>
 
           <div class="cs-card">
-            <image-banner class="cs-card-bg" parallax="0.3">
+            <div class="image-banner cs-card-bg">
               <img src="/images/Service_03.png" alt="Digital Marketing" width="800" height="1067" loading="lazy" />
               <div class="cs-card-overlay"></div>
-            </image-banner>
+            </div>
             <div class="cs-card-content">
               <div class="cs-card-center">
                 <div class="cs-card-icon">
@@ -109,10 +109,10 @@
           </div>
 
           <div class="cs-card">
-            <image-banner class="cs-card-bg" parallax="0.3">
+            <div class="image-banner cs-card-bg">
               <img src="/images/Img_2.png" alt="Khóa học cá nhân" width="800" height="800" loading="lazy" />
               <div class="cs-card-overlay"></div>
-            </image-banner>
+            </div>
             <div class="cs-card-content">
               <div class="cs-card-center">
                 <div class="cs-card-icon">
@@ -138,9 +138,9 @@
               <span class="custom-ui-tag">Câu chuyện của chúng tôi</span>
             </div>
             <h2 class="cos-heading">
-              <magic-text-animate animation="blur-in" split-by="word" stagger="0.05">
+              <div class="magic-text-animate">
                 Hành trình <br><em>Kiến tạo tác động</em>
-              </magic-text-animate>
+              </div>
             </h2>
           </div>
 
@@ -164,13 +164,13 @@
     <section class="scrolling-section">
       <div class="section section--narrow section-full bg-custom" style="--background: 247 247 244;">
         <!-- Mobile Layout -->
-        <images-with-text-scrolling class="images-scrolling-mobile scroll-area bleed sm:unbleed">
+        <div class="images-with-text-scrolling images-scrolling-mobile scroll-area bleed sm:unbleed">
           <div class="images-scrolling-mobile__item snap-start">
             <img src="/images/B2B_7.png" alt="Khởi nguồn" loading="lazy" class="rounded-sm" />
             <div class="images-scrolling__content">
               <span class="images-scrolling__counter bold">01</span>
               <div class="prose">
-                <p class="h1" reveal-on-scroll="true"><split-lines>Khởi nguồn</split-lines></p>
+                <p class="h1"><span class="split-lines">Khởi nguồn</span></p>
                 <p>Bắt đầu với khát vọng phá vỡ các rào cản học tập truyền thống, chúng tôi đã đặt những viên gạch đầu tiên cho một hệ sinh thái giáo dục thực chiến, nơi tri thức được chuyển hóa trực tiếp thành giá trị vận hành.</p>
               </div>
             </div>
@@ -180,7 +180,7 @@
             <div class="images-scrolling__content">
               <span class="images-scrolling__counter bold">02</span>
               <div class="prose">
-                <p class="h1" reveal-on-scroll="true"><split-lines>Mở rộng quy mô</split-lines></p>
+                <p class="h1"><span class="split-lines">Mở rộng quy mô</span></p>
                 <p>Với triết lý "Người học là trung tâm của mọi sự thay đổi", chúng tôi không ngừng hội tụ đội ngũ chuyên gia giàu kinh nghiệm thực chiến và áp dụng các công nghệ tiên phong để cá nhân hóa hành trình phát triển cho mọi đối tác.</p>
               </div>
             </div>
@@ -190,34 +190,34 @@
             <div class="images-scrolling__content">
               <span class="images-scrolling__counter bold">03</span>
               <div class="prose">
-                <p class="h1" reveal-on-scroll="true"><split-lines>Vị thế hiện tại</split-lines></p>
+                <p class="h1"><span class="split-lines">Vị thế hiện tại</span></p>
                 <p>Qua nhiều năm không ngừng đổi mới phương pháp luận, ACC Academy đã trở thành bảo chứng cho sự thành công của hàng chục nghìn chuyên gia và hàng chục doanh nghiệp dẫn đầu.</p>
               </div>
             </div>
           </div>
-        </images-with-text-scrolling>
+        </div>
 
         <!-- Desktop Layout -->
-        <images-with-text-scrolling scrolling-experience="reveal" class="images-scrolling-desktop">
+        <div class="images-with-text-scrolling images-scrolling-desktop">
           <div class="images-scrolling-desktop__content-list">
             <div class="images-scrolling__content">
               <span class="images-scrolling__counter bold">01</span>
               <div class="prose">
-                <p class="h1" reveal-on-scroll="true"><split-lines>Khởi nguồn</split-lines></p>
+                <p class="h1"><span class="split-lines">Khởi nguồn</span></p>
                 <p>Bắt đầu với khát vọng phá vỡ các rào cản học tập truyền thống, chúng tôi đã đặt những viên gạch đầu tiên cho một hệ sinh thái giáo dục thực chiến, nơi tri thức được chuyển hóa trực tiếp thành giá trị vận hành.</p>
               </div>
             </div>
-            <div class="images-scrolling__content opacity-0">
+            <div class="images-scrolling__content">
               <span class="images-scrolling__counter bold">02</span>
               <div class="prose">
-                <p class="h1" reveal-on-scroll="true"><split-lines>Mở rộng quy mô</split-lines></p>
+                <p class="h1"><span class="split-lines">Mở rộng quy mô</span></p>
                 <p>Với triết lý "Người học là trung tâm của mọi sự thay đổi", chúng tôi không ngừng hội tụ đội ngũ chuyên gia giàu kinh nghiệm thực chiến và áp dụng các công nghệ tiên phong để cá nhân hóa hành trình phát triển cho mọi đối tác.</p>
               </div>
             </div>
-            <div class="images-scrolling__content opacity-0">
+            <div class="images-scrolling__content">
               <span class="images-scrolling__counter bold">03</span>
               <div class="prose">
-                <p class="h1" reveal-on-scroll="true"><split-lines>Vị thế hiện tại</split-lines></p>
+                <p class="h1"><span class="split-lines">Vị thế hiện tại</span></p>
                 <p>Qua nhiều năm không ngừng đổi mới phương pháp luận, ACC Academy đã trở thành bảo chứng cho sự thành công của hàng chục nghìn chuyên gia và hàng chục doanh nghiệp dẫn đầu.</p>
               </div>
             </div>
@@ -228,7 +228,7 @@
             <img src="/images/B2B_15.png" alt="Step 2" loading="lazy" class="rounded-sm" />
             <img src="/images/B2B_14_1fce947b-4288-4364-bfc5-49f6305b4abe.png" alt="Step 3" loading="lazy" class="rounded-sm" />
           </div>
-        </images-with-text-scrolling>
+        </div>
       </div>
     </section>
 
@@ -245,9 +245,9 @@
             Thống kê
           </span>
           <h2 class="cstats-heading">
-            <magic-text-animate animation="blur-in" split-by="word" stagger="0.05">
+            <div class="magic-text-animate">
               Những con số minh chứng cho <br><em>Tác động chiến lược</em>
-            </magic-text-animate>
+            </div>
           </h2>
           <div class="cstats-description">
             <p>Chúng tôi không chỉ nói về thay đổi; chúng tôi đo lường nó. Mỗi chỉ số dưới đây là kết quả của sự cam kết tuyệt đối về chất lượng và hiệu quả thực tế.</p>

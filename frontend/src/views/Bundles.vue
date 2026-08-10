@@ -100,22 +100,30 @@
           </div>
 
           <div class="features-list">
-            <h4>📚 KHÓA HỌC BAO GỒM:</h4>
+            <h4>📚 KHÓA HỌC BAO GỒM ({{ (b.courses || []).length }} Khóa):</h4>
             <ul>
-              <li v-for="c in (b.courses || [])" :key="c.id">
+              <li v-for="c in (b.courses || []).slice(0, 3)" :key="c.id">
                 <i class="check-icon">✓</i> <strong>{{ c.title }}</strong>
               </li>
               <li v-if="!b.courses || b.courses.length === 0">
                 <i class="check-icon">✓</i> Trọn bộ khóa học chuyên sâu
               </li>
+              <li v-if="b.courses && b.courses.length > 3" class="more-courses-item">
+                ➕ <strong>Và {{ b.courses.length - 3 }} khóa học khác...</strong>
+              </li>
             </ul>
 
+            <!-- View Details Button -->
+            <button @click="selectedBundleModal = b" class="btn-view-details">
+              🔍 Xem chi tiết {{ (b.courses || []).length }} khóa học & quà tặng
+            </button>
+
             <!-- BONUS GIFTS SECTION -->
-            <div v-if="(b.gift_courses || b.giftCourses) && (b.gift_courses || b.giftCourses).length > 0" class="gift-courses-box mt-3" style="padding: 12px; background: rgba(245, 158, 11, 0.08); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.25);">
-              <h5 style="color: #d97706; font-size: 13px; font-weight: bold; margin-bottom: 6px;">🎁 QUÀ TẶNG ĐẶC BIỆT KÈM THEO:</h5>
+            <div v-if="(b.gift_courses || b.giftCourses) && (b.gift_courses || b.giftCourses).length > 0" class="gift-courses-box mt-3" style="padding: 10px; background: rgba(245, 158, 11, 0.08); border-radius: 8px; border: 1px solid rgba(245, 158, 11, 0.25);">
+              <h5 style="color: #d97706; font-size: 12px; font-weight: bold; margin-bottom: 4px;">🎁 TẶNG KÈM:</h5>
               <ul style="list-style: none; padding: 0; margin: 0;">
-                <li v-for="g in (b.gift_courses || b.giftCourses)" :key="g.id" style="font-size: 13px; color: #92400e; margin-bottom: 4px;">
-                  ✨ Tặng miễn phí: <strong>{{ g.title }}</strong>
+                <li v-for="g in (b.gift_courses || b.giftCourses).slice(0, 2)" :key="g.id" style="font-size: 12px; color: #92400e;">
+                  ✨ {{ g.title }}
                 </li>
               </ul>
             </div>
@@ -131,7 +139,7 @@
       </div>
     </section>
 
-    <!-- 4. REASONS TO CHOOSE ACC BUNDLE -->
+    <!-- 3. REASONS TO CHOOSE ACC BUNDLE -->
     <section class="why-bundle-section">
       <div class="container">
         <div class="section-header text-center">
@@ -167,7 +175,7 @@
       </div>
     </section>
 
-    <!-- 5. STUDENT TESTIMONIALS SECTION -->
+    <!-- 4. STUDENT TESTIMONIALS SECTION -->
     <section class="bundle-testimonials-section container">
       <div class="section-header text-center">
         <span class="sub-heading-tag">CÂU CHUYỆN THÀNH CÔNG</span>
@@ -219,7 +227,7 @@
       </div>
     </section>
 
-    <!-- 6. FAQ ACCORDION SECTION -->
+    <!-- 5. FAQ ACCORDION SECTION -->
     <section class="bundle-faq-section container">
       <div class="section-header text-center">
         <h2>Câu Hỏi Thường Gặp (FAQ)</h2>
@@ -244,7 +252,7 @@
       </div>
     </section>
 
-    <!-- 7. STICKY FLOATING FOOTER BAR -->
+    <!-- 6. STICKY FLOATING FOOTER BAR -->
     <div class="sticky-bundle-bar animate-slide-up" v-if="bundles.length > 0">
       <div class="container sticky-inner">
         <div class="sticky-info">
@@ -261,6 +269,59 @@
         </button>
       </div>
     </div>
+
+    <!-- 7. BUNDLE DETAIL MODAL -->
+    <div v-if="selectedBundleModal" class="bundle-modal-backdrop" @click.self="selectedBundleModal = null">
+      <div class="bundle-modal-card glass-card animate-slide-up">
+        <button class="modal-close-btn" @click="selectedBundleModal = null">&times;</button>
+        
+        <div class="modal-header">
+          <span class="modal-tag">CHI TIẾT TRỌN BỘ COMBO</span>
+          <h2>{{ selectedBundleModal.title }}</h2>
+          <p>{{ selectedBundleModal.description || 'Thông tin chi tiết tất cả các khóa học & quà tặng nằm trong gói Combo này.' }}</p>
+        </div>
+
+        <div class="modal-body">
+          <h4 class="modal-section-title">📚 Tất Cả {{ (selectedBundleModal.courses || []).length }} Khóa Học Bao GỒm:</h4>
+          
+          <div class="modal-courses-list">
+            <div v-for="(c, index) in (selectedBundleModal.courses || [])" :key="c.id" class="modal-course-item">
+              <span class="course-index-num">#{{ index + 1 }}</span>
+              <img :src="c.image || '/images/Square-Cover-_1.webp'" :alt="c.title" class="modal-course-thumb" @error="handleImageError" />
+              <div class="modal-course-info">
+                <h5 class="modal-course-name">{{ c.title }}</h5>
+                <p class="modal-course-desc">{{ c.description || 'Khóa học thực hành chuyên sâu theo lộ trình chuẩn.' }}</p>
+                <div class="modal-course-meta">
+                  <span>⏱️ {{ c.duration || 'Linh hoạt' }}</span>
+                  <span v-if="c.price" class="modal-course-price">Giá gốc: {{ formatPrice(c.price) }}</span>
+                </div>
+              </div>
+            </div>
+            <div v-if="!selectedBundleModal.courses || selectedBundleModal.courses.length === 0" style="color: #64748b; font-size: 14px; text-align: center; padding: 20px;">
+              Đang cập nhật danh sách khóa học...
+            </div>
+          </div>
+
+          <!-- Gift Courses in Modal -->
+          <div v-if="(selectedBundleModal.gift_courses || selectedBundleModal.giftCourses) && (selectedBundleModal.gift_courses || selectedBundleModal.giftCourses).length > 0" class="modal-gifts-box mt-4">
+            <h4 class="modal-section-title" style="color: #d97706;">🎁 Quà Tặng Đặc Biệt Đi Kèm:</h4>
+            <div v-for="g in (selectedBundleModal.gift_courses || selectedBundleModal.giftCourses)" :key="g.id" class="modal-gift-item">
+              <span>✨ <strong>{{ g.title }}</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <div class="modal-price-summary">
+            <span class="label">Tổng chi phí gói Combo:</span>
+            <span class="price-val">{{ formatPrice(selectedBundleModal.price) }}</span>
+          </div>
+          <button @click="handleEnrollBundle(selectedBundleModal)" class="btn primary-gradient-btn modal-cta-btn">
+            SỞ HỮU COMBO NGAY 🚀
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -273,6 +334,7 @@ const router = useRouter();
 const courseStore = useCourseStore();
 
 const openFaq = ref(0);
+const selectedBundleModal = ref(null);
 
 const bundles = computed(() => courseStore.bundles);
 
@@ -298,34 +360,43 @@ const handleEnrollBundle = async (bundleObj) => {
     return;
   }
   
-  let addedAny = false;
-  if (bundleObj.courses && bundleObj.courses.length > 0) {
-    for (const c of bundleObj.courses) {
-      if (!courseStore.isEnrolled(c.id)) {
-        try {
-          await courseStore.addToCart(c.id);
-          addedAny = true;
-        } catch (err) {
-          // ignore duplicate cart errors
-        }
-      }
-    }
-  } else if (bundleObj.handle) {
-    const course = courseStore.courses.find(c => c.handle === bundleObj.handle || c.category === 'bundles') || courseStore.courses[0];
-    if (course && !courseStore.isEnrolled(course.id)) {
-      try {
-        await courseStore.addToCart(course.id);
-        addedAny = true;
-      } catch (err) {}
-    }
+  // 1. Find the Bundle course item matching this bundle (category = 'bundles' or matching handle / title / id)
+  let bundleCourseItem = courseStore.courses.find(c => 
+    c.handle === bundleObj.handle || 
+    c.id === bundleObj.id || 
+    c.title === bundleObj.title ||
+    (c.category === 'bundles' && c.handle === bundleObj.handle)
+  );
+
+  // If not found in memory, try refreshing course list
+  if (!bundleCourseItem) {
+    await courseStore.fetchCourses();
+    bundleCourseItem = courseStore.courses.find(c => 
+      c.handle === bundleObj.handle || 
+      c.id === bundleObj.id || 
+      c.title === bundleObj.title ||
+      (c.category === 'bundles' && c.handle === bundleObj.handle)
+    );
   }
 
-  if (!addedAny && bundleObj.courses && bundleObj.courses.every(c => courseStore.isEnrolled(c.id))) {
-    courseStore.showToast('Bạn đã sở hữu tất cả các khóa học trong gói Combo này rồi!', 'info');
-    router.push('/dashboard');
-    return;
+  if (bundleCourseItem) {
+    try {
+      await courseStore.addToCart(bundleCourseItem.id);
+    } catch (err) {
+      // Item already in cart
+    }
+  } else {
+    // Add single bundle item by ID if present
+    try {
+      await courseStore.addToCart(bundleObj.id);
+    } catch (err) {}
   }
 
+  if (selectedBundleModal.value) {
+    selectedBundleModal.value = null;
+  }
+
+  courseStore.showToast(`Đã thêm gói "${bundleObj.title}" vào giỏ hàng với giá ưu đãi Combo!`, 'success');
   router.push('/cart');
 };
 

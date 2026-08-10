@@ -26,11 +26,17 @@ def perform_startup_tasks():
     except Exception as e:
         print(f"Error creating DB tables on startup: {e}")
 
-    # Ensure is_resolved & curriculum_data columns exist
+    # Ensure columns exist for upgraded schemas
     try:
         from sqlalchemy import inspect, text
         inspector = inspect(engine)
         with engine.begin() as conn:
+            if inspector.has_table("users"):
+                users_cols = [c["name"] for c in inspector.get_columns("users")]
+                if "store_credit_balance" not in users_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN store_credit_balance INT DEFAULT 0"))
+                    print("Added column store_credit_balance to users table.")
+
             if inspector.has_table("contacts"):
                 contacts_cols = [c["name"] for c in inspector.get_columns("contacts")]
                 if "is_resolved" not in contacts_cols:
@@ -45,6 +51,9 @@ def perform_startup_tasks():
                 if "program_id" not in courses_cols:
                     conn.execute(text("ALTER TABLE courses ADD COLUMN program_id INT NULL"))
                     print("Added column program_id to courses table.")
+                if "default_commission_percent" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN default_commission_percent INT DEFAULT 10"))
+                    print("Added column default_commission_percent to courses table.")
             
             if inspector.has_table("enrollments"):
                 enr_cols = [c["name"] for c in inspector.get_columns("enrollments")]

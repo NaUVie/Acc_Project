@@ -58,6 +58,12 @@ const routes = [
     component: () => import('../views/library/Recipes.vue')
   },
   {
+    path: '/gioi-thieu',
+    alias: ['/referral', '/referrals', '/gioi-thieu-nhan-thuong'],
+    name: 'ReferralProgram',
+    component: () => import('../views/ReferralProgram.vue')
+  },
+  {
     path: '/contact',
     name: 'Contact',
     component: () => import('../views/Contact.vue')

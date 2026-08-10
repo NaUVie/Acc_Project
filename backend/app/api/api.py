@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from .endpoints import auth, courses, cart, orders, blogs, contacts, testimonials, admin, upload, enrollments
+from .endpoints import auth, courses, cart, orders, blogs, contacts, testimonials, admin, upload, enrollments, engagement, marketing
 
 api_router = APIRouter()
 
@@ -14,3 +14,6 @@ api_router.include_router(contacts.router, prefix="/contacts", tags=["Contact Fo
 api_router.include_router(testimonials.router, prefix="/testimonials", tags=["Student Testimonials"])
 api_router.include_router(admin.router, prefix="/admin", tags=["Admin Operations"])
 api_router.include_router(upload.router, prefix="/upload", tags=["Media Uploads"])
+api_router.include_router(engagement.router, prefix="/engagement", tags=["User Engagement"])
+api_router.include_router(marketing.router, prefix="/marketing", tags=["Marketing & Promotions"])
+

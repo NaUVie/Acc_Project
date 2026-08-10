@@ -68,6 +68,11 @@ export const useCourseStore = defineStore('courses', {
     // Enrollment states (courses user has paid access to)
     enrollments: [], // list of { id, course, enrolled_at }
 
+    // Engagement & Marketing states
+    wishlist: [], // list of wishlist items
+    adminCoupons: [],
+    adminCommissions: [],
+
     // Admin Dashboard States
     adminUsers: [],
     adminOrders: [],
@@ -1267,6 +1272,261 @@ export const useCourseStore = defineStore('courses', {
       
       const data = await res.json();
       return data.url;
+    },
+
+    // --- Engagement Actions (Reviews, Notes, Wishlist) ---
+    async fetchCourseReviews(courseHandle) {
+      try {
+        return await this.apiRequest(`/engagement/reviews/${courseHandle}`);
+      } catch (err) {
+        console.error(`Failed to fetch reviews for ${courseHandle}:`, err);
+        return [];
+      }
+    },
+
+    async addCourseReview(courseHandle, reviewData) {
+      try {
+        const data = await this.apiRequest(`/engagement/reviews/${courseHandle}`, {
+          method: 'POST',
+          body: JSON.stringify(reviewData)
+        });
+        this.showToast('Cảm ơn bạn đã viết đánh giá cho khóa học!', 'success');
+        return data;
+      } catch (err) {
+        this.showToast(err.message || 'Không thể gửi đánh giá', 'error');
+        throw err;
+      }
+    },
+
+    async fetchLessonNotes(courseHandle) {
+      if (!this.token) return [];
+      try {
+        return await this.apiRequest(`/engagement/notes/${courseHandle}`);
+      } catch (err) {
+        console.error(`Failed to fetch notes for ${courseHandle}:`, err);
+        return [];
+      }
+    },
+
+    async addLessonNote(noteData) {
+      try {
+        const data = await this.apiRequest('/engagement/notes', {
+          method: 'POST',
+          body: JSON.stringify(noteData)
+        });
+        this.showToast('Đã lưu ghi chú bài học!', 'success');
+        return data;
+      } catch (err) {
+        this.showToast(err.message || 'Không thể lưu ghi chú', 'error');
+        throw err;
+      }
+    },
+
+    async deleteLessonNote(noteId) {
+      try {
+        await this.apiRequest(`/engagement/notes/${noteId}`, {
+          method: 'DELETE'
+        });
+        this.showToast('Đã xóa ghi chú', 'info');
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi khi xóa ghi chú', 'error');
+        throw err;
+      }
+    },
+
+    async fetchWishlist() {
+      if (!this.token) return [];
+      try {
+        const data = await this.apiRequest('/engagement/wishlist');
+        this.wishlist = data.map(item => ({
+          id: item.id,
+          createdAt: item.created_at,
+          course: mapCourse(item.course)
+        }));
+        return this.wishlist;
+      } catch (err) {
+        console.error('Failed to fetch wishlist:', err);
+        return [];
+      }
+    },
+
+    async toggleWishlist(courseId) {
+      if (!this.token) {
+        this.showToast('Vui lòng đăng nhập để lưu khóa học yêu thích!', 'error');
+        return false;
+      }
+      try {
+        const res = await this.apiRequest(`/engagement/wishlist/toggle/${courseId}`, {
+          method: 'POST'
+        });
+        this.showToast(res.message, res.added ? 'success' : 'info');
+        await this.fetchWishlist();
+        return res.added;
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi khi lưu wishlist', 'error');
+        return false;
+      }
+    },
+
+    // --- Marketing Actions (Coupons, Store Credit & Commissions) ---
+    async applyCoupon(code, cartTotal) {
+      try {
+        const res = await this.apiRequest('/marketing/coupons/apply', {
+          method: 'POST',
+          body: JSON.stringify({ code, cart_total: cartTotal })
+        });
+        return res;
+      } catch (err) {
+        throw err;
+      }
+    },
+
+    async fetchAdminCoupons() {
+      if (!this.token) return;
+      try {
+        const data = await this.apiRequest('/marketing/admin/coupons');
+        this.adminCoupons = data;
+        return data;
+      } catch (err) {
+        console.error('Failed to fetch admin coupons:', err);
+      }
+    },
+
+    async addAdminCoupon(couponData) {
+      try {
+        const data = await this.apiRequest('/marketing/admin/coupons', {
+          method: 'POST',
+          body: JSON.stringify(couponData)
+        });
+        await this.fetchAdminCoupons();
+        this.showToast('Tạo mã giảm giá thành công!', 'success');
+        return data;
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi khi tạo mã giảm giá', 'error');
+        throw err;
+      }
+    },
+
+    async deleteAdminCoupon(couponId) {
+      try {
+        await this.apiRequest(`/marketing/admin/coupons/${couponId}`, {
+          method: 'DELETE'
+        });
+        await this.fetchAdminCoupons();
+        this.showToast('Đã xóa mã giảm giá', 'success');
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi khi xóa mã', 'error');
+        throw err;
+      }
+    },
+
+    async fetchMyReferralSummary() {
+      if (!this.token) return;
+      try {
+        const data = await this.apiRequest('/marketing/referrals/my-summary');
+        this.referralSummary = {
+          referralCode: data.referral_code,
+          storeCreditBalance: data.store_credit_balance,
+          totalReferrals: data.total_referrals,
+          totalCommissionEarned: data.total_commission_earned,
+          referralsList: (data.referrals_list || []).map(ref => ({
+            id: ref.id,
+            referredFullname: ref.referred_fullname,
+            commissionAmount: ref.commission_amount,
+            status: ref.status,
+            createdAt: ref.created_at
+          }))
+        };
+        // Also update local user object store_credit_balance
+        if (this.user) {
+          this.user.storeCreditBalance = data.store_credit_balance;
+        }
+        return this.referralSummary;
+      } catch (err) {
+        console.error('Failed to load referral summary:', err);
+      }
+    },
+
+    async checkoutWithOptions(couponCode = null, useStoreCredit = false) {
+      if (!this.token) return;
+      try {
+        let endpoint = '/marketing/checkout-options';
+        const params = new URLSearchParams();
+        if (couponCode) params.append('coupon_code', couponCode);
+        if (useStoreCredit) params.append('use_store_credit', 'true');
+        if (params.toString()) {
+          endpoint += `?${params.toString()}`;
+        }
+        const order = await this.apiRequest(endpoint, {
+          method: 'POST'
+        });
+        await Promise.all([
+          this.fetchCart(),
+          this.fetchOrders(),
+          this.fetchUserMe(),
+          this.fetchMyReferralSummary()
+        ]);
+        return order;
+      } catch (err) {
+        throw err;
+      }
+    },
+
+    async fetchAdminCommissions() {
+      if (!this.token) return;
+      try {
+        const data = await this.apiRequest('/marketing/admin/commissions');
+        this.adminCommissions = data;
+        return data;
+      } catch (err) {
+        console.error('Failed to fetch admin commissions:', err);
+      }
+    },
+
+    async setAdminCommission(userId, courseId, percent) {
+      try {
+        const data = await this.apiRequest('/marketing/admin/commissions/set', {
+          method: 'POST',
+          body: JSON.stringify({
+            user_id: Number(userId),
+            course_id: Number(courseId),
+            commission_percent: Number(percent)
+          })
+        });
+        await this.fetchAdminCommissions();
+        this.showToast('Cấu hình tỷ lệ hoa hồng thành công!', 'success');
+        return data;
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi khi cài đặt hoa hồng', 'error');
+        throw err;
+      }
+    },
+
+    // --- Admin Data Export ---
+    async exportAdminReport(type = 'orders', period = 'all') {
+      if (!this.token) return;
+      try {
+        const url = `${API_BASE}/admin/export/${type}?period=${period}`;
+        const res = await fetch(url, {
+          headers: {
+            'Authorization': `Bearer ${this.token}`
+          }
+        });
+        if (!res.ok) throw new Error('Không thể tải file xuất dữ liệu');
+        const blob = await res.blob();
+        const downloadUrl = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = `bao_cao_${type}_${period}_acc.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(downloadUrl);
+        this.showToast('Xuất báo cáo dữ liệu thành công!', 'success');
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi xuất file dữ liệu', 'error');
+      }
     }
+
   }
 });

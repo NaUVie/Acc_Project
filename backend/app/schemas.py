@@ -38,6 +38,7 @@ class CourseBase(BaseModel):
     description: Optional[str] = None
     duration: Optional[str] = None
     level: Optional[str] = None
+    default_commission_percent: Optional[int] = 10
 
 class CoursePublicResponse(CourseBase):
     tags: List[CourseTagResponse] = []
@@ -175,6 +176,7 @@ class UserResponse(UserBase):
     id: int
     referral_code: str
     role: str
+    store_credit_balance: int = 0
     referred_by_id: Optional[int] = None
     created_at: datetime
 
@@ -288,6 +290,7 @@ class UserAdminResponse(BaseModel):
     role: str
     referral_code: str
     referred_by_id: Optional[int] = None
+    store_credit_balance: int = 0
     is_active: bool
     created_at: datetime
 
@@ -401,6 +404,109 @@ class CourseProgressUpdate(BaseModel):
 class CourseProgressResponse(BaseModel):
     course_id: int
     completed_lessons: List[str] = []
+
+# Review Schemas
+class CourseReviewCreate(BaseModel):
+    rating: int # 1 to 5
+    comment: str
+
+class CourseReviewResponse(BaseModel):
+    id: int
+    course_id: int
+    user_id: int
+    user_fullname: str
+    rating: int
+    comment: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Lesson Note Schemas
+class LessonNoteCreate(BaseModel):
+    course_handle: str
+    lesson_id: str
+    timestamp_seconds: int = 0
+    note_text: str
+
+class LessonNoteResponse(BaseModel):
+    id: int
+    user_id: int
+    course_id: int
+    lesson_id: str
+    timestamp_seconds: int
+    note_text: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Wishlist Schemas
+class WishlistResponse(BaseModel):
+    id: int
+    course: CourseResponse
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Coupon Schemas
+class CouponCreate(BaseModel):
+    code: str
+    discount_type: str = "percent" # "percent" or "fixed"
+    discount_value: int
+    min_order_value: Optional[int] = 0
+    max_discount_amount: Optional[int] = 0
+    usage_limit: Optional[int] = 0
+    valid_from: Optional[datetime] = None
+    valid_to: Optional[datetime] = None
+    is_active: Optional[bool] = True
+
+class CouponResponse(BaseModel):
+    id: int
+    code: str
+    discount_type: str
+    discount_value: int
+    min_order_value: int
+    max_discount_amount: int
+    usage_limit: int
+    times_used: int
+    valid_from: Optional[datetime] = None
+    valid_to: Optional[datetime] = None
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class CouponApplyRequest(BaseModel):
+    code: str
+    cart_total: int
+
+class CouponApplyResponse(BaseModel):
+    valid: bool
+    code: str
+    discount_amount: int
+    message: str
+
+# Custom Commission Schemas
+class UserCourseCommissionCreate(BaseModel):
+    user_id: int
+    course_id: int
+    commission_percent: int
+
+class UserCourseCommissionResponse(BaseModel):
+    id: int
+    user_id: int
+    user_fullname: str
+    course_id: int
+    course_title: str
+    commission_percent: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
 
 
 

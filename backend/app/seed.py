@@ -205,17 +205,56 @@ COURSES_SEED = [
 
     # Combos / Bundles
     {
-        "id": 10205877633335,
-        "title": "Data Bootcamp - Combo 2 khoá học AI For Decision Making và Data Processing",
+        "id": 9000000000001,
+        "title": "Bundle 2026 Master VIP Tất Cả Khóa Học",
         "category_slug": "bundles",
-        "handle": "data-bootcamp",
-        "price": 3659000,
-        "original_price": 4500000,
+        "handle": "bundle-2026-master",
+        "price": 5990000,
+        "original_price": 15900000,
         "image": "/images/Data_Bootcamp.png",
-        "tags": ["Beginner", "Combo", "Data", "AI", "Video on-demand"],
-        "description": "Combo hoàn hảo giúp bạn nâng tầm tư duy số, tự động hóa xử lý dữ liệu và đưa ra quyết định dựa trên số liệu thực tế.",
-        "duration": "8 tuần",
+        "tags": ["VIP", "Combo", "Bundle"],
+        "description": "Sở hữu trọn bộ tất cả các khóa học cao cấp tại ACC Academy với đặc quyền cập nhật kiến thức mới miễn phí trong suốt năm 2026.",
+        "duration": "Trọn đời",
+        "level": "Tất cả trình độ"
+    },
+    {
+        "id": 9000000000002,
+        "title": "AI & Automation Master Bundle",
+        "category_slug": "bundles",
+        "handle": "ai-master-bundle",
+        "price": 3990000,
+        "original_price": 9800000,
+        "image": "/images/Square_Cover_b1dc8f1b-edc2-473f-ada7-6756dae8a281.png",
+        "tags": ["AI", "Combo", "Automation"],
+        "description": "Trọn bộ các khóa học AI cốt lõi: ChatGPT Work Automation, AI COE, Gen AI Studio và Claude Productivity.",
+        "duration": "Trọn đời",
+        "level": "Cơ bản - Nâng cao"
+    },
+    {
+        "id": 9000000000003,
+        "title": "Data Bootcamp - Combo AI For Decision Making & Data Processing",
+        "category_slug": "bundles",
+        "handle": "data-bootcamp-combo",
+        "price": 4500000,
+        "original_price": 8400000,
+        "image": "/images/Data_Bootcamp.png",
+        "tags": ["Data", "Combo", "AI"],
+        "description": "Combo toàn diện xử lý dữ liệu tự động, xây dựng Dashboard Looker Studio và ứng dụng AI ra quyết định kinh doanh.",
+        "duration": "Trọn đời",
         "level": "Cơ bản - Trung cấp"
+    },
+    {
+        "id": 9000000000004,
+        "title": "Combo Quản Trị & Lãnh Đạo Chuyên Nghiệp",
+        "category_slug": "bundles",
+        "handle": "leadership-master-combo",
+        "price": 3200000,
+        "original_price": 6800000,
+        "image": "/images/Leader_Shift.webp",
+        "tags": ["Management", "Combo", "Leadership"],
+        "description": "Lộ trình nâng cao năng lực lãnh đạo, giao tiếp thuyết phục cấp trên và quản trị dự án hiệu quả.",
+        "duration": "Trọn đời",
+        "level": "Cơ bản - Nâng cao"
     }
 ]
 
@@ -428,6 +467,34 @@ def seed_database():
                 courses=soft_courses
             )
             db.add(b4)
+
+        db.commit()
+
+        # Ensure all bundles have corresponding Course entries with category_slug='bundles'
+        all_bundles = db.query(models.Bundle).all()
+        for idx, b in enumerate(all_bundles, start=1):
+            c_entry = db.query(models.Course).filter(
+                (models.Course.handle == b.handle) | (models.Course.title == b.title)
+            ).first()
+            if not c_entry:
+                c_entry = models.Course(
+                    id=9000000000000 + idx,
+                    title=b.title,
+                    category_slug="bundles",
+                    handle=b.handle,
+                    price=b.price,
+                    original_price=b.original_price,
+                    image=b.image or "/images/Data_Bootcamp.png",
+                    tags="[\"Bundle\", \"Combo\"]",
+                    description=b.description,
+                    duration="Trọn đời",
+                    level="Tất cả trình độ"
+                )
+                db.add(c_entry)
+            else:
+                c_entry.price = b.price
+                c_entry.original_price = b.original_price
+                c_entry.category_slug = "bundles"
 
         db.commit()
 

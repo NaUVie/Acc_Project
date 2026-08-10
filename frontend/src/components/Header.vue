@@ -204,9 +204,71 @@
       <!-- Action buttons -->
       <div class="header-actions">
         <router-link v-if="!courseStore.token" to="/login" class="login-btn">Đăng nhập học viên</router-link>
-        <div v-else class="user-menu-wrapper" style="display: flex; align-items: center; gap: 8px;">
-          <router-link v-if="courseStore.userMe?.role === 'admin'" to="/admin" class="btn btn-primary" style="padding: 6px 12px; font-size: 13px; border-radius: var(--rounded-button); box-shadow: none; height: auto;">👑 Quản trị</router-link>
-          <router-link to="/dashboard" class="login-btn user-btn">🙋‍♂️ {{ courseStore.userMe?.fullname || 'Học viên' }}</router-link>
+        
+        <!-- User Profile Dropdown -->
+        <div 
+          v-else 
+          class="user-dropdown-wrapper" 
+          @mouseenter="isUserDropdownOpen = true" 
+          @mouseleave="isUserDropdownOpen = false"
+        >
+          <button class="user-btn-trigger" @click="isUserDropdownOpen = !isUserDropdownOpen">
+            <span class="user-avatar-badge">{{ (courseStore.userMe?.fullname || 'H')[0].toUpperCase() }}</span>
+            <span class="user-name-text">{{ courseStore.userMe?.fullname || 'Học viên' }}</span>
+            <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </button>
+
+          <div class="user-dropdown-menu" :class="{ 'open': isUserDropdownOpen }">
+            <div class="user-dropdown-header">
+              <div class="user-header-info">
+                <div class="user-header-name">{{ courseStore.userMe?.fullname }}</div>
+                <div class="user-header-email">{{ courseStore.userMe?.email }}</div>
+              </div>
+              <span v-if="courseStore.userMe?.role === 'admin'" class="user-role-tag">Quản trị viên</span>
+            </div>
+
+            <div class="user-dropdown-divider"></div>
+
+            <div class="user-dropdown-body">
+              <router-link 
+                v-if="courseStore.userMe?.role === 'admin'" 
+                to="/admin" 
+                class="user-dropdown-link admin-highlight" 
+                @click="isUserDropdownOpen = false"
+              >
+                <span class="dropdown-icon">👑</span>
+                <div class="dropdown-link-text">
+                  <span class="link-title">Trang quản trị hệ thống</span>
+                  <span class="link-desc">Quản lý khóa học, đơn hàng & học viên</span>
+                </div>
+              </router-link>
+
+              <router-link to="/dashboard" class="user-dropdown-link" @click="isUserDropdownOpen = false">
+                <span class="dropdown-icon">🎓</span>
+                <div class="dropdown-link-text">
+                  <span class="link-title">Khóa học của tôi</span>
+                  <span class="link-desc">Vào học & xem tiến độ</span>
+                </div>
+              </router-link>
+
+              <router-link to="/gioi-thieu" class="user-dropdown-link" @click="isUserDropdownOpen = false">
+                <span class="dropdown-icon">🎁</span>
+                <div class="dropdown-link-text">
+                  <span class="link-title">Giới thiệu & Nhận thưởng</span>
+                  <span class="link-desc">Nhận đến 29.000.000 VNĐ hoa hồng</span>
+                </div>
+              </router-link>
+            </div>
+
+            <div class="user-dropdown-divider"></div>
+
+            <button class="user-dropdown-logout" @click="handleLogout">
+              <span class="dropdown-icon">🚪</span>
+              <span>Đăng xuất tài khoản</span>
+            </button>
+          </div>
         </div>
         
         <button class="icon-btn" aria-label="Tìm kiếm">
@@ -309,6 +371,7 @@
           </div>
         </div>
 
+        <router-link to="/gioi-thieu" class="mobile-single-link" style="color: #022B9F; font-weight: 700;" @click="closeMobileMenu">Giới thiệu & Nhận thưởng 🎁</router-link>
         <router-link to="/chia-se-hoc-vien" class="mobile-single-link" @click="closeMobileMenu">Chia sẻ học viên</router-link>
         <router-link to="/contact" class="mobile-single-link" @click="closeMobileMenu">Liên hệ</router-link>
         <router-link to="/about-us" class="mobile-single-link" @click="closeMobileMenu">Về chúng tôi</router-link>
@@ -390,12 +453,20 @@ const router = useRouter();
 const courseStore = useCourseStore();
 
 const isCartOpen = ref(false);
+const isUserDropdownOpen = ref(false);
 const isScrolled = ref(false);
 const isHidden = ref(false);
 const lastScrollTop = ref(0);
 const isMobileMenuOpen = ref(false);
 const activeMobileSection = ref('');
 const activeMobileSubSection = ref('');
+
+const handleLogout = () => {
+  isUserDropdownOpen.value = false;
+  courseStore.logout();
+  courseStore.showToast('Đã đăng xuất thành công!', 'info');
+  router.push('/login');
+};
 
 const handleViewCart = () => {
   isCartOpen.value = false;

@@ -125,6 +125,7 @@
             </div>
             <video 
               v-if="videoUrl" 
+              ref="videoRef"
               controls 
               autoplay
               :src="videoUrl" 
@@ -282,6 +283,16 @@
               <span>Thảo luận & Hỏi đáp</span>
               <span class="qa-badge-count">{{ qas.length }}</span>
             </button>
+
+            <button 
+              class="tab-nav-item" 
+              :class="{ 'active': activeTab === 'notes' }"
+              @click="activeTab = 'notes'"
+            >
+              <span class="tab-icon">📌</span>
+              <span>Ghi chú của tôi</span>
+              <span class="qa-badge-count" style="background: #0284c7;">{{ lessonNotes.length }}</span>
+            </button>
           </div>
 
           <div class="tab-content-body">
@@ -391,6 +402,50 @@
                 </div>
               </div>
             </div>
+
+            <!-- TAB 4: LESSON NOTES -->
+            <div v-if="activeTab === 'notes'" class="tab-pane notes-pane">
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <h4 style="font-size: 15px; font-weight: 700; color: #0f172a; margin: 0;">Lưu ghi chú bài học</h4>
+                  <button @click="captureCurrentVideoTimestamp" style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    ⏱️ mốc {{ formatTimestamp(currentNoteTimestamp) }}
+                  </button>
+                </div>
+                <textarea 
+                  v-model="newNoteText" 
+                  placeholder="Viết ghi chú cá nhân của bạn cho mốc thời gian này..."
+                  rows="3"
+                  style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; box-sizing: border-box; outline: none; margin-bottom: 12px;"
+                ></textarea>
+                <div style="display: flex; justify-content: flex-end;">
+                  <button @click="submitLessonNote" :disabled="submittingNote" class="btn btn-primary btn-sm">
+                    {{ submittingNote ? 'Đang lưu...' : '📌 Lưu ghi chú' }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Notes Feed -->
+              <div v-if="lessonNotes.length === 0" style="text-align: center; padding: 30px 0; color: #64748b; font-size: 14px;">
+                Bạn chưa tạo ghi chú nào cho khóa học này.
+              </div>
+              <div v-else style="display: flex; flex-direction: column; gap: 12px;">
+                <div v-for="note in lessonNotes" :key="note.id" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; background: #fff; display: flex; justify-content: space-between; align-items: flex-start;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                      <span @click="seekToTimestamp(note.timestamp_seconds)" style="background: #0284c7; color: white; border-radius: 6px; padding: 2px 8px; font-weight: 700; font-size: 12px; cursor: pointer; text-decoration: underline;" title="Bấm để tua video tới mốc thời gian này">
+                        ▶ {{ formatTimestamp(note.timestamp_seconds) }}
+                      </span>
+                      <span style="font-size: 11px; color: #94a3b8;">{{ formatNoteDate(note.created_at) }}</span>
+                    </div>
+                    <p style="font-size: 14px; color: #334155; margin: 0; line-height: 1.5;">{{ note.note_text }}</p>
+                  </div>
+                  <button @click="handleDeleteNote(note.id)" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 14px;" title="Xóa ghi chú này">
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -460,8 +515,9 @@ onMounted(async () => {
     activeLesson.value = curriculum.value[0].lessons[0];
   }
 
-  // Load persistent QAs
+  // Load persistent QAs & Notes
   loadSavedQas();
+  loadLessonNotes();
 });
 
 const activeLesson = ref(null);
@@ -750,6 +806,72 @@ const getUserInitials = (name) => {
   const parts = name.trim().split(' ');
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+// --- Lesson Notes Functionality ---
+const videoRef = ref(null);
+const lessonNotes = ref([]);
+const newNoteText = ref('');
+const currentNoteTimestamp = ref(0);
+const submittingNote = ref(false);
+
+const captureCurrentVideoTimestamp = () => {
+  if (videoRef.value && !isNaN(videoRef.value.currentTime)) {
+    currentNoteTimestamp.value = Math.floor(videoRef.value.currentTime);
+  }
+};
+
+const formatTimestamp = (sec) => {
+  if (!sec || isNaN(sec)) return '00:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`;
+};
+
+const formatNoteDate = (iso) => {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+};
+
+const seekToTimestamp = (sec) => {
+  if (videoRef.value) {
+    videoRef.value.currentTime = sec;
+    videoRef.value.play().catch(() => {});
+  }
+};
+
+const loadLessonNotes = async () => {
+  const handle = route.params.handle;
+  if (!handle) return;
+  lessonNotes.value = await courseStore.fetchLessonNotes(handle);
+};
+
+const submitLessonNote = async () => {
+  if (!newNoteText.value.trim()) {
+    courseStore.showToast('Vui lòng nhập nội dung ghi chú!', 'warning');
+    return;
+  }
+  captureCurrentVideoTimestamp();
+  submittingNote.value = true;
+  try {
+    const note = await courseStore.addLessonNote({
+      course_handle: route.params.handle,
+      lesson_id: activeLesson.value ? String(activeLesson.value.id) : 'general',
+      timestamp_seconds: currentNoteTimestamp.value,
+      note_text: newNoteText.value.trim()
+    });
+    lessonNotes.value.unshift(note);
+    newNoteText.value = '';
+  } catch (err) {
+    // handled in store
+  } finally {
+    submittingNote.value = false;
+  }
+};
+
+const handleDeleteNote = async (noteId) => {
+  await courseStore.deleteLessonNote(noteId);
+  lessonNotes.value = lessonNotes.value.filter(n => n.id !== noteId);
 };
 </script>
 

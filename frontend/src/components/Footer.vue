@@ -36,6 +36,7 @@
           <h3 class="custom-footer-heading">Khám phá</h3>
           <ul class="custom-footer-linklist">
             <li><router-link to="/about-us">Về ACC Academy</router-link></li>
+            <li><router-link to="/gioi-thieu">Giới thiệu & Nhận thưởng 🎁</router-link></li>
             <li><router-link to="/courses/category/ky-nang-ai">Khóa học AI & Tự động hóa</router-link></li>
             <li><router-link to="/corporate/dao-tao">Đào tạo Doanh nghiệp</router-link></li>
             <li><router-link to="/library/blog">Bài viết chuyên gia</router-link></li>

@@ -69,6 +69,7 @@ class Course(Base):
     duration = Column(String(50), nullable=True)
     level = Column(String(50), nullable=True)
     curriculum_data = Column(Text, nullable=True)
+    default_commission_percent = Column(Integer, default=10)
 
     category = relationship("Category", back_populates="courses")
     program = relationship("Program", back_populates="courses")
@@ -119,6 +120,7 @@ class User(Base):
     referral_code = Column(String(50), unique=True, index=True, nullable=False)
     referred_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     role = Column(String(50), default="student") # student, admin
+    store_credit_balance = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
@@ -221,5 +223,74 @@ class Banner(Base):
     position = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class CourseReview(Base):
+    __tablename__ = "course_reviews"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    course_id = Column(BigInteger, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    rating = Column(Integer, nullable=False) # 1 to 5
+    comment = Column(Text, nullable=False)
+    is_approved = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", backref="reviews")
+    course = relationship("Course", backref="reviews")
+
+class LessonNote(Base):
+    __tablename__ = "lesson_notes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    course_id = Column(BigInteger, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    lesson_id = Column(String(100), nullable=False)
+    timestamp_seconds = Column(Integer, default=0)
+    note_text = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", backref="notes")
+    course = relationship("Course", backref="notes")
+
+class Wishlist(Base):
+    __tablename__ = "wishlists"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    course_id = Column(BigInteger, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", backref="wishlists")
+    course = relationship("Course", backref="wishlists")
+
+class Coupon(Base):
+    __tablename__ = "coupons"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    code = Column(String(50), unique=True, index=True, nullable=False)
+    discount_type = Column(String(20), default="percent") # "percent" or "fixed"
+    discount_value = Column(Integer, nullable=False)
+    min_order_value = Column(Integer, default=0)
+    max_discount_amount = Column(Integer, default=0) # 0 means no cap
+    usage_limit = Column(Integer, default=0) # 0 means unlimited
+    times_used = Column(Integer, default=0)
+    valid_from = Column(DateTime, nullable=True)
+    valid_to = Column(DateTime, nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class UserCourseCommission(Base):
+    """Custom commission rate per user and course (overrides Course.default_commission_percent)."""
+    __tablename__ = "user_course_commissions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    course_id = Column(BigInteger, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
+    commission_percent = Column(Integer, nullable=False) # e.g. 15 for 15%
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", backref="custom_commissions")
+    course = relationship("Course", backref="custom_commissions")
+
 
 
