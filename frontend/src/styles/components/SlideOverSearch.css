@@ -1,0 +1,388 @@
+.search-slideover-container {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.search-slideover-container.active {
+  pointer-events: auto;
+}
+
+.search-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 2101;
+  pointer-events: auto;
+}
+
+.search-panel {
+  position: relative;
+  width: 510px;
+  max-width: calc(100vw - 32px);
+  height: calc(100vh - 40px);
+  margin: 20px 20px 20px 0;
+  border-radius: 16px;
+  background-color: #ffffff;
+  z-index: 2102;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+}
+
+.search-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: #ffffff;
+}
+
+@media screen and (min-width: 700px) {
+  .search-header {
+    padding: 2rem 2.5rem 1.5rem 2.5rem;
+  }
+}
+
+.search-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.search-title-row h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 40px 12px 44px;
+  font-size: 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+  outline: none;
+  transition: all 0.2s ease;
+  color: #0f172a;
+}
+
+.search-input:focus {
+  background: #ffffff;
+  border-color: #022B9F;
+  box-shadow: 0 0 0 3px rgba(2, 43, 159, 0.1);
+}
+
+.clear-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.clear-btn:hover {
+  color: #0f172a;
+}
+
+.quick-tags {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  margin-top: 4px;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+}
+
+.quick-tags::-webkit-scrollbar {
+  height: 4px;
+}
+
+.quick-tags::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 2px;
+}
+
+.quick-tags::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 2px;
+}
+
+.tag-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #64748b;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.tag-btn:hover,
+.tag-btn.active {
+  background: #022B9F;
+  color: #ffffff;
+  border-color: #022B9F;
+}
+
+.search-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  padding: 1.25rem 1.5rem 1.5rem 1.5rem;
+}
+
+@media screen and (min-width: 700px) {
+  .search-body {
+    padding: 1.5rem 2.5rem 2.5rem 2.5rem;
+  }
+}
+
+.search-suggestions {
+  margin-top: 8px;
+}
+
+.suggestion-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.featured-section {
+  margin-top: 24px;
+}
+
+.suggestion-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill-item {
+  padding: 8px 14px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pill-item:hover {
+  background: rgba(2, 43, 159, 0.08);
+  color: #022B9F;
+  border-color: rgba(2, 43, 159, 0.2);
+}
+
+.results-count {
+  font-size: 13px;
+  color: #64748b;
+  margin-bottom: 16px;
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.course-result-card {
+  display: flex;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid #f1f5f9;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.course-result-card:hover {
+  border-color: rgba(2, 43, 159, 0.2);
+  background: #f8fafc;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.course-thumb {
+  width: 64px;
+  height: 64px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.course-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.course-category {
+  font-size: 11px;
+  font-weight: 700;
+  color: #022B9F;
+  text-transform: uppercase;
+}
+
+.course-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.course-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+}
+
+.price-current {
+  font-weight: 700;
+  color: #059669;
+}
+
+.price-original {
+  font-size: 11.5px;
+  color: #94a3b8;
+  text-decoration: line-through;
+}
+
+.no-results {
+  text-align: center;
+  padding: 48px 16px;
+}
+
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.no-results p {
+  font-size: 14px;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.empty-hint {
+  font-size: 12.5px;
+  color: #94a3b8;
+}
+
+/* Transitions: 2-Stage Bar Pause & Stretch Animation */
+.fade-enter-active {
+  transition: opacity 0.3s ease;
+}
+.fade-leave-active {
+  transition: opacity 0.55s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-enter-active {
+  animation: expandDrawerBar 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: right center;
+}
+
+.slide-leave-active {
+  animation: collapseDrawerBar 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: right center;
+}
+
+@keyframes expandDrawerBar {
+  0% {
+    transform: scaleX(0.01);
+    opacity: 0;
+  }
+  /* Stage 1: Appears as a narrow vertical bar 20px from right edge and holds for ~0.2s */
+  28% {
+    transform: scaleX(0.02);
+    opacity: 1;
+  }
+  /* Stage 2: Expands smoothly from right to left */
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes collapseDrawerBar {
+  0% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  /* Stage 1 Reverse: Coils/shrinks back from left to right down to narrow bar */
+  72% {
+    transform: scaleX(0.02);
+    opacity: 1;
+  }
+  /* Stage 2 Reverse: Pauses briefly (~0.2s) as bar at 20px edge then fades out */
+  100% {
+    transform: scaleX(0.01);
+    opacity: 0;
+  }
+}

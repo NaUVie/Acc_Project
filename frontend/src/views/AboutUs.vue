@@ -281,7 +281,7 @@
 import { onMounted } from 'vue';
 
 onMounted(() => {
-  // Trigger animations if needed or track analytics
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 </script>
 

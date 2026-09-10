@@ -74,6 +74,16 @@ const routes = [
     component: () => import('../views/AboutUs.vue')
   },
   {
+    path: '/doi-ngu-giang-vien',
+    name: 'Lecturers',
+    component: () => import('../views/Lecturers.vue')
+  },
+  {
+    path: '/giang-vien/:id',
+    name: 'LecturerDetail',
+    component: () => import('../views/LecturerDetail.vue')
+  },
+  {
     path: '/login',
     name: 'Login',
     component: () => import('../views/Login.vue')
