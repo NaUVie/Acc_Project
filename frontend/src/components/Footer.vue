@@ -55,12 +55,12 @@
 
         <!-- Col 4: Contact -->
         <div class="custom-footer-col">
-          <h3 class="custom-footer-heading">Liên hệ</h3>
+          <h3 class="custom-footer-heading">Liên hệ với ACC</h3>
           <div class="custom-footer-contact-info">
-            <p><strong>Hotline:</strong> 090 977 0085</p>
-            <p><strong>Email:</strong> support@accacademy.vn</p>
-            <p><strong>Địa chỉ:</strong> Tòa nhà Fideco, 14 Thảo Điền, TP. Thủ Đức, TP. HCM</p>
-            <p><strong>MST:</strong> 0317402205</p>
+            <p><strong>Hotline:</strong> 0938 566 700</p>
+            <p><strong>Email:</strong> info@acc-edu.vn</p>
+            <p><strong>VP. Hồ Chí Minh:</strong> 156 Nam Kỳ Khởi Nghĩa</p>
+            <p><strong>VP. Hà Nội:</strong> 28 Ngõ 7 Giang Văn Minh, P. Kim Mã</p>
           </div>
         </div>
       </div>

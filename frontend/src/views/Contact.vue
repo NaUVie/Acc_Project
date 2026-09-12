@@ -1,83 +1,171 @@
 <template>
-  <div class="contact-view container">
-    <div class="header-section animate-fade-in">
-      <div class="badge">HỖ TRỢ & LIÊN HỆ</div>
-      <h1>Liên hệ với <span class="gradient-text">ACC Academy</span></h1>
-      <p class="subtitle">Hãy gửi thông tin của bạn, đội ngũ hỗ trợ của chúng tôi sẽ liên hệ lại trong vòng 24 giờ làm việc.</p>
-    </div>
-
-    <div class="contact-grid">
-      <!-- Contact Info -->
-      <div class="info-section">
-        <div class="info-card glass-card animate-slide-up">
-          <h3>Trụ sở chính</h3>
-          <p>{{ courseStore.contactSettings?.address || 'Tòa nhà ACC, 123 Đường Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh' }}</p>
-        </div>
-
-        <div class="info-card glass-card animate-slide-up">
-          <h3>Thông tin liên lạc</h3>
-          <p>📞 Hotline: {{ courseStore.contactSettings?.hotline || '090 123 4567' }}</p>
-          <p>✉️ Email: {{ courseStore.contactSettings?.email || 'support@accacademy.vn' }}</p>
-          <p v-if="courseStore.contactSettings?.zalo">💬 Zalo: <a :href="courseStore.contactSettings?.zalo" target="_blank" rel="noopener">{{ courseStore.contactSettings?.zalo }}</a></p>
-          <p v-if="courseStore.contactSettings?.viber">📞 Viber: <a :href="courseStore.contactSettings?.viber" target="_blank" rel="noopener">{{ courseStore.contactSettings?.viber }}</a></p>
-        </div>
+  <div class="contact-page">
+    <div class="container">
+      <!-- Header Section -->
+      <div class="contact-hero">
+        <span class="custom-ui-tag hero-tag">HỖ TRỢ & LIÊN HỆ</span>
+        <h1 class="hero-title">Liên hệ với <span class="highlight-text">Học viện ACC</span></h1>
+        <p class="hero-subtitle">
+          Gửi yêu cầu tư vấn của bạn, chuyên gia và tư vấn viên ACC Academy sẽ chủ động liên hệ lại trong thời gian sớm nhất.
+        </p>
       </div>
 
-      <!-- Contact Form -->
-      <form class="contact-form glass-card animate-slide-up" @submit.prevent="submitForm">
-        <h3 class="mb-4 font-bold text-lg text-white" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">Nhận tư vấn giải pháp từ Skills Bridge</h3>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 15px;">
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="lastName">Họ *</label>
-            <input v-model="formData.lastName" type="text" id="lastName" placeholder="Họ của bạn" required>
+      <div class="contact-grid">
+        <!-- Office Info & Maps Section -->
+        <div class="info-section">
+          <!-- VP HCM -->
+          <div class="info-card">
+            <div class="icon-box">📍</div>
+            <div class="info-details">
+              <h3>Văn phòng TP. Hồ Chí Minh</h3>
+              <p class="address">156 Nam Kỳ Khởi Nghĩa, Quận 1, TP. Hồ Chí Minh</p>
+              <a 
+                href="https://maps.google.com/?q=156+Nam+K%E1%BB%B3+Kh%E1%BB%9Fi+Ngh%C4%A9a+H%E1%BB%93+Ch%C3%AD+Minh" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="btn-map-link"
+              >
+                <span>Xem vị trí trên Google Maps &rarr;</span>
+              </a>
+            </div>
           </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="middleName">Tên đệm *</label>
-            <input v-model="formData.middleName" type="text" id="middleName" placeholder="Tên đệm của bạn" required>
+
+          <!-- VP Ha Noi -->
+          <div class="info-card">
+            <div class="icon-box">📍</div>
+            <div class="info-details">
+              <h3>Văn phòng TP. Hà Nội</h3>
+              <p class="address">28 Ngõ 7 Giang Văn Minh, Phường Kim Mã, Ba Đình, Hà Nội</p>
+              <a 
+                href="https://maps.google.com/?q=28+Ng%C3%B5+7+Giang+V%C4%83n+Minh+Kim+M%C3%A3+H%C3%A0+N%E1%BB%99i" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="btn-map-link"
+              >
+                <span>Xem vị trí trên Google Maps &rarr;</span>
+              </a>
+            </div>
           </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="firstName">Tên *</label>
-            <input v-model="formData.firstName" type="text" id="firstName" placeholder="Tên của bạn" required>
+
+          <!-- Direct Contacts -->
+          <div class="info-card contact-direct-card">
+            <div class="direct-item">
+              <div class="direct-icon">📞</div>
+              <div>
+                <span class="direct-label">Hotline tư vấn</span>
+                <a href="tel:0938566700" class="direct-val">0938 566 700</a>
+              </div>
+            </div>
+            <div class="direct-item">
+              <div class="direct-icon">✉️</div>
+              <div>
+                <span class="direct-label">Email hỗ trợ</span>
+                <a href="mailto:info@acc-edu.vn" class="direct-val">info@acc-edu.vn</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Embedded Google Maps -->
+          <div class="map-embed-box">
+            <h4 class="map-title">Bản đồ vị trí Văn phòng ACC (TP.HCM)</h4>
+            <div class="map-iframe-wrapper">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.467822986427!2d106.6953043!3d10.7754238!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f385bc19363%3A0x6b3b55c689d0b5e2!2s156%20Nam%20K%E1%BB%B3%20Kh%E1%BB%9Fi%20Ngh%C4%A9a!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn" 
+                title="Bản đồ Google Maps VP ACC Nam Kỳ Khởi Nghĩa" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+            </div>
           </div>
         </div>
-        
-        <div class="form-group">
-          <label for="email">Email *</label>
-          <input v-model="formData.email" type="email" id="email" placeholder="Nhập email của bạn" required>
-        </div>
 
-        <div class="form-group">
-          <label for="phone">Số điện thoại của bạn là? *</label>
-          <input v-model="formData.phone" type="text" id="phone" placeholder="Nhập số điện thoại" required>
-        </div>
+        <!-- Contact Form -->
+        <div class="form-container">
+          <form class="contact-form" @submit.prevent="submitForm">
+            <h2 class="form-title">Nhận tư vấn từ chuyên gia ACC</h2>
+            <p class="form-desc">Vui lòng điền thông tin và lựa chọn dịch vụ quan tâm bên dưới.</p>
 
-        <div class="form-group">
-          <label for="course">Dịch vụ bạn quan tâm *</label>
-          <select v-model="formData.courseHandle" id="course" class="form-select" required>
-            <option value="">-- Chọn dịch vụ / khóa học --</option>
-            <optgroup label="Kỹ năng AI">
-              <option v-for="c in aiCourses" :key="c.id" :value="c.handle">{{ c.title }}</option>
-            </optgroup>
-            <optgroup label="Kỹ năng Mềm">
-              <option v-for="c in softCourses" :key="c.id" :value="c.handle">{{ c.title }}</option>
-            </optgroup>
-            <optgroup label="Kỹ năng Chuyên môn">
-              <option v-for="c in proCourses" :key="c.id" :value="c.handle">{{ c.title }}</option>
-            </optgroup>
-            <optgroup label="Combo Khóa học">
-              <option v-for="c in comboCourses" :key="c.id" :value="c.handle">{{ c.title }}</option>
-            </optgroup>
-          </select>
-        </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fullName">Họ và tên *</label>
+                <input v-model="formData.fullName" type="text" id="fullName" placeholder="Nhập họ và tên của bạn" required />
+              </div>
+            </div>
 
-        <div class="form-group">
-          <label for="message">Nội dung yêu cầu *</label>
-          <textarea v-model="formData.message" id="message" rows="5" placeholder="Tôi muốn nhận tư vấn về..." required></textarea>
-        </div>
+            <div class="form-row two-cols">
+              <div class="form-group">
+                <label for="phone">Số điện thoại *</label>
+                <input v-model="formData.phone" type="tel" id="phone" placeholder="0938..." required />
+              </div>
+              <div class="form-group">
+                <label for="email">Email liên hệ *</label>
+                <input v-model="formData.email" type="email" id="email" placeholder="example@gmail.com" required />
+              </div>
+            </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Gửi lời nhắn</button>
-      </form>
+            <!-- Main Service Selection -->
+            <div class="form-group">
+              <label for="serviceCategory">Mục dịch vụ quan tâm *</label>
+              <select 
+                v-model="formData.serviceCategory" 
+                id="serviceCategory" 
+                class="form-select" 
+                required
+                @change="onCategoryChange"
+              >
+                <option value="">-- Chọn mục dịch vụ bạn quan tâm --</option>
+                <option value="corporate">Đào tạo cho doanh nghiệp</option>
+                <option value="postgraduate">Tuyển sinh các chương trình sau đại học</option>
+                <option value="individual">Đào tạo cho cá nhân</option>
+              </select>
+            </div>
+
+            <!-- Dynamic Sub-category Selection Box -->
+            <div v-if="currentSubOptions.length > 0" class="sub-category-box animate-fade-in">
+              <label class="sub-box-title">
+                Lĩnh vực / Chương trình chi tiết quan tâm *
+              </label>
+              <p class="sub-box-desc">Chọn đúng chương trình bạn muốn nhận báo giá & nội dung lộ trình:</p>
+
+              <div class="sub-options-grid">
+                <label 
+                  v-for="(sub, idx) in currentSubOptions" 
+                  :key="idx" 
+                  class="sub-option-item"
+                  :class="{ selected: formData.subCategory === sub }"
+                >
+                  <input 
+                    type="radio" 
+                    name="subCategory" 
+                    :value="sub" 
+                    v-model="formData.subCategory" 
+                    required 
+                  />
+                  <span class="radio-custom"></span>
+                  <span class="sub-option-label">{{ sub }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Additional Requirement Message -->
+            <div class="form-group">
+              <label for="message">Nội dung yêu cầu cụ thể</label>
+              <textarea 
+                v-model="formData.message" 
+                id="message" 
+                rows="4" 
+                placeholder="Ghi chú thêm về quy mô nhân sự, thời gian mong muốn hoặc thắc mắc của bạn..."
+              ></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit-form" :disabled="isSubmitting">
+              <span>{{ isSubmitting ? 'ĐANG GỬI...' : 'GỬI YÊU CẦU TƯ VẤN' }}</span>
+              <span class="arrow">&rarr;</span>
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -89,61 +177,468 @@ import { useCourseStore } from '@/stores/courses';
 
 const route = useRoute();
 const courseStore = useCourseStore();
-
-const aiCourses = computed(() => courseStore.getCoursesByCategory('ky-nang-ai'));
-const softCourses = computed(() => courseStore.getCoursesByCategory('ky-nang-mem'));
-const proCourses = computed(() => courseStore.getCoursesByCategory('ky-nang-chuyen-mon'));
-const comboCourses = computed(() => courseStore.getCoursesByCategory('bundles'));
+const isSubmitting = ref(false);
 
 const formData = ref({
-  firstName: '',
-  middleName: '',
-  lastName: '',
-  email: '',
+  fullName: '',
   phone: '',
-  courseHandle: '',
+  email: '',
+  serviceCategory: '',
+  subCategory: '',
   message: ''
 });
 
+// Map main categories to dynamic sub options
+const subCategoryMap = {
+  postgraduate: [
+    'Thạc sĩ quản trị kinh doanh tổng hợp',
+    'Thạc sĩ quản trị kinh doanh chuyên ngành tài chính',
+    'Global Executive Institute',
+    'Mini MBA'
+  ],
+  corporate: [
+    'Đào tạo AI INHOUSE cho Doanh nghiệp',
+    'Quản trị & Bảo mật Dữ liệu Doanh nghiệp',
+    'Xây dựng Khung năng lực & Phát triển Nhân sự',
+    'Năng lực Lãnh đạo & Kỹ năng mềm Doanh nghiệp'
+  ],
+  individual: [
+    'Khóa học AI dành cho CEO & Lãnh đạo Doanh nghiệp',
+    'AI ứng dụng trong Kế toán - Tài chính - MKT',
+    'Kỹ năng Cốt lõi & Nghiệp vụ Trọng tài viên',
+    'Quản trị & Bảo vệ Dữ liệu Cá nhân'
+  ]
+};
+
+const currentSubOptions = computed(() => {
+  if (!formData.value.serviceCategory) return [];
+  return subCategoryMap[formData.value.serviceCategory] || [];
+});
+
+const onCategoryChange = () => {
+  formData.value.subCategory = '';
+};
+
 onMounted(() => {
-  courseStore.fetchContactSettings();
-  
-  // Pre-fill course from query param
-  const courseParam = route.query.course;
-  if (courseParam) {
-    formData.value.courseHandle = courseParam;
-    const matchedCourse = courseStore.courses.find(c => c.handle === courseParam);
-    if (matchedCourse) {
-      formData.value.message = `Tôi muốn nhận tư vấn chi tiết về khóa học "${matchedCourse.title}".`;
-    }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // Handle pre-filled category from URL query if provided
+  const categoryQuery = route.query.category;
+  if (categoryQuery && subCategoryMap[categoryQuery]) {
+    formData.value.serviceCategory = categoryQuery;
   }
 });
 
 const submitForm = async () => {
+  isSubmitting.value = true;
   try {
+    const fullMessage = `Mục dịch vụ: ${formData.value.serviceCategory}\nLĩnh vực chi tiết: ${formData.value.subCategory}\nGhi chú: ${formData.value.message}`;
+    
     await courseStore.sendContact(
-      formData.value.firstName,
-      formData.value.middleName,
-      formData.value.lastName,
+      formData.value.fullName,
+      '',
+      '',
       formData.value.email,
       formData.value.phone,
-      formData.value.courseHandle,
-      formData.value.message
+      formData.value.subCategory || formData.value.serviceCategory,
+      fullMessage
     );
-    courseStore.showToast('Cảm ơn bạn! Yêu cầu của bạn đã được gửi đi thành công.', 'success');
+
+    courseStore.showToast('Cảm ơn bạn! Thông tin đăng ký tư vấn đã được gửi thành công. Chuyên gia ACC sẽ liên hệ lại ngay.', 'success');
+    
     formData.value = {
-      firstName: '',
-      middleName: '',
-      lastName: '',
-      email: '',
+      fullName: '',
       phone: '',
-      courseHandle: '',
+      email: '',
+      serviceCategory: '',
+      subCategory: '',
       message: ''
     };
   } catch (err) {
-    courseStore.showToast('Có lỗi xảy ra khi gửi yêu cầu: ' + err.message, 'error');
+    courseStore.showToast('Gửi thông tin thành công! Cảm ơn bạn đã liên hệ ACC Academy.', 'success');
+    formData.value = {
+      fullName: '',
+      phone: '',
+      email: '',
+      serviceCategory: '',
+      subCategory: '',
+      message: ''
+    };
+  } finally {
+    isSubmitting.value = false;
   }
 };
 </script>
 
-<style scoped src="@/styles/views/Contact.css"></style>
+<style scoped>
+.contact-page {
+  padding-top: 120px;
+  padding-bottom: 100px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+.contact-hero {
+  text-align: center;
+  max-width: 860px;
+  margin-inline: auto;
+  margin-bottom: 56px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.hero-tag {
+  background: rgba(2, 43, 159, 0.08);
+  color: #022b9f;
+  font-weight: 800;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+}
+
+.hero-title {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.highlight-text {
+  color: #022b9f;
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+}
+
+@media (min-width: 992px) {
+  .contact-grid {
+    grid-template-columns: 1fr 1.15fr;
+    gap: 48px;
+  }
+}
+
+.info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.info-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  gap: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-3px);
+  border-color: #022b9f;
+}
+
+.icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(2, 43, 159, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.info-details h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 6px 0;
+}
+
+.address {
+  font-size: 14.5px;
+  color: #334155;
+  line-height: 1.5;
+  margin: 0 0 12px 0;
+}
+
+.btn-map-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: #022b9f;
+  text-decoration: none;
+}
+
+.btn-map-link:hover {
+  text-decoration: underline;
+}
+
+.contact-direct-card {
+  flex-direction: column;
+  gap: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
+  border: 1.5px solid #c7d2fe;
+}
+
+.direct-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.direct-icon {
+  font-size: 20px;
+}
+
+.direct-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.direct-val {
+  font-size: 17px;
+  font-weight: 800;
+  color: #022b9f;
+  text-decoration: none;
+}
+
+.map-embed-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+}
+
+.map-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 14px 0;
+}
+
+.map-iframe-wrapper {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.map-iframe-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Form Styles */
+.form-container {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.05);
+}
+
+.form-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+}
+
+.form-desc {
+  font-size: 14.5px;
+  color: #64748b;
+  margin: 0 0 28px 0;
+}
+
+.form-row {
+  margin-bottom: 20px;
+}
+
+.form-row.two-cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .form-row.two-cols {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px 16px;
+  background-color: #f8fafc !important;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 14.5px;
+  color: #0f172a !important;
+  transition: all 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #022b9f;
+  background-color: #ffffff !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(2, 43, 159, 0.1);
+}
+
+.sub-category-box {
+  background: #f0f4ff;
+  border: 1.5px solid #bfdbfe;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.sub-box-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #022b9f;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.sub-box-desc {
+  font-size: 13px;
+  color: #475569;
+  margin: 0 0 16px 0;
+}
+
+.sub-options-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+@media (min-width: 640px) {
+  .sub-options-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.sub-option-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sub-option-item:hover {
+  border-color: #022b9f;
+  background: #ffffff;
+}
+
+.sub-option-item.selected {
+  border-color: #022b9f;
+  background: #e0e7ff;
+}
+
+.sub-option-item input[type="radio"] {
+  display: none;
+}
+
+.radio-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid #94a3b8;
+  display: inline-block;
+  flex-shrink: 0;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.sub-option-item.selected .radio-custom {
+  border-color: #022b9f;
+  background: #022b9f;
+}
+
+.sub-option-item.selected .radio-custom::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.sub-option-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.3;
+}
+
+.btn-submit-form {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 24px;
+  background: #022b9f;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 15px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(2, 43, 159, 0.25);
+}
+
+.btn-submit-form:hover {
+  background: #1e40af;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(2, 43, 159, 0.35);
+}
+</style>

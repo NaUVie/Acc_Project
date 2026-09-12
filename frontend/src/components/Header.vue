@@ -173,8 +173,25 @@
         <!-- 5. ĐỘI NGŨ GIẢNG VIÊN -->
         <router-link to="/doi-ngu-giang-vien" class="nav-link">ĐỘI NGŨ GIẢNG VIÊN</router-link>
 
-        <!-- 6. DỰ ÁN -->
-        <router-link to="/corporate/case-studies" class="nav-link">DỰ ÁN</router-link>
+        <!-- 6. DỰ ÁN (Dropdown menu) -->
+        <div class="nav-item dropdown">
+          <router-link to="/du-an" class="nav-link dropdown-toggle">
+            DỰ ÁN
+            <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </router-link>
+          <div class="dropdown-menu">
+            <router-link to="/du-an?cat=du-an-da-dao-tao" class="dropdown-item">
+              <div class="dropdown-title">DỰ ÁN ĐÃ ĐÀO TẠO</div>
+              <div class="dropdown-desc">Các dự án đào tạo In-house & chuyển đổi số thực chiến cho doanh nghiệp</div>
+            </router-link>
+            <router-link to="/du-an?cat=su-kien" class="dropdown-item">
+              <div class="dropdown-title">SỰ KIỆN</div>
+              <div class="dropdown-desc">Hội thảo, workshop và các sự kiện kết nối tri thức nổi bật của ACC</div>
+            </router-link>
+          </div>
+        </div>
 
         <!-- 7. CHIA SẺ HỌC VIÊN -->
         <router-link to="/chia-se-hoc-vien" class="nav-link">CHIA SẺ HỌC VIÊN</router-link>
@@ -394,7 +411,20 @@
         </div>
 
         <router-link to="/doi-ngu-giang-vien" class="mobile-single-link" @click="closeMobileMenu">ĐỘI NGŨ GIẢNG VIÊN</router-link>
-        <router-link to="/corporate/case-studies" class="mobile-single-link" @click="closeMobileMenu">DỰ ÁN</router-link>
+        
+        <!-- Mobile Accordion: Dự án -->
+        <div class="mobile-nav-group">
+          <div class="mobile-nav-label" @click="toggleMobileSection('projects')">
+            DỰ ÁN
+            <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'projects' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </div>
+          <div class="mobile-nav-links" v-show="activeMobileSection === 'projects'">
+            <router-link to="/du-an?cat=du-an-da-dao-tao" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN ĐÃ ĐÀO TẠO</router-link>
+            <router-link to="/du-an?cat=su-kien" @click="closeMobileMenu" class="mobile-single-sublink">SỰ KIỆN</router-link>
+          </div>
+        </div>
         <router-link to="/chia-se-hoc-vien" class="mobile-single-link" @click="closeMobileMenu">CHIA SẺ HỌC VIÊN</router-link>
         <router-link to="/contact" class="mobile-single-link" @click="closeMobileMenu">LIÊN HỆ</router-link>
         <router-link to="/about-us" class="mobile-single-link" @click="closeMobileMenu">VỀ CHÚNG TÔI</router-link>

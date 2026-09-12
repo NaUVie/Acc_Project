@@ -5,7 +5,12 @@
 </template>
 
 <script setup>
-import StudentTestimonials from '@/components/StudentTestimonials.vue'
+import { onMounted } from 'vue';
+import StudentTestimonials from '@/components/StudentTestimonials.vue';
+
+onMounted(() => {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 </script>
 
 <style scoped src="@/styles/views/TestimonialsView.css"></style>

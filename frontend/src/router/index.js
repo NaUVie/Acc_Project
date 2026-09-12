@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../views/Home.vue';
+import AboutUs from '../views/AboutUs.vue';
 
 const routes = [
   {
@@ -43,9 +44,15 @@ const routes = [
     component: () => import('../views/corporate/ForTeam.vue')
   },
   {
-    path: '/corporate/case-studies',
-    name: 'CorporateCaseStudies',
-    component: () => import('../views/corporate/CaseStudies.vue')
+    path: '/du-an',
+    alias: ['/corporate/case-studies', '/projects', '/su-kien'],
+    name: 'Projects',
+    component: () => import('../views/Projects.vue')
+  },
+  {
+    path: '/du-an/:id',
+    name: 'ProjectDetail',
+    component: () => import('../views/ProjectDetail.vue')
   },
   {
     path: '/library/blog',
@@ -71,7 +78,7 @@ const routes = [
   {
     path: '/about-us',
     name: 'AboutUs',
-    component: () => import('../views/AboutUs.vue')
+    component: AboutUs
   },
   {
     path: '/doi-ngu-giang-vien',

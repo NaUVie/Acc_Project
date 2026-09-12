@@ -168,17 +168,63 @@
 
     <!-- 4. Partner Logos Section -->
     <section class="partner-logos-section">
-      <div class="container">
+      <div class="partner-logos-header container">
+        <span class="partner-logos-badge">ĐỐI TÁC TIN CẬY</span>
         <h3 class="partner-logos-title">130+ doanh nghiệp hàng đầu đã hợp tác</h3>
-        
-        <div class="partner-logos-grid" :class="{ 'reveal-active': partnerRevealActive }">
+      </div>
+      
+      <div class="partner-marquee-container">
+        <!-- Row 1: Scroll Left -->
+        <div class="partner-marquee-track partner-track-left">
           <div 
-            v-for="(logo, idx) in partnerLogos" 
-            :key="idx" 
+            v-for="(logo, idx) in partnerRow1" 
+            :key="'r1-a-' + idx" 
             class="partner-logo-card"
-            :style="{ '--delay-idx': idx }"
           >
-            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" referrerpolicy="no-referrer" />
+            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+          </div>
+          <div 
+            v-for="(logo, idx) in partnerRow1" 
+            :key="'r1-b-' + idx" 
+            class="partner-logo-card"
+          >
+            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+          </div>
+        </div>
+
+        <!-- Row 2: Scroll Right -->
+        <div class="partner-marquee-track partner-track-right">
+          <div 
+            v-for="(logo, idx) in partnerRow2" 
+            :key="'r2-a-' + idx" 
+            class="partner-logo-card"
+          >
+            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+          </div>
+          <div 
+            v-for="(logo, idx) in partnerRow2" 
+            :key="'r2-b-' + idx" 
+            class="partner-logo-card"
+          >
+            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+          </div>
+        </div>
+
+        <!-- Row 3: Scroll Left -->
+        <div class="partner-marquee-track partner-track-left-alt">
+          <div 
+            v-for="(logo, idx) in partnerRow3" 
+            :key="'r3-a-' + idx" 
+            class="partner-logo-card"
+          >
+            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+          </div>
+          <div 
+            v-for="(logo, idx) in partnerRow3" 
+            :key="'r3-b-' + idx" 
+            class="partner-logo-card"
+          >
+            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
           </div>
         </div>
       </div>
@@ -367,10 +413,7 @@
       </div>
     </section>
 
-    <!-- 8. Testimonials Section (Doanh nhân & Influencers) -->
-    <StudentTestimonials />
-
-    <!-- 9. Blog posts Section -->
+    <!-- 8. Blog posts Section -->
     <section class="blogs-section">
       <div class="container">
         <div class="blogs-header-row">
@@ -448,7 +491,6 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import { useTestimonialStore } from '@/stores/testimonials';
-import StudentTestimonials from '@/components/StudentTestimonials.vue';
 
 const courseStore = useCourseStore();
 const testimonialStore = useTestimonialStore();
@@ -738,8 +780,20 @@ const partnerLogos = [
   { name: 'Đối tác 128', src: 'https://drive.google.com/thumbnail?id=1ts89H4WhBhMNfA2ArvYPuXZHTf3toHl3&sz=w400' },
   { name: 'Đối tác 129', src: 'https://drive.google.com/thumbnail?id=1EmG0OdZy9KfpgnEc0EL4ia_1JNtp750o&sz=w400' },
   { name: 'Đối tác 130', src: 'https://drive.google.com/thumbnail?id=1I9Z2zEeb0C8BJ3mB3l5RXI9swyDR1xTe&sz=w400' },
-  { name: 'Đối tác 131', src: 'https://drive.google.com/thumbnail?id=1lyu7z2iak8pq6tK4AQ1XexIdPBt_uLG6&sz=w400' }
+  { name: 'Đối tác 131', src: 'https://drive.google.com/thumbnail?id=1lyu7z2iak8pq6tK4AQ1XexIdPBt_uLG6&sz=w400' },
+  { name: 'Đối tác 132', src: 'https://drive.google.com/thumbnail?id=1_JzbTSatd8x1OPLFptfg1DT_xuEO4Hjp&sz=w400' },
+  { name: 'Đối tác 133', src: 'https://drive.google.com/thumbnail?id=1b378GpCnLUDWuoX5etKg4OLBDljqVWxM&sz=w400' },
+  { name: 'Đối tác 134', src: 'https://drive.google.com/thumbnail?id=1PnL8NkivKXEpboIpoDeXlHE4XpOBqNDW&sz=w400' },
+  { name: 'Đối tác 135', src: 'https://drive.google.com/thumbnail?id=1e1C6X22UTcaDxevVzbYmdBYVi5n2PEt-&sz=w400' },
+  { name: 'Đối tác 136', src: 'https://drive.google.com/thumbnail?id=1dqAgR97sr5vt_i7cyEdlirnLJC8B_q5f&sz=w400' },
+  { name: 'Đối tác 137', src: 'https://drive.google.com/thumbnail?id=1jGVMxysKJ3c33LgrKnCayADykl5u-mkY&sz=w400' },
+  { name: 'Đối tác 138', src: 'https://drive.google.com/thumbnail?id=1sI8f54M4LH2UmXZKWs9vNkBsYxZPnLeV&sz=w400' }
 ];
+
+const thirdPart = Math.ceil(partnerLogos.length / 3);
+const partnerRow1 = computed(() => partnerLogos.slice(0, thirdPart));
+const partnerRow2 = computed(() => partnerLogos.slice(thirdPart, thirdPart * 2));
+const partnerRow3 = computed(() => partnerLogos.slice(thirdPart * 2));
 
 // 4. Partnership Autoplay Tabs
 const activeTab = ref(0);
