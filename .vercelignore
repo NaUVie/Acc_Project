@@ -4,7 +4,5 @@ venv/
 .git/
 *.mp4
 *.MOV
-*.png
-*.jpg
 *.zip
 *.db
