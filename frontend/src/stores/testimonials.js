@@ -1,6 +1,20 @@
 import { defineStore } from 'pinia';
 
-const API_BASE = 'http://127.0.0.1:8000/api';
+const getApiBase = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== 'undefined') {
+    const isDev = import.meta.env.DEV;
+    if (isDev) {
+      return `${window.location.protocol}//${window.location.hostname}:8000/api`;
+    }
+    return `${window.location.origin}/api`;
+  }
+  return '/api';
+};
+
+const API_BASE = getApiBase();
 
 export const useTestimonialStore = defineStore('testimonials', {
   state: () => ({
