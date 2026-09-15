@@ -5,7 +5,7 @@
       <div class="breadcrumb">
         <router-link to="/">Trang chủ</router-link>
         <span class="sep">&rsaquo;</span>
-        <router-link to="/du-an">Dự án & Sự kiện</router-link>
+        <router-link to="/du-an">Dự án Đào tạo & Tư vấn</router-link>
         <span class="sep">&rsaquo;</span>
         <span class="current">{{ project.title }}</span>
       </div>
@@ -165,12 +165,12 @@ watch(() => route.params.id, scrollToTop);
   text-transform: uppercase;
 }
 
-.category-badge.du-an-da-dao-tao {
+.category-badge.du-an-da-thuc-hien {
   background: #022b9f;
 }
 
-.category-badge.su-kien {
-  background: #059669;
+.category-badge.du-an-dang-thuc-hien {
+  background: #d97706;
 }
 
 .publish-date, .client-tag {

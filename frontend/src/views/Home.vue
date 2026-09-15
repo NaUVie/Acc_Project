@@ -307,57 +307,6 @@
       </div>
     </section>
 
-    <!-- 6. Partnership Section (Autoplay Tabs) -->
-    <section class="partnership-tabs-section">
-      <div class="container partnership-container">
-        <!-- Left Banner Card -->
-        <div class="partnership-left-card">
-          <img src="/images/CTA_card.png" alt="Cùng bạn mở ra khả năng mới" class="partnership-card-bg" />
-          <div class="partnership-card-content text-white">
-            <p class="partnership-card-tagline">Cùng bạn mở ra những khả năng mới</p>
-            <router-link to="/contact" class="partnership-card-btn">
-              <span>Kết nối với Chuyên gia</span>
-              <span class="arrow-up-right">&nearr;</span>
-            </router-link>
-          </div>
-        </div>
-
-        <!-- Right Tabs Content -->
-        <div class="partnership-right-content">
-          <h2 class="partnership-title">Bạn đã sẵn sàng nâng tầm năng lực tổ chức?</h2>
-          <p class="partnership-subtitle">Chúng tôi cung cấp các giải pháp đào tạo và tư vấn chuyên sâu, đồng hành cùng doanh nghiệp đạt hiệu quả tối ưu.</p>
-          
-          <!-- Tabs Navigation -->
-          <div class="partnership-tabs-nav" role="tablist">
-            <button 
-              v-for="(tab, index) in partnershipTabs" 
-              :key="index"
-              class="partnership-tab-btn"
-              :class="{ active: activeTab === index }"
-              @click="handleTabClick(index)"
-              role="tab"
-              :aria-selected="activeTab === index ? 'true' : 'false'"
-            >
-              <span class="tab-btn-title">{{ tab.title }}</span>
-              <!-- Active Progress Bar Indicator -->
-              <span class="tab-progress-track">
-                <span 
-                  class="tab-progress-bar"
-                  :style="{ width: activeTab === index ? tabProgress + '%' : '0%' }"
-                ></span>
-              </span>
-            </button>
-          </div>
-
-          <!-- Tab Content Display -->
-          <div class="partnership-tab-content-panel">
-            <p class="partnership-tab-desc">
-              {{ partnershipTabs[activeTab].desc }}
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- 7. Comprehensive Training Solutions (Courses Grid Section) -->
     <section class="courses-section">
@@ -413,42 +362,87 @@
       </div>
     </section>
 
-    <!-- 8. Blog posts Section -->
-    <section class="blogs-section">
+    <!-- 8. Featured Lecturers Section -->
+    <section class="featured-lecturers-section">
       <div class="container">
         <div class="blogs-header-row">
           <div class="blogs-header-left">
-            <span class="blogs-ui-tag">Thư viện bài viết</span>
-            <h2 class="blogs-heading">Cập nhật thông tin mới nhất cùng ACC Academy</h2>
+            <span class="blogs-ui-tag">ĐỘI NGŨ GIẢNG VIÊN</span>
+            <h2 class="blogs-heading">Đội ngũ Giảng viên & Chuyên gia Thực chiến</h2>
           </div>
-          <router-link to="/library/blog" class="blogs-view-all-btn">
-            Xem thêm bài viết
+          <router-link to="/doi-ngu-giang-vien" class="blogs-view-all-btn">
+            Xem tất cả giảng viên &rarr;
           </router-link>
         </div>
 
-        <div class="blogs-grid">
-          <article 
-            v-for="post in blogPosts" 
-            :key="post.id"
-            class="blog-post-card"
+        <div class="home-lecturers-grid">
+          <div 
+            v-for="l in featuredLecturers" 
+            :key="l.id" 
+            class="home-lecturer-card-item"
           >
-            <router-link :to="'/library/blog'" class="blog-image-anchor">
-              <div class="blog-img-box">
-                <img :src="post.image" :alt="post.title" class="blog-img-element" loading="lazy" />
+            <router-link :to="'/giang-vien/' + l.id" class="team-card-wrapper group">
+              <div class="team-card-image-box">
+                <img 
+                  :src="l.avatar" 
+                  :alt="l.name" 
+                  class="team-card-img" 
+                  @error="(e) => e.target.src = '/images/1_6.png'"
+                  referrerpolicy="no-referrer" 
+                />
+                <!-- Dark Gradient Overlay -->
+                <div class="team-card-gradient"></div>
+                
+                <!-- Bottom Info Box -->
+                <div class="team-card-info-box">
+                  <h3 class="team-card-name">{{ l.name }}</h3>
+                  <div class="team-card-role-row">
+                    <span class="accent-line"></span>
+                    <span class="team-card-role">{{ l.title }}</span>
+                  </div>
+                </div>
               </div>
             </router-link>
-            <div class="blog-body-content">
-              <span class="blog-category-tag">{{ post.category }}</span>
-              <h3 class="blog-post-title">
-                <router-link :to="'/library/blog'">{{ post.title }}</router-link>
-              </h3>
-              <p class="blog-post-excerpt">{{ post.excerpt }}</p>
-              <router-link :to="'/library/blog'" class="blog-read-more-link">
-                <span>Xem thêm</span>
-                <span class="read-more-arrow">&rarr;</span>
-              </router-link>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9. Student Shared Feedback Section (Replaces Blog Section) -->
+    <section class="student-feedback-section">
+      <div class="container">
+        <div class="blogs-header-row">
+          <div class="blogs-header-left">
+            <span class="blogs-ui-tag">CHIA SẺ HỌC VIÊN</span>
+            <h2 class="blogs-heading">Hình ảnh & Cảm nhận Thực tế từ Học viên ACC</h2>
+          </div>
+          <router-link to="/chia-se-hoc-vien" class="blogs-view-all-btn">
+            Xem thêm chia sẻ học viên &rarr;
+          </router-link>
+        </div>
+
+        <div class="home-feedback-grid">
+          <div 
+            v-for="p in homeStudentFeedbacks" 
+            :key="p.id" 
+            class="home-feedback-card"
+          >
+            <div class="home-feedback-img-box" v-if="p.image">
+              <img :src="p.image" :alt="p.name" class="home-feedback-img" referrerpolicy="no-referrer" />
             </div>
-          </article>
+            <div class="home-feedback-body">
+              <div class="home-student-profile">
+                <img :src="p.avatar" :alt="p.name" class="home-profile-avatar" referrerpolicy="no-referrer" />
+                <div>
+                  <h4 class="home-profile-name">{{ p.name }}</h4>
+                  <p class="home-profile-role">{{ p.role }} • {{ p.company }}</p>
+                </div>
+              </div>
+              <div class="home-stars">★★★★★</div>
+              <p class="home-quote-text">"{{ p.quote }}"</p>
+              <span class="home-course-tag">{{ p.courseName }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -491,6 +485,8 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import { useTestimonialStore } from '@/stores/testimonials';
+import { lecturersData } from '@/data/lecturers';
+import { photoTestimonialsData } from '@/data/testimonials';
 
 const courseStore = useCourseStore();
 const testimonialStore = useTestimonialStore();
@@ -795,54 +791,6 @@ const partnerRow1 = computed(() => partnerLogos.slice(0, thirdPart));
 const partnerRow2 = computed(() => partnerLogos.slice(thirdPart, thirdPart * 2));
 const partnerRow3 = computed(() => partnerLogos.slice(thirdPart * 2));
 
-// 4. Partnership Autoplay Tabs
-const activeTab = ref(0);
-const tabsAutoplay = ref(true);
-const tabProgress = ref(0);
-const partnershipTabs = [
-  {
-    title: 'Đồng hành',
-    desc: 'Làm việc sát cánh cùng đội ngũ của bạn, từ đào tạo đến triển khai thực tế, đảm bảo mọi chiến lược đều được áp dụng hiệu quả và mang lại tác động rõ ràng.'
-  },
-  {
-    title: 'Chuyên sâu',
-    desc: 'Phân tích chuyên sâu từng khía cạnh trong hoạt động kinh doanh để đưa ra giải pháp tối ưu, phù hợp với mục tiêu phát triển dài hạn.'
-  },
-  {
-    title: 'Thiết kế riêng',
-    desc: 'Mỗi giải pháp đều được thiết kế riêng biệt, phù hợp với nhu cầu cụ thể của từng đối tác, đảm bảo hiệu quả tối đa.'
-  }
-];
-
-let tabProgressInterval = null;
-const TAB_DURATION = 4000; // 4 seconds per tab
-const startTabProgress = () => {
-  if (!tabsAutoplay.value) return;
-  const stepTime = 30; // ms
-  const stepAmount = (stepTime / TAB_DURATION) * 100;
-  
-  tabProgressInterval = setInterval(() => {
-    tabProgress.value += stepAmount;
-    if (tabProgress.value >= 100) {
-      tabProgress.value = 0;
-      activeTab.value = (activeTab.value + 1) % partnershipTabs.length;
-    }
-  }, stepTime);
-};
-
-const stopTabProgress = () => {
-  if (tabProgressInterval) {
-    clearInterval(tabProgressInterval);
-    tabProgressInterval = null;
-  }
-};
-
-const handleTabClick = (index) => {
-  tabsAutoplay.value = false;
-  stopTabProgress();
-  activeTab.value = index;
-  tabProgress.value = 100;
-};
 
 // 5. Custom Mouse Cursor for Case Studies
 const showCursor = ref(false);
@@ -1043,15 +991,23 @@ const loadMoreCourses = () => {
   visibleCourseCount.value += 8;
 };
 
-// 9. Blog posts list from courseStore
-const blogPosts = computed(() => courseStore.getBlogPosts);
+// 9. Featured Lecturers (Hoàng, Bình, Tuấn / Thương, Hiền)
+const featuredLecturerIds = ['nguyen-vu-huy-hoang', 'nguyen-tan-binh', 'bui-huynh-thuong', 'helen-lam-hien'];
+const featuredLecturers = computed(() => {
+  return lecturersData.filter(l => featuredLecturerIds.includes(l.id));
+});
+
+// 10. Student Shared Feedbacks photos for Home
+const homeStudentFeedbacks = computed(() => {
+  return photoTestimonialsData.slice(0, 3);
+});
 
 onMounted(() => {
   startHeroAutoplay();
   setupEcoTitleObserver();
   setupCountersObserver();
   setupPartnerObserver();
-  startTabProgress();
+
   if (courseStore.courses.length === 0) {
     courseStore.fetchCourses();
   }
@@ -1059,7 +1015,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   stopHeroAutoplay();
-  stopTabProgress();
+
 });
 </script>
 

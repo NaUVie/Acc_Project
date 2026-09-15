@@ -1,139 +1,144 @@
 <template>
   <div class="course-category-view container">
-    <!-- Header Section -->
+    <!-- Hero Header -->
     <div class="header-section animate-fade-in">
-      <div class="badge">{{ categoryMeta.badge }}</div>
-      <h1><span class="gradient-text">{{ categoryMeta.name }}</span></h1>
-      <p class="subtitle">{{ categoryMeta.description }}</p>
+      <div class="badge">HỆ THỐNG ĐÀO TẠO ACC ACADEMY</div>
+      <h1>Chương trình <span class="gradient-text">Đào tạo & Phát triển Năng lực</span></h1>
+      <p class="subtitle">Khám phá các lộ trình đào tạo từ kỹ năng ứng dụng AI, kỹ năng chuyên môn đến các giải pháp In-house dành cho cá nhân và doanh nghiệp.</p>
     </div>
 
-    <!-- Main Two-Column Layout -->
-    <div class="category-main-layout">
-      <!-- Left Sidebar Filters -->
-      <aside class="sidebar-filter-panel glass-card">
-        <!-- Section 1: Categories Navigation -->
-        <div class="filter-group">
-          <h3 class="filter-group-title">Danh Mục Khóa Học</h3>
-          <ul class="category-nav-list">
-            <li v-for="cat in availableCategories" :key="cat.slug">
-              <router-link 
-                :to="'/courses/category/' + cat.slug" 
-                class="cat-nav-link"
-                :class="{ active: currentSlug.toLowerCase() === cat.slug.toLowerCase() }"
-              >
-                <span>{{ cat.name }}</span>
-                <span class="cat-count-badge" v-if="getCategoryCount(cat.slug)">{{ getCategoryCount(cat.slug) }}</span>
-              </router-link>
-            </li>
-          </ul>
-        </div>
-
-        <!-- Section 2: Level Filter -->
-        <div class="filter-group">
-          <h3 class="filter-group-title">Trình Độ Học</h3>
-          <div class="filter-options-list">
-            <label class="filter-radio-option" :class="{ active: selectedLevel === '' }">
-              <input type="radio" value="" v-model="selectedLevel" />
-              <span>Tất cả cấp độ</span>
-            </label>
-            <label class="filter-radio-option" :class="{ active: selectedLevel === 'Cơ bản' }">
-              <input type="radio" value="Cơ bản" v-model="selectedLevel" />
-              <span>Cơ bản</span>
-            </label>
-            <label class="filter-radio-option" :class="{ active: selectedLevel === 'Trung cấp' }">
-              <input type="radio" value="Trung cấp" v-model="selectedLevel" />
-              <span>Trung cấp</span>
-            </label>
-            <label class="filter-radio-option" :class="{ active: selectedLevel === 'Nâng cao' }">
-              <input type="radio" value="Nâng cao" v-model="selectedLevel" />
-              <span>Nâng cao</span>
-            </label>
-          </div>
-        </div>
-
-        <!-- Section 3: Sort Options -->
-        <div class="filter-group">
-          <h3 class="filter-group-title">Sắp Xếp Theo</h3>
-          <select v-model="sortBy" class="sidebar-select">
-            <option value="default">Mới nhất</option>
-            <option value="price-asc">Giá: Thấp đến Cao</option>
-            <option value="price-desc">Giá: Cao đến Thấp</option>
-          </select>
-        </div>
-
-        <!-- Reset Button -->
+    <!-- Mega Dropdown-Style Layout Container -->
+    <div class="mega-style-layout glass-card">
+      <!-- Left Sidebar: Categories Navigation -->
+      <div class="mega-menu-sidebar">
         <button 
-          v-if="selectedLevel || sortBy !== 'default'" 
-          class="btn-reset-filters"
-          @click="resetFilters"
+          v-for="cat in availableCategories" 
+          :key="cat.id"
+          class="mega-sidebar-item"
+          :class="{ active: selectedCategory === cat.id }"
+          @click="selectCategory(cat.id)"
+          @mouseenter="selectCategoryHover(cat.id)"
         >
-          🔄 Xóa bộ lọc
+          <span class="indicator-bar"></span>
+          <span>{{ cat.name }}</span>
+          <span class="cat-count-badge">{{ getCategoryCount(cat.id) }}</span>
         </button>
-      </aside>
+      </div>
 
-      <!-- Right Main Content Area -->
-      <main class="category-content-area">
-        <!-- Results Count Header -->
-        <div class="category-toolbar glass-card" v-if="categoryCourses.length > 0">
-          <div class="results-count">
-            Hiển thị <strong>{{ displayRange }}</strong> trong <strong>{{ filteredCourses.length }}</strong> khóa học
+      <!-- Right Content: Courses Grid for regular categories -->
+      <div class="mega-menu-content" v-if="selectedCategory !== 'corporate'">
+        <div class="mega-content-header">
+          <div>
+            <span class="cat-badge-small">{{ activeCategoryMeta.badge }}</span>
+            <h2 class="mega-content-title">{{ activeCategoryMeta.name }}</h2>
           </div>
+          <p class="cat-desc-small">{{ activeCategoryMeta.description }}</p>
         </div>
 
-        <!-- Courses Grid -->
-        <div class="courses-grid-wrapper" v-if="filteredCourses.length > 0">
-          <div class="courses-grid">
-            <div v-for="course in paginatedCourses" :key="course.id" class="course-card glass-card animate-slide-up">
-              <router-link :to="'/course/' + course.handle" class="card-image-container">
-                <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" class="course-image" @error="handleImageError" />
-                <div class="card-image-overlay" v-if="course.tags && course.tags.length">
-                  <span v-for="tag in course.tags.slice(0, 2)" :key="tag" class="image-tag">{{ tag }}</span>
-                </div>
-              </router-link>
-              <div class="card-body">
-                <div class="card-header-meta">
-                  <span class="course-badge" :class="{ 'best-seller': course.price > 3000000 }">
-                    {{ course.price > 3000000 ? 'Chuyên sâu' : 'Hot' }}
-                  </span>
-                  <span class="level-badge">{{ course.level || 'Tổng quát' }}</span>
-                </div>
-                <h3>
-                  <router-link :to="'/course/' + course.handle" class="course-title-link">
-                    {{ course.title }}
-                  </router-link>
-                </h3>
-                <p>{{ course.description }}</p>
-                <div class="course-meta">
-                  <span class="duration">⏱️ {{ course.duration || 'Linh hoạt' }}</span>
-                </div>
-                <div class="card-footer">
-                  <div class="price-container">
-                    <span class="original-price" v-if="course.originalPrice">{{ formatPrice(course.originalPrice) }}</span>
-                    <span class="price">{{ formatPrice(course.price) }}</span>
-                  </div>
-                  <button @click.stop="handleEnroll(course.id)" class="btn btn-primary btn-sm">Đăng ký học</button>
+        <!-- Course Cards Grid (Matching Mega Program Card Grid Style) -->
+        <div class="mega-programs-grid" v-if="filteredCourses.length > 0">
+          <div 
+            v-for="course in filteredCourses" 
+            :key="course.id"
+            class="mega-program-card"
+          >
+            <router-link :to="'/course/' + (course.handle || course.id)" class="mega-card-link">
+              <div class="mega-school-logo">
+                <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" @error="handleImageError" />
+              </div>
+              <div class="mega-card-info">
+                <span class="mega-school-name">{{ course.level || 'Khóa học' }}</span>
+                <h4 class="mega-program-title" :title="course.title">{{ course.title }}</h4>
+                <p class="mega-program-desc">{{ course.description }}</p>
+                <div class="mega-card-footer">
+                  <span class="mega-price">{{ formatPrice(course.price) }}</span>
+                  <span class="mega-enroll-btn">Đăng ký ngay &rarr;</span>
                 </div>
               </div>
+            </router-link>
+          </div>
+        </div>
+
+        <div v-else class="empty-state">
+          <p>Chưa tìm thấy khóa học phù hợp trong danh mục này.</p>
+        </div>
+      </div>
+
+      <!-- Corporate Menu Panel inside Mega Style Layout -->
+      <div class="mega-menu-content corporate-mega-content" v-else>
+        <div class="mega-content-header">
+          <div>
+            <span class="cat-badge-small">IN-HOUSE & TƯ VẤN</span>
+            <h2 class="mega-content-title">Giải pháp Đào tạo Doanh nghiệp</h2>
+          </div>
+          <router-link to="/corporate/dao-tao" class="mega-view-all-link">
+            Tìm hiểu chi tiết &rarr;
+          </router-link>
+        </div>
+
+        <div class="corporate-menu-grid">
+          <div class="corporate-menu-group">
+            <div class="corporate-group-header">
+              <router-link to="/corporate/dao-tao" class="corporate-group-title">
+                <span class="icon-bullet">🚀</span>
+                Đào tạo AI INHOUSE cho doanh nghiệp
+              </router-link>
             </div>
+            <ul class="corporate-sub-list">
+              <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI cho Cơ quan Nhà nước, UBND & Phường/Xã</router-link></li>
+              <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI chuyên ngành Y tế & Thẩm mỹ</router-link></li>
+              <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI chuyên ngành Xây dựng</router-link></li>
+              <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI cho Doanh nghiệp Sản xuất & Thương mại</router-link></li>
+              <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI cho Trường học & Cơ sở Giáo dục</router-link></li>
+            </ul>
           </div>
 
-          <!-- Pagination Component -->
-          <Pagination 
-            :currentPage="currentPage" 
-            :totalItems="filteredCourses.length" 
-            :pageSize="pageSize" 
-            @update:currentPage="currentPage = $event"
-          />
-        </div>
+          <div class="corporate-menu-group">
+            <div class="corporate-group-header">
+              <router-link to="/corporate/coe" class="corporate-group-title">
+                <span class="icon-bullet">🛡️</span>
+                Quản trị & Bảo mật Dữ liệu Doanh nghiệp
+              </router-link>
+            </div>
 
-        <!-- Empty State -->
-        <div class="empty-category-state glass-card" v-else>
-          <div class="empty-icon">📚</div>
-          <h3>Chưa tìm thấy khóa học phù hợp</h3>
-          <p>Không có khóa học nào khớp với bộ lọc đã chọn hoặc danh mục này đang cập nhật.</p>
-          <button @click="resetFilters" class="btn btn-primary">Xóa bộ lọc</button>
+            <div class="corporate-group-header style-mt">
+              <router-link to="/corporate/for-team" class="corporate-group-title">
+                <span class="icon-bullet">📊</span>
+                Xây dựng Khung năng lực & Phát triển Nhân sự
+              </router-link>
+            </div>
+            <ul class="corporate-sub-list">
+              <li><router-link to="/corporate/for-team" class="corporate-sub-link">Xây dựng Ma trận năng lực theo vị trí</router-link></li>
+              <li><router-link to="/corporate/for-team" class="corporate-sub-link">Tích hợp năng lực AI & năng lực số</router-link></li>
+              <li><router-link to="/corporate/for-team" class="corporate-sub-link">Xây dựng khung năng lực theo phòng ban</router-link></li>
+              <li><router-link to="/corporate/for-team" class="corporate-sub-link">Xây dựng Lộ trình đào tạo toàn diện</router-link></li>
+            </ul>
+          </div>
+
+          <div class="corporate-menu-group">
+            <div class="corporate-group-header">
+              <router-link to="/corporate/case-studies" class="corporate-group-title">
+                <span class="icon-bullet">💡</span>
+                Năng lực Lãnh đạo Chủ động & Hiệu quả
+              </router-link>
+            </div>
+
+            <div class="corporate-group-header style-mt">
+              <router-link to="/corporate/case-studies" class="corporate-group-title">
+                <span class="icon-bullet">🤝</span>
+                Phát triển Kỹ năng mềm Doanh nghiệp
+              </router-link>
+            </div>
+
+            <div class="corporate-group-header style-mt">
+              <router-link to="/corporate/case-studies" class="corporate-group-title">
+                <span class="icon-bullet">🎤</span>
+                Nghệ thuật Kể chuyện & Truyền cảm hứng
+              </router-link>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   </div>
 </template>
@@ -142,16 +147,12 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
-import Pagination from '@/components/Pagination.vue';
 
 const route = useRoute();
 const router = useRouter();
 const courseStore = useCourseStore();
 
-const selectedLevel = ref('');
-const sortBy = ref('default');
-const currentPage = ref(1);
-const pageSize = ref(6);
+const selectedCategory = ref('all');
 
 onMounted(async () => {
   if (courseStore.courses.length === 0) {
@@ -160,315 +161,483 @@ onMounted(async () => {
   if (courseStore.categories && courseStore.categories.length === 0) {
     await courseStore.fetchCategories();
   }
+  
+  const paramSlug = route.params.categorySlug;
+  if (paramSlug) {
+    selectedCategory.value = paramSlug;
+  } else {
+    selectedCategory.value = 'all';
+  }
 });
 
-// Dynamic category slug from URL
-const currentSlug = computed(() => {
-  return route.params.categorySlug || 'ky-nang-ai';
+watch(() => route.params.categorySlug, (newSlug) => {
+  if (newSlug) {
+    selectedCategory.value = newSlug;
+  } else {
+    selectedCategory.value = 'all';
+  }
 });
 
-watch([selectedLevel, sortBy, currentSlug], () => {
-  currentPage.value = 1;
-});
+const selectCategory = (id) => {
+  selectedCategory.value = id;
+  if (id === 'all') {
+    router.push('/courses');
+  } else if (id !== 'corporate') {
+    router.push(`/courses/category/${id}`);
+  }
+};
 
-// Categories list for Sidebar
+const selectCategoryHover = (id) => {
+  selectedCategory.value = id;
+};
+
 const availableCategories = computed(() => {
+  const base = [
+    { id: 'all', name: 'Tất cả khóa học' }
+  ];
+  let list = [];
   if (courseStore.categories && courseStore.categories.length > 0) {
-    return courseStore.categories;
+    list = courseStore.categories.map(c => ({ id: c.slug, name: c.name }));
+  } else {
+    list = [
+      { id: 'ky-nang-ai', name: 'Kỹ năng AI' },
+      { id: 'ky-nang-chuyen-mon', name: 'Kỹ năng chuyên môn' },
+      { id: 'ky-nang-mem', name: 'Kỹ năng mềm' }
+    ];
   }
   return [
-    { slug: 'ky-nang-ai', name: 'Kỹ năng AI & Tự động hóa' },
-    { slug: 'ky-nang-chuyen-mon', name: 'Kỹ năng chuyên môn' },
-    { slug: 'ky-nang-mem', name: 'Kỹ năng mềm' }
+    ...base,
+    ...list,
+    { id: 'corporate', name: 'Đào tạo Doanh nghiệp' }
   ];
 });
 
-const getCategoryCount = (slug) => {
-  return courseStore.getCoursesByCategory(slug).length;
+const getCategoryCount = (id) => {
+  if (id === 'all') return courseStore.courses.length;
+  if (id === 'corporate') return 'In-House';
+  return courseStore.getCoursesByCategory(id).length;
 };
 
-const resetFilters = () => {
-  selectedLevel.value = '';
-  sortBy.value = 'default';
-};
+const activeCategoryMeta = computed(() => {
+  const id = selectedCategory.value.toLowerCase();
+  const catObj = availableCategories.value.find(c => c.id === id);
 
-// Category Metadata presets & fallback
-const categoryMeta = computed(() => {
-  const slug = currentSlug.value.toLowerCase();
-  const matchedCategory = courseStore.categories?.find(c => c.slug === slug);
-  
-  if (slug === 'ky-nang-ai' || slug === 'ai') {
+  if (id === 'all') {
     return {
-      name: 'Kỹ năng Ứng dụng AI',
+      name: 'Tất cả Khóa học Đào tạo',
+      badge: 'TOÀN BỘ CHƯƠNG TRÌNH',
+      description: 'Khám phá tất cả các khóa học phát triển năng lực AI, kỹ năng chuyên môn và kỹ năng mềm tại ACC Academy.'
+    };
+  }
+  if (id === 'ky-nang-ai' || id === 'ai') {
+    return {
+      name: 'Kỹ năng Ứng dụng AI & Tự động hóa',
       badge: 'CHUYÊN ĐỀ CÔNG NGHỆ SỐ',
-      description: 'Làm chủ các công cụ trí tuệ nhân tạo (ChatGPT, Claude, Copilot, Midjourney) để tối ưu hóa quy trình làm việc và đột phá năng lực bản thân.'
+      description: 'Làm chủ các công cụ Generative AI (ChatGPT, Claude, Copilot, Midjourney) để tối ưu 70% hiệu suất làm việc.'
     };
   }
-  if (slug === 'ky-nang-mem' || slug === 'mem') {
+  if (id === 'ky-nang-chuyen-mon' || id === 'chuyen-mon') {
     return {
-      name: 'Kỹ năng mềm',
-      badge: 'PHÁT TRIỂN BẢN THÂN',
-      description: 'Nâng cao tư duy phản biện, kỹ năng làm việc nhóm, quản lý thời gian và giải quyết vấn đề hiệu quả trong môi trường hiện đại.'
-    };
-  }
-  if (slug === 'ky-nang-chuyen-mon' || slug === 'chuyen-mon') {
-    return {
-      name: 'Kỹ năng chuyên môn',
+      name: 'Kỹ năng Chuyên môn & Quản trị',
       badge: 'NĂNG LỰC CHUYÊN SÂU',
-      description: 'Trở thành chuyên gia trong lĩnh vực tài chính, kế toán, kiểm toán và phân tích dữ liệu kinh doanh với lộ trình thực chiến.'
+      description: 'Nâng cao năng lực quản trị tài chính, kế toán, kiểm toán và phân tích dữ liệu chuyên sâu cho tổ chức.'
     };
   }
-
+  if (id === 'ky-nang-mem' || id === 'mem') {
+    return {
+      name: 'Kỹ năng mềm & Phát triển Bản thân',
+      badge: 'KỸ NĂNG CỐT LÕI',
+      description: 'Rèn luyện kỹ năng lãnh đạo, giao tiếp, thuyết phục, quản lý thời gian và giải quyết vấn đề hiệu quả.'
+    };
+  }
+  if (id === 'corporate') {
+    return {
+      name: 'Giải pháp Đào tạo Doanh nghiệp (In-House)',
+      badge: 'DOANH NGHIỆP',
+      description: 'Chương trình may đo theo nhu cầu thực tế và mục tiêu phát triển bền vững của doanh nghiệp.'
+    };
+  }
   return {
-    name: matchedCategory ? matchedCategory.name : slug.replace(/-/g, ' ').toUpperCase(),
+    name: catObj ? catObj.name : id.toUpperCase(),
     badge: 'DANH MỤC KHÓA HỌC',
-    description: 'Khám phá các khóa học chất lượng cao được thiết kế riêng cho sự nghiệp của bạn.'
+    description: 'Các khóa học chất lượng cao tại ACC Academy.'
   };
 });
 
-// Raw category courses from store
-const categoryCourses = computed(() => {
-  return courseStore.getCoursesByCategory(currentSlug.value);
-});
-
-// Filtered and Sorted courses
 const filteredCourses = computed(() => {
-  let list = [...categoryCourses.value];
-
-  if (selectedLevel.value) {
-    list = list.filter(c => c.level && c.level.includes(selectedLevel.value));
+  if (selectedCategory.value === 'all') {
+    return courseStore.courses;
   }
-
-  if (sortBy.value === 'price-asc') {
-    list.sort((a, b) => a.price - b.price);
-  } else if (sortBy.value === 'price-desc') {
-    list.sort((a, b) => b.price - a.price);
-  }
-
-  return list;
-});
-
-// Paginated courses slice
-const paginatedCourses = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  return filteredCourses.value.slice(start, start + pageSize.value);
-});
-
-const displayRange = computed(() => {
-  const total = filteredCourses.value.length;
-  if (total === 0) return '0';
-  const start = (currentPage.value - 1) * pageSize.value + 1;
-  const end = Math.min(currentPage.value * pageSize.value, total);
-  return `${start}-${end}`;
+  return courseStore.getCoursesByCategory(selectedCategory.value);
 });
 
 const formatPrice = (value) => {
-  if (!value) return '0đ';
-  return value.toLocaleString('vi-VN') + 'đ';
-};
-
-const handleEnroll = async (courseId) => {
-  if (!courseStore.token) {
-    courseStore.showToast('Vui lòng đăng nhập để đăng ký khóa học!', 'warning');
-    router.push('/login');
-    return;
+  if (!value) return 'Liên hệ';
+  if (typeof value === 'number') {
+    return value.toLocaleString('vi-VN') + 'đ';
   }
-  try {
-    await courseStore.buyNow(courseId);
-    router.push('/checkout');
-  } catch (err) {
-    if (err.message !== 'CANCELLED') {
-      courseStore.showToast(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!', 'error');
-    }
-  }
+  return value;
 };
 
 const handleImageError = (e) => {
-  e.target.src = 'https://images.unsplash.com/photo-1677442136019-21780efad99a?q=80&w=600&auto=format&fit=crop';
+  e.target.src = '/images/Square-Cover-_1.webp';
 };
 </script>
 
 <style scoped>
-@import "@/styles/views/courses/AISkills.css";
-
-.category-main-layout {
-  display: grid;
-  grid-template-columns: 280px 1fr;
-  gap: 28px;
-  align-items: start;
-  margin-top: 30px;
+.course-category-view {
+  padding-top: 120px;
+  padding-bottom: 100px;
+  min-height: 100vh;
+  background-color: #f8fafc;
 }
 
-.sidebar-filter-panel {
-  padding: 24px;
-  border-radius: var(--radius-lg);
-  background: #ffffff;
-  border: 1px solid var(--border-color);
-  position: sticky;
-  top: 100px;
-}
-
-.filter-group {
-  margin-bottom: 24px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.filter-group:last-child {
-  margin-bottom: 0;
-  padding-bottom: 0;
-  border-bottom: none;
-}
-
-.filter-group-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 14px;
-}
-
-.category-nav-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
+.header-section {
+  text-align: center;
+  max-width: 860px;
+  margin-inline: auto;
+  margin-bottom: 40px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-}
-
-.cat-nav-link {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px 14px;
-  border-radius: 8px;
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-  text-decoration: none;
-  transition: all 0.2s ease;
+  gap: 14px;
 }
 
-.cat-nav-link:hover {
-  background: #f8fafc;
-  color: #022B9F;
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  color: #022b9f;
+  background: rgba(2, 43, 159, 0.08);
+  padding: 5px 16px;
+  border-radius: 20px;
+  letter-spacing: 1px;
 }
 
-.cat-nav-link.active {
-  background: #eef2ff;
+.gradient-text {
+  background: linear-gradient(135deg, #022b9f 0%, #2563eb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mega-style-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 560px;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid #eaecf0;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+@media (max-width: 992px) {
+  .mega-style-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sidebar Column */
+.mega-menu-sidebar {
+  background-color: #f8fafc;
+  padding: 28px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-right: 1px solid #eaecf0;
+}
+
+.mega-sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: transparent;
+  border: none;
+  color: #475467;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.mega-sidebar-item .indicator-bar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 0;
+  background-color: #022B9F;
+  transition: height 0.25s ease;
+  border-radius: 0 3px 3px 0;
+}
+
+.mega-sidebar-item:hover,
+.mega-sidebar-item.active {
   color: #022B9F;
+  background-color: rgba(2, 43, 159, 0.06);
+}
+
+.mega-sidebar-item:hover .indicator-bar,
+.mega-sidebar-item.active .indicator-bar {
+  height: 60%;
+}
+
+.mega-sidebar-item.active {
+  background-color: rgba(2, 43, 159, 0.09);
   font-weight: 700;
 }
 
 .cat-count-badge {
   font-size: 11px;
-  padding: 2px 8px;
-  border-radius: 99px;
-  background: #f1f5f9;
-  color: #64748b;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: #e2e8f0;
+  color: #475569;
 }
 
-.cat-nav-link.active .cat-count-badge {
+.mega-sidebar-item.active .cat-count-badge {
   background: #022B9F;
-  color: white;
+  color: #ffffff;
 }
 
-.filter-options-list {
+/* Right Content Column */
+.mega-menu-content {
+  background-color: #ffffff;
+  padding: 36px 40px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 24px;
 }
 
-.filter-radio-option {
+.mega-content-header {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  padding: 6px 8px;
-  border-radius: 6px;
-  transition: background 0.2s ease;
+  flex-direction: column;
+  gap: 6px;
+  border-bottom: 1px solid #eaecf0;
+  padding-bottom: 18px;
 }
 
-.filter-radio-option:hover {
-  background: #f8fafc;
+.cat-badge-small {
+  font-size: 11px;
+  font-weight: 800;
+  color: #022b9f;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-.filter-radio-option input {
-  accent-color: #022B9F;
+.mega-content-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
 }
 
-.sidebar-select {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  background: white;
-  font-size: 13px;
-  color: var(--text-primary);
-}
-
-.btn-reset-filters {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  border-radius: 8px;
-  background: #f1f5f9;
-  border: none;
-  color: #475569;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-reset-filters:hover {
-  background: #e2e8f0;
-}
-
-.category-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 20px;
-  margin-bottom: 24px;
-  border-radius: var(--radius-lg);
-}
-
-.results-count {
+.cat-desc-small {
   font-size: 14px;
-  color: var(--text-secondary);
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
 }
 
-.empty-category-state {
-  text-align: center;
-  padding: 60px 24px;
-  margin-top: 20px;
-  border-radius: var(--radius-lg);
+/* Program Card Grid */
+.mega-programs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
 }
 
-.empty-icon {
-  font-size: 48px;
-  margin-bottom: 16px;
+@media (min-width: 1200px) {
+  .mega-programs-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
-.empty-category-state h3 {
-  font-size: 22px;
+@media (max-width: 768px) {
+  .mega-programs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mega-program-card {
+  background-color: #ffffff;
+  border: 1px solid #eaecf0;
+  border-radius: 14px;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.02);
+}
+
+.mega-program-card:hover {
+  transform: translateY(-4px);
+  background-color: #f8fafc;
+  border-color: #022B9F;
+  box-shadow: 0 12px 28px rgba(2, 43, 159, 0.1);
+}
+
+.mega-card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-decoration: none;
+  height: 100%;
+}
+
+.mega-school-logo {
+  width: 100%;
+  height: 160px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #f1f5f9;
+}
+
+.mega-school-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.mega-program-card:hover .mega-school-logo img {
+  transform: scale(1.05);
+}
+
+.mega-card-info {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 6px;
+}
+
+.mega-school-name {
+  color: #022B9F;
+  font-size: 11.5px;
   font-weight: 700;
-  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.empty-category-state p {
-  color: var(--text-secondary);
-  margin-bottom: 24px;
+.mega-program-title {
+  color: #0f172a;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.mega-program-desc {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mega-card-footer {
+  margin-top: auto;
+  padding-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.mega-price {
+  font-size: 15px;
+  font-weight: 800;
+  color: #022b9f;
+}
+
+.mega-enroll-btn {
+  font-size: 13px;
+  font-weight: 700;
+  color: #022b9f;
+  transition: transform 0.2s ease;
+}
+
+.mega-program-card:hover .mega-enroll-btn {
+  transform: translateX(4px);
+}
+
+/* Corporate Mega Menu Panel */
+.corporate-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  align-items: start;
 }
 
 @media (max-width: 992px) {
-  .category-main-layout {
+  .corporate-menu-grid {
     grid-template-columns: 1fr;
   }
-  .sidebar-filter-panel {
-    position: static;
-  }
+}
+
+.corporate-menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.corporate-group-header {
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.corporate-group-header.style-mt {
+  margin-top: 20px;
+}
+
+.corporate-group-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  text-decoration: none;
+  line-height: 1.35;
+  transition: color 0.2s ease;
+}
+
+.corporate-group-title:hover {
+  color: #022B9F;
+}
+
+.icon-bullet {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.corporate-sub-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 12px;
+}
+
+.corporate-sub-link {
+  font-size: 13.5px;
+  color: #475569;
+  text-decoration: none;
+  line-height: 1.45;
+  transition: all 0.2s ease;
+  display: block;
+}
+
+.corporate-sub-link:hover {
+  color: #022B9F;
+  font-weight: 600;
+  transform: translateX(4px);
 }
 </style>

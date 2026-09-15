@@ -9,6 +9,12 @@ const routes = [
     component: Home
   },
   {
+    path: '/courses',
+    alias: ['/dao-tao', '/courses/category'],
+    name: 'AllCourses',
+    component: () => import('../views/courses/CourseCategoryView.vue')
+  },
+  {
     path: '/courses/category/:categorySlug',
     name: 'CourseCategoryView',
     component: () => import('../views/courses/CourseCategoryView.vue')

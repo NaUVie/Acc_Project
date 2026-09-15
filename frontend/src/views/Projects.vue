@@ -3,35 +3,35 @@
     <div class="container">
       <!-- Hero Section -->
       <div class="projects-hero">
-        <span class="custom-ui-tag hero-tag">DỰ ÁN & SỰ KIỆN</span>
-        <h1 class="hero-title">Dự án Đã Đào tạo & Sự kiện Nổi bật</h1>
+        <span class="custom-ui-tag hero-tag">DỰ ÁN ĐÀO TẠO & TƯ VẤN</span>
+        <h1 class="hero-title">Dự án Đã Thực Hiện & Đang Triển Khai</h1>
         <p class="hero-subtitle">
-          Khám phá các dự án đào tạo In-house thực chiến cho doanh nghiệp và các sự kiện kết nối tri thức hàng đầu được tổ chức bởi ACC Academy.
+          Khám phá các dự án đào tạo In-house thực chiến và tư vấn chuyển đổi số may đo cho các tập đoàn, doanh nghiệp hàng đầu do ACC Academy thực hiện.
         </p>
       </div>
 
-      <!-- Filter Tabs -->
+      <!-- Filter Tabs / Navbar -->
       <div class="filter-tabs">
         <button 
           class="tab-btn" 
           :class="{ active: currentCategory === 'all' }"
           @click="selectCategory('all')"
         >
-          Tất cả bài viết
+          Tất cả dự án
         </button>
         <button 
           class="tab-btn" 
-          :class="{ active: currentCategory === 'du-an-da-dao-tao' }"
-          @click="selectCategory('du-an-da-dao-tao')"
+          :class="{ active: currentCategory === 'du-an-da-thuc-hien' }"
+          @click="selectCategory('du-an-da-thuc-hien')"
         >
-          Dự án đã đào tạo
+          Dự án đã thực hiện
         </button>
         <button 
           class="tab-btn" 
-          :class="{ active: currentCategory === 'su-kien' }"
-          @click="selectCategory('su-kien')"
+          :class="{ active: currentCategory === 'du-an-dang-thuc-hien' }"
+          @click="selectCategory('du-an-dang-thuc-hien')"
         >
-          Sự kiện
+          Dự án đang thực hiện
         </button>
       </div>
 
@@ -95,7 +95,7 @@ const currentCategory = ref('all');
 
 const syncCategoryFromQuery = () => {
   const cat = route.query.cat;
-  if (cat && ['du-an-da-dao-tao', 'su-kien'].includes(cat)) {
+  if (cat && ['du-an-da-thuc-hien', 'du-an-dang-thuc-hien'].includes(cat)) {
     currentCategory.value = cat;
   } else {
     currentCategory.value = 'all';
@@ -271,12 +271,12 @@ const filteredProjects = computed(() => {
   text-transform: uppercase;
 }
 
-.category-badge.du-an-da-dao-tao {
+.category-badge.du-an-da-thuc-hien {
   background: #022b9f;
 }
 
-.category-badge.su-kien {
-  background: #059669;
+.category-badge.du-an-dang-thuc-hien {
+  background: #d97706;
 }
 
 .card-body {

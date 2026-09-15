@@ -5,7 +5,7 @@
       <nav class="breadcrumb">
         <router-link to="/">Trang chủ</router-link>
         <span class="sep">/</span>
-        <router-link to="/about-us">Đội ngũ giảng viên</router-link>
+        <router-link to="/doi-ngu-giang-vien">Đội ngũ giảng viên</router-link>
         <span class="sep">/</span>
         <span class="current">{{ lecturer.name }}</span>
       </nav>
@@ -28,7 +28,7 @@
           <p class="lecturer-tagline">{{ lecturer.tagline }}</p>
           
           <div class="action-buttons">
-            <a :href="lecturer.driveProfile" target="_blank" rel="noopener noreferrer" class="btn-profile-drive">
+            <a v-if="lecturer.driveProfile" :href="lecturer.driveProfile" target="_blank" rel="noopener noreferrer" class="btn-profile-drive">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14 2 14 8 20 8"/>
@@ -63,42 +63,102 @@
         </div>
       </article>
 
-      <!-- Other Lecturers Carousel / Grid -->
-      <section class="other-lecturers-section">
-        <h2 class="other-title">Giảng viên khác tại ACC Academy</h2>
-        <div class="other-grid">
-          <div 
-            v-for="item in otherLecturers" 
-            :key="item.id" 
-            class="other-card"
-          >
-            <router-link :to="'/giang-vien/' + item.id" class="other-card-link">
-              <div class="other-avatar-box">
-                <img :src="item.avatar" :alt="item.name" />
-              </div>
-              <div class="other-info">
-                <h4 class="other-name">{{ item.name }}</h4>
-                <p class="other-title-text">{{ item.title }}</p>
-              </div>
-            </router-link>
+      <!-- Other Lecturers Carousel / Slider Section -->
+      <section class="other-lecturers-section" v-if="otherLecturers.length > 0">
+        <div class="other-header-row">
+          <h2 class="other-title">Giảng viên khác tại ACC Academy</h2>
+          <div class="slider-arrows">
+            <button 
+              class="arrow-btn prev" 
+              @click="prevSlide" 
+              aria-label="Giảng viên trước"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </button>
+            <button 
+              class="arrow-btn next" 
+              @click="nextSlide" 
+              aria-label="Giảng viên tiếp theo"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="9 18 15 12 9 6"></polyline>
+              </svg>
+            </button>
           </div>
+        </div>
+
+        <div class="slider-wrapper">
+          <div 
+            class="slider-track" 
+            :style="{ transform: `translateX(calc(-${currentIndex} * ((100% + 20px) / ${cardsToShow})))` }"
+          >
+            <div 
+              v-for="item in otherLecturers" 
+              :key="item.id" 
+              class="other-card-item"
+              :style="{ flex: `0 0 calc((100% - (20px * (${cardsToShow} - 1))) / ${cardsToShow})` }"
+            >
+              <router-link :to="'/giang-vien/' + item.id" class="team-card-wrapper group">
+                <div class="team-card-image-box">
+                  <img 
+                    :src="item.avatar" 
+                    :alt="item.name" 
+                    class="team-card-img"
+                    @error="(e) => e.target.src = '/images/1_6.png'"
+                    referrerpolicy="no-referrer"
+                  />
+                  <!-- Dark Gradient Overlay -->
+                  <div class="team-card-gradient"></div>
+                  
+                  <!-- Bottom Info Box -->
+                  <div class="team-card-info-box">
+                    <h3 class="team-card-name">{{ item.name }}</h3>
+                    <div class="team-card-role-row">
+                      <span class="accent-line"></span>
+                      <span class="team-card-role">{{ item.title }}</span>
+                    </div>
+                  </div>
+                </div>
+              </router-link>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slider Dots -->
+        <div class="slider-dots" v-if="maxIndex > 0">
+          <button 
+            v-for="idx in (maxIndex + 1)" 
+            :key="idx"
+            class="slider-dot"
+            :class="{ active: currentIndex === (idx - 1) }"
+            @click="currentIndex = (idx - 1)"
+            :aria-label="'Chuyển tới slide ' + idx"
+          ></button>
         </div>
       </section>
     </div>
 
     <div v-else class="not-found-box container">
       <h2>Không tìm thấy thông tin giảng viên</h2>
-      <router-link to="/about-us" class="btn-back">Quay lại Đội ngũ giảng viên</router-link>
+      <router-link to="/doi-ngu-giang-vien" class="btn-back">Quay lại Đội ngũ giảng viên</router-link>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { lecturersData } from '@/data/lecturers';
 
 const route = useRoute();
+const currentIndex = ref(0);
+const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200);
+
+const handleResize = () => {
+  windowWidth.value = window.innerWidth;
+};
 
 const lecturer = computed(() => {
   const id = route.params.id;
@@ -107,14 +167,47 @@ const lecturer = computed(() => {
 
 const otherLecturers = computed(() => {
   if (!lecturer.value) return lecturersData;
-  return lecturersData.filter(l => l.id !== lecturer.value.id).slice(0, 4);
+  return lecturersData.filter(l => l.id !== lecturer.value.id);
 });
+
+const cardsToShow = computed(() => {
+  if (windowWidth.value < 640) return 1;
+  if (windowWidth.value < 1024) return 2;
+  if (windowWidth.value < 1200) return 3;
+  return 4;
+});
+
+const maxIndex = computed(() => {
+  return Math.max(0, otherLecturers.value.length - cardsToShow.value);
+});
+
+const prevSlide = () => {
+  if (currentIndex.value > 0) {
+    currentIndex.value--;
+  } else {
+    currentIndex.value = maxIndex.value;
+  }
+};
+
+const nextSlide = () => {
+  if (currentIndex.value < maxIndex.value) {
+    currentIndex.value++;
+  } else {
+    currentIndex.value = 0;
+  }
+};
 
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.addEventListener('resize', handleResize);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize);
 });
 
 watch(() => route.params.id, () => {
+  currentIndex.value = 0;
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 </script>
@@ -329,76 +422,208 @@ watch(() => route.params.id, () => {
   transform: scale(1.02);
 }
 
+/* Other Lecturers Slider Styles */
 .other-lecturers-section {
-  margin-top: 40px;
+  margin-top: 50px;
 }
 
-.other-title {
-  font-size: 22px;
-  font-weight: 800;
-  color: #0f172a;
+.other-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 24px;
 }
 
-.other-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 20px;
+.other-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
 }
 
-@media (min-width: 640px) {
-  .other-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.slider-arrows {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-@media (min-width: 1024px) {
-  .other-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-.other-card {
+.arrow-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
   background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.arrow-btn:hover {
+  background: #022b9f;
+  color: #ffffff;
+  border-color: #022b9f;
+  box-shadow: 0 6px 16px rgba(2, 43, 159, 0.25);
+  transform: translateY(-2px);
+}
+
+.slider-wrapper {
+  overflow: hidden;
+  width: 100%;
+  padding-block: 8px;
+}
+
+.slider-track {
+  display: flex;
+  gap: 20px;
+  transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+  will-change: transform;
+}
+
+.other-card-item {
+  box-sizing: border-box;
+}
+
+.team-card-wrapper {
+  display: block;
+  text-decoration: none;
+  width: 100%;
+  height: 100%;
+}
+
+.team-card-image-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
   border-radius: 16px;
-  padding: 20px;
-  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  background-color: #0f172a;
+}
+
+@media (min-width: 768px) {
+  .team-card-image-box {
+    aspect-ratio: 4 / 5;
+  }
+}
+
+.team-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-card-wrapper:hover .team-card-img {
+  transform: scale(1.08);
+}
+
+.team-card-gradient {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.35) 45%, transparent 100%);
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
+.team-card-wrapper:hover .team-card-gradient {
+  opacity: 1;
+}
+
+.team-card-info-box {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 24px 20px;
+  transform: translateY(6px);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.team-card-wrapper:hover .team-card-info-box {
+  transform: translateY(0);
+}
+
+.team-card-name {
+  font-size: 20px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  line-height: 1.25;
+  letter-spacing: -0.3px;
+  text-transform: uppercase;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.team-card-role-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.accent-line {
+  height: 2px;
+  width: 28px;
+  background: #2563eb;
+  display: inline-block;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.team-card-role {
+  font-size: 12px;
+  font-weight: 700;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.slider-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.slider-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  border: none;
+  cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.other-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  border-color: #022b9f;
+.slider-dot.active {
+  background: #022b9f;
+  width: 24px;
+  border-radius: 12px;
 }
 
-.other-card-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.not-found-box {
+  padding-top: 80px;
   text-align: center;
+}
+
+.btn-back {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 10px 20px;
+  background: #022b9f;
+  color: #ffffff;
+  border-radius: 10px;
   text-decoration: none;
-}
-
-.other-avatar-box img {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-bottom: 12px;
-  border: 2px solid #022b9f;
-}
-
-.other-name {
-  font-size: 16px;
   font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 4px;
-}
-
-.other-title-text {
-  font-size: 13px;
-  color: #64748b;
-  line-height: 1.4;
 }
 </style>

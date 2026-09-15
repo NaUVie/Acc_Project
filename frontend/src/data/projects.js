@@ -1,8 +1,8 @@
 export const projectsData = [
   {
     id: 'dao-tao-ai-acb',
-    category: 'du-an-da-dao-tao',
-    categoryName: 'Dự án đã đào tạo',
+    category: 'du-an-da-thuc-hien',
+    categoryName: 'Dự án đã thực hiện',
     title: 'Đào tạo ứng dụng Generative AI cho 150+ nhân sự quản lý Tập đoàn ACB',
     summary: 'Giúp bộ phận nhân sự và kinh doanh ứng dụng ChatGPT & Generative AI nâng cao hiệu suất làm việc, tự động hóa báo cáo và phân tích dữ liệu chuyên sâu.',
     image: 'https://drive.google.com/thumbnail?id=120WyoSixRMCuWCMFeNjFKxsDzt74filf&sz=w800',
@@ -43,8 +43,8 @@ export const projectsData = [
   },
   {
     id: 'khung-nang-luc-so-bosch',
-    category: 'du-an-da-dao-tao',
-    categoryName: 'Dự án đã đào tạo',
+    category: 'du-an-da-thuc-hien',
+    categoryName: 'Dự án đã thực hiện',
     title: 'Xây dựng Khung năng lực số & Đào tạo Tư duy Phản biện Bosch Việt Nam',
     summary: 'Tư vấn xây dựng ma trận năng lực số và huấn luyện kỹ năng giải quyết vấn đề phức tạp (Problem Solving) theo tiêu chuẩn quốc tế cho đội ngũ kỹ sư Bosch.',
     image: 'https://drive.google.com/thumbnail?id=1ZININwRW94lavoqqoJ3eAArE5v6vsyZ5&sz=w800',
@@ -72,61 +72,61 @@ export const projectsData = [
     ]
   },
   {
-    id: 'su-kien-workshop-ai-leader-2026',
-    category: 'su-kien',
-    categoryName: 'Sự kiện',
-    title: 'Hội thảo Chuyên đề: AI Leadership & Chuyển đổi số Doanh nghiệp 2026',
-    summary: 'Sự kiện quy tụ hơn 200 CEO, C-Level và các nhà quản lý hàng đầu thảo luận về chiến lược tích hợp AI vào văn hóa và mô hình kinh doanh của doanh nghiệp.',
+    id: 'du-an-trien-khai-ai-shb',
+    category: 'du-an-dang-thuc-hien',
+    categoryName: 'Dự án đang thực hiện',
+    title: 'Tư vấn & Triển khai Lộ trình AI Leadership & Tự động hóa Vận hành SHB',
+    summary: 'Dự án chiến lược tư vấn và huấn luyện trực tiếp cho C-Level và các Giám đốc Khối ngân hàng xây dựng trung tâm năng lực AI (CoE) và văn hóa đổi mới sáng tạo.',
     image: 'https://drive.google.com/thumbnail?id=1CU6Pq9-wx_l2DPlb7uigkGIvCtcl921E&sz=w800',
-    date: '10/06/2026',
-    client: 'ACC Academy & ĐH Andrews',
+    date: 'Tháng 09/2026 - Đang triển khai',
+    client: 'Ngân hàng SHB',
     driveProfile: '',
     content: [
       {
         type: 'paragraph',
-        text: 'Vừa qua, ACC Academy phối hợp cùng Đại học Andrews (Hoa Kỳ) đã tổ chức thành công Hội thảo Chuyên đề "AI Leadership & Chuyển đổi số Doanh nghiệp 2026" tại TP.HCM.'
+        text: 'ACC Academy hiện đang trực tiếp đồng hành cùng Ngân hàng SHB trong dự án tư vấn chiến lược "AI Leadership & Digital Transformation" nhằm hiện đại hóa mô hình vận hành và nâng cao trải nghiệm khách hàng số.'
       },
       {
         type: 'heading',
-        text: 'Điểm nhấn sự kiện'
-      },
-      {
-        type: 'paragraph',
-        text: 'Sự kiện thu hút sự tham gia của hơn 200 diễn giả, chuyên gia AI và các nhà lãnh đạo tập đoàn hàng đầu Việt Nam. Tại đây, các diễn giả đã chia sẻ những bài học thực chiến quý báu về lộ trình ứng dụng AI hiệu quả và an toàn.'
+        text: 'Hạng mục triển khai trọng tâm'
       },
       {
         type: 'bullets',
         items: [
-          'Chia sẻ từ ThS. Nguyễn Vũ Huy Hoàng — Master AI Trainer về xu hướng AI 2026',
-          'Tọa đàm bàn tròn: Thách thức an toàn dữ liệu và bảo mật trong doanh nghiệp',
-          'Trải nghiệm trực tiếp các công cụ AI hỗ trợ vận hành và quản trị nhân sự',
-          'Lễ ký kết hợp tác chiến lược giữa ACC Academy và các đối tác công nghệ'
+          'Huấn luyện tư duy lãnh đạo số (Digital Leadership) cho ban điều hành',
+          'Tư vấn thiết lập Trung tâm Năng lực AI xuất sắc (AI Center of Excellence)',
+          'Tự động hóa các luồng xử lý chứng từ và thẩm định tín dụng bằng Generative AI',
+          'Xây dựng chính sách An toàn dữ liệu và Bảo mật thông tin tài chính'
         ]
       }
     ]
   },
   {
-    id: 'su-kien-alumni-andrews-networking',
-    category: 'su-kien',
-    categoryName: 'Sự kiện',
-    title: 'Sự kiện Kết nối Tri thức Alumni Andrews & Khai giảng Khóa MBA mới',
-    summary: 'Đêm hội giao lưu kết nối mạng lưới cựu học viên Thạc sĩ Quản trị Kinh doanh Andrews MBA cùng lễ đón tân học viên khóa mới.',
+    id: 'du-an-dao-tao-ai-amway',
+    category: 'du-an-dang-thuc-hien',
+    categoryName: 'Dự án đang thực hiện',
+    title: 'Dự án Đào tạo May đo Ứng dụng AI & Automation cho Tập đoàn Amway',
+    summary: 'Chương trình In-house may đo giúp đội ngũ Marketing, Sales và Chăm sóc khách hàng tự động hóa 70% nội dung truyền thông và quy trình tương tác khách hàng.',
     image: 'https://drive.google.com/thumbnail?id=1miKA4icyQ_nAgwQe5vQge3bqg2W_f8zg&sz=w800',
-    date: '20/05/2026',
-    client: 'Andrews MBA & LEADMAN Institute',
+    date: 'Tháng 08/2026 - Đang triển khai',
+    client: 'Tập đoàn Amway Việt Nam',
     driveProfile: '',
     content: [
       {
         type: 'paragraph',
-        text: 'Sự kiện Alumni Andrews Networking là hoạt động thường niên quy tụ hàng trăm doanh nhân, nhà quản lý là cựu học viên và học viên chương trình Andrews MBA tại Việt Nam.'
+        text: 'Dự án huấn luyện và tư vấn ứng dụng Generative AI đa kênh cho toàn bộ đội ngũ chuyên viên truyền thông và tiếp thị của Amway Việt Nam.'
       },
       {
         type: 'heading',
-        text: 'Nội dung chương trình'
+        text: 'Các mảng nội dung chính'
       },
       {
-        type: 'paragraph',
-        text: 'Trong không khí ấm cúng và trang trọng, các thế hệ học viên Andrews đã cùng chia sẻ cơ hội hợp tác kinh doanh, lắng nghe các bài trình bày từ Viện LEADMAN và giao lưu mở rộng mạng lưới đối tác.'
+        type: 'bullets',
+        items: [
+          'Ứng dụng Claude & ChatGPT trong sáng tạo ý tưởng và viết kịch bản truyền thông',
+          'Thiết kế hình ảnh và infographic chuẩn nhận diện thương hiệu với Midjourney',
+          'Tối ưu quy trình chăm sóc khách hàng và cá nhân hóa trải nghiệm mua sắm'
+        ]
       }
     ]
   }

@@ -8,7 +8,13 @@
 
       <!-- Desktop Nav -->
       <nav class="desktop-nav">
-        <!-- 1. ĐỐI TÁC TIN CẬY -->
+        <!-- 1. VỀ CHÚNG TÔI -->
+        <router-link to="/about-us" class="nav-link">VỀ CHÚNG TÔI</router-link>
+
+        <!-- 2. ĐÀO TẠO -->
+        <router-link to="/courses" class="nav-link">ĐÀO TẠO</router-link>
+
+        <!-- 3. ĐỐI TÁC TIN CẬY -->
         <div class="nav-item dropdown">
           <button class="nav-link dropdown-toggle" @click.prevent="openDrawer('trusted-partners')">
             ĐỐI TÁC TIN CẬY
@@ -28,152 +34,37 @@
           </div>
         </div>
 
-        <!-- 2. CHO DOANH NGHIỆP (Mega Dropdown) -->
-        <div class="nav-item mega-dropdown">
-          <button class="nav-link dropdown-toggle" aria-haspopup="true" @click.prevent="openDrawer('corporate')">
-            CHO DOANH NGHIỆP
+        <!-- 4. TUYỂN SINH -->
+        <div class="nav-item dropdown">
+          <button class="nav-link dropdown-toggle" @click.prevent="openDrawer('post-graduate')">
+            TUYỂN SINH
             <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
           </button>
-          
-          <!-- Corporate Mega Menu Panel -->
-          <div class="mega-menu-panel corporate-mega-panel">
-            <div class="container corporate-mega-container">
-              <div class="corporate-menu-grid">
-
-                <!-- Col 1: Đào tạo AI INHOUSE -->
-                <div class="corporate-menu-group">
-                  <div class="corporate-group-header">
-                    <router-link to="/corporate/dao-tao" class="corporate-group-title">
-                      Đào tạo AI INHOUSE cho doanh nghiệp
-                    </router-link>
-                  </div>
-                  <ul class="corporate-sub-list">
-                    <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI cho Cơ quan Nhà nước, UBND & Phường/Xã</router-link></li>
-                    <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI chuyên ngành Y tế & Thẩm mỹ</router-link></li>
-                    <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI chuyên ngành Xây dựng</router-link></li>
-                    <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI cho Doanh nghiệp Sản xuất & Thương mại</router-link></li>
-                    <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI cho Trường học & Cơ sở Giáo dục</router-link></li>
-                  </ul>
-                </div>
-
-                <!-- Col 2: Quản trị & Bảo mật Dữ liệu & Xây dựng Khung Năng lực -->
-                <div class="corporate-menu-group">
-                  <div class="corporate-group-header">
-                    <router-link to="/corporate/coe" class="corporate-group-title">
-                      Quản trị & Bảo mật Dữ liệu Doanh nghiệp
-                    </router-link>
-                  </div>
-
-                  <div class="corporate-group-header style-mt">
-                    <router-link to="/corporate/for-team" class="corporate-group-title">
-                      Xây dựng Khung năng lực & Phát triển Nhân sự
-                    </router-link>
-                  </div>
-                  <ul class="corporate-sub-list">
-                    <li><router-link to="/corporate/for-team" class="corporate-sub-link">Xây dựng Ma trận năng lực theo vị trí</router-link></li>
-                    <li><router-link to="/corporate/for-team" class="corporate-sub-link">Tích hợp năng lực AI & năng lực số</router-link></li>
-                    <li><router-link to="/corporate/for-team" class="corporate-sub-link">Xây dựng khung năng lực theo phòng ban</router-link></li>
-                    <li><router-link to="/corporate/for-team" class="corporate-sub-link">Xây dựng Lộ trình đào tạo & phát triển toàn diện cho doanh nghiệp</router-link></li>
-                  </ul>
-                </div>
-
-                <!-- Col 3: Kỹ năng & Lãnh đạo -->
-                <div class="corporate-menu-group">
-                  <div class="corporate-group-header">
-                    <router-link to="/corporate/case-studies" class="corporate-group-title">
-                      Năng lực Lãnh đạo Chủ động & Hiệu quả
-                    </router-link>
-                  </div>
-
-                  <div class="corporate-group-header style-mt">
-                    <router-link to="/corporate/case-studies" class="corporate-group-title">
-                      Phát triển Kỹ năng mềm trong Môi trường Doanh nghiệp
-                    </router-link>
-                  </div>
-
-                  <div class="corporate-group-header style-mt">
-                    <router-link to="/corporate/case-studies" class="corporate-group-title">
-                      Nghệ thuật Kể chuyện & Truyền cảm hứng
-                    </router-link>
-                  </div>
-                </div>
-
-              </div>
-            </div>
+          <div class="dropdown-menu">
+            <router-link to="/post-graduate/mba" class="dropdown-item">
+              <div class="dropdown-title">Thạc sĩ quản trị kinh doanh</div>
+              <div class="dropdown-desc">Chương trình đào tạo MBA chuẩn Quốc tế</div>
+            </router-link>
+            <router-link to="/post-graduate/gei" class="dropdown-item">
+              <div class="dropdown-title">Global Executive Institute</div>
+              <div class="dropdown-desc">Viện Đào tạo Lãnh đạo Toàn cầu</div>
+            </router-link>
+            <router-link to="/post-graduate/mini-mba" class="dropdown-item">
+              <div class="dropdown-title">Mini MBA</div>
+              <div class="dropdown-desc">Chương trình quản trị tinh gọn thực chiến</div>
+            </router-link>
           </div>
         </div>
 
-        <!-- 3. TUYỂN SINH SAU ĐẠI HỌC -->
-        <button class="nav-link dropdown-toggle" @click.prevent="openDrawer('post-graduate')">
-          TUYỂN SINH SAU ĐẠI HỌC
-          <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 9l6 6 6-6"/>
-          </svg>
-        </button>
+        <!-- 5. TIN TỨC -->
+        <router-link to="/library/blog" class="nav-link">TIN TỨC</router-link>
 
-        <!-- 4. CHO CÁ NHÂN (Mega Menu: Khóa học) -->
-        <div class="nav-item mega-dropdown">
-          <button class="nav-link dropdown-toggle" aria-haspopup="true" @click.prevent="openDrawer('courses')">
-            CHO CÁ NHÂN
-            <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 9l6 6 6-6"/>
-            </svg>
-          </button>
-          
-          <!-- Mega Menu Panel -->
-          <div class="mega-menu-panel">
-            <div class="container mega-menu-container">
-              <!-- Left Sidebar: Categories -->
-              <div class="mega-menu-sidebar">
-                <button 
-                  v-for="cat in categories" 
-                  :key="cat.id"
-                  class="mega-sidebar-item"
-                  :class="{ active: selectedCategory === cat.id }"
-                  @mouseenter="selectedCategory = cat.id"
-                >
-                  <span class="indicator-bar"></span>
-                  {{ cat.name }}
-                </button>
-              </div>
-              
-              <!-- Right Content: Program Grid -->
-              <div class="mega-menu-content">
-                <div class="mega-content-header">
-                  <h3 class="mega-content-title">{{ activeCategoryName }}</h3>
-                  <router-link :to="activeCategoryLink" class="mega-view-all-link">
-                    Xem tất cả {{ activeCategoryName }} &rarr;
-                  </router-link>
-                </div>
-                
-                <div class="mega-programs-grid">
-                  <div 
-                    v-for="program in filteredPrograms" 
-                    :key="program.id"
-                    class="mega-program-card"
-                  >
-                    <router-link :to="program.link" class="mega-card-link">
-                      <div class="mega-school-logo">
-                        <img :src="program.logo" :alt="program.school" />
-                      </div>
-                      <div class="mega-card-info">
-                        <span class="mega-school-name">{{ program.school }}</span>
-                        <h4 class="mega-program-title" :title="program.title">{{ program.title }}</h4>
-                      </div>
-                    </router-link>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- 5. ĐỘI NGŨ GIẢNG VIÊN -->
+        <!-- 6. ĐỘI NGŨ GIẢNG VIÊN -->
         <router-link to="/doi-ngu-giang-vien" class="nav-link">ĐỘI NGŨ GIẢNG VIÊN</router-link>
 
-        <!-- 6. DỰ ÁN (Dropdown menu) -->
+        <!-- 7. DỰ ÁN -->
         <div class="nav-item dropdown">
           <router-link to="/du-an" class="nav-link dropdown-toggle">
             DỰ ÁN
@@ -182,25 +73,22 @@
             </svg>
           </router-link>
           <div class="dropdown-menu">
-            <router-link to="/du-an?cat=du-an-da-dao-tao" class="dropdown-item">
-              <div class="dropdown-title">DỰ ÁN ĐÃ ĐÀO TẠO</div>
+            <router-link to="/du-an?cat=du-an-da-thuc-hien" class="dropdown-item">
+              <div class="dropdown-title">DỰ ÁN ĐÃ THỰC HIỆN</div>
               <div class="dropdown-desc">Các dự án đào tạo In-house & chuyển đổi số thực chiến cho doanh nghiệp</div>
             </router-link>
-            <router-link to="/du-an?cat=su-kien" class="dropdown-item">
-              <div class="dropdown-title">SỰ KIỆN</div>
-              <div class="dropdown-desc">Hội thảo, workshop và các sự kiện kết nối tri thức nổi bật của ACC</div>
+            <router-link to="/du-an?cat=du-an-dang-thuc-hien" class="dropdown-item">
+              <div class="dropdown-title">DỰ ÁN ĐANG THỰC HIỆN</div>
+              <div class="dropdown-desc">Các lộ trình tư vấn & đào tạo chiến lược đang được ACC triển khai</div>
             </router-link>
           </div>
         </div>
 
-        <!-- 7. CHIA SẺ HỌC VIÊN -->
+        <!-- 8. CHIA SẺ HỌC VIÊN -->
         <router-link to="/chia-se-hoc-vien" class="nav-link">CHIA SẺ HỌC VIÊN</router-link>
 
-        <!-- 8. LIÊN HỆ -->
+        <!-- 9. LIÊN HỆ -->
         <router-link to="/contact" class="nav-link">LIÊN HỆ</router-link>
-
-        <!-- 9. VỀ CHÚNG TÔI -->
-        <router-link to="/about-us" class="nav-link">VỀ CHÚNG TÔI</router-link>
       </nav>
 
       <!-- Action buttons -->
@@ -301,7 +189,13 @@
     <!-- Mobile Nav Overlay -->
     <div class="mobile-nav" :class="{ 'open': isMobileMenuOpen }">
       <div class="mobile-nav-inner">
-        <!-- Mobile Accordion: Đối tác tin cậy -->
+        <!-- 1. VỀ CHÚNG TÔI -->
+        <router-link to="/about-us" class="mobile-single-link" @click="closeMobileMenu">VỀ CHÚNG TÔI</router-link>
+
+        <!-- 2. ĐÀO TẠO -->
+        <router-link to="/courses" class="mobile-single-link" @click="closeMobileMenu">ĐÀO TẠO</router-link>
+
+        <!-- 3. ĐỐI TÁC TIN CẬY -->
         <div class="mobile-nav-group">
           <div class="mobile-nav-label" @click="toggleMobileSection('trusted-partners')">
             ĐỐI TÁC TIN CẬY
@@ -315,58 +209,10 @@
           </div>
         </div>
 
-        <!-- Mobile Accordion: Doanh nghiệp -->
-        <div class="mobile-nav-group">
-          <div class="mobile-nav-label" @click="toggleMobileSection('corporate')">
-            CHO DOANH NGHIỆP
-            <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'corporate' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 9l6 6 6-6"/>
-            </svg>
-          </div>
-          <div class="mobile-nav-links" v-show="activeMobileSection === 'corporate'">
-            <!-- Group 1: Đào tạo AI INHOUSE -->
-            <div class="mobile-sub-group">
-              <div class="mobile-sub-label" @click="toggleMobileSubSection('corp-ai')">
-                <span>Đào tạo AI INHOUSE cho doanh nghiệp</span>
-                <span class="plus-icon">{{ activeMobileSubSection === 'corp-ai' ? '−' : '+' }}</span>
-              </div>
-              <div class="mobile-sub-content" v-show="activeMobileSubSection === 'corp-ai'">
-                <router-link to="/corporate/dao-tao" @click="closeMobileMenu" class="mobile-sub-link">Đào tạo AI cho Cơ quan Nhà nước, UBND & Phường/Xã</router-link>
-                <router-link to="/corporate/dao-tao" @click="closeMobileMenu" class="mobile-sub-link">Đào tạo AI chuyên ngành Y tế & Thẩm mỹ</router-link>
-                <router-link to="/corporate/dao-tao" @click="closeMobileMenu" class="mobile-sub-link">Đào tạo AI chuyên ngành Xây dựng</router-link>
-                <router-link to="/corporate/dao-tao" @click="closeMobileMenu" class="mobile-sub-link">Đào tạo AI cho Doanh nghiệp Sản xuất & Thương mại</router-link>
-                <router-link to="/corporate/dao-tao" @click="closeMobileMenu" class="mobile-sub-link">Đào tạo AI cho Trường học & Cơ sở Giáo dục</router-link>
-              </div>
-            </div>
-
-            <!-- Group 2: Quản trị & Bảo mật Dữ liệu -->
-            <router-link to="/corporate/coe" @click="closeMobileMenu" class="mobile-single-sublink">Quản trị & Bảo mật Dữ liệu Doanh nghiệp</router-link>
-
-            <!-- Group 3: Xây dựng Khung Năng lực -->
-            <div class="mobile-sub-group">
-              <div class="mobile-sub-label" @click="toggleMobileSubSection('corp-framework')">
-                <span>Xây dựng Khung năng lực & Phát triển Nhân sự</span>
-                <span class="plus-icon">{{ activeMobileSubSection === 'corp-framework' ? '−' : '+' }}</span>
-              </div>
-              <div class="mobile-sub-content" v-show="activeMobileSubSection === 'corp-framework'">
-                <router-link to="/corporate/for-team" @click="closeMobileMenu" class="mobile-sub-link">Xây dựng Ma trận năng lực theo vị trí</router-link>
-                <router-link to="/corporate/for-team" @click="closeMobileMenu" class="mobile-sub-link">Tích hợp năng lực AI & năng lực số</router-link>
-                <router-link to="/corporate/for-team" @click="closeMobileMenu" class="mobile-sub-link">Xây dựng khung năng lực theo phòng ban</router-link>
-                <router-link to="/corporate/for-team" @click="closeMobileMenu" class="mobile-sub-link">Xây dựng Lộ trình đào tạo & phát triển toàn diện cho doanh nghiệp</router-link>
-              </div>
-            </div>
-
-            <!-- Single sub-items -->
-            <router-link to="/corporate/case-studies" @click="closeMobileMenu" class="mobile-single-sublink">Năng lực Lãnh đạo Chủ động & Hiệu quả</router-link>
-            <router-link to="/corporate/case-studies" @click="closeMobileMenu" class="mobile-single-sublink">Phát triển Kỹ năng mềm trong Môi trường Doanh nghiệp</router-link>
-            <router-link to="/corporate/case-studies" @click="closeMobileMenu" class="mobile-single-sublink">Nghệ thuật Kể chuyện & Truyền cảm hứng</router-link>
-          </div>
-        </div>
-
-        <!-- Mobile Accordion: Tuyển sinh sau đại học -->
+        <!-- 4. TUYỂN SINH -->
         <div class="mobile-nav-group">
           <div class="mobile-nav-label" @click="toggleMobileSection('post-graduate')">
-            TUYỂN SINH SAU ĐẠI HỌC
+            TUYỂN SINH
             <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'post-graduate' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
@@ -378,41 +224,13 @@
           </div>
         </div>
 
-        <!-- Mobile Accordion: Cho Cá Nhân -->
-        <div class="mobile-nav-group">
-          <div class="mobile-nav-label" @click="toggleMobileSection('courses')">
-            CHO CÁ NHÂN
-            <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'courses' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 9l6 6 6-6"/>
-            </svg>
-          </div>
-          <div class="mobile-nav-links" v-show="activeMobileSection === 'courses'">
-            <div class="mobile-sub-group">
-              <div class="mobile-sub-label" @click="toggleMobileSubSection('individual-ai')">
-                <span>Các khóa Đào tạo ứng dụng AI cho cá nhân</span>
-                <span class="plus-icon">{{ activeMobileSubSection === 'individual-ai' ? '−' : '+' }}</span>
-              </div>
-              <div class="mobile-sub-content" v-show="activeMobileSubSection === 'individual-ai'">
-                <router-link to="/courses/ai" @click="closeMobileMenu" class="mobile-sub-link">AI dành cho CEO & Lãnh đạo Doanh nghiệp</router-link>
-                <router-link to="/courses/ai" @click="closeMobileMenu" class="mobile-sub-link">AI ứng dụng trong Kế toán - Tài chính</router-link>
-                <router-link to="/courses/ai" @click="closeMobileMenu" class="mobile-sub-link">AI ứng dụng trong Hành chính - Nhân sự</router-link>
-                <router-link to="/courses/ai" @click="closeMobileMenu" class="mobile-sub-link">AI ứng dụng trong Kinh doanh & Phát triển thị trường</router-link>
-                <router-link to="/courses/ai" @click="closeMobileMenu" class="mobile-sub-link">AI ứng dụng trong Sales & Chăm sóc khách hàng</router-link>
-                <router-link to="/courses/ai" @click="closeMobileMenu" class="mobile-sub-link">AI ứng dụng trong Marketing & Truyền thông</router-link>
-                <router-link to="/courses/ai" @click="closeMobileMenu" class="mobile-sub-link">AI ứng dụng trong Sản xuất - Kỹ thuật - Vận hành</router-link>
-              </div>
-            </div>
+        <!-- 5. TIN TỨC -->
+        <router-link to="/library/blog" class="mobile-single-link" @click="closeMobileMenu">TIN TỨC</router-link>
 
-            <router-link to="/courses/chuyen-mon" @click="closeMobileMenu" class="mobile-single-sublink">Kỹ năng Cốt lõi & Nghiệp vụ dành cho Trọng tài viên</router-link>
-            <router-link to="/courses/chuyen-mon" @click="closeMobileMenu" class="mobile-single-sublink">Quản trị & Bảo vệ Dữ liệu Cá nhân</router-link>
-            <router-link to="/courses/mem" @click="closeMobileMenu" class="mobile-single-sublink">Digital Marketing & Phát triển Thương hiệu Số</router-link>
-            <router-link to="/courses/mem" @click="closeMobileMenu" class="mobile-single-sublink">Xây dựng & Phát triển Thương hiệu Cá nhân</router-link>
-          </div>
-        </div>
-
+        <!-- 6. ĐỘI NGŨ GIẢNG VIÊN -->
         <router-link to="/doi-ngu-giang-vien" class="mobile-single-link" @click="closeMobileMenu">ĐỘI NGŨ GIẢNG VIÊN</router-link>
-        
-        <!-- Mobile Accordion: Dự án -->
+
+        <!-- 7. DỰ ÁN -->
         <div class="mobile-nav-group">
           <div class="mobile-nav-label" @click="toggleMobileSection('projects')">
             DỰ ÁN
@@ -421,13 +239,16 @@
             </svg>
           </div>
           <div class="mobile-nav-links" v-show="activeMobileSection === 'projects'">
-            <router-link to="/du-an?cat=du-an-da-dao-tao" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN ĐÃ ĐÀO TẠO</router-link>
-            <router-link to="/du-an?cat=su-kien" @click="closeMobileMenu" class="mobile-single-sublink">SỰ KIỆN</router-link>
+            <router-link to="/du-an?cat=du-an-da-thuc-hien" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN ĐÃ THỰC HIỆN</router-link>
+            <router-link to="/du-an?cat=du-an-dang-thuc-hien" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN ĐANG THỰC HIỆN</router-link>
           </div>
         </div>
+
+        <!-- 8. CHIA SẺ HỌC VIÊN -->
         <router-link to="/chia-se-hoc-vien" class="mobile-single-link" @click="closeMobileMenu">CHIA SẺ HỌC VIÊN</router-link>
+
+        <!-- 9. LIÊN HỆ -->
         <router-link to="/contact" class="mobile-single-link" @click="closeMobileMenu">LIÊN HỆ</router-link>
-        <router-link to="/about-us" class="mobile-single-link" @click="closeMobileMenu">VỀ CHÚNG TÔI</router-link>
         
         <router-link v-if="!courseStore.token" to="/login" class="mobile-login-btn" @click="closeMobileMenu">Đăng nhập</router-link>
         <div v-else class="mobile-user-menu" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
@@ -592,18 +413,24 @@ watch(isDrawerOpen, (val) => {
 
 // 1. Mega Menu Categories Data dynamically loaded from store
 const categories = computed(() => {
+  let baseList = [];
   if (courseStore.categories && courseStore.categories.length > 0) {
-    return courseStore.categories.map(c => ({
+    baseList = courseStore.categories.map(c => ({
       id: c.slug,
       name: c.name,
       viewAllLink: c.slug === 'bundles' ? '/bundles' : `/courses/category/${c.slug}`
     }));
+  } else {
+    baseList = [
+      { id: 'ky-nang-ai', name: 'Kỹ năng AI', viewAllLink: '/courses/category/ky-nang-ai' },
+      { id: 'ky-nang-chuyen-mon', name: 'Kỹ năng chuyên môn', viewAllLink: '/courses/category/ky-nang-chuyen-mon' },
+      { id: 'ky-nang-mem', name: 'Kỹ năng mềm', viewAllLink: '/courses/category/ky-nang-mem' },
+      { id: 'bundles', name: 'Combo khóa học', viewAllLink: '/bundles' }
+    ];
   }
   return [
-    { id: 'ky-nang-ai', name: 'Kỹ năng AI', viewAllLink: '/courses/category/ky-nang-ai' },
-    { id: 'ky-nang-chuyen-mon', name: 'Kỹ năng chuyên môn', viewAllLink: '/courses/category/ky-nang-chuyen-mon' },
-    { id: 'ky-nang-mem', name: 'Kỹ năng mềm', viewAllLink: '/courses/category/ky-nang-mem' },
-    { id: 'bundles', name: 'Combo khóa học', viewAllLink: '/bundles' }
+    ...baseList,
+    { id: 'corporate', name: 'Đào tạo Doanh nghiệp', viewAllLink: '/corporate/dao-tao' }
   ];
 });
 

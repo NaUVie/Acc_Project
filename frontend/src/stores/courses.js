@@ -86,6 +86,9 @@ export const useCourseStore = defineStore('courses', {
     getCoursesByCategory: (state) => (categorySlug) => {
       if (!categorySlug) return state.courses;
       let targetSlug = String(categorySlug).toLowerCase();
+      if (['all', 'courses', 'dao-tao'].includes(targetSlug)) {
+        return state.courses;
+      }
       const ALIASES = {
         'ai': 'ky-nang-ai',
         'mem': 'ky-nang-mem',
