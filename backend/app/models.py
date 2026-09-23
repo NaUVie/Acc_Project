@@ -180,11 +180,48 @@ class Testimonial(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(150), nullable=False)
-    role = Column(String(150), nullable=False)
-    text = Column(Text, nullable=False)
-    image = Column(String(255), nullable=True)
-    video_url = Column(String(255), nullable=True)
+    role = Column(String(150), nullable=True)
+    company = Column(String(150), nullable=True)
+    text = Column(Text, nullable=True)
+    image = Column(String(500), nullable=True)
+    rating = Column(Integer, default=5)
+    quote = Column(Text, nullable=True)
+    course_name = Column(String(255), nullable=True)
+    testimonial_type = Column(String(50), default="text") # "text", "photo", "video"
+    youtube_id = Column(String(100), nullable=True)
+    thumbnail = Column(String(500), nullable=True)
+    video_url = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class Lecturer(Base):
+    __tablename__ = "lecturers"
+
+    id = Column(String(100), primary_key=True, index=True)
+    name = Column(String(150), nullable=False)
+    title = Column(String(255), nullable=False)
+    tagline = Column(Text, nullable=True)
+    avatar = Column(String(500), nullable=True)
+    avatar_drive_link = Column(String(500), nullable=True)
+    drive_profile = Column(String(500), nullable=True)
+    bio_short = Column(Text, nullable=True)
+    details_html = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class Project(Base):
+    __tablename__ = "projects"
+
+    id = Column(String(100), primary_key=True, index=True)
+    category = Column(String(100), nullable=False)
+    category_name = Column(String(100), nullable=False)
+    title = Column(String(255), nullable=False)
+    summary = Column(Text, nullable=True)
+    image = Column(String(500), nullable=True)
+    date = Column(String(100), nullable=True)
+    client = Column(String(150), nullable=True)
+    drive_profile = Column(String(500), nullable=True)
+    content = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
 
 class Enrollment(Base):
     """Tracks which user has access to which course (after payment)."""

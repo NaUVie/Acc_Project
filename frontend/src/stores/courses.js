@@ -38,7 +38,12 @@ export const useCourseStore = defineStore('courses', {
   state: () => ({
     // Catalog states
     courses: [],
-    categories: [],
+    categories: [
+      { slug: 'dao-tao-doanh-nghiep', name: 'Đào tạo cho doanh nghiệp' },
+      { slug: 'dao-tao-ca-nhan', name: 'Đào tạo cho cá nhân' },
+      { slug: 'dao-tao-co-quan-nha-nuoc', name: 'Đào tạo cho khối cơ quan - nhà nước' },
+      { slug: 'bundles', name: 'Combo khóa học' }
+    ],
     programs: [],
     bundles: [],
     contactSettings: null,
@@ -90,16 +95,26 @@ export const useCourseStore = defineStore('courses', {
         return state.courses;
       }
       const ALIASES = {
-        'ai': 'ky-nang-ai',
-        'mem': 'ky-nang-mem',
-        'chuyen-mon': 'ky-nang-chuyen-mon'
+        'doanh-nghiep': 'dao-tao-doanh-nghiep',
+        'ca-nhan': 'dao-tao-ca-nhan',
+        'nha-nuoc': 'dao-tao-co-quan-nha-nuoc',
+        'co-quan-nha-nuoc': 'dao-tao-co-quan-nha-nuoc',
+        'ai': 'dao-tao-doanh-nghiep',
+        'ky-nang-ai': 'dao-tao-doanh-nghiep',
+        'mem': 'dao-tao-ca-nhan',
+        'ky-nang-mem': 'dao-tao-ca-nhan',
+        'chuyen-mon': 'dao-tao-ca-nhan',
+        'ky-nang-chuyen-mon': 'dao-tao-ca-nhan'
       };
       if (ALIASES[targetSlug]) {
         targetSlug = ALIASES[targetSlug];
       }
-      return state.courses.filter(course => 
-        course.category && String(course.category).toLowerCase() === targetSlug
-      );
+      return state.courses.filter(course => {
+        if (!course.category) return false;
+        const cCat = String(course.category).toLowerCase();
+        const mappedCCat = ALIASES[cCat] || cCat;
+        return mappedCCat === targetSlug;
+      });
     },
     getCourseByHandle: (state) => (handle) => {
       return state.courses.find(course => course.handle === handle);

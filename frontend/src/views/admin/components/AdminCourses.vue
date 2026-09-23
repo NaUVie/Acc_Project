@@ -392,7 +392,7 @@ const uploadCourseImage = async (e) => {
 const courseForm = ref({
   title: '',
   handle: '',
-  category: 'ky-nang-ai',
+  category: 'dao-tao-doanh-nghiep',
   programId: null,
   image: '',
   price: 0,
@@ -407,7 +407,7 @@ const openAddCourseModal = () => {
   courseForm.value = {
     title: '',
     handle: '',
-    category: 'ky-nang-ai',
+    category: 'dao-tao-doanh-nghiep',
     programId: null,
     image: '/images/default.jpg',
     price: 9800000,
@@ -597,9 +597,12 @@ const formatPrice = (value) => {
 
 const translateCategory = (cat) => {
   switch (cat) {
-    case 'ky-nang-ai': return 'Kỹ năng AI';
-    case 'ky-nang-mem': return 'Kỹ năng mềm';
-    case 'ky-nang-chuyen-mon': return 'Kỹ năng chuyên môn';
+    case 'dao-tao-doanh-nghiep': return 'Đào tạo cho doanh nghiệp';
+    case 'dao-tao-ca-nhan': return 'Đào tạo cho cá nhân';
+    case 'dao-tao-co-quan-nha-nuoc': return 'Đào tạo cho khối cơ quan - nhà nước';
+    case 'ky-nang-ai': return 'Đào tạo cho doanh nghiệp';
+    case 'ky-nang-mem': return 'Đào tạo cho cá nhân';
+    case 'ky-nang-chuyen-mon': return 'Đào tạo cho cá nhân';
     case 'bundles': return 'Combo / Gói';
     default: return cat;
   }

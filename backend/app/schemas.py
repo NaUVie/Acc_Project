@@ -130,9 +130,92 @@ class BlogPostBase(BaseModel):
     date: Optional[str] = None
     link: Optional[str] = None
 
+class BlogPostCreate(BaseModel):
+    title: str
+    handle: str
+    category: str
+    excerpt: Optional[str] = None
+    image: Optional[str] = None
+    date: Optional[str] = None
+    link: Optional[str] = None
+
+class BlogPostUpdate(BaseModel):
+    title: Optional[str] = None
+    handle: Optional[str] = None
+    category: Optional[str] = None
+    excerpt: Optional[str] = None
+    image: Optional[str] = None
+    date: Optional[str] = None
+    link: Optional[str] = None
+
 class BlogPostResponse(BlogPostBase):
     class Config:
         from_attributes = True
+
+# Lecturer Schemas
+class LecturerBase(BaseModel):
+    id: str
+    name: str
+    title: str
+    tagline: Optional[str] = None
+    avatar: Optional[str] = None
+    avatar_drive_link: Optional[str] = None
+    drive_profile: Optional[str] = None
+    bio_short: Optional[str] = None
+    details_html: Optional[str] = None
+
+class LecturerCreate(LecturerBase):
+    pass
+
+class LecturerUpdate(BaseModel):
+    name: Optional[str] = None
+    title: Optional[str] = None
+    tagline: Optional[str] = None
+    avatar: Optional[str] = None
+    avatar_drive_link: Optional[str] = None
+    drive_profile: Optional[str] = None
+    bio_short: Optional[str] = None
+    details_html: Optional[str] = None
+
+class LecturerResponse(LecturerBase):
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+# Project Schemas
+class ProjectBase(BaseModel):
+    id: str
+    category: str
+    category_name: str
+    title: str
+    summary: Optional[str] = None
+    image: Optional[str] = None
+    date: Optional[str] = None
+    client: Optional[str] = None
+    drive_profile: Optional[str] = None
+    content: Optional[str] = None
+
+class ProjectCreate(ProjectBase):
+    pass
+
+class ProjectUpdate(BaseModel):
+    category: Optional[str] = None
+    category_name: Optional[str] = None
+    title: Optional[str] = None
+    summary: Optional[str] = None
+    image: Optional[str] = None
+    date: Optional[str] = None
+    client: Optional[str] = None
+    drive_profile: Optional[str] = None
+    content: Optional[str] = None
+
+class ProjectResponse(ProjectBase):
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
 
 # Contact Schemas
 class ContactCreate(BaseModel):
@@ -257,16 +340,53 @@ class ReferralSummary(BaseModel):
     referrals_list: List[ReferralResponse]
 
 # Testimonial Schemas
+class TestimonialCreate(BaseModel):
+    name: str
+    role: Optional[str] = None
+    company: Optional[str] = None
+    text: Optional[str] = None
+    image: Optional[str] = None
+    rating: Optional[int] = 5
+    quote: Optional[str] = None
+    course_name: Optional[str] = None
+    testimonial_type: Optional[str] = "text"
+    youtube_id: Optional[str] = None
+    thumbnail: Optional[str] = None
+    video_url: Optional[str] = None
+
+class TestimonialUpdate(BaseModel):
+    name: Optional[str] = None
+    role: Optional[str] = None
+    company: Optional[str] = None
+    text: Optional[str] = None
+    image: Optional[str] = None
+    rating: Optional[int] = None
+    quote: Optional[str] = None
+    course_name: Optional[str] = None
+    testimonial_type: Optional[str] = None
+    youtube_id: Optional[str] = None
+    thumbnail: Optional[str] = None
+    video_url: Optional[str] = None
+
 class TestimonialResponse(BaseModel):
     id: int
     name: str
-    role: str
-    text: str
+    role: Optional[str] = None
+    company: Optional[str] = None
+    text: Optional[str] = None
     image: Optional[str] = None
+    rating: Optional[int] = 5
+    quote: Optional[str] = None
+    course_name: Optional[str] = None
+    testimonial_type: Optional[str] = "text"
+    youtube_id: Optional[str] = None
+    thumbnail: Optional[str] = None
     video_url: Optional[str] = None
+    created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
 
 # Admin Schemas
 class UserAdminCreate(BaseModel):

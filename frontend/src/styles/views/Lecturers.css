@@ -1,0 +1,314 @@
+.lecturers-page {
+  padding-top: 120px;
+  padding-bottom: 100px;
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.header-section {
+  text-align: center;
+  max-width: 860px;
+  margin-inline: auto;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  color: #022B9F;
+  background: rgba(2, 43, 159, 0.08);
+  padding: 6px 16px;
+  border-radius: 20px;
+  letter-spacing: 1px;
+}
+
+.header-section h1 {
+  font-size: clamp(32px, 4vw, 46px);
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #022B9F 0%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Mega Style Layout (Giao diện chuẩn giống ĐÀO TẠO) */
+.mega-style-layout {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  background: #ffffff;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  min-height: 580px;
+}
+
+.mega-menu-sidebar {
+  background-color: #f8fafc;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.mega-sidebar-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  color: #475467;
+  font-size: 14.5px;
+  font-weight: 600;
+  text-align: left;
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.mega-sidebar-item .indicator-bar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 0;
+  background-color: #022B9F;
+  transition: height 0.25s ease;
+  border-radius: 0 3px 3px 0;
+}
+
+.mega-sidebar-item:hover,
+.mega-sidebar-item.active {
+  color: #022B9F;
+  background-color: rgba(2, 43, 159, 0.06);
+}
+
+.mega-sidebar-item:hover .indicator-bar,
+.mega-sidebar-item.active .indicator-bar {
+  height: 60%;
+}
+
+.cat-count-badge {
+  background: rgba(0, 0, 0, 0.06);
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.mega-sidebar-item.active .cat-count-badge {
+  background: #022B9F;
+  color: #ffffff;
+}
+
+.mega-menu-content {
+  padding: 32px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mega-content-header {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding-bottom: 16px;
+}
+
+.cat-badge-small {
+  font-size: 11px;
+  font-weight: 800;
+  color: #022B9F;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.mega-content-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 4px 0 6px 0;
+}
+
+.cat-desc-small {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.mega-programs-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.lecturer-mega-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.lecturer-mega-card:hover {
+  transform: translateY(-4px);
+  border-color: #022B9F;
+  box-shadow: 0 12px 30px rgba(2, 43, 159, 0.08);
+}
+
+.mega-card-link {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.lecturer-avatar-box {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid #022B9F;
+  box-shadow: 0 4px 12px rgba(2, 43, 159, 0.15);
+}
+
+.lecturer-avatar-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mega-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+}
+
+.card-header-badge-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.mega-school-name {
+  color: #022B9F;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.mini-role-tag {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: #ffffff;
+}
+
+.mini-role-tag.gold {
+  background: #d97706;
+}
+
+.mini-role-tag.blue {
+  background: #022B9F;
+}
+
+.mega-program-title {
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 800;
+  margin: 2px 0 0 0;
+}
+
+.lecturer-sub-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0284c7;
+  margin: 0 0 8px 0;
+}
+
+.stats-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.stat-pill {
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.mega-program-desc {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0 0 14px 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mega-card-footer {
+  margin-top: auto;
+}
+
+.mega-enroll-btn {
+  font-size: 13px;
+  font-weight: 700;
+  color: #022B9F;
+  text-decoration: none;
+}
+
+.mega-enroll-btn:hover {
+  color: #0284c7;
+  text-decoration: underline;
+}
+
+.empty-state {
+  padding: 60px 0;
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+}
+
+@media (max-width: 992px) {
+  .mega-style-layout {
+    grid-template-columns: 1fr;
+  }
+  .mega-programs-grid {
+    grid-template-columns: 1fr;
+  }
+  .mega-menu-sidebar {
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+}

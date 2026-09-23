@@ -314,11 +314,19 @@ const getCategoryName = (cat) => {
   const found = courseStore.categories.find(c => c.slug === cat || c.name === cat);
   if (found) return found.name;
   switch (cat) {
-    case 'ky-nang-ai': return 'Kỹ năng AI';
-    case 'ky-nang-mem': return 'Kỹ năng mềm';
-    case 'ky-nang-chuyen-mon': return 'Kỹ năng chuyên môn';
-    case 'bundles': return 'Gói Combo';
-    default: return cat;
+    case 'dao-tao-doanh-nghiep':
+    case 'ky-nang-ai':
+      return 'Đào tạo cho doanh nghiệp';
+    case 'dao-tao-ca-nhan':
+    case 'ky-nang-mem':
+    case 'ky-nang-chuyen-mon':
+      return 'Đào tạo cho cá nhân';
+    case 'dao-tao-co-quan-nha-nuoc':
+      return 'Đào tạo cho khối cơ quan - nhà nước';
+    case 'bundles':
+      return 'Gói Combo';
+    default:
+      return cat;
   }
 };
 

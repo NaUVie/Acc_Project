@@ -670,3 +670,137 @@ def set_custom_commission(db: Session, user_id: int, course_id: int, commission_
         db.refresh(new_comm)
         return new_comm
 
+
+# --- Blog Post Extended CRUD ---
+def get_blog_by_id_or_handle(db: Session, identifier: str):
+    if identifier.isdigit():
+        blog = db.query(models.BlogPost).filter(models.BlogPost.id == int(identifier)).first()
+        if blog:
+            return blog
+    return db.query(models.BlogPost).filter(models.BlogPost.handle == identifier).first()
+
+def create_blog_post(db: Session, blog_in: schemas.BlogPostCreate):
+    db_blog = models.BlogPost(**blog_in.model_dump())
+    db.add(db_blog)
+    db.commit()
+    db.refresh(db_blog)
+    return db_blog
+
+def update_blog_post(db: Session, blog_id: int, blog_in: schemas.BlogPostUpdate):
+    db_blog = db.query(models.BlogPost).filter(models.BlogPost.id == blog_id).first()
+    if not db_blog:
+        return None
+    for key, value in blog_in.model_dump(exclude_unset=True).items():
+        setattr(db_blog, key, value)
+    db.commit()
+    db.refresh(db_blog)
+    return db_blog
+
+def delete_blog_post(db: Session, blog_id: int):
+    db_blog = db.query(models.BlogPost).filter(models.BlogPost.id == blog_id).first()
+    if db_blog:
+        db.delete(db_blog)
+        db.commit()
+        return True
+    return False
+
+
+# --- Testimonial Extended CRUD ---
+def get_testimonial_by_id(db: Session, testimonial_id: int):
+    return db.query(models.Testimonial).filter(models.Testimonial.id == testimonial_id).first()
+
+def create_testimonial(db: Session, test_in: schemas.TestimonialCreate):
+    db_test = models.Testimonial(**test_in.model_dump())
+    db.add(db_test)
+    db.commit()
+    db.refresh(db_test)
+    return db_test
+
+def update_testimonial(db: Session, testimonial_id: int, test_in: schemas.TestimonialUpdate):
+    db_test = db.query(models.Testimonial).filter(models.Testimonial.id == testimonial_id).first()
+    if not db_test:
+        return None
+    for key, value in test_in.model_dump(exclude_unset=True).items():
+        setattr(db_test, key, value)
+    db.commit()
+    db.refresh(db_test)
+    return db_test
+
+def delete_testimonial(db: Session, testimonial_id: int):
+    db_test = db.query(models.Testimonial).filter(models.Testimonial.id == testimonial_id).first()
+    if db_test:
+        db.delete(db_test)
+        db.commit()
+        return True
+    return False
+
+
+# --- Lecturer CRUD ---
+def get_lecturers(db: Session):
+    return db.query(models.Lecturer).all()
+
+def get_lecturer_by_id(db: Session, lecturer_id: str):
+    return db.query(models.Lecturer).filter(models.Lecturer.id == lecturer_id).first()
+
+def create_lecturer(db: Session, lecturer_in: schemas.LecturerCreate):
+    db_lecturer = models.Lecturer(**lecturer_in.model_dump())
+    db.add(db_lecturer)
+    db.commit()
+    db.refresh(db_lecturer)
+    return db_lecturer
+
+def update_lecturer(db: Session, lecturer_id: str, lecturer_in: schemas.LecturerUpdate):
+    db_lecturer = db.query(models.Lecturer).filter(models.Lecturer.id == lecturer_id).first()
+    if not db_lecturer:
+        return None
+    for key, value in lecturer_in.model_dump(exclude_unset=True).items():
+        setattr(db_lecturer, key, value)
+    db.commit()
+    db.refresh(db_lecturer)
+    return db_lecturer
+
+def delete_lecturer(db: Session, lecturer_id: str):
+    db_lecturer = db.query(models.Lecturer).filter(models.Lecturer.id == lecturer_id).first()
+    if db_lecturer:
+        db.delete(db_lecturer)
+        db.commit()
+        return True
+    return False
+
+
+# --- Project CRUD ---
+def get_projects(db: Session, category: Optional[str] = None):
+    query = db.query(models.Project)
+    if category:
+        query = query.filter(models.Project.category == category)
+    return query.all()
+
+def get_project_by_id(db: Session, project_id: str):
+    return db.query(models.Project).filter(models.Project.id == project_id).first()
+
+def create_project(db: Session, project_in: schemas.ProjectCreate):
+    db_project = models.Project(**project_in.model_dump())
+    db.add(db_project)
+    db.commit()
+    db.refresh(db_project)
+    return db_project
+
+def update_project(db: Session, project_id: str, project_in: schemas.ProjectUpdate):
+    db_project = db.query(models.Project).filter(models.Project.id == project_id).first()
+    if not db_project:
+        return None
+    for key, value in project_in.model_dump(exclude_unset=True).items():
+        setattr(db_project, key, value)
+    db.commit()
+    db.refresh(db_project)
+    return db_project
+
+def delete_project(db: Session, project_id: str):
+    db_project = db.query(models.Project).filter(models.Project.id == project_id).first()
+    if db_project:
+        db.delete(db_project)
+        db.commit()
+        return True
+    return False
+
+

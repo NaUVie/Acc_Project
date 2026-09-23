@@ -165,12 +165,16 @@ watch(() => route.params.id, scrollToTop);
   text-transform: uppercase;
 }
 
-.category-badge.du-an-da-thuc-hien {
+.category-badge.du-an-doanh-nghiep {
   background: #022b9f;
 }
 
-.category-badge.du-an-dang-thuc-hien {
-  background: #d97706;
+.category-badge.du-an-ca-nhan {
+  background: #0284c7;
+}
+
+.category-badge.du-an-nha-nuoc {
+  background: #059669;
 }
 
 .publish-date, .client-tag {

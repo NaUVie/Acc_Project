@@ -8,23 +8,23 @@ from app import models
 
 # Sample data translated from Pinia store (courses.js)
 CATEGORIES_SEED = [
-    {"slug": "ky-nang-ai", "name": "Kỹ năng AI"},
-    {"slug": "ky-nang-mem", "name": "Kỹ năng mềm"},
-    {"slug": "ky-nang-chuyen-mon", "name": "Kỹ năng chuyên môn"},
+    {"slug": "dao-tao-doanh-nghiep", "name": "Đào tạo cho doanh nghiệp"},
+    {"slug": "dao-tao-ca-nhan", "name": "Đào tạo cho cá nhân"},
+    {"slug": "dao-tao-co-quan-nha-nuoc", "name": "Đào tạo cho khối cơ quan - nhà nước"},
     {"slug": "bundles", "name": "Combo khóa học"}
 ]
 
 COURSES_SEED = [
-    # Kỹ năng AI
+    # 1. Đào tạo cho doanh nghiệp
     {
         "id": 10800458137911,
         "title": "AI Center of Excellence: Lộ Trình Quản Trị & Vận Hành AI Cho Doanh Nghiệp",
-        "category_slug": "ky-nang-ai",
+        "category_slug": "dao-tao-doanh-nghiep",
         "handle": "ai-center-of-excellence",
         "price": 3629000,
         "original_price": 4500000,
         "image": "/images/Square-Cover-_1.webp",
-        "tags": ["Course", "E-learning", "Quản trị AI"],
+        "tags": ["Doanh nghiệp", "Quản trị AI", "CoE"],
         "description": "Lộ trình toàn diện để tích hợp, quản trị và vận hành các mô hình trí tuệ nhân tạo (AI) hiệu quả trong cơ cấu doanh nghiệp hiện đại.",
         "duration": "6 tuần",
         "level": "Nâng cao"
@@ -32,64 +32,79 @@ COURSES_SEED = [
     {
         "id": 10800448438583,
         "title": "ChatGPT Work Automation: 10X Tốc độ hoàn thành công việc với ChatGPT & hệ sinh thái OpenAI",
-        "category_slug": "ky-nang-ai",
+        "category_slug": "dao-tao-doanh-nghiep",
         "handle": "chatgpt-work-automation",
         "price": 3449000,
         "original_price": 4200000,
         "image": "/images/Square_Cover_b1dc8f1b-edc2-473f-ada7-6756dae8a281.png",
-        "tags": ["Codex", "E-learning", "Kỹ năng AI", "Trí tuệ nhân tạo (AI)"],
+        "tags": ["Doanh nghiệp", "Tự động hóa", "Kỹ năng AI"],
         "description": "Làm chủ các prompt chuyên sâu để tự động hóa soạn thảo, phân tích tài liệu và tối ưu hóa hiệu suất làm việc văn phòng với ChatGPT.",
         "duration": "5 tuần",
         "level": "Cơ bản - Nâng cao"
     },
     {
         "id": 10681994740023,
-        "title": "Gen AI Studio: X5 Số Lượng Hình Ảnh, Video Mà Không Tăng Thêm Chi Phí Và Nguồn Lực",
-        "category_slug": "ky-nang-ai",
+        "title": "Gen AI Studio: X5 Số Lượng Hình Ảnh, Video Cho Marketing & Doanh Nghiệp",
+        "category_slug": "dao-tao-doanh-nghiep",
         "handle": "gen-ai-studio",
         "price": 3249000,
         "original_price": 3800000,
         "image": "/images/Square-Cover_c232d7ad-fa2d-4744-b359-5ee042cd9eda.webp",
-        "tags": ["AI Creative", "Beginner", "E-learning", "Trí tuệ nhân tạo (AI)"],
+        "tags": ["Doanh nghiệp", "AI Creative", "Marketing"],
         "description": "Khai phá sức mạnh của AI trong thiết kế hình ảnh, sản xuất video tự động, giúp tối giản chi phí marketing và tăng năng suất nội dung.",
         "duration": "4 tuần",
         "level": "Cơ bản"
     },
     {
-        "id": 10523458044215,
-        "title": "Claude Productivity: X2 Chất lượng công việc với cộng sự điều hành Claude AI",
-        "category_slug": "ky-nang-ai",
-        "handle": "claude-productivity",
-        "price": 3449000,
-        "original_price": 4000000,
-        "image": "/images/Claude_Productivity.png",
-        "tags": ["Course", "Intermediate", "Productivity", "Trí tuệ nhân tạo (AI)"],
-        "description": "Sử dụng Claude AI như một trợ lý thông minh hỗ trợ xử lý dữ liệu phức tạp, xây dựng nội dung chất lượng cao và quản lý dự án.",
-        "duration": "4 tuần",
-        "level": "Trung cấp"
-    },
-    {
         "id": 10454235545911,
         "title": "AI Workflows for Business Operations",
-        "category_slug": "ky-nang-ai",
+        "category_slug": "dao-tao-doanh-nghiep",
         "handle": "ai-workflow-operations",
         "price": 1999000,
         "original_price": 2500000,
         "image": "/images/AIW2_c1252e7c-2e62-4a53-8846-496332c851a1.png",
-        "tags": ["Advanced", "E-learning", "Trí tuệ nhân tạo (AI)", "Workflow"],
+        "tags": ["Doanh nghiệp", "Workflow", "Vận hành"],
         "description": "Thiết kế các quy trình tự động hóa vận hành doanh nghiệp bằng cách kết hợp AI với các hệ thống hiện tại.",
         "duration": "5 tuần",
         "level": "Nâng cao"
     },
     {
+        "id": 8152702583095,
+        "title": "Lập Kế Hoạch Quản Lý Dự Án – Nghệ Thuật Quản Trị Chuyên Nghiệp",
+        "category_slug": "dao-tao-doanh-nghiep",
+        "handle": "khoa-hoc-lap-ke-hoach-quan-ly-chuyen-nghiep",
+        "price": 4990000,
+        "original_price": 5800000,
+        "image": "/images/5_6aae1a70-ead0-4301-96ae-b697f7767949.png",
+        "tags": ["Doanh nghiệp", "Quản lý dự án", "Lãnh đạo"],
+        "description": "Phương pháp lập tiến độ, quản trị rủi ro và điều phối tài nguyên dự án một cách khoa học, đúng tiến độ.",
+        "duration": "6 tuần",
+        "level": "Trung cấp"
+    },
+
+    # 2. Đào tạo cho cá nhân
+    {
+        "id": 10523458044215,
+        "title": "Claude Productivity: X2 Chất lượng công việc với cộng sự điều hành Claude AI",
+        "category_slug": "dao-tao-ca-nhan",
+        "handle": "claude-productivity",
+        "price": 3449000,
+        "original_price": 4000000,
+        "image": "/images/Claude_Productivity.png",
+        "tags": ["Cá nhân", "Productivity", "Claude AI"],
+        "description": "Sử dụng Claude AI như một trợ lý thông minh hỗ trợ xử lý dữ liệu phức tạp, xây dựng nội dung chất lượng cao và quản lý dự án.",
+        "duration": "4 tuần",
+        "level": "Trung cấp"
+    },
+    {
         "id": 10382239858999,
         "title": "Gemini Productivity: X5 Hiệu suất làm việc với hệ sinh thái Google AI",
-        "category_slug": "ky-nang-ai",
+        "category_slug": "dao-tao-ca-nhan",
         "handle": "gemini-productivity",
         "price": 2699000,
         "original_price": 3200000,
         "image": "/images/Gemini_Productivity.png",
-        "tags": ["Automation", "Beginner", "E-learning", "Productivity", "Trí tuệ nhân tạo (AI)"],
+        "tags": ["Cá nhân", "Google Workspace", "Gemini"],
         "description": "Tận dụng tối đa Google Workspace tích hợp Gemini để làm việc nhóm hiệu quả, lập kế hoạch và quản lý email thông minh.",
         "duration": "4 tuần",
         "level": "Cơ bản"
@@ -97,25 +112,25 @@ COURSES_SEED = [
     {
         "id": 10322225529143,
         "title": "Khoá học AI Survival Kit - Bộ 6 kỹ năng sống còn thời AI",
-        "category_slug": "ky-nang-ai",
+        "category_slug": "dao-tao-ca-nhan",
         "handle": "khoa-hoc-ai-survival-kit",
         "price": 1599000,
         "original_price": 2000000,
         "image": "/images/AI_Survival_Kit_a9bbf9b4-480d-4467-9571-804887d45212.png",
-        "tags": ["Beginner", "E-learning", "Trí tuệ nhân tạo (AI)"],
+        "tags": ["Cá nhân", "Kỹ năng sống còn", "Beginner"],
         "description": "Trang bị đầy đủ kiến thức và kỹ năng cơ bản nhất để thích ứng và phát triển trong kỷ nguyên trí tuệ nhân tạo bùng nổ.",
         "duration": "3 tuần",
         "level": "Cơ bản"
     },
     {
         "id": 10296150753591,
-        "title": "Khoá học AI Workflow Automation - Tự động hóa quy trình với Zapier, Make AI, N8N",
-        "category_slug": "ky-nang-ai",
+        "title": "Khoá học AI Workflow Automation - Tự động hóa quy trình cá nhân",
+        "category_slug": "dao-tao-ca-nhan",
         "handle": "ai-workflow-automation",
         "price": 1799000,
         "original_price": 2200000,
         "image": "/images/AI_Workflow_Automation_8decdc78-096c-4924-9bf9-128ca34359a4.png",
-        "tags": ["E-learning", "Intermediate", "Trí tuệ nhân tạo (AI)", "Workflow Automation"],
+        "tags": ["Cá nhân", "Make", "Zapier"],
         "description": "Kết nối các ứng dụng và xây dựng luồng công việc tự động hóa hoàn toàn không cần code thông qua Zapier và Make.",
         "duration": "5 tuần",
         "level": "Trung cấp"
@@ -123,27 +138,25 @@ COURSES_SEED = [
     {
         "id": 10202599489847,
         "title": "Khóa học Data Processing - X5 Hiệu suất xử lý dữ liệu với AI",
-        "category_slug": "ky-nang-ai",
+        "category_slug": "dao-tao-ca-nhan",
         "handle": "data-processing",
         "price": 950000,
         "original_price": 1500000,
         "image": "/images/Data_Processing.png",
-        "tags": ["Beginner", "Data", "E-learning", "Trí tuệ nhân tạo (AI)"],
+        "tags": ["Cá nhân", "Dữ liệu", "AI Tools"],
         "description": "Học cách thu thập, làm sạch và phân tích dữ liệu lớn nhanh chóng bằng các công cụ hỗ trợ AI.",
         "duration": "3 tuần",
         "level": "Cơ bản"
     },
-
-    # Kỹ năng mềm
     {
         "id": 8250507854135,
         "title": "Khóa học Thuyết Trình Thuyết Phục Chuyên Nghiệp",
-        "category_slug": "ky-nang-mem",
+        "category_slug": "dao-tao-ca-nhan",
         "handle": "khoa-hoc-ky-nang-thuyet-trinh-thuyet-phuc",
         "price": 3990000,
         "original_price": 4800000,
         "image": "/images/7_3fd889db-0fdf-43aa-867f-67d166f045c7.png",
-        "tags": ["Giao tiếp", "Quản lý - Lãnh đạo", "Thuyết trình"],
+        "tags": ["Cá nhân", "Thuyết trình", "Giao tiếp"],
         "description": "Làm chủ giọng nói, ngôn ngữ cơ thể và cấu trúc slide logic để cuốn hút và thuyết phục mọi đối tượng khán giả.",
         "duration": "6 tuần",
         "level": "Cơ bản - Nâng cao"
@@ -151,40 +164,25 @@ COURSES_SEED = [
     {
         "id": 8027323826487,
         "title": "Giao Tiếp Khéo Léo – Chinh Phục Cấp Trên, Dẫn Dắt Cấp Dưới",
-        "category_slug": "ky-nang-mem",
+        "category_slug": "dao-tao-ca-nhan",
         "handle": "khoa-hoc-giao-tiep-tao-anh-huong",
         "price": 3990000,
         "original_price": 4500000,
         "image": "/images/6_76841af7-348d-4ff0-960c-2bc1b568e791.png",
-        "tags": ["Giao tiếp", "Quản lý - Lãnh đạo"],
-        "description": "Nghệ thuật giao tiếp ứng xử thông minh nơi công sở, giúp xây dựng lòng tin với sếp và tạo động lực cho nhân viên.",
+        "tags": ["Cá nhân", "Ứng xử", "Công sở"],
+        "description": "Nghệ thuật giao tiếp ứng xử thông minh nơi công sở, giúp xây dựng lòng tin với sếp và tạo động lực cho đồng nghiệp.",
         "duration": "5 tuần",
         "level": "Cơ bản - Nâng cao"
     },
     {
-        "id": 8152702583095,
-        "title": "Lập Kế Hoạch Quản Lý Dự Án – Nghệ Thuật Quản Trị Chuyên Nghiệp",
-        "category_slug": "ky-nang-mem",
-        "handle": "khoa-hoc-lap-ke-hoach-quan-ly-chuyen-nghiep",
-        "price": 4990000,
-        "original_price": 5800000,
-        "image": "/images/5_6aae1a70-ead0-4301-96ae-b697f7767949.png",
-        "tags": ["Quản lý", "Quản lý - Lãnh đạo", "Dự án"],
-        "description": "Phương pháp lập tiến độ, quản trị rủi ro và điều phối tài nguyên dự án một cách khoa học, đúng tiến độ.",
-        "duration": "6 tuần",
-        "level": "Trung cấp"
-    },
-
-    # Kỹ năng chuyên môn
-    {
         "id": 10249474572599,
-        "title": "Looker Studio for Everyone (Google data studio) - 1 Click Tự Động Hoá Báo Cáo",
-        "category_slug": "ky-nang-chuyen-mon",
+        "title": "Looker Studio for Everyone - 1 Click Tự Động Hoá Báo Cáo",
+        "category_slug": "dao-tao-ca-nhan",
         "handle": "looker-studio-for-everyone",
         "price": 1799000,
         "original_price": 2400000,
         "image": "/images/LS_Looker_Studio_for_Everyone_SQR.png",
-        "tags": ["Data Visualization", "E-learning", "Intermediate", "Dashboard"],
+        "tags": ["Cá nhân", "Dashboard", "Looker Studio"],
         "description": "Học cách kết nối các nguồn dữ liệu khác nhau và tự động hóa toàn bộ hệ thống báo cáo trực quan trong 1 click.",
         "duration": "4 tuần",
         "level": "Trung cấp"
@@ -192,15 +190,56 @@ COURSES_SEED = [
     {
         "id": 10376862499127,
         "title": "Khoá học Excel AI - Làm chủ kỹ năng Excel với AI",
-        "category_slug": "ky-nang-chuyen-mon",
+        "category_slug": "dao-tao-ca-nhan",
         "handle": "excel-ai",
         "price": 569000,
         "original_price": 900000,
         "image": "/images/Excell_skill_e9651cdc-6ff9-48ed-9e96-d4e0b6419a41.png",
-        "tags": ["Course", "Thinkific", "Excel AI"],
+        "tags": ["Cá nhân", "Excel AI", "Kỹ năng văn phòng"],
         "description": "Kết hợp sức mạnh AI vào Excel giúp viết hàm nhanh chóng, xử lý dữ liệu tự động và lập báo cáo thần tốc.",
         "duration": "3 tuần",
         "level": "Cơ bản"
+    },
+
+    # 3. Đào tạo cho khối cơ quan - nhà nước
+    {
+        "id": 1090011112222,
+        "title": "Đào Tạo AI & Tự Động Hóa Hành Chính Cho Khối Cơ Quan Nhà Nước",
+        "category_slug": "dao-tao-co-quan-nha-nuoc",
+        "handle": "ai-hanh-chinh-nha-nuoc",
+        "price": 3890000,
+        "original_price": 4800000,
+        "image": "/images/CoE-Web.png",
+        "tags": ["Cơ quan nhà nước", "Hành chính công", "AI"],
+        "description": "Lộ trình đào tạo chuyên biệt hỗ trợ cán bộ công chức ứng dụng AI xử lý hồ sơ, văn bản hành chính và chuẩn hóa dịch vụ công.",
+        "duration": "5 tuần",
+        "level": "Cơ bản - Nâng cao"
+    },
+    {
+        "id": 1090033334444,
+        "title": "Quản Trị & Bảo Mật Dữ Liệu Số Trong Cơ Quan Công Quyền",
+        "category_slug": "dao-tao-co-quan-nha-nuoc",
+        "handle": "quan-tri-du-lieu-nha-nuoc",
+        "price": 4200000,
+        "original_price": 5000000,
+        "image": "/images/Square-Cover-_1.webp",
+        "tags": ["Cơ quan nhà nước", "Bảo mật", "Chuyển đổi số"],
+        "description": "Khóa huấn luyện chuyên sâu về an toàn thông tin, bảo mật dữ liệu công quyền và tuân thủ Nghị định bảo vệ dữ liệu cá nhân trong đơn vị hành chính.",
+        "duration": "6 tuần",
+        "level": "Nâng cao"
+    },
+    {
+        "id": 1090055556666,
+        "title": "Xây Dựng Khung Năng Lực Số & Chuyển Đổi Số Khối Cơ Quan - Nhà Nước",
+        "category_slug": "dao-tao-co-quan-nha-nuoc",
+        "handle": "khung-nang-luc-so-nha-nuoc",
+        "price": 3500000,
+        "original_price": 4500000,
+        "image": "/images/Leader_Shift.webp",
+        "tags": ["Cơ quan nhà nước", "Khung năng lực số", "Chính phủ số"],
+        "description": "Hệ thống ma trận năng lực số và lộ trình nâng cao năng lực công nghệ cho đội ngũ lãnh đạo, quản lý khối cơ quan nhà nước và đơn vị sự nghiệp công lập.",
+        "duration": "4 tuần",
+        "level": "Trung cấp"
     },
 
     # Combos / Bundles
@@ -258,6 +297,7 @@ COURSES_SEED = [
     }
 ]
 
+
 BLOG_POSTS_SEED = [
     {
         "id": 101,
@@ -295,25 +335,96 @@ TESTIMONIALS_SEED = [
     {
         "name": "Lê Hồng Minh",
         "role": "Founder & CEO, VNG Corporation",
-        "text": "Đội ngũ kỹ sư và nhân viên VNG đã cải thiện vượt bậc hiệu suất làm việc nhờ các khóa học và quy trình tự động hóa được thiết kế bởi ACC Academy. Đây là đòn bẩy thiết thực cho doanh nghiệp công nghệ.",
+        "company": "VNG Corporation",
+        "text": "Đội ngũ kỹ sư và nhân viên VNG đã cải thiện vượt bậc hiệu suất làm việc nhờ các khóa học và quy trình tự động hóa được thiết kế bởi ACC Academy.",
         "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
-        "video_url": "https://www.w3schools.com/html/mov_bbb.mp4" # Sample MP4 clip
+        "rating": 5,
+        "testimonial_type": "text"
     },
     {
-        "name": "Nguyễn Thành Nam",
-        "role": "Cựu CEO FPT, Founder FUNiX",
-        "text": "Năng lực ứng dụng AI thực tế là điều sống còn với mọi nhà quản lý hiện nay. Khóa đào tạo AI Center of Excellence của ACC thực sự đem lại hướng tiếp cận sắc bén cho các doanh nhân hàng đầu.",
-        "image": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&auto=format&fit=crop",
-        "video_url": None
+        "name": "Nguyễn Thanh Tùng",
+        "role": "Founder & CEO",
+        "company": "TechVision Group",
+        "text": "Chương trình ứng dụng AI trong quản trị doanh nghiệp tại ACC Academy đã giúp chúng tôi tối ưu 40% chi phí vận hành nhân sự và tăng tốc độ làm việc vượt bậc!",
+        "image": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=200&q=80",
+        "rating": 5,
+        "quote": "Chương trình ứng dụng AI trong quản trị doanh nghiệp tại ACC Academy đã giúp chúng tôi tối ưu 40% chi phí vận hành nhân sự!",
+        "course_name": "Khóa học AI Skills Cho Doanh Nhân",
+        "testimonial_type": "photo"
     },
     {
-        "name": "Trần Hải Linh",
-        "role": "CEO, Sendo.vn",
-        "text": "Giải pháp đào tạo kỹ năng chuyên môn của ACC giúp hệ thống vận hành trơn tru hơn. Phương pháp đào tạo kết hợp lý thuyết và bài tập thực tiễn tạo động lực học tập cực lớn cho học viên.",
-        "image": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=400&auto=format&fit=crop",
-        "video_url": "https://www.w3schools.com/html/movie.mp4" # Sample MP4 clip
+        "name": "Phản hồi Học viên ACC #1",
+        "role": "Học viên ACC Academy",
+        "testimonial_type": "video",
+        "youtube_id": "BC9rvc1F3dA",
+        "thumbnail": "https://img.youtube.com/vi/BC9rvc1F3dA/hqdefault.jpg",
+        "video_url": "https://www.youtube.com/embed/BC9rvc1F3dA?autoplay=1"
     }
 ]
+
+LECTURERS_SEED = [
+    {
+        "id": "nguyen-vu-huy-hoang",
+        "name": "ThS. Nguyễn Vũ Huy Hoàng",
+        "title": "Master AI Trainer & Chuyên gia Chuyển đổi số",
+        "tagline": "Chuyên gia đào tạo và tư vấn về AI, Xây dựng khung năng lực số và ứng dụng công nghệ trong quản trị bảo mật doanh nghiệp.",
+        "avatar": "https://lh3.googleusercontent.com/d/1NornFFlN9I_tSIDn3WWQUQxfjK5B21vl",
+        "avatar_drive_link": "https://drive.google.com/file/d/1NornFFlN9I_tSIDn3WWQUQxfjK5B21vl/view?usp=drive_link",
+        "drive_profile": "",
+        "bio_short": "Có gần 15 năm kinh nghiệm trong đào tạo, tư vấn quản trị và chuyển đổi số, ông tập trung nghiên cứu và triển khai các giải pháp ứng dụng AI vào quản trị, nhân sự, Marketing, kinh doanh và vận hành.",
+        "details_html": "<p>ThS. Nguyễn Vũ Huy Hoàng là Master AI Trainer và chuyên gia hàng đầu về ứng dụng AI, xây dựng khung năng lực số và quản trị bảo mật dữ liệu doanh nghiệp tại Việt Nam.</p>"
+    },
+    {
+        "id": "helen-lam-hien",
+        "name": "Giảng viên Helen Lâm Hiền",
+        "title": "Trainer, ICF Coach & Trưởng Bộ môn Marketing & Sales",
+        "tagline": "Trainer, ICF Coach – Chuyên gia đào tạo, phát triển năng lực lãnh đạo, Sales & Marketing và ứng dụng AI trong doanh nghiệp.",
+        "avatar": "https://lh3.googleusercontent.com/d/1B7vaiEA8KNBUQq_qcNPqHED3ZzhEQTWk",
+        "avatar_drive_link": "https://drive.google.com/file/d/1B7vaiEA8KNBUQq_qcNPqHED3ZzhEQTWk/view?usp=drive_link",
+        "drive_profile": "",
+        "bio_short": "Với hơn 10 năm kinh nghiệm trong Marketing, tư vấn và phát triển tổ chức, cô đã đồng hành cùng nhiều doanh nghiệp trong đào tạo đội ngũ, xây dựng năng lực quản lý.",
+        "details_html": "<p>Cô Helen Lâm Hiền là Chuyên gia Đào tạo, Khai vấn Quốc tế ICF Coach và hiện giữ vị trí Trưởng Bộ môn Marketing & Sales tại Học viện ACC.</p>"
+    },
+    {
+        "id": "bui-huynh-thuong",
+        "name": "Giảng viên Bùi Huỳnh Thương",
+        "title": "Chuyên gia đào tạo AI & Phát triển năng lực công nghệ",
+        "tagline": "Chuyên gia đào tạo AI và phát triển năng lực ứng dụng công nghệ cho doanh nghiệp.",
+        "avatar": "https://lh3.googleusercontent.com/d/1mDIsbAnM-4965taEYhaQvAONqNgD9MKm",
+        "avatar_drive_link": "https://drive.google.com/file/d/1mDIsbAnM-4965taEYhaQvAONqNgD9MKm/view?usp=drive_link",
+        "drive_profile": "",
+        "bio_short": "Tập trung nghiên cứu, đào tạo và triển khai các giải pháp AI phục vụ quản trị, vận hành và nâng cao hiệu suất nhân sự.",
+        "details_html": "<p>Giảng viên Bùi Huỳnh Thương là nhà huấn luyện công nghệ tiên phong trong lĩnh vực ứng dụng Generative AI cho đội ngũ nhân sự và quản lý doanh nghiệp.</p>"
+    }
+]
+
+PROJECTS_SEED = [
+    {
+        "id": "dao-tao-ai-acb",
+        "category": "du-an-da-thuc-hien",
+        "category_name": "Dự án đã thực hiện",
+        "title": "Đào tạo ứng dụng Generative AI cho 150+ nhân sự quản lý Tập đoàn ACB",
+        "summary": "Giúp bộ phận nhân sự và kinh doanh ứng dụng ChatGPT & Generative AI nâng cao hiệu suất làm việc, tự động hóa báo cáo và phân tích dữ liệu chuyên sâu.",
+        "image": "https://drive.google.com/thumbnail?id=120WyoSixRMCuWCMFeNjFKxsDzt74filf&sz=w800",
+        "date": "15/08/2026",
+        "client": "Tập đoàn Tài chính ACB",
+        "drive_profile": "https://drive.google.com/file/d/1p6MtWI5Xk0E00o9TmDhQJA4dFK1j9m0i/view?usp=drive_link",
+        "content": '[{"type": "paragraph", "text": "Học viện ACC vừa phối hợp cùng Tập đoàn Tài chính ACB triển khai thành công chương trình đào tạo chuyên sâu Generative AI."}]'
+    },
+    {
+        "id": "khung-nang-luc-so-bosch",
+        "category": "du-an-da-thuc-hien",
+        "category_name": "Dự án đã thực hiện",
+        "title": "Xây dựng Khung năng lực số & Đào tạo Tư duy Phản biện Bosch Việt Nam",
+        "summary": "Tư vấn xây dựng ma trận năng lực số và huấn luyện kỹ năng giải quyết vấn đề phức tạp (Problem Solving) theo tiêu chuẩn quốc tế cho đội ngũ kỹ sư Bosch.",
+        "image": "https://drive.google.com/thumbnail?id=1ZININwRW94lavoqqoJ3eAArE5v6vsyZ5&sz=w800",
+        "date": "28/07/2026",
+        "client": "Bosch Việt Nam",
+        "drive_profile": "",
+        "content": '[{"type": "paragraph", "text": "ACC Academy đã đồng hành cùng Bosch Việt Nam triển khai dự án khảo sát, tư vấn xây dựng ma trận năng lực số."}]'
+    }
+]
+
 
 def seed_database():
     print("Initializing Database tables...")
@@ -375,7 +486,7 @@ def seed_database():
         print("Seeding courses...")
         for course_data in COURSES_SEED:
             existing = db.query(models.Course).filter(models.Course.id == course_data["id"]).first()
-            p_id = prog1.id if course_data["category_slug"] == "ky-nang-ai" else (prog2.id if course_data["category_slug"] == "ky-nang-mem" else None)
+            p_id = prog1.id if course_data["category_slug"] in ["dao-tao-doanh-nghiep", "dao-tao-co-quan-nha-nuoc", "ky-nang-ai"] else (prog2.id if course_data["category_slug"] in ["dao-tao-ca-nhan", "ky-nang-mem"] else None)
             if not existing:
                 course = models.Course(
                     id=course_data["id"],
@@ -529,20 +640,37 @@ def seed_database():
         for test_data in TESTIMONIALS_SEED:
             existing = db.query(models.Testimonial).filter(models.Testimonial.name == test_data["name"]).first()
             if not existing:
-                testimonial = models.Testimonial(
-                    name=test_data["name"],
-                    role=test_data["role"],
-                    text=test_data["text"],
-                    image=test_data["image"],
-                    video_url=test_data["video_url"]
-                )
+                testimonial = models.Testimonial(**test_data)
                 db.add(testimonial)
             else:
-                existing.role = test_data["role"]
-                existing.text = test_data["text"]
-                existing.image = test_data["image"]
-                existing.video_url = test_data["video_url"]
+                for k, v in test_data.items():
+                    setattr(existing, k, v)
         db.commit()
+
+        # 5. Seed Lecturers
+        print("Seeding lecturers...")
+        for lec_data in LECTURERS_SEED:
+            existing = db.query(models.Lecturer).filter(models.Lecturer.id == lec_data["id"]).first()
+            if not existing:
+                lecturer = models.Lecturer(**lec_data)
+                db.add(lecturer)
+            else:
+                for k, v in lec_data.items():
+                    setattr(existing, k, v)
+        db.commit()
+
+        # 6. Seed Projects
+        print("Seeding projects...")
+        for proj_data in PROJECTS_SEED:
+            existing = db.query(models.Project).filter(models.Project.id == proj_data["id"]).first()
+            if not existing:
+                project = models.Project(**proj_data)
+                db.add(project)
+            else:
+                for k, v in proj_data.items():
+                    setattr(existing, k, v)
+        db.commit()
+
 
         # 5. Seed Banners
         print("Seeding banners...")

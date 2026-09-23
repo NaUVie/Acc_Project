@@ -59,7 +59,7 @@ export const useTestimonialStore = defineStore('testimonials', {
           }
         }
       } catch (err) {
-        console.error("Failed to fetch testimonials from backend:", err);
+        console.warn("Backend server connection failed for testimonials, using initial fallback data:", err);
       } finally {
         this.loading = false;
       }

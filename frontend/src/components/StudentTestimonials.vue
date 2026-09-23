@@ -75,9 +75,11 @@
               <span class="video-badge">VIDEO #{{ idx + 1 }}</span>
             </div>
             <div class="video-card-body">
+              <span class="program-tag-badge" v-if="v.courseName">🎓 {{ v.courseName }}</span>
               <h4 class="video-card-title">{{ v.title }}</h4>
-              <div class="student-meta">
-                <span class="s-name">{{ v.studentName }}</span>
+              <div class="student-profile-info">
+                <span class="s-name">👤 {{ v.studentName }}</span>
+                <span class="s-role" v-if="v.role || v.company">💼 {{ v.role }} <span v-if="v.company">• {{ v.company }}</span></span>
               </div>
               <span class="yt-link-small">
                 Bấm để xem video ngay &blackrtrif;
@@ -409,23 +411,46 @@ const closeVideo = () => {
   flex-grow: 1;
 }
 
+.program-tag-badge {
+  display: inline-block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #022b9f;
+  background: rgba(2, 43, 159, 0.08);
+  padding: 4px 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  width: fit-content;
+}
+
 .video-card-title {
   font-size: 16px;
   font-weight: 800;
   color: #0f172a;
-  margin: 0 0 10px 0;
+  margin: 0 0 12px 0;
   line-height: 1.4;
 }
 
-.student-meta {
+.student-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   font-size: 13px;
-  color: #475569;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 10px;
 }
 
 .s-name {
   font-weight: 700;
-  color: #022b9f;
+  color: #0f172a;
+}
+
+.s-role {
+  font-size: 12.5px;
+  color: #64748b;
+  font-weight: 600;
 }
 
 .yt-link-small {

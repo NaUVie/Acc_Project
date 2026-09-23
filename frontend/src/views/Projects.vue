@@ -21,17 +21,24 @@
         </button>
         <button 
           class="tab-btn" 
-          :class="{ active: currentCategory === 'du-an-da-thuc-hien' }"
-          @click="selectCategory('du-an-da-thuc-hien')"
+          :class="{ active: currentCategory === 'du-an-doanh-nghiep' }"
+          @click="selectCategory('du-an-doanh-nghiep')"
         >
-          Dự án đã thực hiện
+          🏢 Dự án Doanh nghiệp
         </button>
         <button 
           class="tab-btn" 
-          :class="{ active: currentCategory === 'du-an-dang-thuc-hien' }"
-          @click="selectCategory('du-an-dang-thuc-hien')"
+          :class="{ active: currentCategory === 'du-an-ca-nhan' }"
+          @click="selectCategory('du-an-ca-nhan')"
         >
-          Dự án đang thực hiện
+          👤 Dự án Cá nhân
+        </button>
+        <button 
+          class="tab-btn" 
+          :class="{ active: currentCategory === 'du-an-nha-nuoc' }"
+          @click="selectCategory('du-an-nha-nuoc')"
+        >
+          🏛️ Dự án Nhà nước
         </button>
       </div>
 
@@ -52,7 +59,7 @@
           <div class="card-body">
             <div class="card-meta">
               <span class="meta-date">📅 {{ item.date }}</span>
-              <span v-if="item.client" class="meta-client">🏢 {{ item.client }}</span>
+              <span v-if="item.client" class="meta-client">🏛️ {{ item.client }}</span>
             </div>
             <h3 class="card-title">
               <router-link :to="'/du-an/' + item.id" class="title-link">
@@ -95,7 +102,7 @@ const currentCategory = ref('all');
 
 const syncCategoryFromQuery = () => {
   const cat = route.query.cat;
-  if (cat && ['du-an-da-thuc-hien', 'du-an-dang-thuc-hien'].includes(cat)) {
+  if (cat && ['du-an-doanh-nghiep', 'du-an-ca-nhan', 'du-an-nha-nuoc'].includes(cat)) {
     currentCategory.value = cat;
   } else {
     currentCategory.value = 'all';
@@ -271,12 +278,16 @@ const filteredProjects = computed(() => {
   text-transform: uppercase;
 }
 
-.category-badge.du-an-da-thuc-hien {
+.category-badge.du-an-doanh-nghiep {
   background: #022b9f;
 }
 
-.category-badge.du-an-dang-thuc-hien {
-  background: #d97706;
+.category-badge.du-an-ca-nhan {
+  background: #0284c7;
+}
+
+.category-badge.du-an-nha-nuoc {
+  background: #059669;
 }
 
 .card-body {

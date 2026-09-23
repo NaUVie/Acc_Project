@@ -716,4 +716,114 @@ def export_revenue_csv(
     )
 
 
+# ==================== LECTURER MANAGEMENT ====================
+
+@router.get("/lecturers", response_model=List[schemas.LecturerResponse])
+def get_all_lecturers_admin(db: Session = Depends(get_db)):
+    return crud.get_lecturers(db)
+
+@router.post("/lecturers", response_model=schemas.LecturerResponse, status_code=status.HTTP_201_CREATED)
+def create_lecturer_admin(lecturer_in: schemas.LecturerCreate, db: Session = Depends(get_db)):
+    existing = crud.get_lecturer_by_id(db, lecturer_in.id)
+    if existing:
+        raise HTTPException(status_code=400, detail="Mã giảng viên (ID) đã tồn tại!")
+    return crud.create_lecturer(db, lecturer_in)
+
+@router.put("/lecturers/{id}", response_model=schemas.LecturerResponse)
+def update_lecturer_admin(id: str, lecturer_in: schemas.LecturerUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_lecturer(db, id, lecturer_in)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Giảng viên không tồn tại")
+    return updated
+
+@router.delete("/lecturers/{id}", status_code=status.HTTP_200_OK)
+def delete_lecturer_admin(id: str, db: Session = Depends(get_db)):
+    success = crud.delete_lecturer(db, id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Giảng viên không tồn tại")
+    return {"message": "Đã xóa thông tin giảng viên thành công"}
+
+
+# ==================== PROJECT MANAGEMENT ====================
+
+@router.get("/projects", response_model=List[schemas.ProjectResponse])
+def get_all_projects_admin(db: Session = Depends(get_db)):
+    return crud.get_projects(db)
+
+@router.post("/projects", response_model=schemas.ProjectResponse, status_code=status.HTTP_201_CREATED)
+def create_project_admin(project_in: schemas.ProjectCreate, db: Session = Depends(get_db)):
+    existing = crud.get_project_by_id(db, project_in.id)
+    if existing:
+        raise HTTPException(status_code=400, detail="Mã dự án (ID) đã tồn tại!")
+    return crud.create_project(db, project_in)
+
+@router.put("/projects/{id}", response_model=schemas.ProjectResponse)
+def update_project_admin(id: str, project_in: schemas.ProjectUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_project(db, id, project_in)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Dự án không tồn tại")
+    return updated
+
+@router.delete("/projects/{id}", status_code=status.HTTP_200_OK)
+def delete_project_admin(id: str, db: Session = Depends(get_db)):
+    success = crud.delete_project(db, id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Dự án không tồn tại")
+    return {"message": "Đã xóa dự án thành công"}
+
+
+# ==================== BLOG POST MANAGEMENT ====================
+
+@router.get("/blogs", response_model=List[schemas.BlogPostResponse])
+def get_all_blogs_admin(db: Session = Depends(get_db)):
+    return crud.get_blog_posts(db)
+
+@router.post("/blogs", response_model=schemas.BlogPostResponse, status_code=status.HTTP_201_CREATED)
+def create_blog_admin(blog_in: schemas.BlogPostCreate, db: Session = Depends(get_db)):
+    existing = crud.get_blog_by_id_or_handle(db, blog_in.handle)
+    if existing:
+        raise HTTPException(status_code=400, detail="Handle bài viết đã tồn tại!")
+    return crud.create_blog_post(db, blog_in)
+
+@router.put("/blogs/{id}", response_model=schemas.BlogPostResponse)
+def update_blog_admin(id: int, blog_in: schemas.BlogPostUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_blog_post(db, id, blog_in)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Bài viết không tồn tại")
+    return updated
+
+@router.delete("/blogs/{id}", status_code=status.HTTP_200_OK)
+def delete_blog_admin(id: int, db: Session = Depends(get_db)):
+    success = crud.delete_blog_post(db, id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Bài viết không tồn tại")
+    return {"message": "Đã xóa bài viết thành công"}
+
+
+# ==================== TESTIMONIAL MANAGEMENT ====================
+
+@router.get("/testimonials", response_model=List[schemas.TestimonialResponse])
+def get_all_testimonials_admin(db: Session = Depends(get_db)):
+    return crud.get_testimonials(db)
+
+@router.post("/testimonials", response_model=schemas.TestimonialResponse, status_code=status.HTTP_201_CREATED)
+def create_testimonial_admin(test_in: schemas.TestimonialCreate, db: Session = Depends(get_db)):
+    return crud.create_testimonial(db, test_in)
+
+@router.put("/testimonials/{id}", response_model=schemas.TestimonialResponse)
+def update_testimonial_admin(id: int, test_in: schemas.TestimonialUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_testimonial(db, id, test_in)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Đánh giá không tồn tại")
+    return updated
+
+@router.delete("/testimonials/{id}", status_code=status.HTTP_200_OK)
+def delete_testimonial_admin(id: int, db: Session = Depends(get_db)):
+    success = crud.delete_testimonial(db, id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Đánh giá không tồn tại")
+    return {"message": "Đã xóa đánh giá thành công"}
+
+
+
 

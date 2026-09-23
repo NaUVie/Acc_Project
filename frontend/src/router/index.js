@@ -29,6 +29,18 @@ const routes = [
     component: () => import('../views/courses/CourseDetail.vue')
   },
   {
+    path: '/tuyen-sinh',
+    alias: ['/post-graduate/mba', '/post-graduate/gei', '/post-graduate/mini-mba'],
+    name: 'Admissions',
+    component: () => import('../views/tuyen-sinh/AdmissionsView.vue')
+  },
+  {
+    path: '/tuyen-sinh/detail/:id',
+    alias: ['/tuyen-sinh/:id'],
+    name: 'AdmissionDetail',
+    component: () => import('../views/tuyen-sinh/AdmissionDetailView.vue')
+  },
+  {
     path: '/bundles',
     alias: ['/pages/bundle-2026', '/pages/bundle'],
     name: 'Bundles',

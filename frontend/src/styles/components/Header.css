@@ -87,6 +87,35 @@
   background-color: rgba(0, 0, 0, 0.04);
 }
 
+/* Bell Ringing animation for TUYỂN SINH */
+.bell-ringing-icon {
+  display: inline-block;
+  font-size: 14px;
+  transform-origin: top center;
+  animation: bellRingAnimation 2s infinite ease-in-out;
+  margin-right: 2px;
+}
+
+@keyframes bellRingAnimation {
+  0%, 100% { transform: rotate(0deg); }
+  10% { transform: rotate(16deg); }
+  20% { transform: rotate(-16deg); }
+  30% { transform: rotate(12deg); }
+  40% { transform: rotate(-12deg); }
+  50% { transform: rotate(6deg); }
+  60% { transform: rotate(-6deg); }
+  70% { transform: rotate(0deg); }
+}
+
+.nav-link-admission {
+  color: #022B9F !important;
+  font-weight: 700 !important;
+}
+
+.nav-link-admission:hover {
+  background-color: rgba(2, 43, 159, 0.08) !important;
+}
+
 .user-btn,
 .login-btn {
   white-space: nowrap;

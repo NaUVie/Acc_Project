@@ -161,16 +161,16 @@ const selectedCategory = ref('all');
 const searchInputRef = ref(null);
 
 const popularTerms = [
-  'Kỹ năng AI',
-  'AI for Team',
-  'Chuyên viên AI',
-  'Kỹ năng mềm'
+  'Đào tạo doanh nghiệp',
+  'Đào tạo cá nhân',
+  'Chính phủ số',
+  'AI In-House'
 ];
 
 const categories = [
-  { id: 'ky-nang-ai', name: 'Kỹ năng AI' },
-  { id: 'ky-nang-chuyen-mon', name: 'Kỹ năng chuyên môn' },
-  { id: 'ky-nang-mem', name: 'Kỹ năng mềm' }
+  { id: 'dao-tao-doanh-nghiep', name: 'Đào tạo cho doanh nghiệp' },
+  { id: 'dao-tao-ca-nhan', name: 'Đào tạo cho cá nhân' },
+  { id: 'dao-tao-co-quan-nha-nuoc', name: 'Đào tạo cho khối cơ quan - nhà nước' }
 ];
 
 watch(() => props.isOpen, (newVal) => {
@@ -217,10 +217,17 @@ const searchResults = computed(() => {
 
 const translateCategory = (cat) => {
   switch (cat) {
-    case 'ky-nang-ai': return 'Kỹ năng AI';
-    case 'ky-nang-mem': return 'Kỹ năng mềm';
-    case 'ky-nang-chuyen-mon': return 'Kỹ năng chuyên môn';
-    default: return cat || 'Khóa học';
+    case 'dao-tao-doanh-nghiep':
+    case 'ky-nang-ai':
+      return 'Đào tạo cho doanh nghiệp';
+    case 'dao-tao-ca-nhan':
+    case 'ky-nang-mem':
+    case 'ky-nang-chuyen-mon':
+      return 'Đào tạo cho cá nhân';
+    case 'dao-tao-co-quan-nha-nuoc':
+      return 'Đào tạo cho khối cơ quan - nhà nước';
+    default:
+      return cat || 'Khóa học';
   }
 };
 

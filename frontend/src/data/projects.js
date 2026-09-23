@@ -1,8 +1,8 @@
 export const projectsData = [
   {
     id: 'dao-tao-ai-acb',
-    category: 'du-an-da-thuc-hien',
-    categoryName: 'Dự án đã thực hiện',
+    category: 'du-an-doanh-nghiep',
+    categoryName: 'Dự án Doanh nghiệp',
     title: 'Đào tạo ứng dụng Generative AI cho 150+ nhân sự quản lý Tập đoàn ACB',
     summary: 'Giúp bộ phận nhân sự và kinh doanh ứng dụng ChatGPT & Generative AI nâng cao hiệu suất làm việc, tự động hóa báo cáo và phân tích dữ liệu chuyên sâu.',
     image: 'https://drive.google.com/thumbnail?id=120WyoSixRMCuWCMFeNjFKxsDzt74filf&sz=w800',
@@ -43,8 +43,8 @@ export const projectsData = [
   },
   {
     id: 'khung-nang-luc-so-bosch',
-    category: 'du-an-da-thuc-hien',
-    categoryName: 'Dự án đã thực hiện',
+    category: 'du-an-doanh-nghiep',
+    categoryName: 'Dự án Doanh nghiệp',
     title: 'Xây dựng Khung năng lực số & Đào tạo Tư duy Phản biện Bosch Việt Nam',
     summary: 'Tư vấn xây dựng ma trận năng lực số và huấn luyện kỹ năng giải quyết vấn đề phức tạp (Problem Solving) theo tiêu chuẩn quốc tế cho đội ngũ kỹ sư Bosch.',
     image: 'https://drive.google.com/thumbnail?id=1ZININwRW94lavoqqoJ3eAArE5v6vsyZ5&sz=w800',
@@ -73,12 +73,12 @@ export const projectsData = [
   },
   {
     id: 'du-an-trien-khai-ai-shb',
-    category: 'du-an-dang-thuc-hien',
-    categoryName: 'Dự án đang thực hiện',
+    category: 'du-an-doanh-nghiep',
+    categoryName: 'Dự án Doanh nghiệp',
     title: 'Tư vấn & Triển khai Lộ trình AI Leadership & Tự động hóa Vận hành SHB',
     summary: 'Dự án chiến lược tư vấn và huấn luyện trực tiếp cho C-Level và các Giám đốc Khối ngân hàng xây dựng trung tâm năng lực AI (CoE) và văn hóa đổi mới sáng tạo.',
     image: 'https://drive.google.com/thumbnail?id=1CU6Pq9-wx_l2DPlb7uigkGIvCtcl921E&sz=w800',
-    date: 'Tháng 09/2026 - Đang triển khai',
+    date: 'Tháng 09/2026',
     client: 'Ngân hàng SHB',
     driveProfile: '',
     content: [
@@ -102,19 +102,19 @@ export const projectsData = [
     ]
   },
   {
-    id: 'du-an-dao-tao-ai-amway',
-    category: 'du-an-dang-thuc-hien',
-    categoryName: 'Dự án đang thực hiện',
-    title: 'Dự án Đào tạo May đo Ứng dụng AI & Automation cho Tập đoàn Amway',
-    summary: 'Chương trình In-house may đo giúp đội ngũ Marketing, Sales và Chăm sóc khách hàng tự động hóa 70% nội dung truyền thông và quy trình tương tác khách hàng.',
+    id: 'du-an-dao-tao-ca-nhan-ai-mastery',
+    category: 'du-an-ca-nhan',
+    categoryName: 'Dự án Cá nhân',
+    title: 'Dự án Huấn luyện 1:1 AI Productivity Mastery cho Lãnh đạo & Chủ Doanh nghiệp',
+    summary: 'Chương trình huấn luyện cá nhân hóa 1:1 giúp các nhà quản lý, chủ doanh nghiệp làm chủ hệ sinh thái AI, tự động hóa 80% công việc điều hành cá nhân.',
     image: 'https://drive.google.com/thumbnail?id=1miKA4icyQ_nAgwQe5vQge3bqg2W_f8zg&sz=w800',
-    date: 'Tháng 08/2026 - Đang triển khai',
-    client: 'Tập đoàn Amway Việt Nam',
+    date: 'Tháng 08/2026',
+    client: 'Cá nhân & Executive Leaders',
     driveProfile: '',
     content: [
       {
         type: 'paragraph',
-        text: 'Dự án huấn luyện và tư vấn ứng dụng Generative AI đa kênh cho toàn bộ đội ngũ chuyên viên truyền thông và tiếp thị của Amway Việt Nam.'
+        text: 'Chương trình tư vấn và gia tốc năng lực cá nhân dành riêng cho các C-Level, Founders và Quản lý cấp cao muốn làm chủ trợ lý AI cá nhân.'
       },
       {
         type: 'heading',
@@ -123,11 +123,41 @@ export const projectsData = [
       {
         type: 'bullets',
         items: [
-          'Ứng dụng Claude & ChatGPT trong sáng tạo ý tưởng và viết kịch bản truyền thông',
-          'Thiết kế hình ảnh và infographic chuẩn nhận diện thương hiệu với Midjourney',
-          'Tối ưu quy trình chăm sóc khách hàng và cá nhân hóa trải nghiệm mua sắm'
+          'Tối ưu hóa trợ lý AI cá nhân xử lý Email, Lịch trình & Báo cáo quản trị',
+          'Xây dựng bộ Prompting cá nhân hóa theo phong cách lãnh đạo riêng',
+          'Huấn luyện phân tích số liệu tài chính & dự báo xu hướng thị trường'
+        ]
+      }
+    ]
+  },
+  {
+    id: 'du-an-chuyen-doi-so-khoi-nha-nuoc',
+    category: 'du-an-nha-nuoc',
+    categoryName: 'Dự án Nhà nước',
+    title: 'Dự án Đào tạo Nâng cao Năng lực Số & An toàn Thông tin cho Khối Cơ quan Nhà nước',
+    summary: 'Chương trình tư vấn bồi dưỡng kỹ năng ứng dụng CNTT, AI và An toàn dữ liệu công quyền cho cán bộ, công chức các Sở, Ban, Ngành.',
+    image: 'https://drive.google.com/thumbnail?id=1CU6Pq9-wx_l2DPlb7uigkGIvCtcl921E&sz=w800',
+    date: 'Tháng 07/2026',
+    client: 'Khối Cơ quan - Nhà nước',
+    driveProfile: '',
+    content: [
+      {
+        type: 'paragraph',
+        text: 'ACC Academy phối hợp tổ chức khóa bồi dưỡng chuyên sâu về Chuyển đổi số, Kỹ năng Số hành chính và Bảo mật An ninh thông tin cho cán bộ công quyền.'
+      },
+      {
+        type: 'heading',
+        text: 'Hạng mục triển khai trọng tâm'
+      },
+      {
+        type: 'bullets',
+        items: [
+          'Số hóa quy trình xử lý văn bản và hồ sơ công quyền',
+          'Bồi dưỡng kỹ năng ứng dụng AI trong tổng hợp báo cáo và văn bản hành chính',
+          'Chuẩn hóa kiến thức An toàn an ninh thông tin và bảo vệ dữ liệu công'
         ]
       }
     ]
   }
 ];
+

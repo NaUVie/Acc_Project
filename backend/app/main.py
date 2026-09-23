@@ -60,6 +60,26 @@ def perform_startup_tasks():
                 if "progress_data" not in enr_cols:
                     conn.execute(text("ALTER TABLE enrollments ADD COLUMN progress_data TEXT NULL"))
                     print("Added column progress_data to enrollments table.")
+
+            if inspector.has_table("testimonials"):
+                test_cols = [c["name"] for c in inspector.get_columns("testimonials")]
+                testimonial_migrations = [
+                    ("company", "VARCHAR(150) NULL"),
+                    ("rating", "INT DEFAULT 5"),
+                    ("quote", "TEXT NULL"),
+                    ("course_name", "VARCHAR(255) NULL"),
+                    ("testimonial_type", "VARCHAR(50) DEFAULT 'text'"),
+                    ("youtube_id", "VARCHAR(100) NULL"),
+                    ("thumbnail", "VARCHAR(500) NULL"),
+                    ("video_url", "VARCHAR(500) NULL")
+                ]
+                for col_name, col_def in testimonial_migrations:
+                    if col_name not in test_cols:
+                        try:
+                            conn.execute(text(f"ALTER TABLE testimonials ADD COLUMN {col_name} {col_def}"))
+                            print(f"Added column {col_name} to testimonials table.")
+                        except Exception as ex:
+                            print(f"Migration column error for testimonials.{col_name}: {ex}")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
 

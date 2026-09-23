@@ -195,26 +195,44 @@ const availableCategories = computed(() => {
   const base = [
     { id: 'all', name: 'Tất cả khóa học' }
   ];
-  let list = [];
+  const defaultList = [
+    { id: 'dao-tao-doanh-nghiep', name: 'Đào tạo cho doanh nghiệp' },
+    { id: 'dao-tao-ca-nhan', name: 'Đào tạo cho cá nhân' },
+    { id: 'dao-tao-co-quan-nha-nuoc', name: 'Đào tạo cho khối cơ quan - nhà nước' },
+    { id: 'bundles', name: 'Combo khóa học' }
+  ];
+
+  // Map any fetched categories or ensure default 4 standard categories are always present
+  const categoryMap = new Map();
+  // First seed default categories
+  defaultList.forEach(item => categoryMap.set(item.id, item.name));
+
   if (courseStore.categories && courseStore.categories.length > 0) {
-    list = courseStore.categories.map(c => ({ id: c.slug, name: c.name }));
-  } else {
-    list = [
-      { id: 'ky-nang-ai', name: 'Kỹ năng AI' },
-      { id: 'ky-nang-chuyen-mon', name: 'Kỹ năng chuyên môn' },
-      { id: 'ky-nang-mem', name: 'Kỹ năng mềm' }
-    ];
+    const slugAlias = {
+      'ky-nang-ai': 'dao-tao-doanh-nghiep',
+      'ky-nang-chuyen-mon': 'dao-tao-ca-nhan',
+      'ky-nang-mem': 'dao-tao-ca-nhan'
+    };
+    courseStore.categories.forEach(c => {
+      const targetSlug = slugAlias[c.slug] || c.slug;
+      if (['dao-tao-doanh-nghiep', 'dao-tao-ca-nhan', 'dao-tao-co-quan-nha-nuoc', 'bundles'].includes(targetSlug)) {
+        if (!categoryMap.has(targetSlug)) {
+          categoryMap.set(targetSlug, c.name);
+        }
+      }
+    });
   }
+
+  const list = Array.from(categoryMap.entries()).map(([id, name]) => ({ id, name }));
   return [
     ...base,
-    ...list,
-    { id: 'corporate', name: 'Đào tạo Doanh nghiệp' }
+    ...list
   ];
 });
 
 const getCategoryCount = (id) => {
   if (id === 'all') return courseStore.courses.length;
-  if (id === 'corporate') return 'In-House';
+  if (id === 'bundles') return courseStore.bundles ? courseStore.bundles.length : 0;
   return courseStore.getCoursesByCategory(id).length;
 };
 
@@ -226,35 +244,28 @@ const activeCategoryMeta = computed(() => {
     return {
       name: 'Tất cả Khóa học Đào tạo',
       badge: 'TOÀN BỘ CHƯƠNG TRÌNH',
-      description: 'Khám phá tất cả các khóa học phát triển năng lực AI, kỹ năng chuyên môn và kỹ năng mềm tại ACC Academy.'
+      description: 'Khám phá tất cả các khóa học phát triển năng lực AI, quản trị doanh nghiệp, kỹ năng cá nhân và hành chính công tại ACC Academy.'
     };
   }
-  if (id === 'ky-nang-ai' || id === 'ai') {
+  if (id === 'dao-tao-doanh-nghiep' || id === 'doanh-nghiep' || id === 'ky-nang-ai') {
     return {
-      name: 'Kỹ năng Ứng dụng AI & Tự động hóa',
-      badge: 'CHUYÊN ĐỀ CÔNG NGHỆ SỐ',
-      description: 'Làm chủ các công cụ Generative AI (ChatGPT, Claude, Copilot, Midjourney) để tối ưu 70% hiệu suất làm việc.'
+      name: 'Đào tạo cho Doanh nghiệp (In-House & CoE)',
+      badge: 'GIẢI PHÁP DOANH NGHIỆP',
+      description: 'Các khóa huấn luyện in-house may đo, tự động hóa quy trình vận hành và xây dựng Trung tâm năng lực AI (CoE) cho doanh nghiệp.'
     };
   }
-  if (id === 'ky-nang-chuyen-mon' || id === 'chuyen-mon') {
+  if (id === 'dao-tao-ca-nhan' || id === 'ca-nhan' || id === 'ky-nang-mem' || id === 'ky-nang-chuyen-mon') {
     return {
-      name: 'Kỹ năng Chuyên môn & Quản trị',
-      badge: 'NĂNG LỰC CHUYÊN SÂU',
-      description: 'Nâng cao năng lực quản trị tài chính, kế toán, kiểm toán và phân tích dữ liệu chuyên sâu cho tổ chức.'
+      name: 'Đào tạo cho Cá nhân & Người đi làm',
+      badge: 'NÂNG CAO HIỆU SUẤT CÁ NHÂN',
+      description: 'Bứt phá thu nhập và tốc độ làm việc với các khóa làm chủ Claude, Gemini, ChatGPT, Excel AI, Looker Studio và Kỹ năng giao tiếp.'
     };
   }
-  if (id === 'ky-nang-mem' || id === 'mem') {
+  if (id === 'dao-tao-co-quan-nha-nuoc' || id === 'nha-nuoc' || id === 'co-quan-nha-nuoc') {
     return {
-      name: 'Kỹ năng mềm & Phát triển Bản thân',
-      badge: 'KỸ NĂNG CỐT LÕI',
-      description: 'Rèn luyện kỹ năng lãnh đạo, giao tiếp, thuyết phục, quản lý thời gian và giải quyết vấn đề hiệu quả.'
-    };
-  }
-  if (id === 'corporate') {
-    return {
-      name: 'Giải pháp Đào tạo Doanh nghiệp (In-House)',
-      badge: 'DOANH NGHIỆP',
-      description: 'Chương trình may đo theo nhu cầu thực tế và mục tiêu phát triển bền vững của doanh nghiệp.'
+      name: 'Đào tạo cho Khối Cơ quan - Nhà nước',
+      badge: 'HÀNH CHÍNH CÔNG & CHÍNH PHỦ SỐ',
+      description: 'Lộ trình chuyển đổi số, tự động hóa xử lý văn bản hành chính, chuẩn hóa khung năng lực số và bảo mật dữ liệu công quyền.'
     };
   }
   return {
