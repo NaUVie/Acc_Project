@@ -266,7 +266,15 @@ const saveBanner = async () => {
 };
 
 const deleteBannerItem = async (id) => {
-  if (confirm("Bạn có chắc chắn muốn xóa banner này?")) {
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận xóa Banner',
+    message: 'Bạn có chắc chắn muốn xóa banner trình chiếu này khỏi trang chủ?',
+    confirmText: 'Đồng ý xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
     try {
       await courseStore.deleteBanner(id);
       courseStore.showToast('Đã xóa banner thành công!', 'success');

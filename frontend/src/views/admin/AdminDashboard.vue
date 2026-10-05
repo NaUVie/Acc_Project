@@ -36,7 +36,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 
 // Import modular tab components
@@ -51,27 +52,18 @@ import AdminBundles from './components/AdminBundles.vue';
 import AdminBanners from './components/AdminBanners.vue';
 import AdminCoupons from './components/AdminCoupons.vue';
 import AdminCommissions from './components/AdminCommissions.vue';
+import AdminLecturers from './components/AdminLecturers.vue';
 
+const route = useRoute();
+const router = useRouter();
 const courseStore = useCourseStore();
-
-onMounted(async () => {
-  await Promise.all([
-    courseStore.fetchAdminUsers(),
-    courseStore.fetchAdminOrders(),
-    courseStore.fetchAdminContacts(),
-    courseStore.fetchCourses(),
-    courseStore.fetchCategories().catch(() => {}),
-    courseStore.fetchPrograms(),
-    courseStore.fetchBundles(),
-    courseStore.fetchAdminBanners().catch(() => {})
-  ]);
-});
 
 // Setup Tab navigation
 const tabs = [
   { id: 'overview', name: 'Tổng quan', icon: '📊' },
   { id: 'coupons', name: 'Mã giảm giá', icon: '🎟️' },
   { id: 'commissions', name: 'Hoa hồng Affiliate', icon: '🤝' },
+  { id: 'lecturers', name: 'Giảng viên', icon: '👨‍🏫' },
   { id: 'banners', name: 'Banner Hero', icon: '🖼️' },
   { id: 'categories', name: 'Chuyên mục', icon: '🏷️' },
   { id: 'courses', name: 'Khóa học', icon: '📚' },
@@ -82,13 +74,47 @@ const tabs = [
   { id: 'contacts', name: 'Liên hệ', icon: '✉️' }
 ];
 
-const activeTab = ref('overview');
+const getInitialTab = () => {
+  const queryTab = route.query.tab;
+  if (queryTab && tabs.some(t => t.id === queryTab)) {
+    return queryTab;
+  }
+  const savedTab = localStorage.getItem('acc_admin_active_tab');
+  if (savedTab && tabs.some(t => t.id === savedTab)) {
+    return savedTab;
+  }
+  return 'overview';
+};
+
+const activeTab = ref(getInitialTab());
+
+watch(activeTab, (newTab) => {
+  localStorage.setItem('acc_admin_active_tab', newTab);
+  if (route.query.tab !== newTab) {
+    router.replace({ query: { ...route.query, tab: newTab } });
+  }
+}, { immediate: true });
+
+onMounted(async () => {
+  await Promise.all([
+    courseStore.fetchAdminUsers(),
+    courseStore.fetchAdminOrders(),
+    courseStore.fetchAdminContacts(),
+    courseStore.fetchCourses(),
+    courseStore.fetchCategories().catch(() => {}),
+    courseStore.fetchPrograms(),
+    courseStore.fetchBundles(),
+    courseStore.fetchLecturers().catch(() => {}),
+    courseStore.fetchAdminBanners().catch(() => {})
+  ]);
+});
 
 const currentTabComponent = computed(() => {
   switch (activeTab.value) {
     case 'overview': return AdminOverview;
     case 'coupons': return AdminCoupons;
     case 'commissions': return AdminCommissions;
+    case 'lecturers': return AdminLecturers;
     case 'banners': return AdminBanners;
     case 'categories': return AdminCategories;
     case 'courses': return AdminCourses;

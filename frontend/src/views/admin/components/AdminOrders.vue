@@ -268,7 +268,15 @@ const saveOrder = async () => {
 };
 
 const deleteOrder = async (orderId) => {
-  if (confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) {
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận xóa đơn hàng',
+    message: `Bạn có chắc chắn muốn xóa đơn hàng #${orderId} khỏi hệ thống?`,
+    confirmText: 'Đồng ý xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
     try {
       await courseStore.deleteAdminOrder(orderId);
       courseStore.showToast('Đã xóa đơn hàng thành công.', 'success');

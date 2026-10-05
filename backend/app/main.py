@@ -54,6 +54,18 @@ def perform_startup_tasks():
                 if "default_commission_percent" not in courses_cols:
                     conn.execute(text("ALTER TABLE courses ADD COLUMN default_commission_percent INT DEFAULT 10"))
                     print("Added column default_commission_percent to courses table.")
+                if "outcomes" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN outcomes TEXT NULL"))
+                    print("Added column outcomes to courses table.")
+                if "requirements" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN requirements TEXT NULL"))
+                    print("Added column requirements to courses table.")
+                if "custom_roadmap" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN custom_roadmap TEXT NULL"))
+                    print("Added column custom_roadmap to courses table.")
+                if "lecturer_ids" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN lecturer_ids TEXT NULL"))
+                    print("Added column lecturer_ids to courses table.")
             
             if inspector.has_table("enrollments"):
                 enr_cols = [c["name"] for c in inspector.get_columns("enrollments")]
@@ -80,6 +92,14 @@ def perform_startup_tasks():
                             print(f"Added column {col_name} to testimonials table.")
                         except Exception as ex:
                             print(f"Migration column error for testimonials.{col_name}: {ex}")
+            if inspector.has_table("lecturers"):
+                lec_cols = [c["name"] for c in inspector.get_columns("lecturers")]
+                if "position" not in lec_cols:
+                    conn.execute(text("ALTER TABLE lecturers ADD COLUMN position INT DEFAULT 0"))
+                    print("Added column position to lecturers table.")
+                if "is_featured" not in lec_cols:
+                    conn.execute(text("ALTER TABLE lecturers ADD COLUMN is_featured BOOLEAN DEFAULT FALSE"))
+                    print("Added column is_featured to lecturers table.")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
 
@@ -87,11 +107,7 @@ def perform_startup_tasks():
     try:
         db = next(get_db())
         try:
-            course_count = db.query(models.Course).count()
-            if course_count == 0:
-                print("Database is empty. Running initial seed...")
-                seed_database()
-            
+            # Only seed default settings if needed, do not force seed courses/lecturers on every restart
             setting_count = db.query(models.ContactSetting).count()
             if setting_count == 0:
                 db_setting = models.ContactSetting(
@@ -153,6 +169,33 @@ def read_root():
         "message": "Welcome to ACC Academy API!",
         "docs_url": "/docs",
         "status": "active"
+    }
+
+import time
+from sqlalchemy import text
+from fastapi import Depends
+
+@app.get("/health")
+@app.get("/api/health")
+def health_check(db = Depends(get_db)):
+    start_time = time.perf_counter()
+    db_status = "ok"
+    db_error = None
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception as e:
+        db_status = "error"
+        db_error = str(e)
+    db_latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
+    
+    return {
+        "status": "ok" if db_status == "ok" else "degraded",
+        "backend": "online",
+        "database": {
+            "status": db_status,
+            "latency_ms": f"{db_latency_ms} ms",
+            "error": db_error
+        }
     }
 
 if __name__ == "__main__":

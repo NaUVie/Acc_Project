@@ -185,9 +185,17 @@ const confirmDelete = async (cat) => {
   const count = getCourseCount(cat.slug);
   let msg = `Bạn có chắc chắn muốn xóa chuyên mục "${cat.name}"?`;
   if (count > 0) {
-    msg += ` Hiện tại đang có ${count} khóa học thuộc chuyên mục này!`;
+    msg += `\n\n⚠️ Hiện tại đang có ${count} khóa học thuộc chuyên mục này. Vui lòng di chuyển hoặc xóa các khóa học trước khi xóa chuyên mục!`;
   }
-  if (confirm(msg)) {
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận xóa chuyên mục',
+    message: msg,
+    confirmText: 'Đồng ý xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
     await courseStore.deleteCategory(cat.slug);
   }
 };

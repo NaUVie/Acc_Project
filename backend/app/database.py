@@ -9,11 +9,13 @@ if "mysql" in db_url and "charset=" not in db_url:
     separator = "&" if "?" in db_url else "?"
     db_url = f"{db_url}{separator}charset=utf8mb4"
 
-# Create database engine
+# Create database engine with connection pooling
 engine = create_engine(
     db_url,
+    pool_size=10,
+    max_overflow=20,
     pool_pre_ping=True,
-    pool_recycle=3600
+    pool_recycle=1800
 )
 
 # Create session maker

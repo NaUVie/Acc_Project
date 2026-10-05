@@ -328,6 +328,14 @@ def create_course_admin(course_in: schemas.CourseAdminCreate, db: Session = Depe
             detail=f"Chuyên mục '{course_in.category_slug}' chưa tồn tại. Vui lòng tạo chuyên mục trước."
         )
 
+    # Check duplicate handle
+    existing_handle = db.query(models.Course).filter(models.Course.handle == course_in.handle).first()
+    if existing_handle:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Mã đường dẫn tĩnh (Slug / Handle) '{course_in.handle}' này đã được sử dụng bởi khóa học '{existing_handle.title}'. Vui lòng đổi Slug khác!"
+        )
+
     # Generate big integer ID if not provided
     max_id = db.query(func.max(models.Course.id)).scalar() or 0
     cid = max_id + 1
@@ -344,7 +352,11 @@ def create_course_admin(course_in: schemas.CourseAdminCreate, db: Session = Depe
         description=course_in.description,
         duration=course_in.duration,
         level=course_in.level,
-        curriculum_data=course_in.curriculum_data
+        curriculum_data=course_in.curriculum_data,
+        outcomes=course_in.outcomes,
+        requirements=course_in.requirements,
+        custom_roadmap=course_in.custom_roadmap,
+        lecturer_ids=course_in.lecturer_ids
     )
     db.add(db_course)
     db.commit()
@@ -359,14 +371,20 @@ def update_course_admin(id: int, course_in: schemas.CourseAdminUpdate, db: Sessi
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Khóa học không tồn tại"
         )
-        
+
     if course_in.title is not None:
         db_course.title = course_in.title
     if course_in.category_slug is not None:
         db_course.category_slug = course_in.category_slug
     if course_in.program_id is not None:
-        db_course.program_id = course_in.program_id if course_in.program_id != 0 else None
-    if course_in.handle is not None:
+        db_course.program_id = course_in.program_id
+    if course_in.handle is not None and course_in.handle != db_course.handle:
+        existing_handle = db.query(models.Course).filter(models.Course.handle == course_in.handle).first()
+        if existing_handle:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Mã đường dẫn tĩnh (Slug / Handle) '{course_in.handle}' đã trùng với khóa học '{existing_handle.title}'. Vui lòng đổi tên hoặc Slug khác!"
+            )
         db_course.handle = course_in.handle
     if course_in.price is not None:
         db_course.price = course_in.price
@@ -382,10 +400,43 @@ def update_course_admin(id: int, course_in: schemas.CourseAdminUpdate, db: Sessi
         db_course.level = course_in.level
     if course_in.curriculum_data is not None:
         db_course.curriculum_data = course_in.curriculum_data
+    if course_in.outcomes is not None:
+        db_course.outcomes = course_in.outcomes
+    if course_in.requirements is not None:
+        db_course.requirements = course_in.requirements
+    if course_in.custom_roadmap is not None:
+        db_course.custom_roadmap = course_in.custom_roadmap
+    if course_in.lecturer_ids is not None:
+        db_course.lecturer_ids = course_in.lecturer_ids
         
     db.commit()
     db.refresh(db_course)
     return db_course
+@router.get("/courses/{id}/related-summary")
+def get_course_related_summary_admin(id: int, db: Session = Depends(get_db)):
+    db_course = db.query(models.Course).filter(models.Course.id == id).first()
+    if not db_course:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Khóa học không tồn tại"
+        )
+    
+    enrollments_count = db.query(models.Enrollment).filter(models.Enrollment.course_id == id).count()
+    reviews_count = db.query(models.CourseReview).filter(models.CourseReview.course_id == id).count()
+    notes_count = db.query(models.LessonNote).filter(models.LessonNote.course_id == id).count()
+    wishlists_count = db.query(models.Wishlist).filter(models.Wishlist.course_id == id).count()
+    cart_count = db.query(models.CartItem).filter(models.CartItem.course_id == id).count()
+    order_items_count = db.query(models.OrderItem).filter(models.OrderItem.course_id == id).count()
+
+    return {
+        "course_title": db_course.title,
+        "enrollments_count": enrollments_count,
+        "reviews_count": reviews_count,
+        "notes_count": notes_count,
+        "wishlists_count": wishlists_count,
+        "cart_count": cart_count,
+        "order_items_count": order_items_count
+    }
 
 @router.delete("/courses/{id}", status_code=status.HTTP_200_OK)
 def delete_course_admin(id: int, db: Session = Depends(get_db)):
@@ -395,13 +446,21 @@ def delete_course_admin(id: int, db: Session = Depends(get_db)):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Khóa học không tồn tại"
         )
-    order_item_count = db.query(models.OrderItem).filter(models.OrderItem.course_id == id).count()
-    if order_item_count > 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Khóa học đang nằm trong {order_item_count} đơn hàng. Không thể xóa để bảo toàn dữ liệu lịch sử đơn hàng."
-        )
-    db.delete(db_course)
+
+    # Clean up related child records first to prevent FK constraint failures
+    from sqlalchemy import text
+    params = {"id": id}
+    db.execute(text("DELETE FROM course_tags WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM enrollments WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM cart_items WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM wishlists WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM lesson_notes WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM course_reviews WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM user_course_commissions WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM bundle_courses WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM bundle_gift_courses WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM order_items WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM courses WHERE id = :id"), params)
     db.commit()
     return {"message": "Đã xóa khóa học thành công"}
 
@@ -729,12 +788,30 @@ def create_lecturer_admin(lecturer_in: schemas.LecturerCreate, db: Session = Dep
         raise HTTPException(status_code=400, detail="Mã giảng viên (ID) đã tồn tại!")
     return crud.create_lecturer(db, lecturer_in)
 
+@router.put("/lecturers/reorder", status_code=status.HTTP_200_OK)
+def reorder_lecturers_admin(items: List[schemas.LecturerReorderItem], db: Session = Depends(get_db)):
+    crud.reorder_lecturers(db, items)
+    return {"message": "Đã cập nhật thứ tự giảng viên thành công"}
+
+@router.put("/lecturers/{id}/toggle-featured", response_model=schemas.LecturerResponse)
+def toggle_lecturer_featured_admin(id: str, db: Session = Depends(get_db)):
+    try:
+        updated = crud.toggle_lecturer_featured(db, id)
+        if not updated:
+            raise HTTPException(status_code=404, detail="Giảng viên không tồn tại")
+        return updated
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+
 @router.put("/lecturers/{id}", response_model=schemas.LecturerResponse)
 def update_lecturer_admin(id: str, lecturer_in: schemas.LecturerUpdate, db: Session = Depends(get_db)):
-    updated = crud.update_lecturer(db, id, lecturer_in)
-    if not updated:
-        raise HTTPException(status_code=404, detail="Giảng viên không tồn tại")
-    return updated
+    try:
+        updated = crud.update_lecturer(db, id, lecturer_in)
+        if not updated:
+            raise HTTPException(status_code=404, detail="Giảng viên không tồn tại")
+        return updated
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
 
 @router.delete("/lecturers/{id}", status_code=status.HTTP_200_OK)
 def delete_lecturer_admin(id: str, db: Session = Depends(get_db)):

@@ -155,7 +155,15 @@ const toggleContactStatus = async (contactId) => {
 };
 
 const deleteContact = async (contactId) => {
-  if (confirm('Bạn có chắc chắn muốn xóa tin nhắn liên hệ này?')) {
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận xóa liên hệ',
+    message: 'Bạn có chắc chắn muốn xóa lời nhắn liên hệ này?',
+    confirmText: 'Đồng ý xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
     try {
       await courseStore.deleteAdminContact(contactId);
       courseStore.showToast('Đã xóa tin nhắn liên hệ thành công.', 'success');

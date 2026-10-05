@@ -355,6 +355,7 @@ TESTIMONIALS_SEED = [
     {
         "name": "Phản hồi Học viên ACC #1",
         "role": "Học viên ACC Academy",
+        "text": "Chia sẻ từ học viên về khóa học tại ACC Academy",
         "testimonial_type": "video",
         "youtube_id": "BC9rvc1F3dA",
         "thumbnail": "https://img.youtube.com/vi/BC9rvc1F3dA/hqdefault.jpg",
@@ -364,15 +365,59 @@ TESTIMONIALS_SEED = [
 
 LECTURERS_SEED = [
     {
+        "id": "nguyen-tan-binh",
+        "name": "TS. Nguyễn Tấn Bình",
+        "title": "Viện trưởng Leadman Institute",
+        "tagline": "Viện trưởng Leadman – Viện nghiên cứu khoa học Lãnh đạo và Quản trị doanh nghiệp",
+        "avatar": "/images/T-Binh-tach-nen-400x400.png",
+        "avatar_drive_link": "",
+        "drive_profile": "",
+        "bio_short": "Thầy nổi tiếng trong giới giảng viên, doanh nhân, là người có khả năng truyền đạt kiến thức quản trị tài chính, kế toán vốn khô khan với ngôn ngữ gần gũi, truyền cảm hứng.",
+        "details_html": "<p>TS. Nguyễn Tấn Bình là Viện trưởng Viện Nghiên cứu Khoa học Lãnh đạo & Quản trị Doanh nghiệp (LEADMAN Institute), chuyên gia hàng đầu về Quản trị Tài chính và Chiến lược Lãnh đạo.</p>"
+    },
+    {
         "id": "nguyen-vu-huy-hoang",
         "name": "ThS. Nguyễn Vũ Huy Hoàng",
-        "title": "Master AI Trainer & Chuyên gia Chuyển đổi số",
-        "tagline": "Chuyên gia đào tạo và tư vấn về AI, Xây dựng khung năng lực số và ứng dụng công nghệ trong quản trị bảo mật doanh nghiệp.",
+        "title": "Giám đốc Đào tạo ACC Academy & Master AI Trainer",
+        "tagline": "Giám đốc Đào tạo - Chuyên gia tư vấn về AI, Xây dựng khung năng lực số và ứng dụng công nghệ trong quản trị doanh nghiệp.",
         "avatar": "https://lh3.googleusercontent.com/d/1NornFFlN9I_tSIDn3WWQUQxfjK5B21vl",
         "avatar_drive_link": "https://drive.google.com/file/d/1NornFFlN9I_tSIDn3WWQUQxfjK5B21vl/view?usp=drive_link",
         "drive_profile": "",
         "bio_short": "Có gần 15 năm kinh nghiệm trong đào tạo, tư vấn quản trị và chuyển đổi số, ông tập trung nghiên cứu và triển khai các giải pháp ứng dụng AI vào quản trị, nhân sự, Marketing, kinh doanh và vận hành.",
-        "details_html": "<p>ThS. Nguyễn Vũ Huy Hoàng là Master AI Trainer và chuyên gia hàng đầu về ứng dụng AI, xây dựng khung năng lực số và quản trị bảo mật dữ liệu doanh nghiệp tại Việt Nam.</p>"
+        "details_html": "<p>ThS. Nguyễn Vũ Huy Hoàng là Giám đốc Đào tạo ACC Academy, Master AI Trainer và chuyên gia hàng đầu về ứng dụng AI, xây dựng khung năng lực số và quản trị bảo mật dữ liệu doanh nghiệp tại Việt Nam.</p>"
+    },
+    {
+        "id": "do-xuan-tuan",
+        "name": "ThS. Nguyễn Anh Tuấn",
+        "title": "Chuyên gia Đào tạo Quản trị Vận hành & AI Workflows",
+        "tagline": "Chuyên gia huấn luyện tự động hóa quy trình vận hành và ứng dụng AI trong quản trị doanh nghiệp.",
+        "avatar": "https://lh3.googleusercontent.com/d/1sGiCe18WnDNjwH_m6c3kwrdgQ5uSRUYA",
+        "avatar_drive_link": "",
+        "drive_profile": "",
+        "bio_short": "Chuyên gia tư vấn tái cấu trúc quy trình vận hành và triển khai AI Workflow cho các tổng công ty và tập đoàn lớn.",
+        "details_html": "<p>ThS. Nguyễn Anh Tuấn sở hữu hơn 12 năm kinh nghiệm trong tư vấn quản trị vận hành và tự động hóa quy trình cho doanh nghiệp.</p>"
+    },
+    {
+        "id": "bui-huynh-thuong",
+        "name": "Giảng viên Bùi Huỳnh Thương",
+        "title": "Chuyên gia đào tạo AI & Phát triển năng lực công nghệ",
+        "tagline": "Chuyên gia đào tạo AI và phát triển năng lực ứng dụng công nghệ cho doanh nghiệp.",
+        "avatar": "https://lh3.googleusercontent.com/d/1mDIsbAnM-4965taEYhaQvAONqNgD9MKm",
+        "avatar_drive_link": "https://drive.google.com/file/d/1mDIsbAnM-4965taEYhaQvAONqNgD9MKm/view?usp=drive_link",
+        "drive_profile": "",
+        "bio_short": "Tập trung nghiên cứu, đào tạo và triển khai các giải pháp AI phục vụ quản trị, vận hành và nâng cao hiệu suất nhân sự.",
+        "details_html": "<p>Giảng viên Bùi Huỳnh Thương là nhà huấn luyện công nghệ tiên phong trong lĩnh vực ứng dụng Generative AI cho đội ngũ nhân sự và quản lý doanh nghiệp.</p>"
+    },
+    {
+        "id": "pham-van-hung",
+        "name": "ThS. Phạm Văn Hùng",
+        "title": "Chuyên gia Tư vấn Quản trị Chiến lược & Nhân sự",
+        "tagline": "Chuyên gia cao cấp về xây dựng khung năng lực nhân sự và chiến lược tăng trưởng doanh nghiệp.",
+        "avatar": "/images/thay-400x400.png",
+        "avatar_drive_link": "",
+        "drive_profile": "",
+        "bio_short": "Hơn 15 năm tư vấn khung năng lực nhân sự và huấn luyện đội ngũ quản lý cấp trung tại các doanh nghiệp hàng đầu.",
+        "details_html": "<p>ThS. Phạm Văn Hùng chuyên tư vấn tái cấu trúc phòng ban và chuẩn hóa ma trận năng lực cho tổ chức.</p>"
     },
     {
         "id": "helen-lam-hien",
@@ -386,15 +431,59 @@ LECTURERS_SEED = [
         "details_html": "<p>Cô Helen Lâm Hiền là Chuyên gia Đào tạo, Khai vấn Quốc tế ICF Coach và hiện giữ vị trí Trưởng Bộ môn Marketing & Sales tại Học viện ACC.</p>"
     },
     {
-        "id": "bui-huynh-thuong",
-        "name": "Giảng viên Bùi Huỳnh Thương",
-        "title": "Chuyên gia đào tạo AI & Phát triển năng lực công nghệ",
-        "tagline": "Chuyên gia đào tạo AI và phát triển năng lực ứng dụng công nghệ cho doanh nghiệp.",
-        "avatar": "https://lh3.googleusercontent.com/d/1mDIsbAnM-4965taEYhaQvAONqNgD9MKm",
-        "avatar_drive_link": "https://drive.google.com/file/d/1mDIsbAnM-4965taEYhaQvAONqNgD9MKm/view?usp=drive_link",
+        "id": "nguyen-thi-my-dung",
+        "name": "ThS. Nguyễn Thị Mỹ Dung",
+        "title": "Chuyên gia Softskills, Sale & Thương hiệu",
+        "tagline": "Giảng viên, chuyên gia tư vấn về: Softskills, Sale, Thương hiệu",
+        "avatar": "/images/chidung-2-400x400.png",
+        "avatar_drive_link": "",
         "drive_profile": "",
-        "bio_short": "Tập trung nghiên cứu, đào tạo và triển khai các giải pháp AI phục vụ quản trị, vận hành và nâng cao hiệu suất nhân sự.",
-        "details_html": "<p>Giảng viên Bùi Huỳnh Thương là nhà huấn luyện công nghệ tiên phong trong lĩnh vực ứng dụng Generative AI cho đội ngũ nhân sự và quản lý doanh nghiệp.</p>"
+        "bio_short": "Với hơn 12 năm kinh nghiệm làm việc, đào tạo và dẫn dắt đội ngũ, là quản lý ở các công ty lớn khi tuổi còn rất trẻ.",
+        "details_html": "<p>ThS. Nguyễn Thị Mỹ Dung có hơn 12 năm kinh nghiệm điều hành và tư vấn chiến lược Thương hiệu, Kỹ năng mềm và Bán hàng.</p>"
+    },
+    {
+        "id": "nguyen-thi-thu-hoa",
+        "name": "Doanh nhân Nguyễn Thị Thu Hoà",
+        "title": "Chuyên gia Trải nghiệm khách hàng & Marketing",
+        "tagline": "Giảng viên, chuyên gia tư vấn về: Trải nghiệm khách hàng, Bán hàng, Marketing",
+        "avatar": "/images/bdh-1-tach-nen-1-400x401.png",
+        "avatar_drive_link": "",
+        "drive_profile": "",
+        "bio_short": "Hơn 10 năm làm quản lý cấp cao ở các tập đoàn lớn tại Việt Nam khi còn rất trẻ, cô áp dụng phương pháp giảng dạy thực tiễn.",
+        "details_html": "<p>Doanh nhân Nguyễn Thị Thu Hoà là chuyên gia cao cấp về Quản trị Trải nghiệm Khách hàng (CX) và Marketing.</p>"
+    },
+    {
+        "id": "do-xuan-hoa",
+        "name": "ThS. Đỗ Xuân Hoà",
+        "title": "Nhà huấn luyện Lãnh đạo & Soft Skills",
+        "tagline": "Giảng viên, nhà huấn luyện về: kỹ năng lãnh đạo, soft skills để làm việc hiệu quả.",
+        "avatar": "/images/thaygiao-400x400.png",
+        "avatar_drive_link": "",
+        "drive_profile": "",
+        "bio_short": "Với hơn 17 năm kinh nghiệm giảng dạy các kỹ năng lãnh đạo và quản lý cho các tập đoàn trong và ngoài nước.",
+        "details_html": "<p>ThS. Đỗ Xuân Hoà sở hữu hơn 17 năm bề dày kinh nghiệm trong việc đào tạo năng lực Lãnh đạo.</p>"
+    },
+    {
+        "id": "nguyen-hoang-diem",
+        "name": "ThS. Nguyễn Hoàng Diễm",
+        "title": "Chuyên gia Chăm sóc khách hàng & CRM",
+        "tagline": "Giảng viên đào tạo và tư vấn về: Chăm sóc khách hàng và xử lý khiếu nại.",
+        "avatar": "/images/DSC3781-400x400.png",
+        "avatar_drive_link": "",
+        "drive_profile": "",
+        "bio_short": "Gần 20 năm kinh nghiệm làm việc và đào tạo tại các tập đoàn lớn ở nhiều lĩnh vực khác nhau.",
+        "details_html": "<p>ThS. Nguyễn Hoàng Diễm có gần 20 năm kinh nghiệm thực chiến trong ngành Chăm sóc Khách hàng.</p>"
+    },
+    {
+        "id": "hoang-minh-nghiep",
+        "name": "ThS. Hoàng Minh Nghiệp",
+        "title": "Chuyên gia Tư vấn Quản lý & Sản xuất",
+        "tagline": "Giảng viên, chuyên gia cao cấp về Tư vấn quản lý và sản xuất.",
+        "avatar": "/images/thay-400x400.png",
+        "avatar_drive_link": "",
+        "drive_profile": "",
+        "bio_short": "Với 15 năm kinh nghiệm trong ngành sản xuất trải qua nhiều vị trí ở các cấp bậc khác nhau.",
+        "details_html": "<p>ThS. Hoàng Minh Nghiệp là cố vấn cao cấp về Tối ưu hóa Sản xuất, Lean Management và Quản trị Vận hành.</p>"
     }
 ]
 
@@ -487,6 +576,10 @@ def seed_database():
         for course_data in COURSES_SEED:
             existing = db.query(models.Course).filter(models.Course.id == course_data["id"]).first()
             p_id = prog1.id if course_data["category_slug"] in ["dao-tao-doanh-nghiep", "dao-tao-co-quan-nha-nuoc", "ky-nang-ai"] else (prog2.id if course_data["category_slug"] in ["dao-tao-ca-nhan", "ky-nang-mem"] else None)
+            
+            # Default assign sample lecturers based on course category
+            lec_ids = "nguyen-vu-huy-hoang,bui-huynh-thuong" if course_data["category_slug"] in ["dao-tao-doanh-nghiep", "dao-tao-co-quan-nha-nuoc"] else "helen-lam-hien,nguyen-vu-huy-hoang"
+
             if not existing:
                 course = models.Course(
                     id=course_data["id"],
@@ -499,7 +592,8 @@ def seed_database():
                     image=course_data["image"],
                     description=course_data["description"],
                     duration=course_data["duration"],
-                    level=course_data["level"]
+                    level=course_data["level"],
+                    lecturer_ids=lec_ids
                 )
                 db.add(course)
                 db.flush() # Get session persistence to relate tags
@@ -518,6 +612,8 @@ def seed_database():
                 existing.description = course_data["description"]
                 existing.duration = course_data["duration"]
                 existing.level = course_data["level"]
+                if not existing.lecturer_ids:
+                    existing.lecturer_ids = lec_ids
         db.commit()
 
         # Seed Bundles
@@ -649,10 +745,14 @@ def seed_database():
 
         # 5. Seed Lecturers
         print("Seeding lecturers...")
-        for lec_data in LECTURERS_SEED:
+        valid_seed_ids = [l["id"] for l in LECTURERS_SEED]
+        # Delete extra DB lecturers that are not in the seed array
+        db.query(models.Lecturer).filter(~models.Lecturer.id.in_(valid_seed_ids)).delete(synchronize_session=False)
+        
+        for idx, lec_data in enumerate(LECTURERS_SEED):
             existing = db.query(models.Lecturer).filter(models.Lecturer.id == lec_data["id"]).first()
             if not existing:
-                lecturer = models.Lecturer(**lec_data)
+                lecturer = models.Lecturer(**lec_data, position=idx + 1)
                 db.add(lecturer)
             else:
                 for k, v in lec_data.items():

@@ -253,7 +253,15 @@ const saveProgram = async () => {
 };
 
 const deleteProgram = async (id) => {
-  if (confirm('Bạn có chắc chắn muốn xóa chương trình đào tạo này?')) {
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận xóa chương trình',
+    message: 'Bạn có chắc chắn muốn xóa chương trình đào tạo này khỏi hệ thống?',
+    confirmText: 'Đồng ý xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
     try {
       await courseStore.deleteAdminProgram(id);
       courseStore.showToast('Đã xóa chương trình đào tạo.', 'success');

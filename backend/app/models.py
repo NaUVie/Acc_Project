@@ -70,10 +70,20 @@ class Course(Base):
     level = Column(String(50), nullable=True)
     curriculum_data = Column(Text, nullable=True)
     default_commission_percent = Column(Integer, default=10)
+    outcomes = Column(Text, nullable=True)
+    requirements = Column(Text, nullable=True)
+    custom_roadmap = Column(Text, nullable=True)
+    lecturer_ids = Column(Text, nullable=True)
 
     category = relationship("Category", back_populates="courses")
     program = relationship("Program", back_populates="courses")
-    tags = relationship("CourseTag", back_populates="course", cascade="all, delete-orphan")
+    tags = relationship("CourseTag", back_populates="course", cascade="all, delete-orphan", passive_deletes=True)
+    enrollments = relationship("Enrollment", back_populates="course", cascade="all, delete-orphan", passive_deletes=True)
+    reviews = relationship("CourseReview", back_populates="course", cascade="all, delete-orphan", passive_deletes=True)
+    notes = relationship("LessonNote", back_populates="course", cascade="all, delete-orphan", passive_deletes=True)
+    wishlists = relationship("Wishlist", back_populates="course", cascade="all, delete-orphan", passive_deletes=True)
+    custom_commissions = relationship("UserCourseCommission", back_populates="course", cascade="all, delete-orphan", passive_deletes=True)
+    cart_items = relationship("CartItem", back_populates="course", cascade="all, delete-orphan", passive_deletes=True)
 
 class CourseTag(Base):
     __tablename__ = "course_tags"
@@ -155,12 +165,12 @@ class CartItem(Base):
     __tablename__ = "cart_items"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    course_id = Column(BigInteger, ForeignKey("courses.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    course_id = Column(BigInteger, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="cart_items")
-    course = relationship("Course")
+    course = relationship("Course", back_populates="cart_items")
 
 class Referral(Base):
     __tablename__ = "referrals"
@@ -205,6 +215,8 @@ class Lecturer(Base):
     drive_profile = Column(String(500), nullable=True)
     bio_short = Column(Text, nullable=True)
     details_html = Column(Text, nullable=True)
+    position = Column(Integer, default=0)
+    is_featured = Column(Boolean, default=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class Project(Base):
@@ -235,7 +247,7 @@ class Enrollment(Base):
     progress_data = Column(Text, nullable=True) # JSON list of completed lesson IDs
 
     user = relationship("User", backref="enrollments")
-    course = relationship("Course", backref="enrollments")
+    course = relationship("Course", back_populates="enrollments")
     order = relationship("Order", backref="enrollments")
 
 class ContactSetting(Base):
@@ -273,7 +285,7 @@ class CourseReview(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", backref="reviews")
-    course = relationship("Course", backref="reviews")
+    course = relationship("Course", back_populates="reviews")
 
 class LessonNote(Base):
     __tablename__ = "lesson_notes"
@@ -287,7 +299,7 @@ class LessonNote(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", backref="notes")
-    course = relationship("Course", backref="notes")
+    course = relationship("Course", back_populates="notes")
 
 class Wishlist(Base):
     __tablename__ = "wishlists"
@@ -298,7 +310,7 @@ class Wishlist(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", backref="wishlists")
-    course = relationship("Course", backref="wishlists")
+    course = relationship("Course", back_populates="wishlists")
 
 class Coupon(Base):
     __tablename__ = "coupons"
@@ -327,7 +339,7 @@ class UserCourseCommission(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", backref="custom_commissions")
-    course = relationship("Course", backref="custom_commissions")
+    course = relationship("Course", back_populates="custom_commissions")
 
 
 

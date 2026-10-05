@@ -160,9 +160,11 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useCourseStore } from '@/stores/courses';
 import { lecturersData } from '@/data/lecturers';
 
 const route = useRoute();
+const courseStore = useCourseStore();
 const currentIndex = ref(0);
 const windowWidth = ref(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
@@ -170,14 +172,18 @@ const handleResize = () => {
   windowWidth.value = window.innerWidth;
 };
 
+const allLecturers = computed(() => {
+  return courseStore.lecturers || [];
+});
+
 const lecturer = computed(() => {
   const id = route.params.id;
-  return lecturersData.find(l => l.id === id);
+  return allLecturers.value.find(l => l.id === id);
 });
 
 const otherLecturers = computed(() => {
-  if (!lecturer.value) return lecturersData;
-  return lecturersData.filter(l => l.id !== lecturer.value.id);
+  if (!lecturer.value) return allLecturers.value;
+  return allLecturers.value.filter(l => l.id !== lecturer.value.id);
 });
 
 const cardsToShow = computed(() => {
@@ -210,6 +216,9 @@ const nextSlide = () => {
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   window.addEventListener('resize', handleResize);
+  if (courseStore.lecturers.length === 0) {
+    courseStore.fetchLecturers();
+  }
 });
 
 onUnmounted(() => {

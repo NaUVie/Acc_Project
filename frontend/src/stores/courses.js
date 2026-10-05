@@ -31,7 +31,11 @@ const mapCourse = (c) => ({
   description: c.description,
   duration: c.duration,
   level: c.level,
-  curriculumData: c.curriculum_data
+  curriculumData: c.curriculum_data,
+  outcomes: c.outcomes,
+  requirements: c.requirements,
+  customRoadmap: c.custom_roadmap,
+  lecturerIds: c.lecturer_ids
 });
 
 export const useCourseStore = defineStore('courses', {
@@ -46,6 +50,7 @@ export const useCourseStore = defineStore('courses', {
     ],
     programs: [],
     bundles: [],
+    lecturers: [],
     contactSettings: null,
     blogPosts: [],
     loading: false,
@@ -62,6 +67,17 @@ export const useCourseStore = defineStore('courses', {
       show: false,
       message: '',
       type: 'info'
+    },
+
+    // Global Confirm Modal State
+    confirmModal: {
+      show: false,
+      title: 'Xác nhận hành động',
+      message: '',
+      confirmText: 'Đồng ý',
+      cancelText: 'Hủy',
+      type: 'danger',
+      resolve: null
     },
 
     // Cart states
@@ -255,6 +271,28 @@ export const useCourseStore = defineStore('courses', {
 
     hideToast() {
       this.toast.show = false;
+    },
+
+    showConfirm({ title = 'Xác nhận hành động', message, confirmText = 'Đồng ý', cancelText = 'Hủy', type = 'danger' }) {
+      return new Promise((resolve) => {
+        this.confirmModal = {
+          show: true,
+          title,
+          message,
+          confirmText,
+          cancelText,
+          type,
+          resolve
+        };
+      });
+    },
+
+    handleConfirmResult(result) {
+      if (this.confirmModal.resolve) {
+        this.confirmModal.resolve(result);
+      }
+      this.confirmModal.show = false;
+      this.confirmModal.resolve = null;
     },
 
     async fetchCategories() {
@@ -1181,6 +1219,124 @@ export const useCourseStore = defineStore('courses', {
       }
     },
 
+    // Lecturers Action
+    async fetchLecturers() {
+      try {
+        const data = await this.apiRequest('/lecturers');
+        const { lecturersData } = await import('@/data/lecturers.js');
+        if (Array.isArray(data)) {
+          this.lecturers = data.map(l => {
+            const staticItem = lecturersData.find(s => s.id === l.id) || {};
+            return {
+              ...staticItem,
+              ...l,
+              majorId: staticItem.majorId || 'ai-cong-nghe',
+              majorName: staticItem.majorName || 'AI & Công nghệ Số',
+              bioShort: l.bio_short || staticItem.bioShort || '',
+              detailsHtml: l.details_html || staticItem.detailsHtml || '',
+              avatarDriveLink: l.avatar_drive_link || staticItem.avatarDriveLink || '',
+              driveProfile: l.drive_profile || staticItem.driveProfile || ''
+            };
+          });
+        } else {
+          this.lecturers = [];
+        }
+      } catch (err) {
+        console.error("Failed to fetch lecturers API:", err);
+        this.lecturers = [];
+      }
+    },
+    async addAdminLecturer(lecturer) {
+      if (!this.token) return;
+      try {
+        await this.apiRequest('/admin/lecturers', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: lecturer.id,
+            name: lecturer.name,
+            title: lecturer.title,
+            tagline: lecturer.tagline || '',
+            avatar: lecturer.avatar || '/images/default-avatar.jpg',
+            avatar_drive_link: lecturer.avatarDriveLink || '',
+            drive_profile: lecturer.driveProfile || '',
+            bio_short: lecturer.bioShort || '',
+            details_html: lecturer.detailsHtml || ''
+          })
+        });
+        await this.fetchLecturers();
+      } catch (err) {
+        console.error("Failed to add lecturer:", err);
+        throw err;
+      }
+    },
+    async updateAdminLecturer(id, lecturer) {
+      if (!this.token) return;
+      try {
+        await this.apiRequest(`/admin/lecturers/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            name: lecturer.name,
+            title: lecturer.title,
+            tagline: lecturer.tagline,
+            avatar: lecturer.avatar,
+            avatar_drive_link: lecturer.avatarDriveLink,
+            drive_profile: lecturer.driveProfile,
+            bio_short: lecturer.bioShort,
+            details_html: lecturer.detailsHtml
+          })
+        });
+        await this.fetchLecturers();
+      } catch (err) {
+        console.error("Failed to update lecturer:", err);
+        throw err;
+      }
+    },
+    async reorderLecturers(reorderedList) {
+      if (!this.token) return;
+      try {
+        const payload = reorderedList.map((item, idx) => ({
+          id: item.id,
+          position: idx + 1
+        }));
+        await this.apiRequest('/admin/lecturers/reorder', {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+        this.lecturers = [...reorderedList.map((item, idx) => ({ ...item, position: idx + 1 }))];
+      } catch (err) {
+        console.error("Failed to reorder lecturers:", err);
+        throw err;
+      }
+    },
+    async toggleLecturerFeatured(id) {
+      if (!this.token) return;
+      try {
+        const updated = await this.apiRequest(`/admin/lecturers/${id}/toggle-featured`, {
+          method: 'PUT'
+        });
+        const index = this.lecturers.findIndex(l => l.id === id);
+        if (index !== -1) {
+          this.lecturers[index].is_featured = updated.is_featured;
+        }
+        return updated;
+      } catch (err) {
+        console.error("Failed to toggle lecturer featured:", err);
+        throw err;
+      }
+    },
+    async deleteAdminLecturer(id) {
+      if (!this.token) return;
+      try {
+        await this.apiRequest(`/admin/lecturers/${id}`, {
+          method: 'DELETE'
+        });
+        await this.fetchLecturers();
+      } catch (err) {
+        console.error("Failed to delete lecturer:", err);
+        throw err;
+      }
+    },
+
     // Courses CRUD
     async addAdminCourse(course) {
       if (!this.token) return;
@@ -1196,7 +1352,11 @@ export const useCourseStore = defineStore('courses', {
           description: course.description || '',
           duration: course.duration || '12 tuần',
           level: course.level || 'Trung cấp',
-          curriculum_data: course.curriculumData || ''
+          curriculum_data: course.curriculumData || '',
+          outcomes: course.outcomes || '',
+          requirements: course.requirements || '',
+          custom_roadmap: course.customRoadmap || '',
+          lecturer_ids: course.lecturerIds || ''
         };
         await this.apiRequest('/admin/courses', {
           method: 'POST',
@@ -1222,7 +1382,11 @@ export const useCourseStore = defineStore('courses', {
           description: updatedData.description,
           duration: updatedData.duration,
           level: updatedData.level,
-          curriculum_data: updatedData.curriculumData
+          curriculum_data: updatedData.curriculumData,
+          outcomes: updatedData.outcomes,
+          requirements: updatedData.requirements,
+          custom_roadmap: updatedData.customRoadmap,
+          lecturer_ids: updatedData.lecturerIds
         };
         await this.apiRequest(`/admin/courses/${courseId}`, {
           method: 'PUT',
@@ -1234,14 +1398,29 @@ export const useCourseStore = defineStore('courses', {
         throw err;
       }
     },
+    async getCourseRelatedSummary(courseId) {
+      if (!this.token) return null;
+      try {
+        return await this.apiRequest(`/admin/courses/${courseId}/related-summary`);
+      } catch (err) {
+        console.error("Failed to fetch course related summary:", err);
+        return null;
+      }
+    },
     async deleteAdminCourse(courseId) {
-      if (!this.token) return;
+      if (!this.token) {
+        throw new Error("Bạn chưa đăng nhập hoặc phiên làm việc đã hết hạn. Vui lòng đăng nhập lại!");
+      }
+      const originalCourses = [...this.courses];
+      // Optimistic update: Disappear immediately from UI (0ms delay)
+      this.courses = this.courses.filter(c => String(c.id) !== String(courseId));
       try {
         await this.apiRequest(`/admin/courses/${courseId}`, {
           method: 'DELETE'
         });
-        await this.fetchCourses();
       } catch (err) {
+        // Rollback on error
+        this.courses = originalCourses;
         console.error("Failed to delete admin course:", err);
         throw err;
       }

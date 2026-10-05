@@ -334,7 +334,7 @@
               <h3 class="home-course-heading">
                 <router-link :to="'/course/' + (course.handle || course.id)">{{ course.title }}</router-link>
               </h3>
-              <p class="home-course-desc">{{ course.description }}</p>
+              <p class="home-course-desc">{{ stripHtml(course.description) }}</p>
               
               <div class="home-course-footer">
                 <div class="home-course-price">
@@ -487,6 +487,7 @@ import { useCourseStore } from '@/stores/courses';
 import { useTestimonialStore } from '@/stores/testimonials';
 import { lecturersData } from '@/data/lecturers';
 import { photoTestimonialsData } from '@/data/testimonials';
+import { stripHtml } from '@/utils/stripHtml';
 
 const courseStore = useCourseStore();
 const testimonialStore = useTestimonialStore();
@@ -849,131 +850,7 @@ const nextTestimonial = () => {
 
 // 8. Dynamic Courses Data from courseStore
 const homeCourses = computed(() => {
-  if (courseStore.courses && courseStore.courses.length > 0) {
-    return courseStore.courses;
-  }
-  return [
-    {
-      id: 1,
-      title: 'ChatGPT & AI Work Automation',
-      description: 'Làm chủ ChatGPT và các công cụ GenAI để tự động hóa 70% công việc văn phòng hằng ngày.',
-      handle: 'chatgpt-work-automation',
-      price: 1950000,
-      originalPrice: 3500000,
-      image: '/images/AIP_AIProductivity_SQR.png',
-      level: 'Mọi cấp độ'
-    },
-    {
-      id: 2,
-      title: 'AI Center of Excellence (CoE)',
-      description: 'Xây dựng trung tâm năng lực AI cốt lõi và lộ trình chuyển đổi số toàn diện cho doanh nghiệp.',
-      handle: 'ai-center-of-excellence',
-      price: 4800000,
-      originalPrice: 7500000,
-      image: '/images/CoE-Thumb.png',
-      level: 'Chuyên sâu'
-    },
-    {
-      id: 3,
-      title: 'Phân tích dữ liệu & Dashboard với Looker Studio',
-      description: 'Chuyển hóa dữ liệu thô thành báo cáo trực quan sinh động hỗ trợ ra quyết định kinh doanh tức thì.',
-      handle: 'looker-studio-data-analysis',
-      price: 2450000,
-      originalPrice: 4200000,
-      image: '/images/LS_Looker_Studio_for_Everyone_SQR.png',
-      level: 'Trung cấp'
-    },
-    {
-      id: 4,
-      title: 'Ứng dụng Claude AI & Midjourney nâng cao',
-      description: 'Khai phá sức mạnh xử lý ngôn ngữ tự nhiên phức tạp và tạo tác phẩm hình ảnh truyền thông đỉnh cao.',
-      handle: 'claude-ai-midjourney-mastery',
-      price: 2950000,
-      originalPrice: 4800000,
-      image: '/images/Claude_Productivity.png',
-      level: 'Nâng cao'
-    },
-    {
-      id: 5,
-      title: 'Kỹ năng Giao tiếp & Thuyết phục Lãnh đạo',
-      description: 'Phát triển năng lực truyền tải thông điệp tạo tác động cao cho các cấp quản lý và lãnh đạo.',
-      handle: 'leadership-communication-skills',
-      price: 3200000,
-      originalPrice: 5000000,
-      image: '/images/Frame_1707482601.png',
-      level: 'Trung cấp'
-    },
-    {
-      id: 6,
-      title: 'Xây dựng Quy trình Tự động hóa với Make & n8n',
-      description: 'Thiết lập luồng tự động hóa tích hợp đa ứng dụng doanh nghiệp mà không cần lập trình chuyên sâu.',
-      handle: 'workflow-automation-make-n8n',
-      price: 2750000,
-      originalPrice: 4500000,
-      image: '/images/AI_Workflow_Automation_8decdc78-096c-4924-9bf9-128ca34359a4.png',
-      level: 'Trung cấp'
-    },
-    {
-      id: 7,
-      title: 'Chiến lược Marketing Dựa trên Dữ liệu (Data-Driven)',
-      description: 'Tối ưu hiệu quả các chiến dịch tiếp thị số thông qua phân tích hành vi khách hàng và đo lường ROI.',
-      handle: 'data-driven-marketing-strategy',
-      price: 3500000,
-      originalPrice: 5500000,
-      image: '/images/Data_Bootcamp.png',
-      level: 'Nâng cao'
-    },
-    {
-      id: 8,
-      title: 'Google Gemini & Copilot for Microsoft 365',
-      description: 'Đột phá hiệu suất văn phòng với bộ đôi công cụ trợ lý ảo thông minh hàng đầu hiện nay.',
-      handle: 'gemini-copilot-m365-mastery',
-      price: 1850000,
-      originalPrice: 3200000,
-      image: '/images/Gemini_Productivity.png',
-      level: 'Cơ bản'
-    },
-    {
-      id: 9,
-      title: 'Tư duy Quản trị & Ra quyết định với AI',
-      description: 'Trang bị khung tư duy ứng dụng AI cho các nhà quản lý để tối ưu hóa nguồn lực và ra quyết định chuẩn xác.',
-      handle: 'ai-decision-making-for-leaders',
-      price: 4200000,
-      originalPrice: 6500000,
-      image: '/images/AID_AI_for_Decision_Making_SQR.png',
-      level: 'Quản lý'
-    },
-    {
-      id: 10,
-      title: 'Kỹ năng Excel Chuyên sâu & VBA Tự động hóa',
-      description: 'Nâng cấp kỹ năng xử lý bảng tính phức tạp, tạo báo cáo tự động và viết mã lệnh VBA cơ bản.',
-      handle: 'advanced-excel-vba-automation',
-      price: 2150000,
-      originalPrice: 3800000,
-      image: '/images/Excell_skill_e9651cdc-6ff9-48ed-9e96-d4e0b6419a41.png',
-      level: 'Trung cấp'
-    },
-    {
-      id: 11,
-      title: 'Quản trị Dự án Chuyển đổi Số',
-      description: 'Phương pháp luận và bộ công cụ thực chiến quản trị các dự án công nghệ số trong tổ chức.',
-      handle: 'digital-transformation-project-management',
-      price: 3900000,
-      originalPrice: 6000000,
-      image: '/images/DataFlow_Automation.png',
-      level: 'Nâng cao'
-    },
-    {
-      id: 12,
-      title: 'Sáng tạo Nội dung Multi-channel với Generative AI',
-      description: 'Tạo hàng loạt nội dung hình ảnh, video và văn bản đa kênh chất lượng cao chuẩn thương hiệu.',
-      handle: 'multichannel-content-generative-ai',
-      price: 2600000,
-      originalPrice: 4200000,
-      image: '/images/AI_Content_Mastery.png',
-      level: 'Mọi cấp độ'
-    }
-  ];
+  return courseStore.courses || [];
 });
 
 // Load 8 courses initially, then load 8 more on button click
@@ -991,9 +868,16 @@ const loadMoreCourses = () => {
   visibleCourseCount.value += 8;
 };
 
-// 9. Featured Lecturers (Hoàng, Bình, Tuấn / Thương, Hiền)
-const featuredLecturerIds = ['nguyen-vu-huy-hoang', 'nguyen-tan-binh', 'bui-huynh-thuong', 'helen-lam-hien'];
+// 9. Featured Lecturers (Dynamically fetched, max 4 featured or fallback to top 4)
 const featuredLecturers = computed(() => {
+  if (courseStore.lecturers && courseStore.lecturers.length > 0) {
+    const featured = courseStore.lecturers.filter(l => l.is_featured);
+    if (featured.length > 0) {
+      return featured.slice(0, 4);
+    }
+    return courseStore.lecturers.slice(0, 4);
+  }
+  const featuredLecturerIds = ['nguyen-vu-huy-hoang', 'nguyen-tan-binh', 'bui-huynh-thuong', 'helen-lam-hien'];
   return lecturersData.filter(l => featuredLecturerIds.includes(l.id));
 });
 
@@ -1010,6 +894,9 @@ onMounted(() => {
 
   if (courseStore.courses.length === 0) {
     courseStore.fetchCourses();
+  }
+  if (courseStore.lecturers.length === 0) {
+    courseStore.fetchLecturers();
   }
 });
 

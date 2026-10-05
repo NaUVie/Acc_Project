@@ -165,8 +165,43 @@
         </div>
 
         <div class="form-group mt-3">
-          <label style="color: #1e293b; font-weight: 600;">Mô tả chi tiết khóa học</label>
-          <textarea v-model="courseForm.description" rows="4" required class="admin-input-style" placeholder="Mô tả tóm tắt khóa học..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
+          <label style="color: #1e293b; font-weight: 600;">Mô tả chi tiết & Tổng quan khóa học (Soạn thảo văn bản)</label>
+          <RichTextEditor v-model="courseForm.description" placeholder="Soạn thảo mô tả chi tiết, tổng quan nội dung khóa học..." />
+        </div>
+
+        <div class="form-group mt-3">
+          <label style="color: #1e293b; font-weight: 600;">Lộ trình khóa học tùy chỉnh (Giai đoạn 1, 2, 3...)</label>
+          <RichTextEditor v-model="courseForm.customRoadmap" placeholder="Ví dụ:&#10;Giai đoạn 1 – AI Foundation | 2 ngày&#10;Xây dựng nền tảng sử dụng AI...&#10;Giai đoạn 2 – AI Agent Operating System | 2 ngày&#10;Thực hành xây dựng ứng dụng..." />
+          <small class="text-muted" style="display: block; margin-top: 4px;">Soạn thảo chi tiết các giai đoạn lộ trình học (Nếu để trống sẽ hiển thị bài giảng từ mục Giáo trình).</small>
+        </div>
+
+        <div class="form-group mt-3">
+          <label style="color: #1e293b; font-weight: 600;">Đội ngũ Giảng viên / Người thực hiện khóa học</label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <select v-model="selectedLecturerToAdd" @change="addLecturerToCourse" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
+              <option value="">-- Chọn Giảng viên để thêm vào khóa học --</option>
+              <option v-for="l in lecturers" :key="l.id" :value="l.id">{{ l.name }} ({{ l.title }})</option>
+            </select>
+            <!-- Selected Lecturers Tags -->
+            <div v-if="selectedLecturersList.length > 0" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+              <span v-for="lec in selectedLecturersList" :key="lec.id" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                <span>👤 {{ lec.name }} - {{ lec.title }}</span>
+                <button type="button" @click="removeLecturerFromCourse(lec.id)" style="background: none; border: none; color: #ef4444; font-weight: 800; cursor: pointer; padding: 0 4px; font-size: 14px;">✕</button>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group mt-3">
+          <label style="color: #1e293b; font-weight: 600;">Bạn sẽ đạt được gì sau khóa học này? (Mỗi mục 1 dòng)</label>
+          <textarea v-model="courseForm.outcomes" rows="4" class="admin-input-style" placeholder="Ví dụ:&#10;Rèn luyện tư duy giao tiếp và thuyết phục hiệu quả trong công việc&#10;Làm chủ phương pháp quản lý thời gian và giải quyết vấn đề linh hoạt&#10;Nâng cao khả năng làm việc nhóm và đàm phán chuyên nghiệp" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
+          <small class="text-muted" style="display: block; margin-top: 4px;">Nhập từng kết quả đạt được trên một dòng riêng biệt.</small>
+        </div>
+
+        <div class="form-group mt-3">
+          <label style="color: #1e293b; font-weight: 600;">Yêu cầu & Đối tượng phù hợp (Mỗi mục 1 dòng)</label>
+          <textarea v-model="courseForm.requirements" rows="4" class="admin-input-style" placeholder="Ví dụ:&#10;Dành cho Quản lý, Chuyên viên, Freelancer và bất kỳ ai muốn nâng cao năng lực thời AI.&#10;Không yêu cầu kiến thức lập trình phức tạp – bài giảng cầm tay chỉ việc.&#10;Chỉ cần máy tính kết nối Internet để tham gia học trực tuyến." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
+          <small class="text-muted" style="display: block; margin-top: 4px;">Nhập từng yêu cầu hoặc đối tượng trên một dòng riêng biệt.</small>
         </div>
 
         <div class="flex-between mt-6 pt-4" style="border-top: 1px solid #e2e8f0;">
@@ -322,6 +357,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import { slugify } from '@/utils/slugify';
 import Pagination from '@/components/Pagination.vue';
+import RichTextEditor from '@/components/RichTextEditor.vue';
 
 const courseStore = useCourseStore();
 
@@ -339,12 +375,41 @@ const onTitleInput = () => {
   }
 };
 
+const lecturers = computed(() => courseStore.lecturers || []);
+const selectedLecturerToAdd = ref('');
+
+const selectedLecturersList = computed(() => {
+  if (!courseForm.value.lecturerIds) return [];
+  const ids = courseForm.value.lecturerIds.split(',').map(s => s.trim()).filter(Boolean);
+  return ids.map(id => lecturers.value.find(l => String(l.id) === String(id))).filter(Boolean);
+});
+
+const addLecturerToCourse = () => {
+  if (!selectedLecturerToAdd.value) return;
+  const currentIds = courseForm.value.lecturerIds ? courseForm.value.lecturerIds.split(',').map(s => s.trim()).filter(Boolean) : [];
+  if (!currentIds.includes(String(selectedLecturerToAdd.value))) {
+    currentIds.push(String(selectedLecturerToAdd.value));
+    courseForm.value.lecturerIds = currentIds.join(',');
+  }
+  selectedLecturerToAdd.value = '';
+};
+
+const removeLecturerFromCourse = (id) => {
+  const currentIds = courseForm.value.lecturerIds ? courseForm.value.lecturerIds.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const updated = currentIds.filter(i => String(i) !== String(id));
+  courseForm.value.lecturerIds = updated.join(',');
+};
+
 onMounted(() => {
+  courseStore.fetchCourses();
   if (courseStore.categories.length === 0) {
     courseStore.fetchCategories();
   }
   if (courseStore.programs.length === 0) {
     courseStore.fetchPrograms();
+  }
+  if (courseStore.lecturers.length === 0) {
+    courseStore.fetchLecturers();
   }
 });
 
@@ -399,7 +464,11 @@ const courseForm = ref({
   originalPrice: 0,
   duration: '12 tuần',
   level: 'Trung cấp',
-  description: ''
+  description: '',
+  outcomes: '',
+  requirements: '',
+  customRoadmap: '',
+  lecturerIds: ''
 });
 
 const openAddCourseModal = () => {
@@ -414,7 +483,11 @@ const openAddCourseModal = () => {
     originalPrice: 12000000,
     duration: '12 tuần',
     level: 'Trung cấp',
-    description: ''
+    description: '',
+    outcomes: '',
+    requirements: '',
+    customRoadmap: '',
+    lecturerIds: ''
   };
   activeView.value = 'course_form';
 };
@@ -422,6 +495,28 @@ const openAddCourseModal = () => {
 const editCourseDetails = (c) => {
   isEditingCourse.value = true;
   editingCourseId.value = c.id;
+  
+  // Format outcomes and requirements array/string into newline-separated string for textarea
+  let formattedOutcomes = c.outcomes || '';
+  if (Array.isArray(formattedOutcomes)) {
+    formattedOutcomes = formattedOutcomes.join('\n');
+  } else if (typeof formattedOutcomes === 'string') {
+    try {
+      const parsed = JSON.parse(formattedOutcomes);
+      if (Array.isArray(parsed)) formattedOutcomes = parsed.join('\n');
+    } catch (e) {}
+  }
+
+  let formattedRequirements = c.requirements || '';
+  if (Array.isArray(formattedRequirements)) {
+    formattedRequirements = formattedRequirements.join('\n');
+  } else if (typeof formattedRequirements === 'string') {
+    try {
+      const parsed = JSON.parse(formattedRequirements);
+      if (Array.isArray(parsed)) formattedRequirements = parsed.join('\n');
+    } catch (e) {}
+  }
+
   courseForm.value = {
     title: c.title,
     handle: c.handle,
@@ -432,7 +527,11 @@ const editCourseDetails = (c) => {
     originalPrice: c.originalPrice,
     duration: c.duration,
     level: c.level,
-    description: c.description
+    description: c.description,
+    outcomes: formattedOutcomes,
+    requirements: formattedRequirements,
+    customRoadmap: c.customRoadmap || '',
+    lecturerIds: c.lecturerIds || ''
   };
   activeView.value = 'course_form';
 };
@@ -465,10 +564,21 @@ const saveCourse = async () => {
 };
 
 const deleteCourse = async (courseId) => {
-  if (confirm('Bạn có chắc muốn xóa khóa học này khỏi danh mục?')) {
+  const c = courses.value.find(item => item.id === courseId);
+  const title = c ? c.title : '';
+
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận xóa khóa học',
+    message: `Bạn có chắc chắn muốn xóa khóa học "${title}" khỏi hệ thống?\n\nHệ thống sẽ đồng thời dọn dẹp các dữ liệu liên quan (học viên, đánh giá, ghi chú, giỏ hàng...).`,
+    confirmText: 'Đồng ý xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
     try {
       await courseStore.deleteAdminCourse(courseId);
-      courseStore.showToast('Đã xóa khóa học thành công.', 'success');
+      courseStore.showToast(`Đã xóa khóa học "${title}" thành công.`, 'success');
     } catch (err) {
       courseStore.showToast(err.message || 'Không thể xóa khóa học.', 'error');
     }

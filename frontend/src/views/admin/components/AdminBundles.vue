@@ -413,7 +413,15 @@ const saveBundle = async () => {
 };
 
 const deleteBundle = async (id) => {
-  if (confirm('Bạn có chắc muốn xóa gói Combo này?')) {
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận xóa gói Combo',
+    message: 'Bạn có chắc chắn muốn xóa gói Combo này khỏi hệ thống?',
+    confirmText: 'Đồng ý xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
     try {
       await courseStore.deleteAdminBundle(id);
       courseStore.showToast('Đã xóa gói Combo thành công.', 'success');

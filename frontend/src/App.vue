@@ -11,6 +11,7 @@
     <Footer />
     <ZaloChatWidget />
     <ToastNotification />
+    <ConfirmModal />
   </div>
 </template>
 
@@ -19,6 +20,7 @@ import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
 import ZaloChatWidget from './components/ZaloChatWidget.vue';
 import ToastNotification from './components/ToastNotification.vue';
+import ConfirmModal from './components/ConfirmModal.vue';
 </script>
 
 <style scoped src="@/styles/App.css"></style>

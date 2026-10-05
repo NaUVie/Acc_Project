@@ -157,7 +157,15 @@ const handleCreate = async () => {
 
 
 const handleDelete = async (couponId) => {
-  if (confirm('Bạn có chắc chắn muốn xóa mã coupon này?')) {
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận xóa mã giảm giá',
+    message: 'Bạn có chắc chắn muốn xóa mã coupon giảm giá này?',
+    confirmText: 'Đồng ý xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
     await courseStore.deleteAdminCoupon(couponId);
   }
 };

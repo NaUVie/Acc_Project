@@ -736,8 +736,11 @@ def delete_testimonial(db: Session, testimonial_id: int):
 
 
 # --- Lecturer CRUD ---
-def get_lecturers(db: Session):
-    return db.query(models.Lecturer).all()
+def get_lecturers(db: Session, featured_only: bool = False):
+    query = db.query(models.Lecturer)
+    if featured_only:
+        query = query.filter(models.Lecturer.is_featured == True)
+    return query.order_by(models.Lecturer.position.asc(), models.Lecturer.name.asc()).all()
 
 def get_lecturer_by_id(db: Session, lecturer_id: str):
     return db.query(models.Lecturer).filter(models.Lecturer.id == lecturer_id).first()
@@ -753,8 +756,41 @@ def update_lecturer(db: Session, lecturer_id: str, lecturer_in: schemas.Lecturer
     db_lecturer = db.query(models.Lecturer).filter(models.Lecturer.id == lecturer_id).first()
     if not db_lecturer:
         return None
-    for key, value in lecturer_in.model_dump(exclude_unset=True).items():
+    
+    # Check max 4 featured limit if trying to set is_featured = True
+    update_data = lecturer_in.model_dump(exclude_unset=True)
+    if update_data.get("is_featured") is True and not db_lecturer.is_featured:
+        current_featured_count = db.query(models.Lecturer).filter(models.Lecturer.is_featured == True).count()
+        if current_featured_count >= 4:
+            raise ValueError("Đã đạt giới hạn tối đa 4 Giảng viên ưu tiên ngoài Trang chủ!")
+
+    for key, value in update_data.items():
         setattr(db_lecturer, key, value)
+    db.commit()
+    db.refresh(db_lecturer)
+    return db_lecturer
+
+def reorder_lecturers(db: Session, items: list):
+    for item in items:
+        lec_id = item.id if hasattr(item, 'id') else item.get('id')
+        pos = item.position if hasattr(item, 'position') else item.get('position')
+        db_lec = db.query(models.Lecturer).filter(models.Lecturer.id == lec_id).first()
+        if db_lec:
+            db_lec.position = pos
+    db.commit()
+    return True
+
+def toggle_lecturer_featured(db: Session, lecturer_id: str):
+    db_lecturer = db.query(models.Lecturer).filter(models.Lecturer.id == lecturer_id).first()
+    if not db_lecturer:
+        return None
+    if not db_lecturer.is_featured:
+        current_featured_count = db.query(models.Lecturer).filter(models.Lecturer.is_featured == True).count()
+        if current_featured_count >= 4:
+            raise ValueError("Đã đạt giới hạn tối đa 4 Giảng viên ưu tiên ngoài Trang chủ!")
+        db_lecturer.is_featured = True
+    else:
+        db_lecturer.is_featured = False
     db.commit()
     db.refresh(db_lecturer)
     return db_lecturer

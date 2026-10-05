@@ -49,7 +49,7 @@
               <div class="mega-card-info">
                 <span class="mega-school-name">{{ course.level || 'Khóa học' }}</span>
                 <h4 class="mega-program-title" :title="course.title">{{ course.title }}</h4>
-                <p class="mega-program-desc">{{ course.description }}</p>
+                <p class="mega-program-desc">{{ stripHtml(course.description) }}</p>
                 <div class="mega-card-footer">
                   <span class="mega-price">{{ formatPrice(course.price) }}</span>
                   <span class="mega-enroll-btn">Đăng ký ngay &rarr;</span>
@@ -147,6 +147,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import { stripHtml } from '@/utils/stripHtml';
 
 const route = useRoute();
 const router = useRouter();

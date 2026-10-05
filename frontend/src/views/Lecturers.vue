@@ -80,8 +80,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useCourseStore } from '@/stores/courses';
 import { lecturersData } from '@/data/lecturers';
 
+const courseStore = useCourseStore();
 const selectedMajor = ref('all');
 
 const majors = [
@@ -93,6 +95,10 @@ const majors = [
   { id: 'san-xuat-van-hanh', name: 'Sản xuất & Vận hành', icon: '🏭' }
 ];
 
+const allLecturers = computed(() => {
+  return courseStore.lecturers || [];
+});
+
 const selectMajor = (id) => {
   selectedMajor.value = id;
 };
@@ -102,8 +108,8 @@ const selectMajorHover = (id) => {
 };
 
 const getMajorCount = (id) => {
-  if (id === 'all') return lecturersData.length;
-  return lecturersData.filter(l => l.majorId === id).length;
+  if (id === 'all') return allLecturers.value.length;
+  return allLecturers.value.filter(l => l.majorId === id).length;
 };
 
 const activeMajorMeta = computed(() => {
@@ -124,13 +130,16 @@ const activeMajorMeta = computed(() => {
 
 const filteredLecturers = computed(() => {
   if (selectedMajor.value === 'all') {
-    return lecturersData;
+    return allLecturers.value;
   }
-  return lecturersData.filter(l => l.majorId === selectedMajor.value);
+  return allLecturers.value.filter(l => l.majorId === selectedMajor.value);
 });
 
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (courseStore.lecturers.length === 0) {
+    courseStore.fetchLecturers();
+  }
 });
 </script>
 

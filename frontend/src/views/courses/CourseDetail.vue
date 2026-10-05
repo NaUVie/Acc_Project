@@ -41,7 +41,7 @@
             <h1 class="course-main-title">{{ course.title }}</h1>
 
             <p class="course-main-description">
-              {{ course.description || 'Khóa học thiết kế thực chiến giúp bạn làm chủ công nghệ, x5 hiệu suất làm việc và nâng tầm sự nghiệp trong kỷ nguyên AI.' }}
+              {{ plainDescription }}
             </p>
 
             <!-- Stats Bar -->
@@ -90,6 +90,9 @@
             <div class="tab-body">
               <!-- Tab 1: Overview -->
               <div v-if="activeTab === 'overview'">
+                <!-- Rich Text Description Block -->
+                <div v-if="course.description" class="rich-course-description mb-6" v-html="course.description"></div>
+
                 <h3 class="section-heading">Bạn sẽ đạt được gì sau khóa học này?</h3>
                 <div class="outcomes-grid">
                   <div v-for="(outcome, oIdx) in courseOutcomes" :key="oIdx" class="outcome-item">
@@ -101,9 +104,7 @@
                 <div style="padding-top: 24px; border-top: 1px solid #f1f5f9; margin-top: 24px;">
                   <h3 class="section-heading">Yêu cầu & Đối tượng phù hợp</h3>
                   <ul class="requirements-list">
-                    <li>Dành cho Quản lý, Chuyên viên, Freelancer và bất kỳ ai muốn nâng cao năng lực thời AI.</li>
-                    <li>Không yêu cầu kiến thức lập trình phức tạp – bài giảng cầm tay chỉ việc từ cơ bản đến nâng cao.</li>
-                    <li>Chỉ cần máy tính kết nối Internet để tham gia học trực tuyến mọi lúc mọi nơi.</li>
+                    <li v-for="(req, rIdx) in courseRequirements" :key="rIdx">{{ req }}</li>
                   </ul>
                 </div>
               </div>
@@ -111,11 +112,15 @@
               <!-- Tab 2: Curriculum -->
               <div v-else-if="activeTab === 'curriculum'">
                 <div class="curriculum-header-row">
-                  <h3 class="section-heading" style="margin: 0;">Chi tiết các bài học</h3>
-                  <span class="lesson-badge">Tổng cộng {{ parsedCurriculum.length }} bài học</span>
+                  <h3 class="section-heading" style="margin: 0;">{{ course.customRoadmap ? 'Lộ trình học tập chi tiết' : 'Chi tiết các bài học' }}</h3>
+                  <span v-if="!course.customRoadmap" class="lesson-badge">Tổng cộng {{ parsedCurriculum.length }} bài học</span>
                 </div>
 
-                <div v-if="parsedCurriculum.length === 0" style="text-align: center; padding: 40px 0; color: #64748b; font-weight: 500;">
+                <!-- Custom Roadmap HTML View -->
+                <div v-if="course.customRoadmap" class="rich-course-description" v-html="course.customRoadmap"></div>
+
+                <!-- Standard Curriculum Items -->
+                <div v-else-if="parsedCurriculum.length === 0" style="text-align: center; padding: 40px 0; color: #64748b; font-weight: 500;">
                   Nội dung lộ trình chi tiết đang được cập nhật.
                 </div>
 
@@ -276,6 +281,20 @@
               </div>
             </div>
 
+            <!-- Lecturers / Course Instructors Box -->
+            <div v-if="courseLecturers.length > 0" class="perks-box" style="margin-top: 20px;">
+              <div class="perks-title" style="margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                <span>🎓 Đội ngũ Giảng viên:</span>
+              </div>
+              <div v-for="lec in courseLecturers" :key="lec.id" style="display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px dashed #e2e8f0;">
+                <img :src="lec.avatar || lec.avatar_drive_link || '/images/default-avatar.jpg'" :alt="lec.name" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7;" />
+                <div>
+                  <div style="font-weight: 700; color: #0f172a; font-size: 14px;">{{ lec.name }}</div>
+                  <div style="font-size: 12px; color: #0284c7; font-weight: 600;">{{ lec.title }}</div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -288,6 +307,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import { stripHtml } from '@/utils/stripHtml';
 
 const route = useRoute();
 const router = useRouter();
@@ -295,6 +315,14 @@ const courseStore = useCourseStore();
 
 const course = ref(null);
 const loading = ref(true);
+
+const plainDescription = computed(() => {
+  if (!course.value || !course.value.description) {
+    return 'Khóa học thiết kế thực chiến giúp bạn làm chủ công nghệ, x5 hiệu suất làm việc và nâng tầm sự nghiệp trong kỷ nguyên AI.';
+  }
+  const clean = stripHtml(course.value.description);
+  return clean.length > 220 ? clean.substring(0, 220) + '...' : clean;
+});
 
 // Check if current user already enrolled in this course
 const isAlreadyEnrolled = computed(() => {
@@ -334,10 +362,15 @@ const courseOutcomes = computed(() => {
   if (!course.value) return [];
   if (course.value.outcomes) {
     if (Array.isArray(course.value.outcomes)) return course.value.outcomes;
-    try {
-      return JSON.parse(course.value.outcomes);
-    } catch (e) {
-      return [course.value.outcomes];
+    if (typeof course.value.outcomes === 'string') {
+      const trimmed = course.value.outcomes.trim();
+      if (trimmed.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) return parsed;
+        } catch (e) {}
+      }
+      return trimmed.split('\n').map(s => s.trim()).filter(Boolean);
     }
   }
   
@@ -377,6 +410,29 @@ const courseOutcomes = computed(() => {
     'Ứng dụng thực tiễn ngay vào công việc hằng ngày',
     'Tài liệu giáo trình đính kèm và nhóm hỗ trợ 24/7',
     'Nhận chứng nhận hoàn thành khóa học từ ACC Academy'
+  ];
+});
+
+const courseRequirements = computed(() => {
+  if (!course.value) return [];
+  if (course.value.requirements) {
+    if (Array.isArray(course.value.requirements)) return course.value.requirements;
+    if (typeof course.value.requirements === 'string') {
+      const trimmed = course.value.requirements.trim();
+      if (trimmed.startsWith('[')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) return parsed;
+        } catch (e) {}
+      }
+      return trimmed.split('\n').map(s => s.trim()).filter(Boolean);
+    }
+  }
+
+  return [
+    'Dành cho Quản lý, Chuyên viên, Freelancer và bất kỳ ai muốn nâng cao năng lực thời AI.',
+    'Không yêu cầu kiến thức lập trình phức tạp – bài giảng cầm tay chỉ việc từ cơ bản đến nâng cao.',
+    'Chỉ cần máy tính kết nối Internet để tham gia học trực tuyến mọi lúc mọi nơi.'
   ];
 });
 
@@ -503,6 +559,12 @@ const buyNow = () => {
     });
 };
 
+const courseLecturers = computed(() => {
+  if (!course.value || !course.value.lecturerIds) return [];
+  const ids = course.value.lecturerIds.split(',').map(s => s.trim()).filter(Boolean);
+  return ids.map(id => courseStore.lecturers.find(l => String(l.id) === String(id))).filter(Boolean);
+});
+
 onMounted(() => {
   loadCourse().then(() => {
     loadReviews();
@@ -513,8 +575,54 @@ onMounted(() => {
   if (courseStore.programs.length === 0) {
     courseStore.fetchPrograms();
   }
+  if (courseStore.lecturers.length === 0) {
+    courseStore.fetchLecturers();
+  }
 });
 
 </script>
+
+<style scoped>
+.rich-course-description {
+  color: #334155;
+  font-size: 15px;
+  line-height: 1.7;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 24px;
+}
+
+.rich-course-description :deep(h2) {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-top: 16px;
+  margin-bottom: 10px;
+}
+
+.rich-course-description :deep(h3) {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+.rich-course-description :deep(ul),
+.rich-course-description :deep(ol) {
+  padding-left: 24px;
+  margin: 10px 0;
+}
+
+.rich-course-description :deep(li) {
+  margin-bottom: 6px;
+}
+
+.rich-course-description :deep(a) {
+  color: #0284c7;
+  text-decoration: underline;
+  font-weight: 600;
+}
+</style>
 
 <style scoped src="@/styles/views/courses/CourseDetail.css"></style>

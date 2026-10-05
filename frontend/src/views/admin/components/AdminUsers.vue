@@ -193,7 +193,15 @@ const saveUser = async () => {
 };
 
 const deleteUser = async (userId) => {
-  if (confirm('Bạn có chắc chắn muốn xóa học viên này khỏi hệ thống?')) {
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận xóa học viên',
+    message: 'Bạn có chắc chắn muốn xóa tài khoản học viên này khỏi hệ thống?',
+    confirmText: 'Đồng ý xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
     try {
       await courseStore.deleteAdminUser(userId);
       courseStore.showToast('Đã xóa học viên thành công.', 'success');

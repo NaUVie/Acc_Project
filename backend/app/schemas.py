@@ -39,6 +39,10 @@ class CourseBase(BaseModel):
     duration: Optional[str] = None
     level: Optional[str] = None
     default_commission_percent: Optional[int] = 10
+    outcomes: Optional[str] = None
+    requirements: Optional[str] = None
+    custom_roadmap: Optional[str] = None
+    lecturer_ids: Optional[str] = None
 
 class CoursePublicResponse(CourseBase):
     tags: List[CourseTagResponse] = []
@@ -163,6 +167,8 @@ class LecturerBase(BaseModel):
     drive_profile: Optional[str] = None
     bio_short: Optional[str] = None
     details_html: Optional[str] = None
+    position: Optional[int] = 0
+    is_featured: Optional[bool] = False
 
 class LecturerCreate(LecturerBase):
     pass
@@ -176,12 +182,18 @@ class LecturerUpdate(BaseModel):
     drive_profile: Optional[str] = None
     bio_short: Optional[str] = None
     details_html: Optional[str] = None
+    position: Optional[int] = None
+    is_featured: Optional[bool] = None
 
 class LecturerResponse(LecturerBase):
     created_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True
+
+class LecturerReorderItem(BaseModel):
+    id: str
+    position: int
 
 # Project Schemas
 class ProjectBase(BaseModel):
@@ -456,6 +468,10 @@ class CourseAdminCreate(BaseModel):
     duration: Optional[str] = None
     level: Optional[str] = None
     curriculum_data: Optional[str] = None
+    outcomes: Optional[str] = None
+    requirements: Optional[str] = None
+    custom_roadmap: Optional[str] = None
+    lecturer_ids: Optional[str] = None
 
 class CourseAdminUpdate(BaseModel):
     title: Optional[str] = None
@@ -469,6 +485,10 @@ class CourseAdminUpdate(BaseModel):
     duration: Optional[str] = None
     level: Optional[str] = None
     curriculum_data: Optional[str] = None
+    outcomes: Optional[str] = None
+    requirements: Optional[str] = None
+    custom_roadmap: Optional[str] = None
+    lecturer_ids: Optional[str] = None
 
 class ContactSettingUpdate(BaseModel):
     address: Optional[str] = None
