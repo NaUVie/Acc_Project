@@ -78,7 +78,7 @@
               <span class="program-tag-badge" v-if="v.courseName">🎓 {{ v.courseName }}</span>
               <h4 class="video-card-title">{{ v.title }}</h4>
               <div class="student-profile-info">
-                <span class="s-name">👤 {{ v.studentName }}</span>
+                <span class="s-name">👤 {{ v.studentName || v.name }}</span>
                 <span class="s-role" v-if="v.role || v.company">💼 {{ v.role }} <span v-if="v.company">• {{ v.company }}</span></span>
               </div>
               <span class="yt-link-small">
@@ -140,13 +140,24 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { youtubePlaylistUrl, videoTestimonialsData, photoTestimonialsData } from '@/data/testimonials';
+import { ref, computed, onMounted } from 'vue';
+import { youtubePlaylistUrl } from '@/data/testimonials';
+import { useTestimonialStore } from '@/stores/testimonials';
+
+const testimonialStore = useTestimonialStore();
 
 const activeTab = ref('all');
 const activeVideoUrl = ref('');
 
+const videoTestimonialsData = computed(() => testimonialStore.videoTestimonials);
+const photoTestimonialsData = computed(() => testimonialStore.photoTestimonials);
+
+onMounted(() => {
+  testimonialStore.fetchTestimonials();
+});
+
 const openVideo = (url) => {
+  if (!url) return;
   activeVideoUrl.value = url;
 };
 

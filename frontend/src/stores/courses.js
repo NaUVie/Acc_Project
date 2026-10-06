@@ -99,6 +99,10 @@ export const useCourseStore = defineStore('courses', {
     adminOrders: [],
     adminContacts: [],
     adminBanners: [],
+    adminTestimonials: [],
+    adminProjects: [],
+    adminBlogPosts: [],
+    projects: [],
     banners: [],
     contactSettings: null
   }),
@@ -186,12 +190,15 @@ export const useCourseStore = defineStore('courses', {
         const response = await fetch(url, { ...options, headers });
         if (!response.ok) {
           if (response.status === 401) {
-            // Token is expired or invalid -> clear local auth state to stop failing requests
-            this.token = null;
-            this.user = null;
-            localStorage.removeItem('token');
-            if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
-              window.location.href = '/login';
+            // Only clear token & redirect if specifically failing user authentication check (/auth/me)
+            // or if explicitly unauthenticated to prevent accidental logouts on transient server errors
+            if (endpoint === '/auth/me') {
+              this.token = null;
+              this.user = null;
+              localStorage.removeItem('token');
+              if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
+                window.location.href = '/login';
+              }
             }
           }
           const errData = await response.json().catch(() => ({}));
@@ -671,8 +678,9 @@ export const useCourseStore = defineStore('courses', {
           referredById: data.referred_by_id,
           createdAt: data.created_at
         };
+        return this.user;
       } catch (err) {
-        this.logout();
+        console.error("Failed to fetch user me profile:", err);
       }
     },
 
@@ -1722,6 +1730,285 @@ export const useCourseStore = defineStore('courses', {
         this.showToast('Xuất báo cáo dữ liệu thành công!', 'success');
       } catch (err) {
         this.showToast(err.message || 'Lỗi xuất file dữ liệu', 'error');
+      }
+    },
+
+    // --- Admin Testimonials CRUD ---
+    async fetchAdminTestimonials() {
+      if (!this.token) return;
+      try {
+        const data = await this.apiRequest('/admin/testimonials');
+        this.adminTestimonials = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to fetch admin testimonials:", err);
+      }
+    },
+
+    async addAdminTestimonial(testimonial) {
+      if (!this.token) return;
+      try {
+        const payload = {
+          name: testimonial.name,
+          role: testimonial.role || '',
+          company: testimonial.company || '',
+          text: testimonial.text || '',
+          image: testimonial.image || '',
+          rating: Number(testimonial.rating) || 5,
+          quote: testimonial.quote || testimonial.text || '',
+          course_name: testimonial.courseName || '',
+          testimonial_type: testimonial.testimonialType || 'text',
+          youtube_id: testimonial.youtubeId || '',
+          thumbnail: testimonial.thumbnail || '',
+          video_url: testimonial.videoUrl || ''
+        };
+        await this.apiRequest('/admin/testimonials', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        await this.fetchAdminTestimonials();
+        this.showToast('Thêm cảm nhận học viên thành công!', 'success');
+      } catch (err) {
+        console.error("Failed to add admin testimonial:", err);
+        this.showToast(err.message || 'Không thể thêm cảm nhận', 'error');
+        throw err;
+      }
+    },
+
+    async updateAdminTestimonial(id, testimonial) {
+      if (!this.token) return;
+      try {
+        const payload = {
+          name: testimonial.name,
+          role: testimonial.role,
+          company: testimonial.company,
+          text: testimonial.text,
+          image: testimonial.image,
+          rating: Number(testimonial.rating) || 5,
+          quote: testimonial.quote,
+          course_name: testimonial.courseName,
+          testimonial_type: testimonial.testimonialType,
+          youtube_id: testimonial.youtubeId,
+          thumbnail: testimonial.thumbnail,
+          video_url: testimonial.videoUrl
+        };
+        await this.apiRequest(`/admin/testimonials/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+        await this.fetchAdminTestimonials();
+        this.showToast('Cập nhật cảm nhận học viên thành công!', 'success');
+      } catch (err) {
+        console.error("Failed to update admin testimonial:", err);
+        this.showToast(err.message || 'Không thể cập nhật cảm nhận', 'error');
+        throw err;
+      }
+    },
+
+    async deleteAdminTestimonial(id) {
+      if (!this.token) return;
+      try {
+        await this.apiRequest(`/admin/testimonials/${id}`, {
+          method: 'DELETE'
+        });
+        await this.fetchAdminTestimonials();
+        this.showToast('Đã xóa cảm nhận học viên thành công!', 'success');
+      } catch (err) {
+        console.error("Failed to delete admin testimonial:", err);
+        this.showToast(err.message || 'Không thể xóa cảm nhận', 'error');
+        throw err;
+      }
+    },
+
+    // --- Admin Projects CRUD ---
+    async fetchProjects() {
+      try {
+        const data = await this.apiRequest('/projects');
+        if (Array.isArray(data) && data.length > 0) {
+          this.projects = data.map(p => ({
+            id: p.id,
+            category: p.category,
+            categoryName: p.category_name,
+            title: p.title,
+            summary: p.summary,
+            image: p.image,
+            date: p.date,
+            client: p.client,
+            driveProfile: p.drive_profile,
+            content: typeof p.content === 'string' ? (JSON.parse(p.content || '[]')) : (p.content || [])
+          }));
+        } else {
+          const { projectsData } = await import('@/data/projects.js');
+          this.projects = projectsData;
+        }
+      } catch (err) {
+        console.error("Failed to fetch projects:", err);
+        const { projectsData } = await import('@/data/projects.js');
+        this.projects = projectsData;
+      }
+    },
+
+    async fetchAdminProjects() {
+      if (!this.token) return;
+      try {
+        const data = await this.apiRequest('/admin/projects');
+        this.adminProjects = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to fetch admin projects:", err);
+      }
+    },
+
+    async addAdminProject(project) {
+      if (!this.token) return;
+      try {
+        const payload = {
+          id: project.id,
+          category: project.category,
+          category_name: project.categoryName || 'Dự án Doanh nghiệp',
+          title: project.title,
+          summary: project.summary || '',
+          image: project.image || '',
+          date: project.date || '',
+          client: project.client || '',
+          drive_profile: project.driveProfile || '',
+          content: typeof project.content === 'object' ? JSON.stringify(project.content) : (project.content || '[]')
+        };
+        await this.apiRequest('/admin/projects', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        await this.fetchAdminProjects();
+        await this.fetchProjects();
+        this.showToast('Thêm dự án thành công!', 'success');
+      } catch (err) {
+        console.error("Failed to add admin project:", err);
+        this.showToast(err.message || 'Không thể thêm dự án', 'error');
+        throw err;
+      }
+    },
+
+    async updateAdminProject(id, project) {
+      if (!this.token) return;
+      try {
+        const payload = {
+          category: project.category,
+          category_name: project.categoryName,
+          title: project.title,
+          summary: project.summary,
+          image: project.image,
+          date: project.date,
+          client: project.client,
+          drive_profile: project.driveProfile,
+          content: typeof project.content === 'object' ? JSON.stringify(project.content) : project.content
+        };
+        await this.apiRequest(`/admin/projects/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+        await this.fetchAdminProjects();
+        await this.fetchProjects();
+        this.showToast('Cập nhật dự án thành công!', 'success');
+      } catch (err) {
+        console.error("Failed to update admin project:", err);
+        this.showToast(err.message || 'Không thể cập nhật dự án', 'error');
+        throw err;
+      }
+    },
+
+    async deleteAdminProject(id) {
+      if (!this.token) return;
+      try {
+        await this.apiRequest(`/admin/projects/${id}`, {
+          method: 'DELETE'
+        });
+        await this.fetchAdminProjects();
+        await this.fetchProjects();
+        this.showToast('Đã xóa dự án thành công!', 'success');
+      } catch (err) {
+        console.error("Failed to delete admin project:", err);
+        this.showToast(err.message || 'Không thể xóa dự án', 'error');
+        throw err;
+      }
+    },
+
+    // --- Admin Blog Posts CRUD ---
+    async fetchAdminBlogPosts() {
+      if (!this.token) return;
+      try {
+        const data = await this.apiRequest('/admin/blogs');
+        this.adminBlogPosts = data;
+        this.blogPosts = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to fetch admin blog posts:", err);
+      }
+    },
+
+    async addAdminBlogPost(blog) {
+      if (!this.token) return;
+      try {
+        const payload = {
+          title: blog.title,
+          handle: blog.handle,
+          category: blog.category || 'AI 2026',
+          image: blog.image || '',
+          excerpt: blog.excerpt || '',
+          date: blog.date || '',
+          link: blog.link || `/blog/${blog.handle}`,
+          content: blog.content || ''
+        };
+        await this.apiRequest('/admin/blogs', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        await this.fetchAdminBlogPosts();
+        this.showToast('Thêm bài viết / tin tức thành công!', 'success');
+      } catch (err) {
+        console.error("Failed to add admin blog post:", err);
+        this.showToast(err.message || 'Không thể thêm bài viết', 'error');
+        throw err;
+      }
+    },
+
+    async updateAdminBlogPost(id, blog) {
+      if (!this.token) return;
+      try {
+        const payload = {
+          title: blog.title,
+          handle: blog.handle,
+          category: blog.category,
+          image: blog.image,
+          excerpt: blog.excerpt,
+          date: blog.date,
+          link: blog.link,
+          content: blog.content
+        };
+        await this.apiRequest(`/admin/blogs/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify(payload)
+        });
+        await this.fetchAdminBlogPosts();
+        this.showToast('Cập nhật bài viết thành công!', 'success');
+      } catch (err) {
+        console.error("Failed to update admin blog post:", err);
+        this.showToast(err.message || 'Không thể cập nhật bài viết', 'error');
+        throw err;
+      }
+    },
+
+    async deleteAdminBlogPost(id) {
+      if (!this.token) return;
+      try {
+        await this.apiRequest(`/admin/blogs/${id}`, {
+          method: 'DELETE'
+        });
+        await this.fetchAdminBlogPosts();
+        this.showToast('Đã xóa bài viết thành công!', 'success');
+      } catch (err) {
+        console.error("Failed to delete admin blog post:", err);
+        this.showToast(err.message || 'Không thể xóa bài viết', 'error');
+        throw err;
       }
     }
 

@@ -53,6 +53,9 @@ import AdminBanners from './components/AdminBanners.vue';
 import AdminCoupons from './components/AdminCoupons.vue';
 import AdminCommissions from './components/AdminCommissions.vue';
 import AdminLecturers from './components/AdminLecturers.vue';
+import AdminTestimonials from './components/AdminTestimonials.vue';
+import AdminProjects from './components/AdminProjects.vue';
+import AdminBlogs from './components/AdminBlogs.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -61,6 +64,9 @@ const courseStore = useCourseStore();
 // Setup Tab navigation
 const tabs = [
   { id: 'overview', name: 'Tổng quan', icon: '📊' },
+  { id: 'blogs', name: 'Tin tức & Bài viết', icon: '📰' },
+  { id: 'projects', name: 'Dự án Case Study', icon: '💼' },
+  { id: 'testimonials', name: 'Cảm nhận học viên', icon: '💬' },
   { id: 'coupons', name: 'Mã giảm giá', icon: '🎟️' },
   { id: 'commissions', name: 'Hoa hồng Affiliate', icon: '🤝' },
   { id: 'lecturers', name: 'Giảng viên', icon: '👨‍🏫' },
@@ -105,13 +111,19 @@ onMounted(async () => {
     courseStore.fetchPrograms(),
     courseStore.fetchBundles(),
     courseStore.fetchLecturers().catch(() => {}),
-    courseStore.fetchAdminBanners().catch(() => {})
+    courseStore.fetchAdminBanners().catch(() => {}),
+    courseStore.fetchAdminTestimonials().catch(() => {}),
+    courseStore.fetchAdminProjects().catch(() => {}),
+    courseStore.fetchAdminBlogPosts().catch(() => {})
   ]);
 });
 
 const currentTabComponent = computed(() => {
   switch (activeTab.value) {
     case 'overview': return AdminOverview;
+    case 'blogs': return AdminBlogs;
+    case 'projects': return AdminProjects;
+    case 'testimonials': return AdminTestimonials;
     case 'coupons': return AdminCoupons;
     case 'commissions': return AdminCommissions;
     case 'lecturers': return AdminLecturers;

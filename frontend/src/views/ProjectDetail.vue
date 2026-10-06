@@ -30,17 +30,21 @@
 
       <!-- Article Content -->
       <div class="article-body">
-        <div 
-          v-for="(block, idx) in project.content" 
-          :key="idx"
-          class="content-block"
-        >
-          <h2 v-if="block.type === 'heading'" class="block-heading">{{ block.text }}</h2>
-          <p v-else-if="block.type === 'paragraph'" class="block-paragraph">{{ block.text }}</p>
-          <ul v-else-if="block.type === 'bullets'" class="block-bullets">
-            <li v-for="(item, bIdx) in block.items" :key="bIdx">{{ item }}</li>
-          </ul>
-        </div>
+        <div v-if="typeof project.content === 'string'" class="content-html-wrapper" v-html="project.content"></div>
+        <template v-else-if="Array.isArray(project.content)">
+          <div 
+            v-for="(block, idx) in project.content" 
+            :key="idx"
+            class="content-block"
+          >
+            <div v-if="block.type === 'html'" class="content-html-wrapper" v-html="block.text"></div>
+            <h2 v-else-if="block.type === 'heading'" class="block-heading">{{ block.text }}</h2>
+            <p v-else-if="block.type === 'paragraph'" class="block-paragraph">{{ block.text }}</p>
+            <ul v-else-if="block.type === 'bullets'" class="block-bullets">
+              <li v-for="(item, bIdx) in block.items" :key="bIdx">{{ item }}</li>
+            </ul>
+          </div>
+        </template>
 
         <!-- Drive Profile Link Button -->
         <div v-if="project.driveProfile" class="drive-banner-box">
@@ -87,17 +91,18 @@
 <script setup>
 import { computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { projectsData } from '@/data/projects';
+import { useCourseStore } from '@/stores/courses';
 
 const route = useRoute();
+const courseStore = useCourseStore();
 
 const project = computed(() => {
-  return projectsData.find(p => p.id === route.params.id);
+  return courseStore.projects.find(p => p.id === route.params.id);
 });
 
 const relatedProjects = computed(() => {
   if (!project.value) return [];
-  return projectsData
+  return courseStore.projects
     .filter(p => p.id !== project.value.id)
     .slice(0, 3);
 });
@@ -106,7 +111,13 @@ const scrollToTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-onMounted(scrollToTop);
+onMounted(() => {
+  scrollToTop();
+  if (courseStore.projects.length === 0) {
+    courseStore.fetchProjects();
+  }
+});
+
 watch(() => route.params.id, scrollToTop);
 </script>
 
@@ -249,6 +260,42 @@ watch(() => route.params.id, scrollToTop);
   line-height: 1.8;
   color: #334155;
   margin-bottom: 8px;
+}
+
+.content-html-wrapper :deep(h2) {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 36px 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #f1f5f9;
+}
+.content-html-wrapper :deep(h3) {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 24px 0 12px 0;
+}
+.content-html-wrapper :deep(p) {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #334155;
+  margin-bottom: 16px;
+}
+.content-html-wrapper :deep(ul), .content-html-wrapper :deep(ol) {
+  padding-left: 24px;
+  margin-bottom: 20px;
+}
+.content-html-wrapper :deep(li) {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #334155;
+  margin-bottom: 8px;
+}
+.content-html-wrapper :deep(a) {
+  color: #022b9f;
+  text-decoration: underline;
+  font-weight: 600;
 }
 
 .drive-banner-box {

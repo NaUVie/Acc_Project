@@ -133,6 +133,7 @@ class BlogPostBase(BaseModel):
     image: Optional[str] = None
     date: Optional[str] = None
     link: Optional[str] = None
+    content: Optional[str] = None
 
 class BlogPostCreate(BaseModel):
     title: str
@@ -142,6 +143,7 @@ class BlogPostCreate(BaseModel):
     image: Optional[str] = None
     date: Optional[str] = None
     link: Optional[str] = None
+    content: Optional[str] = None
 
 class BlogPostUpdate(BaseModel):
     title: Optional[str] = None
@@ -151,6 +153,7 @@ class BlogPostUpdate(BaseModel):
     image: Optional[str] = None
     date: Optional[str] = None
     link: Optional[str] = None
+    content: Optional[str] = None
 
 class BlogPostResponse(BlogPostBase):
     class Config:

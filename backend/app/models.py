@@ -105,6 +105,7 @@ class BlogPost(Base):
     image = Column(String(255), nullable=True)
     date = Column(String(50), nullable=True)
     link = Column(String(255), nullable=True)
+    content = Column(Text, nullable=True)
 
 class Contact(Base):
     __tablename__ = "contacts"

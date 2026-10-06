@@ -93,10 +93,11 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { projectsData } from '@/data/projects';
+import { useCourseStore } from '@/stores/courses';
 
 const route = useRoute();
 const router = useRouter();
+const courseStore = useCourseStore();
 
 const currentCategory = ref('all');
 
@@ -112,6 +113,7 @@ const syncCategoryFromQuery = () => {
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   syncCategoryFromQuery();
+  courseStore.fetchProjects();
 });
 
 watch(() => route.query.cat, () => {
@@ -127,11 +129,13 @@ const selectCategory = (cat) => {
   }
 };
 
+const allProjects = computed(() => courseStore.projects || []);
+
 const filteredProjects = computed(() => {
   if (currentCategory.value === 'all') {
-    return projectsData;
+    return allProjects.value;
   }
-  return projectsData.filter(item => item.category === currentCategory.value);
+  return allProjects.value.filter(item => item.category === currentCategory.value);
 });
 </script>
 

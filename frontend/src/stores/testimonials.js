@@ -16,29 +16,26 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
+import { videoTestimonialsData, photoTestimonialsData } from '@/data/testimonials';
+
 export const useTestimonialStore = defineStore('testimonials', {
   state: () => ({
-    testimonials: [
-      // Fallback/Initial state
-      {
-        id: 1,
-        text: "Tôi đã học được rất nhiều, không chỉ về kỹ năng giải quyết vấn đề và ra quyết định, mà còn ở cách tư duy và áp dụng vào công việc thực tế.",
-        name: "Lê Hồng Minh",
-        role: "Founder & CEO, VNG Corporation",
-        image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop",
-        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4"
-      },
-      {
-        id: 2,
-        text: "Khóa học được chuẩn bị một cách kỹ lưỡng, thể hiện qua các hoạt động tình huống sinh động và lôi cuốn, giúp tôi dễ dàng tiếp cận và ghi nhớ kiến thức.",
-        name: "Nguyễn Thành Nam",
-        role: "Cựu CEO FPT, Founder FUNiX",
-        image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&auto=format&fit=crop",
-        videoUrl: null
-      }
-    ],
+    testimonials: [],
     loading: false
   }),
+
+  getters: {
+    videoTestimonials(state) {
+      const list = state.testimonials.filter(t => t.testimonialType === 'video');
+      if (list.length > 0) return list;
+      return videoTestimonialsData;
+    },
+    photoTestimonials(state) {
+      const list = state.testimonials.filter(t => t.testimonialType === 'photo' || t.testimonialType === 'text');
+      if (list.length > 0) return list;
+      return photoTestimonialsData;
+    }
+  },
 
   actions: {
     async fetchTestimonials() {
@@ -51,10 +48,20 @@ export const useTestimonialStore = defineStore('testimonials', {
             this.testimonials = data.map(item => ({
               id: item.id,
               name: item.name,
-              role: item.role,
-              text: item.text,
-              image: item.image,
-              videoUrl: item.video_url
+              studentName: item.name,
+              role: item.role || '',
+              company: item.company || '',
+              text: item.text || '',
+              quote: item.quote || item.text || '',
+              rating: item.rating || 5,
+              image: item.image || '',
+              avatar: item.thumbnail || item.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+              courseName: item.course_name || '',
+              testimonialType: item.testimonial_type || 'text',
+              youtubeId: item.youtube_id || '',
+              thumbnail: item.thumbnail || (item.youtube_id ? `https://img.youtube.com/vi/${item.youtube_id}/hqdefault.jpg` : ''),
+              videoUrl: item.video_url || (item.youtube_id ? `https://www.youtube.com/embed/${item.youtube_id}?autoplay=1` : ''),
+              title: item.text || item.quote || `Chia sẻ từ học viên ${item.name}`
             }));
           }
         }

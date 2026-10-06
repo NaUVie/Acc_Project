@@ -623,6 +623,14 @@ onMounted(() => {
   text-decoration: underline;
   font-weight: 600;
 }
+
+.rich-course-description :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 16px 0;
+  display: block;
+}
 </style>
 
 <style scoped src="@/styles/views/courses/CourseDetail.css"></style>

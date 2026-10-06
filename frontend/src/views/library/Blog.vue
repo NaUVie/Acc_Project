@@ -56,7 +56,7 @@
           :key="post.id" 
           class="blog-post-card snap-center group"
         >
-          <a :href="post.link" class="blog-post-card__figure rounded">
+          <router-link :to="post.link || '/blog/' + post.handle" class="blog-post-card__figure rounded">
             <span class="badge badge--primary">{{ post.category }}</span>
             <img 
               :src="post.image" 
@@ -64,12 +64,12 @@
               class="w-full h-full object-cover zoom-image"
               loading="lazy"
             />
-          </a>
+          </router-link>
           <div class="blog-post-card__info">
             <div class="v-stack gap-4 sm:gap-5">
               <div class="v-stack gap-3 sm:gap-4">
                 <p class="h3">
-                  <a :href="post.link">{{ post.title }}</a>
+                  <router-link :to="post.link || '/blog/' + post.handle">{{ post.title }}</router-link>
                 </p>
                 <p>{{ post.excerpt }}</p>
               </div>
@@ -109,10 +109,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 
 const courseStore = useCourseStore();
+
+onMounted(async () => {
+  await courseStore.fetchBlogs().catch(() => {});
+});
 
 const categories = [
   'All posts',
@@ -131,8 +135,8 @@ const posts = computed(() => courseStore.getBlogPosts);
 const filteredPosts = computed(() => {
   return posts.value.filter(post => {
     const matchesCategory = selectedCategory.value === 'All posts' || post.category === selectedCategory.value;
-    const matchesSearch = post.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-                          post.excerpt.toLowerCase().includes(searchQuery.value.toLowerCase());
+    const matchesSearch = (post.title && post.title.toLowerCase().includes(searchQuery.value.toLowerCase())) || 
+                          (post.excerpt && post.excerpt.toLowerCase().includes(searchQuery.value.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 });

@@ -74,8 +74,15 @@ const routes = [
   },
   {
     path: '/library/blog',
+    alias: ['/blog'],
     name: 'LibraryBlog',
     component: () => import('../views/library/Blog.vue')
+  },
+  {
+    path: '/blog/:handle',
+    alias: ['/library/blog/:handle'],
+    name: 'BlogDetail',
+    component: () => import('../views/library/BlogDetail.vue')
   },
   {
     path: '/library/recipes',
