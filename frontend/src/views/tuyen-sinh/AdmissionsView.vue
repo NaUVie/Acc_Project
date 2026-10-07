@@ -3,9 +3,7 @@
     <!-- Hero Banner Section -->
     <section class="admissions-hero">
       <div class="container hero-container">
-        <div class="hero-badge animate-fade-in">
-          <span class="bell-icon-pulse">🔔</span> CHƯƠNG TRÌNH TUYỂN SINH CAO CẤP ACC ACADEMY
-        </div>
+
         <h1 class="hero-title animate-fade-in">
           Nâng tầm Lãnh đạo & Khai phá <span class="gradient-text">Tiềm năng Quản trị</span>
         </h1>
@@ -16,13 +14,13 @@
         <!-- Quick Jump Pills -->
         <div class="jump-pills">
           <button @click="scrollToSection('mba')" class="jump-pill active">
-            🎓 MBA Andrews
+           MBA Andrews
           </button>
-          <button @click="scrollToSection('mini-mba')" class="jump-pill">
+          <!-- <button @click="scrollToSection('mini-mba')" class="jump-pill">
             ⚡ Mini MBA
-          </button>
+          </button> -->
           <button @click="scrollToSection('gel')" class="jump-pill">
-            🌐 GEL (Global Executive Leadership)
+          GEL (Global Executive Leadership)
           </button>
         </div>
       </div>
@@ -49,15 +47,12 @@
 
             <div class="program-highlights">
               <div class="highlight-item">
-                <span class="icon">🏛️</span>
                 <span>Đại học Top đầu Hoa Kỳ (Thành lập từ 1874)</span>
               </div>
               <div class="highlight-item">
-                <span class="icon">🎓</span>
                 <span>Bằng có giá trị toàn cầu & Bộ GD&ĐT Việt Nam công nhận</span>
               </div>
               <div class="highlight-item">
-                <span class="icon">⏱️</span>
                 <span>Thời gian học: 18 tháng (Cuối tuần & Online linh hoạt)</span>
               </div>
             </div>
@@ -75,7 +70,7 @@
       </div>
 
       <!-- Program 2: Mini MBA -->
-      <div id="mini-mba" class="program-card glass-card animate-slide-up">
+      <!-- <div id="mini-mba" class="program-card glass-card animate-slide-up">
         <div class="program-grid reverse">
           <div class="program-media">
             <img src="/images/Service_card_2.png" alt="Mini MBA Thực chiến" class="program-img" />
@@ -115,7 +110,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Program 3: GEL (Global Executive Leadership) -->
       <div id="gel" class="program-card glass-card animate-slide-up">
@@ -135,15 +130,12 @@
 
             <div class="program-highlights">
               <div class="highlight-item">
-                <span class="icon">🌐</span>
                 <span>Trải nghiệm trực tiếp tại trụ sở các tập đoàn tại Hoa Kỳ</span>
               </div>
               <div class="highlight-item">
-                <span class="icon">🤝</span>
                 <span>Giao lưu & kết nối với mạng lưới Lãnh đạo Doanh nghiệp quốc tế</span>
               </div>
               <div class="highlight-item">
-                <span class="icon">📜</span>
                 <span>Chứng nhận Lãnh đạo Toàn cầu từ Viện LEADMAN & Andrews</span>
               </div>
             </div>

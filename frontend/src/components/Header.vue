@@ -12,7 +12,28 @@
         <router-link to="/about-us" class="nav-link">VỀ CHÚNG TÔI</router-link>
 
         <!-- 2. ĐÀO TẠO -->
-        <router-link to="/courses" class="nav-link">ĐÀO TẠO</router-link>
+        <div class="nav-item dropdown">
+          <router-link to="/courses" class="nav-link dropdown-toggle">
+            ĐÀO TẠO
+            <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </router-link>
+          <div class="dropdown-menu">
+            <router-link to="/courses" class="dropdown-item">
+              <div class="dropdown-title">TẤT CẢ KHÓA HỌC</div>
+              <div class="dropdown-desc">Khám phá toàn bộ các khóa học & chương trình đào tạo</div>
+            </router-link>
+            <router-link to="/courses/category/dao-tao-doanh-nghiep" class="dropdown-item">
+              <div class="dropdown-title">ĐÀO TẠO INHOUSE</div>
+              <div class="dropdown-desc">Các giải pháp đào tạo Inhouse & chuyển đổi số cho doanh nghiệp</div>
+            </router-link>
+            <router-link to="/courses/category/dao-tao-ca-nhan" class="dropdown-item">
+              <div class="dropdown-title">ĐÀO TẠO CÁ NHÂN</div>
+              <div class="dropdown-desc">Kỹ năng ứng dụng AI, chuyên môn & kỹ năng mềm cho cá nhân</div>
+            </router-link>
+          </div>
+        </div>
 
         <!-- 3. TUYỂN SINH (Single Link) -->
         <router-link to="/tuyen-sinh" class="nav-link nav-link-admission">
@@ -56,15 +77,15 @@
           </router-link>
           <div class="dropdown-menu">
             <router-link to="/du-an?cat=du-an-doanh-nghiep" class="dropdown-item">
-              <div class="dropdown-title">🏢 DỰ ÁN DOANH NGHIỆP</div>
+              <div class="dropdown-title">DỰ ÁN DOANH NGHIỆP</div>
               <div class="dropdown-desc">Các dự án đào tạo In-house & chuyển đổi số may đo cho doanh nghiệp</div>
             </router-link>
             <router-link to="/du-an?cat=du-an-ca-nhan" class="dropdown-item">
-              <div class="dropdown-title">👤 DỰ ÁN CÁ NHÂN</div>
+              <div class="dropdown-title">DỰ ÁN CÁ NHÂN</div>
               <div class="dropdown-desc">Các chương trình huấn luyện gia tốc năng lực 1:1 cho nhà quản lý</div>
             </router-link>
             <router-link to="/du-an?cat=du-an-nha-nuoc" class="dropdown-item">
-              <div class="dropdown-title">🏛️ DỰ ÁN NHÀ NƯỚC</div>
+              <div class="dropdown-title">DỰ ÁN NHÀ NƯỚC</div>
               <div class="dropdown-desc">Bồi dưỡng năng lực số & an toàn thông tin khối cơ quan - nhà nước</div>
             </router-link>
           </div>
@@ -179,7 +200,19 @@
         <router-link to="/about-us" class="mobile-single-link" @click="closeMobileMenu">VỀ CHÚNG TÔI</router-link>
 
         <!-- 2. ĐÀO TẠO -->
-        <router-link to="/courses" class="mobile-single-link" @click="closeMobileMenu">ĐÀO TẠO</router-link>
+        <div class="mobile-nav-group">
+          <div class="mobile-nav-label" @click="toggleMobileSection('courses-menu')">
+            ĐÀO TẠO
+            <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'courses-menu' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </div>
+          <div class="mobile-nav-links" v-show="activeMobileSection === 'courses-menu'">
+            <router-link to="/courses" @click="closeMobileMenu" class="mobile-single-sublink">Tất cả khóa học</router-link>
+            <router-link to="/courses/category/dao-tao-doanh-nghiep" @click="closeMobileMenu" class="mobile-single-sublink">Đào tạo Inhouse</router-link>
+            <router-link to="/courses/category/dao-tao-ca-nhan" @click="closeMobileMenu" class="mobile-single-sublink">Đào tạo cá nhân</router-link>
+          </div>
+        </div>
 
         <!-- 3. TUYỂN SINH -->
         <router-link to="/tuyen-sinh" class="mobile-single-link" @click="closeMobileMenu">TUYỂN SINH</router-link>
@@ -213,9 +246,9 @@
             </svg>
           </div>
           <div class="mobile-nav-links" v-show="activeMobileSection === 'projects'">
-            <router-link to="/du-an?cat=du-an-doanh-nghiep" @click="closeMobileMenu" class="mobile-single-sublink">🏢 DỰ ÁN DOANH NGHIỆP</router-link>
-            <router-link to="/du-an?cat=du-an-ca-nhan" @click="closeMobileMenu" class="mobile-single-sublink">👤 DỰ ÁN CÁ NHÂN</router-link>
-            <router-link to="/du-an?cat=du-an-nha-nuoc" @click="closeMobileMenu" class="mobile-single-sublink">🏛️ DỰ ÁN NHÀ NƯỚC</router-link>
+            <router-link to="/du-an?cat=du-an-doanh-nghiep" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN DOANH NGHIỆP</router-link>
+            <router-link to="/du-an?cat=du-an-ca-nhan" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN CÁ NHÂN</router-link>
+            <router-link to="/du-an?cat=du-an-nha-nuoc" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN NHÀ NƯỚC</router-link>
           </div>
         </div>
 
@@ -485,7 +518,7 @@ const drawerItems = computed(() => {
     case 'post-graduate':
       return [
         { title: '🎓 MBA ANDREW (Thạc sĩ Quản trị Kinh doanh Hoa Kỳ)', link: '/tuyen-sinh#mba' },
-        { title: '⚡ MINI MBA Practical (Quản trị Tinh gọn)', link: '/tuyen-sinh#mini-mba' },
+        // { title: '⚡ MINI MBA Practical (Quản trị Tinh gọn)', link: '/tuyen-sinh#mini-mba' },
         { title: '🌐 GEL (Global Executive Leadership)', link: '/tuyen-sinh#gel' }
       ];
     case 'courses':

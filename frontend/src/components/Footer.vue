@@ -60,7 +60,6 @@
             <p><strong>Hotline:</strong> 0938 566 700</p>
             <p><strong>Email:</strong> info@acc-edu.vn</p>
             <p><strong>VP. Hồ Chí Minh:</strong> 156 Nam Kỳ Khởi Nghĩa</p>
-            <p><strong>VP. Hà Nội:</strong> 28 Ngõ 7 Giang Văn Minh, P. Kim Mã</p>
           </div>
         </div>
       </div>

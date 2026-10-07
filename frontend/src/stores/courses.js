@@ -43,10 +43,8 @@ export const useCourseStore = defineStore('courses', {
     // Catalog states
     courses: [],
     categories: [
-      { slug: 'dao-tao-doanh-nghiep', name: 'Đào tạo cho doanh nghiệp' },
-      { slug: 'dao-tao-ca-nhan', name: 'Đào tạo cho cá nhân' },
-      { slug: 'dao-tao-co-quan-nha-nuoc', name: 'Đào tạo cho khối cơ quan - nhà nước' },
-      { slug: 'bundles', name: 'Combo khóa học' }
+      { slug: 'dao-tao-doanh-nghiep', name: 'Đào tạo Inhouse' },
+      { slug: 'dao-tao-ca-nhan', name: 'Đào tạo cá nhân' }
     ],
     programs: [],
     bundles: [],

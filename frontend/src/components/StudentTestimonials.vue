@@ -3,13 +3,10 @@
     <div class="container">
       <!-- Section Header -->
       <div class="section-header">
-        <span class="custom-ui-tag hero-tag">CHIA SẺ HỌC VIÊN</span>
         <h2 class="section-title">
           Góc nhìn & Phản hồi Thực tế từ <span class="highlight-text">Học viên ACC Academy</span>
         </h2>
-        <p class="section-desc">
-          Lắng nghe những chia sẻ, đánh giá trực tiếp và kết quả đạt được từ các CEO, Chủ doanh nghiệp và Học viên sau các khóa đào tạo của ACC Academy.
-        </p>
+     
 
         <!-- YouTube Playlist Banner Button -->
         <div class="youtube-playlist-banner">

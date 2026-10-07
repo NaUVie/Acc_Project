@@ -2,9 +2,7 @@
   <div class="lecturers-page container">
     <!-- Hero Header -->
     <div class="header-section animate-fade-in">
-      <div class="badge">ĐỘI NGŨ GIẢNG VIÊN THỰC CHUYÊN ACC ACADEMY</div>
       <h1>Đội ngũ <span class="gradient-text">Giảng viên & Chuyên gia Thực chiến</span></h1>
-      <p class="subtitle">Khám phá và kết nối với các chuyên gia, giảng viên hàng đầu theo từng chuyên ngành đào tạo thực tiễn tại doanh nghiệp.</p>
     </div>
 
     <!-- Mega Dropdown-Style Layout Container (Giao diện giống hệt ĐÀO TẠO) -->

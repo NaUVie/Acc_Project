@@ -78,57 +78,32 @@
               </div>
             </div>
 
-          <div class="eco-center">
-            <img src="/images/Ecosystem_1.png" alt="ACC Academy Ecosystem" class="eco-img" />
-          </div>
-
-          <div class="eco-right">
-            <div class="services-list-card">
-              <h3 class="services-card-title">Dịch vụ của chúng tôi</h3>
-              <ul class="services-card-links">
-                <li>
-                  <router-link to="/corporate/dao-tao" class="service-item-link">
-                    <span>Đào tạo In-house cho Doanh nghiệp</span>
-                    <span class="arrow-icon">&rarr;</span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link to="/courses/category/ky-nang-chuyen-mon" class="service-item-link">
-                    <span>Tuyển sinh các chương trình sau đại học</span>
-                    <span class="arrow-icon">&rarr;</span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link to="/corporate/coe" class="service-item-link">
-                    <span>Tư vấn Ứng dụng AI & Tự động hóa</span>
-                    <span class="arrow-icon">&rarr;</span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link to="/contact" class="service-item-link">
-                    <span>Tư vấn Marketing & Chuyển đổi số</span>
-                    <span class="arrow-icon">&rarr;</span>
-                  </router-link>
-                </li>
-                <li>
-                  <router-link to="/courses/category/ky-nang-ai" class="service-item-link">
-                    <span>Đào tạo dành cho Cá nhân</span>
-                    <span class="arrow-icon">&rarr;</span>
-                  </router-link>
-                </li>
-              </ul>
-              <router-link to="/contact" class="eco-cta-btn">
-                <span>Liên hệ tư vấn</span>
-                <span class="circle-arrow">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                    <polyline points="7 7 17 7 17 17"></polyline>
-                  </svg>
-                </span>
-              </router-link>
+            <!-- Video Player Section (Replaces eco-center image & eco-right services list) -->
+            <div class="eco-video-wrapper">
+              <div class="eco-video-card" :class="{ 'is-playing': isVideoPlaying }">
+                <video 
+                  ref="ecoVideoRef" 
+                  class="eco-video-element" 
+                  poster="/images/CoE-Thumb.png"
+                  controls
+                  playsinline
+                  :src="videoUrl"
+                  @play="isVideoPlaying = true"
+                  @pause="isVideoPlaying = false"
+                  @ended="isVideoPlaying = false"
+                ></video>
+                <div v-if="!isVideoPlaying" class="video-play-overlay" @click="handlePlayVideo">
+                  <div class="play-pulse-ring"></div>
+                  <button class="play-btn-circle" aria-label="Phát video">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                  </button>
+                  <span class="play-btn-label">XEM VIDEO GIỚI THIỆU ACC ACADEMY</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
       </div>
     </section>
 
@@ -169,7 +144,6 @@
     <!-- 4. Partner Logos Section -->
     <section class="partner-logos-section">
       <div class="partner-logos-header container">
-        <span class="partner-logos-badge">ĐỐI TÁC TIN CẬY</span>
         <h3 class="partner-logos-title">130+ doanh nghiệp hàng đầu đã hợp tác</h3>
       </div>
       
@@ -243,64 +217,23 @@
         </div>
 
         <div class="bento-grid-container">
-          <!-- Card 1: Enterprise Training (Wide) -->
-          <div class="bento-card card-wide bg-dark-blue">
-            <img src="/images/service_card.webp" alt="Đào tạo doanh nghiệp" class="bento-card-bg" />
-            <div class="bento-card-content content-center text-white">
-              <h3 class="bento-card-title">Đào tạo Đội ngũ doanh nghiệp</h3>
-              <p class="bento-card-desc">Xây dựng năng lực thích ứng cao cho tổ chức thông qua các lộ trình đào tạo được thiết kế riêng</p>
-              <router-link to="/corporate/dao-tao" class="bento-arrow-btn btn-light">
-                <span class="btn-text">Liên hệ ngay</span>
-                <span class="btn-circle">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                    <polyline points="7 7 17 7 17 17"></polyline>
-                  </svg>
-                </span>
-              </router-link>
+          <div 
+            v-for="(card, index) in bentoCards" 
+            :key="card.id"
+            class="bento-card"
+            :class="[index === 0 ? 'card-wide' : 'card-square', card.bgClass]"
+          >
+            <router-link v-if="card.link" :to="card.link" class="bento-card-overlay-link"></router-link>
+            
+            <img v-if="card.bgImage" :src="card.bgImage" :alt="card.title" class="bento-card-bg" :class="card.bgImgClass" />
+            
+            <div class="bento-card-content" :class="card.contentClass">
+              <h3 class="bento-card-title">{{ card.title }}</h3>
+              <p class="bento-card-desc">{{ card.desc }}</p>
             </div>
-          </div>
 
-          <!-- Card 2: Enterprise Training (Square) -->
-          <div class="bento-card card-square bg-slate-gray">
-            <router-link to="/corporate/dao-tao" class="bento-card-overlay-link"></router-link>
-            <div class="bento-card-content content-top text-white">
-              <h3 class="bento-card-title">Đào tạo doanh nghiệp</h3>
-              <p class="bento-card-desc">Chương trình Inhouse may đo và các Khóa đào tạo cá nhân - chuyển hóa kiến thức quốc tế thành hành vi và hiệu suất trong tổ chức của bạn.</p>
-            </div>
-            <div class="bento-card-bottom-mockup">
-              <img src="/images/Service_card_dfee141b-d689-4e2c-bec9-350c9f407f84.png" alt="Đào tạo doanh nghiệp" class="bento-mockup-img" />
-            </div>
-          </div>
-
-          <!-- Card 3: Exclusive Andrews Admission (Square) -->
-          <div class="bento-card card-square bg-slate-gray">
-            <router-link to="/courses/category/ky-nang-chuyen-mon" class="bento-card-overlay-link"></router-link>
-            <img src="/images/service_card_2.webp" alt="Tuyển sinh độc quyền Andrews" class="bento-card-bg bento-bg-tint" />
-            <div class="bento-card-content content-top text-white">
-              <h3 class="bento-card-title">Tuyển sinh độc quyền Andrews</h3>
-              <p class="bento-card-desc">Thạc sĩ MBA Andrews tại Việt Nam và GEI - Hội thảo Lãnh đạo cấp cao tại Michigan, Hoa Kỳ. ACC là đại diện duy nhất tại Việt Nam.</p>
-            </div>
-          </div>
-
-          <!-- Card 4: Individual Courses (Wide) -->
-          <div class="bento-card card-wide bg-light-gray">
-            <picture>
-              <source media="(max-width: 768px)" srcset="/images/Service_card_3.png" />
-              <img src="/images/Service_card_2.png" alt="Khóa học cá nhân" class="bento-card-bg" />
-            </picture>
-            <div class="bento-card-content content-left text-dark">
-              <h3 class="bento-card-title">Khóa học Cá nhân</h3>
-              <p class="bento-card-desc">Trang bị hệ thống tư duy và công cụ để mỗi cá nhân trở thành phiên bản xuất sắc nhất trong sự nghiệp của mình</p>
-              <router-link to="/courses/category/ky-nang-ai" class="bento-arrow-btn btn-teal">
-                <span class="btn-text">Khám phá ngay</span>
-                <span class="btn-circle">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="7" y1="17" x2="17" y2="7"></line>
-                    <polyline points="7 7 17 7 17 17"></polyline>
-                  </svg>
-                </span>
-              </router-link>
+            <div v-if="card.mockupImage" class="bento-card-bottom-mockup">
+              <img :src="card.mockupImage" :alt="card.title" class="bento-mockup-img" />
             </div>
           </div>
         </div>
@@ -312,9 +245,31 @@
     <section class="courses-section">
       <div class="container">
         <div class="courses-header">
-          <span class="courses-ui-tag">Giải pháp đào tạo</span>
-          <h2 class="courses-title">Giải pháp đào tạo phát triển năng lực toàn diện</h2>
-          <p class="courses-subtitle">ACC cung cấp các chương trình đào tạo được thiết kế theo từng cấp độ, chức năng và nhu cầu của tổ chức, giúp chuyển hóa kiến thức thành năng lực thực tiễn và hiệu quả công việc.</p>
+          <h2 class="courses-title">Lịch đào tạo</h2>
+          <!-- Filter Tabs / Navbar (All, Inhouse, Individual) -->
+          <div class="course-filter-tabs">
+            <button 
+              class="tab-btn" 
+              :class="{ active: currentCourseCategory === 'all' }"
+              @click="currentCourseCategory = 'all'"
+            >
+              Tất cả
+            </button>
+            <button 
+              class="tab-btn" 
+              :class="{ active: currentCourseCategory === 'dao-tao-doanh-nghiep' }"
+              @click="currentCourseCategory = 'dao-tao-doanh-nghiep'"
+            >
+               Đào tạo Inhouse
+            </button>
+            <button 
+              class="tab-btn" 
+              :class="{ active: currentCourseCategory === 'dao-tao-ca-nhan' }"
+              @click="currentCourseCategory = 'dao-tao-ca-nhan'"
+            >
+               Đào tạo Cá nhân
+            </button>
+          </div>
         </div>
 
         <div class="home-courses-grid">
@@ -326,7 +281,6 @@
             <router-link :to="'/course/' + (course.handle || course.id)" class="home-course-img-link">
               <div class="home-course-img-box">
                 <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" class="home-course-img" loading="lazy" />
-                <span class="home-course-level-tag">{{ course.level || 'Tất cả cấp độ' }}</span>
               </div>
             </router-link>
             
@@ -334,16 +288,14 @@
               <h3 class="home-course-heading">
                 <router-link :to="'/course/' + (course.handle || course.id)">{{ course.title }}</router-link>
               </h3>
-              <p class="home-course-desc">{{ stripHtml(course.description) }}</p>
+              <!-- <p class="home-course-desc">{{ stripHtml(course.description) }}</p> -->
               
               <div class="home-course-footer">
-                <div class="home-course-price">
-                  <span class="price-orig" v-if="course.originalPrice">{{ formatPrice(course.originalPrice) }}</span>
-                  <span class="price-val">{{ formatPrice(course.price) }}</span>
-                </div>
-                <router-link :to="'/course/' + (course.handle || course.id)" class="home-course-btn">
-                  <span>Chi tiết</span>
-                  <span class="arrow">&rarr;</span>
+                <router-link :to="'/course/' + (course.handle || course.id)" class="btn-link-stretch" aria-label="Xem chi tiết khóa học">
+                  <div class="arrow-stretch-box">
+                    <span class="line-body"></span>
+                    <span class="arrow-tip"></span>
+                  </div>
                 </router-link>
               </div>
             </div>
@@ -367,11 +319,16 @@
       <div class="container">
         <div class="blogs-header-row">
           <div class="blogs-header-left">
-            <span class="blogs-ui-tag">ĐỘI NGŨ GIẢNG VIÊN</span>
             <h2 class="blogs-heading">Đội ngũ Giảng viên & Chuyên gia Thực chiến</h2>
           </div>
-          <router-link to="/doi-ngu-giang-vien" class="blogs-view-all-btn">
-            Xem tất cả giảng viên &rarr;
+          <router-link to="/doi-ngu-giang-vien" class="header-link-with-arrow" aria-label="Xem tất cả giảng viên">
+            <span class="header-link-text">Xem tất cả</span>
+            <div class="btn-link-stretch">
+              <div class="arrow-stretch-box">
+                <span class="line-body"></span>
+                <span class="arrow-tip"></span>
+              </div>
+            </div>
           </router-link>
         </div>
 
@@ -413,11 +370,16 @@
       <div class="container">
         <div class="blogs-header-row">
           <div class="blogs-header-left">
-            <span class="blogs-ui-tag">CHIA SẺ HỌC VIÊN</span>
-            <h2 class="blogs-heading">Hình ảnh & Cảm nhận Thực tế từ Học viên ACC</h2>
+            <h2 class="blogs-heading">Cảm nhận từ Học viên ACC</h2>
           </div>
-          <router-link to="/chia-se-hoc-vien" class="blogs-view-all-btn">
-            Xem thêm chia sẻ học viên &rarr;
+          <router-link to="/chia-se-hoc-vien" class="header-link-with-arrow" aria-label="Xem thêm chia sẻ học viên">
+            <span class="header-link-text">Xem thêm</span>
+            <div class="btn-link-stretch">
+              <div class="arrow-stretch-box">
+                <span class="line-body"></span>
+                <span class="arrow-tip"></span>
+              </div>
+            </div>
           </router-link>
         </div>
 
@@ -440,14 +402,14 @@
               </div>
               <div class="home-stars">★★★★★</div>
               <p class="home-quote-text">"{{ p.quote }}"</p>
-              <span class="home-course-tag">{{ p.courseName }}</span>
+              <!-- <span class="home-course-tag">{{ p.courseName }}</span> -->
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 10. CTA Section -->
+    <!-- 10. CTA Section
     <section class="cta-banner-section">
       <div class="container">
         <div class="cta-banner-box">
@@ -477,8 +439,77 @@
           </div>
         </div>
       </div>
-    </section>
+    </section> -->
   </div>
+
+  <!-- Auto Pop-up Consultation Modal (Horizontal Name Card Style) -->
+  <Transition name="modal-fade">
+    <div v-if="isContactModalOpen" class="consult-modal-overlay" @click.self="closeContactModal">
+      <div class="consult-card-visit-horizontal" role="dialog" aria-modal="true" aria-labelledby="consult-modal-title">
+        <button class="consult-modal-close" @click="closeContactModal" aria-label="Đóng cửa sổ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <!-- Left Side: ACC Logo & Brand Identity -->
+        <div class="card-visit-left">
+          <div class="card-logo-box">
+            <img src="/images/logo3.png" alt="ACC Academy Logo" class="card-acc-logo" />
+            <h2 class="card-acc-brand">ACC ACADEMY</h2>
+            <p class="card-acc-slogan">Kiến tạo năng lực — Dẫn dắt chuyển đổi bền vững</p>
+          </div>
+          <div class="card-decoration-pattern"></div>
+        </div>
+
+        <!-- Right Side: Compact Form -->
+        <div class="card-visit-right">
+          <div class="card-visit-header">
+            <h3 id="consult-modal-title" class="card-visit-title">Đăng Ký Tư Vấn</h3>
+            <p class="card-visit-desc">Nhận tư vấn trực tiếp từ chuyên gia</p>
+          </div>
+
+          <form @submit.prevent="submitContactModal" class="card-visit-form">
+            <div class="card-input-wrap">
+              <input 
+                v-model="contactForm.fullname" 
+                type="text" 
+                class="card-input" 
+                placeholder="Họ và tên *" 
+                required 
+              />
+            </div>
+
+            <div class="card-input-wrap">
+              <input 
+                v-model="contactForm.phone" 
+                type="tel" 
+                class="card-input" 
+                placeholder="Số điện thoại *" 
+                required 
+              />
+            </div>
+
+            <div class="card-input-wrap">
+              <input 
+                v-model="contactForm.email" 
+                type="email" 
+                class="card-input" 
+                placeholder="Email *" 
+                required 
+              />
+            </div>
+
+            <button type="submit" class="card-submit-btn" :disabled="isSubmittingContact">
+              <span v-if="!isSubmittingContact">Đăng Ký Ngay &rarr;</span>
+              <span v-else>Đang gửi...</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -491,6 +522,18 @@ import { stripHtml } from '@/utils/stripHtml';
 
 const courseStore = useCourseStore();
 const testimonialStore = useTestimonialStore();
+
+// Ecosystem Video Player
+const ecoVideoRef = ref(null);
+const isVideoPlaying = ref(false);
+const videoUrl = ref('/videos/intro.mp4');
+
+const handlePlayVideo = () => {
+  if (ecoVideoRef.value) {
+    ecoVideoRef.value.play();
+    isVideoPlaying.value = true;
+  }
+};
 
 // 1. Hero Carousel
 const currentSlide = ref(0);
@@ -793,7 +836,59 @@ const partnerRow2 = computed(() => partnerLogos.slice(thirdPart, thirdPart * 2))
 const partnerRow3 = computed(() => partnerLogos.slice(thirdPart * 2));
 
 
-// 5. Custom Mouse Cursor for Case Studies
+// Bento Grid Cards Data with F5 Rotation
+const rawBentoCards = [
+  {
+    id: 'ca-nhan',
+    title: 'Đào tạo cho cá nhân',
+    desc: 'Trang bị hệ thống tư duy và công cụ để mỗi cá nhân trở thành phiên bản xuất sắc nhất trong sự nghiệp của mình',
+    bgClass: 'bg-dark-blue',
+    contentClass: 'content-center text-white',
+    bgImage: '/images/service_card.webp',
+    link: '/courses/category/dao-tao-ca-nhan'
+  },
+  {
+    id: 'inhouse',
+    title: 'Đào tạo Inhouse',
+    desc: 'Xây dựng năng lực thích ứng cao cho tổ chức thông qua các lộ trình đào tạo được thiết kế riêng',
+    bgClass: 'bg-slate-gray',
+    contentClass: 'content-top text-white',
+    mockupImage: '/images/Service_card_dfee141b-d689-4e2c-bec9-350c9f407f84.png',
+    link: '/courses/category/dao-tao-doanh-nghiep'
+  },
+  {
+    id: 'andrews',
+    title: 'Tuyển sinh đại học Andrews',
+    desc: 'Thạc sĩ MBA Andrews tại Việt Nam và GEI - Hội thảo Lãnh đạo cấp cao tại Michigan, Hoa Kỳ.',
+    bgClass: 'bg-slate-gray',
+    contentClass: 'content-top text-white',
+    bgImage: '/images/service_card_2.webp',
+    bgImgClass: 'bento-bg-tint',
+    link: '/tuyen-sinh'
+  }
+];
+
+const bentoCardsOffset = ref(0);
+
+const getBentoRotationOffset = () => {
+  if (typeof window !== 'undefined' && window.sessionStorage) {
+    let currentIdx = parseInt(sessionStorage.getItem('acc_bento_rotate_idx') || '0', 10);
+    const nextIdx = (currentIdx + 1) % rawBentoCards.length;
+    sessionStorage.setItem('acc_bento_rotate_idx', nextIdx.toString());
+    return currentIdx;
+  }
+  return 0;
+};
+
+const bentoCards = computed(() => {
+  const offset = bentoCardsOffset.value;
+  const len = rawBentoCards.length;
+  const rotated = [];
+  for (let i = 0; i < len; i++) {
+    rotated.push(rawBentoCards[(i + offset) % len]);
+  }
+  return rotated;
+});
 const showCursor = ref(false);
 const cursorX = ref(0);
 const cursorY = ref(0);
@@ -849,8 +944,14 @@ const nextTestimonial = () => {
 };
 
 // 8. Dynamic Courses Data from courseStore
+const currentCourseCategory = ref('all');
+
 const homeCourses = computed(() => {
-  return courseStore.courses || [];
+  const list = courseStore.courses || [];
+  if (currentCourseCategory.value === 'all') {
+    return list;
+  }
+  return courseStore.getCoursesByCategory(currentCourseCategory.value);
 });
 
 // Load 8 courses initially, then load 8 more on button click
@@ -886,11 +987,71 @@ const homeStudentFeedbacks = computed(() => {
   return photoTestimonialsData.slice(0, 3);
 });
 
+// 11. Consultation Auto Pop-up Modal State & Handler
+const isContactModalOpen = ref(false);
+const isSubmittingContact = ref(false);
+const contactForm = ref({
+  fullname: '',
+  phone: '',
+  email: '',
+  courseHandle: '',
+  message: ''
+});
+
+const closeContactModal = () => {
+  isContactModalOpen.value = false;
+};
+
+const submitContactModal = async () => {
+  if (!contactForm.value.fullname || !contactForm.value.phone || !contactForm.value.email) {
+    courseStore.showToast('Vui lòng điền đầy đủ các thông tin bắt buộc (*)', 'warning');
+    return;
+  }
+
+  isSubmittingContact.value = true;
+  try {
+    const nameParts = contactForm.value.fullname.trim().split(' ');
+    const lastName = nameParts.length > 0 ? nameParts[nameParts.length - 1] : '';
+    const firstName = nameParts.length > 1 ? nameParts[0] : contactForm.value.fullname.trim();
+    const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : '';
+
+    await courseStore.sendContact(
+      firstName,
+      middleName,
+      lastName,
+      contactForm.value.email,
+      contactForm.value.phone,
+      contactForm.value.courseHandle || 'consultation-popup',
+      contactForm.value.message || 'Đăng ký tư vấn từ Popup Trang Chủ'
+    );
+
+    courseStore.showToast('Cảm ơn bạn! Thông tin đăng ký tư vấn đã được gửi thành công.', 'success');
+    closeContactModal();
+    contactForm.value = {
+      fullname: '',
+      phone: '',
+      email: '',
+      courseHandle: '',
+      message: ''
+    };
+  } catch (err) {
+    courseStore.showToast(err.message || 'Gửi thông tin thất bại. Vui lòng thử lại sau!', 'error');
+  } finally {
+    isSubmittingContact.value = false;
+  }
+};
+
 onMounted(() => {
+  bentoCardsOffset.value = getBentoRotationOffset();
   startHeroAutoplay();
   setupEcoTitleObserver();
   setupCountersObserver();
   setupPartnerObserver();
+
+  // Auto pop-up consultation modal on mount (with short delay for smooth entrance)
+  setTimeout(() => {
+    isContactModalOpen.value = true;
+  }, 600);
 
   if (courseStore.courses.length === 0) {
     courseStore.fetchCourses();
@@ -902,7 +1063,6 @@ onMounted(() => {
 
 onUnmounted(() => {
   stopHeroAutoplay();
-
 });
 </script>
 

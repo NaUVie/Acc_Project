@@ -3,11 +3,8 @@
     <div class="container">
       <!-- Header Section -->
       <div class="contact-hero">
-        <span class="custom-ui-tag hero-tag">HỖ TRỢ & LIÊN HỆ</span>
         <h1 class="hero-title">Liên hệ với <span class="highlight-text">Học viện ACC</span></h1>
-        <p class="hero-subtitle">
-          Gửi yêu cầu tư vấn của bạn, chuyên gia và tư vấn viên ACC Academy sẽ chủ động liên hệ lại trong thời gian sớm nhất.
-        </p>
+        
       </div>
 
       <div class="contact-grid">
@@ -15,7 +12,7 @@
         <div class="info-section">
           <!-- VP HCM -->
           <div class="info-card">
-            <div class="icon-box">📍</div>
+
             <div class="info-details">
               <h3>Văn phòng TP. Hồ Chí Minh</h3>
               <p class="address">156 Nam Kỳ Khởi Nghĩa, Quận 1, TP. Hồ Chí Minh</p>
@@ -30,34 +27,16 @@
             </div>
           </div>
 
-          <!-- VP Ha Noi -->
-          <div class="info-card">
-            <div class="icon-box">📍</div>
-            <div class="info-details">
-              <h3>Văn phòng TP. Hà Nội</h3>
-              <p class="address">28 Ngõ 7 Giang Văn Minh, Phường Kim Mã, Ba Đình, Hà Nội</p>
-              <a 
-                href="https://maps.google.com/?q=28+Ng%C3%B5+7+Giang+V%C4%83n+Minh+Kim+M%C3%A3+H%C3%A0+N%E1%BB%99i" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="btn-map-link"
-              >
-                <span>Xem vị trí trên Google Maps &rarr;</span>
-              </a>
-            </div>
-          </div>
 
           <!-- Direct Contacts -->
           <div class="info-card contact-direct-card">
             <div class="direct-item">
-              <div class="direct-icon">📞</div>
               <div>
                 <span class="direct-label">Hotline tư vấn</span>
                 <a href="tel:0938566700" class="direct-val">0938 566 700</a>
               </div>
             </div>
             <div class="direct-item">
-              <div class="direct-icon">✉️</div>
               <div>
                 <span class="direct-label">Email hỗ trợ</span>
                 <a href="mailto:info@acc-edu.vn" class="direct-val">info@acc-edu.vn</a>

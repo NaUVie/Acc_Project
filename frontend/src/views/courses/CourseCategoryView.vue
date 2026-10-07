@@ -1,11 +1,6 @@
 <template>
   <div class="course-category-view container">
-    <!-- Hero Header -->
-    <div class="header-section animate-fade-in">
-      <div class="badge">HỆ THỐNG ĐÀO TẠO ACC ACADEMY</div>
-      <h1>Chương trình <span class="gradient-text">Đào tạo & Phát triển Năng lực</span></h1>
-      <p class="subtitle">Khám phá các lộ trình đào tạo từ kỹ năng ứng dụng AI, kỹ năng chuyên môn đến các giải pháp In-house dành cho cá nhân và doanh nghiệp.</p>
-    </div>
+
 
     <!-- Mega Dropdown-Style Layout Container -->
     <div class="mega-style-layout glass-card">
@@ -27,13 +22,6 @@
 
       <!-- Right Content: Courses Grid for regular categories -->
       <div class="mega-menu-content" v-if="selectedCategory !== 'corporate'">
-        <div class="mega-content-header">
-          <div>
-            <span class="cat-badge-small">{{ activeCategoryMeta.badge }}</span>
-            <h2 class="mega-content-title">{{ activeCategoryMeta.name }}</h2>
-          </div>
-          <p class="cat-desc-small">{{ activeCategoryMeta.description }}</p>
-        </div>
 
         <!-- Course Cards Grid (Matching Mega Program Card Grid Style) -->
         <div class="mega-programs-grid" v-if="filteredCourses.length > 0">
@@ -51,8 +39,18 @@
                 <h4 class="mega-program-title" :title="course.title">{{ course.title }}</h4>
                 <p class="mega-program-desc">{{ stripHtml(course.description) }}</p>
                 <div class="mega-card-footer">
-                  <span class="mega-price">{{ formatPrice(course.price) }}</span>
-                  <span class="mega-enroll-btn">Đăng ký ngay &rarr;</span>
+                  <div class="mega-course-price">
+                    <span class="current-price">{{ formatPrice(course.price) }}</span>
+                    <span v-if="course.originalPrice && course.originalPrice > course.price" class="original-price">
+                      {{ formatPrice(course.originalPrice) }}
+                    </span>
+                  </div>
+                  <div class="btn-link-stretch">
+                    <div class="arrow-stretch-box">
+                      <span class="line-body"></span>
+                      <span class="arrow-tip"></span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </router-link>
@@ -193,41 +191,10 @@ const selectCategoryHover = (id) => {
 };
 
 const availableCategories = computed(() => {
-  const base = [
-    { id: 'all', name: 'Tất cả khóa học' }
-  ];
-  const defaultList = [
-    { id: 'dao-tao-doanh-nghiep', name: 'Đào tạo cho doanh nghiệp' },
-    { id: 'dao-tao-ca-nhan', name: 'Đào tạo cho cá nhân' },
-    { id: 'dao-tao-co-quan-nha-nuoc', name: 'Đào tạo cho khối cơ quan - nhà nước' },
-    { id: 'bundles', name: 'Combo khóa học' }
-  ];
-
-  // Map any fetched categories or ensure default 4 standard categories are always present
-  const categoryMap = new Map();
-  // First seed default categories
-  defaultList.forEach(item => categoryMap.set(item.id, item.name));
-
-  if (courseStore.categories && courseStore.categories.length > 0) {
-    const slugAlias = {
-      'ky-nang-ai': 'dao-tao-doanh-nghiep',
-      'ky-nang-chuyen-mon': 'dao-tao-ca-nhan',
-      'ky-nang-mem': 'dao-tao-ca-nhan'
-    };
-    courseStore.categories.forEach(c => {
-      const targetSlug = slugAlias[c.slug] || c.slug;
-      if (['dao-tao-doanh-nghiep', 'dao-tao-ca-nhan', 'dao-tao-co-quan-nha-nuoc', 'bundles'].includes(targetSlug)) {
-        if (!categoryMap.has(targetSlug)) {
-          categoryMap.set(targetSlug, c.name);
-        }
-      }
-    });
-  }
-
-  const list = Array.from(categoryMap.entries()).map(([id, name]) => ({ id, name }));
   return [
-    ...base,
-    ...list
+    { id: 'all', name: 'Tất cả khóa học' },
+    { id: 'dao-tao-doanh-nghiep', name: 'Đào tạo Inhouse' },
+    { id: 'dao-tao-ca-nhan', name: 'Đào tạo cá nhân' }
   ];
 });
 
@@ -237,44 +204,7 @@ const getCategoryCount = (id) => {
   return courseStore.getCoursesByCategory(id).length;
 };
 
-const activeCategoryMeta = computed(() => {
-  const id = selectedCategory.value.toLowerCase();
-  const catObj = availableCategories.value.find(c => c.id === id);
 
-  if (id === 'all') {
-    return {
-      name: 'Tất cả Khóa học Đào tạo',
-      badge: 'TOÀN BỘ CHƯƠNG TRÌNH',
-      description: 'Khám phá tất cả các khóa học phát triển năng lực AI, quản trị doanh nghiệp, kỹ năng cá nhân và hành chính công tại ACC Academy.'
-    };
-  }
-  if (id === 'dao-tao-doanh-nghiep' || id === 'doanh-nghiep' || id === 'ky-nang-ai') {
-    return {
-      name: 'Đào tạo cho Doanh nghiệp (In-House & CoE)',
-      badge: 'GIẢI PHÁP DOANH NGHIỆP',
-      description: 'Các khóa huấn luyện in-house may đo, tự động hóa quy trình vận hành và xây dựng Trung tâm năng lực AI (CoE) cho doanh nghiệp.'
-    };
-  }
-  if (id === 'dao-tao-ca-nhan' || id === 'ca-nhan' || id === 'ky-nang-mem' || id === 'ky-nang-chuyen-mon') {
-    return {
-      name: 'Đào tạo cho Cá nhân & Người đi làm',
-      badge: 'NÂNG CAO HIỆU SUẤT CÁ NHÂN',
-      description: 'Bứt phá thu nhập và tốc độ làm việc với các khóa làm chủ Claude, Gemini, ChatGPT, Excel AI, Looker Studio và Kỹ năng giao tiếp.'
-    };
-  }
-  if (id === 'dao-tao-co-quan-nha-nuoc' || id === 'nha-nuoc' || id === 'co-quan-nha-nuoc') {
-    return {
-      name: 'Đào tạo cho Khối Cơ quan - Nhà nước',
-      badge: 'HÀNH CHÍNH CÔNG & CHÍNH PHỦ SỐ',
-      description: 'Lộ trình chuyển đổi số, tự động hóa xử lý văn bản hành chính, chuẩn hóa khung năng lực số và bảo mật dữ liệu công quyền.'
-    };
-  }
-  return {
-    name: catObj ? catObj.name : id.toUpperCase(),
-    badge: 'DANH MỤC KHÓA HỌC',
-    description: 'Các khóa học chất lượng cao tại ACC Academy.'
-  };
-});
 
 const filteredCourses = computed(() => {
   if (selectedCategory.value === 'all') {
@@ -554,28 +484,81 @@ const handleImageError = (e) => {
 
 .mega-card-footer {
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   border-top: 1px dashed #e2e8f0;
 }
 
-.mega-price {
+.mega-course-price {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.current-price {
   font-size: 15px;
   font-weight: 800;
-  color: #022b9f;
+  color: #022B9F;
+  white-space: nowrap;
 }
 
-.mega-enroll-btn {
-  font-size: 13px;
-  font-weight: 700;
-  color: #022b9f;
-  transition: transform 0.2s ease;
+.original-price {
+  font-size: 12px;
+  color: #94a3b8;
+  text-decoration: line-through;
+  white-space: nowrap;
 }
 
-.mega-program-card:hover .mega-enroll-btn {
-  transform: translateX(4px);
+.btn-link-stretch {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  text-decoration: none;
+  color: #022B9F;
+  padding-block: 4px;
+}
+
+.arrow-stretch-box {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+  margin-right: 0;
+  width: 30px;
+  max-width: 100%;
+  transition: width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-link-stretch .line-body {
+  width: 24px;
+  height: 2px;
+  background-color: currentColor;
+  transition: width 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-link-stretch .arrow-tip {
+  border: solid currentColor;
+  border-width: 0 2.5px 2.5px 0;
+  display: inline-block;
+  padding: 3.5px;
+  transform: rotate(-45deg);
+  margin-left: -6px;
+  flex-shrink: 0;
+}
+
+.mega-program-card:hover .arrow-stretch-box,
+.btn-link-stretch:hover .arrow-stretch-box {
+  width: 90px;
+}
+
+.mega-program-card:hover .btn-link-stretch .line-body,
+.btn-link-stretch:hover .line-body {
+  width: 84px;
 }
 
 /* Corporate Mega Menu Panel */

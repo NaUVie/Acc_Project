@@ -5,298 +5,143 @@
       <nav class="breadcrumb-nav">
         <router-link to="/" class="breadcrumb-link">Trang chủ</router-link>
         <span class="breadcrumb-separator">&rsaquo;</span>
-        <router-link :to="course ? '/courses/category/' + (course.category || 'ky-nang-ai') : '/courses/category/ky-nang-ai'" class="breadcrumb-link">{{ course ? getCategoryName(course.category) : 'Khóa học' }}</router-link>
+        <router-link :to="course ? '/courses/category/' + (course.category || 'dao-tao-ca-nhan') : '/courses'" class="breadcrumb-link">{{ course ? getCategoryName(course.category) : 'Khóa học' }}</router-link>
         <span class="breadcrumb-separator">&rsaquo;</span>
         <span class="breadcrumb-current">{{ course?.title || 'Chi tiết khóa học' }}</span>
       </nav>
 
       <!-- Loading State -->
-      <div v-if="loading" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 0;">
-        <div style="width: 44px; height: 44px; border: 3px solid #cbd5e1; border-top-color: #0284c7; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
-        <p style="margin-top: 16px; font-weight: 600; color: #475569;">Đang tải thông tin khóa học...</p>
+      <div v-if="loading" class="detail-loading-box">
+        <div class="detail-loading-spinner"></div>
+        <p class="detail-loading-text">Đang tải nội dung...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error || !course" style="background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; padding: 40px; border-radius: 20px; text-align: center; max-width: 500px; margin: 60px auto;">
-        <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 8px;">Không tìm thấy khóa học</h3>
-        <p style="font-size: 14px; margin-bottom: 24px; color: #dc2626;">{{ error || 'Khóa học bạn tìm kiếm không tồn tại hoặc đã bị gỡ bỏ.' }}</p>
-        <router-link to="/" class="btn-add-cart" style="display: inline-flex; width: auto; padding: 10px 24px;">Quay về Trang chủ</router-link>
+      <div v-else-if="error || !course" class="detail-error-box">
+        <h3>Không tìm thấy nội dung khóa học</h3>
+        <p>{{ error || 'Khóa học bạn tìm kiếm không tồn tại hoặc đã bị gỡ bỏ.' }}</p>
+        <router-link to="/courses" class="btn-back-courses">Xem tất cả khóa học</router-link>
       </div>
 
-      <!-- Main Detail View -->
-      <div v-else class="detail-grid">
+      <!-- Main Article & Registration Layout -->
+      <div v-else class="course-article-grid">
         
-        <!-- Left Column: Hero Info & Detailed Tabs -->
-        <div class="detail-main-content">
-          
-          <!-- Course Hero Card -->
-          <div class="course-hero-card">
-            <div class="course-badges-row">
-              <span class="cat-badge">{{ getCategoryName(course.category) }}</span>
-              <span v-if="parentProgram" class="program-parent-badge">
-                🎓 thuộc {{ parentProgram.title }}
-              </span>
+        <!-- Left Column: Article Style Content -->
+        <article class="course-article-main">
+          <!-- Article Header -->
+          <header class="article-header-box">
+            <div class="article-badges">
+              <span class="cat-badge-pill">{{ getCategoryName(course.category) }}</span>
+              <span v-if="parentProgram" class="program-badge-pill">🎓 {{ parentProgram.title }}</span>
             </div>
-
-            <h1 class="course-main-title">{{ course.title }}</h1>
-
-            <p class="course-main-description">
+            
+            <h1 class="article-main-title">{{ course.title }}</h1>
+            
+            <p class="article-lead-text" v-if="plainDescription">
               {{ plainDescription }}
             </p>
+<!-- 
+            <div class="article-meta-row">
+              <span class="meta-item">⭐ {{ course.rating || '4.9' }} ({{ course.ratingCount || 120 }} đánh giá)</span>
+              <span class="meta-item">👥 {{ course.studentCount ? course.studentCount.toLocaleString() : '1,200' }}+ Học viên</span>
+              <span class="meta-item">🔄 Cập nhật mới nhất</span>
+            </div> -->
+          </header>
 
-            <!-- Stats Bar -->
-            <div class="course-meta-bar">
-              <div class="meta-rating">
-                <span>⭐ {{ course.rating || (4.8 + ((course.id % 3) * 0.1)).toFixed(1) }}</span>
-                <span class="rating-count">({{ course.ratingCount || Math.floor((course.id % 45) + 85) }} đánh giá)</span>
-              </div>
-              <div class="meta-item">
-                <span>👥 {{ course.studentCount ? course.studentCount.toLocaleString() : ((course.id % 15 + 8) * 120 + 450).toLocaleString() }}+ Học viên</span>
-              </div>
-              <div class="meta-item">
-                <span>🌐 Tiếng Việt</span>
-              </div>
-              <div class="meta-item" style="color: #94a3b8;">
-                <span>🔄 Cập nhật 2026</span>
-              </div>
-            </div>
+          <!-- Featured Cover Image -->
+          <div class="article-cover-box" v-if="course.image">
+            <img :src="course.image" :alt="course.title" class="article-cover-img" />
           </div>
 
-          <!-- Course Tabs Card -->
-          <div class="course-tabs-card">
-            <!-- Tab Headers -->
-            <div class="tab-headers">
-              <button 
-                @click="activeTab = 'overview'" 
-                :class="['tab-btn', { active: activeTab === 'overview' }]"
-              >
-                💡 Tổng quan khóa học
-              </button>
-              <button 
-                @click="activeTab = 'curriculum'" 
-                :class="['tab-btn', { active: activeTab === 'curriculum' }]"
-              >
-                📚 Lộ trình học ({{ parsedCurriculum.length }} bài học)
-              </button>
-              <button 
-                @click="activeTab = 'reviews'" 
-                :class="['tab-btn', { active: activeTab === 'reviews' }]"
-              >
-                ⭐ Đánh giá ({{ reviews.length }})
-              </button>
+          <!-- Main Article Content Body -->
+          <div class="article-content-body">
+            <!-- Full Description / Content -->
+            <div v-if="course.description" class="rich-article-html" v-html="course.description"></div>
+
+            <!-- Outcomes / Highlights -->
+            <div v-if="courseOutcomes.length > 0" class="article-section-block">
+              <h3 class="article-sub-heading">Giá trị cốt lõi & Mục tiêu đạt được</h3>
+              <div class="article-outcomes-grid">
+                <div v-for="(outcome, oIdx) in courseOutcomes" :key="oIdx" class="article-outcome-card">
+                  <span class="check-icon">✓</span>
+                  <span>{{ outcome }}</span>
+                </div>
+              </div>
             </div>
 
-            <!-- Tab Body -->
-            <div class="tab-body">
-              <!-- Tab 1: Overview -->
-              <div v-if="activeTab === 'overview'">
-                <!-- Rich Text Description Block -->
-                <div v-if="course.description" class="rich-course-description mb-6" v-html="course.description"></div>
+            <!-- Detailed Roadmap / Curriculum if exists -->
+            <div v-if="course.customRoadmap" class="article-section-block">
+              <h3 class="article-sub-heading">Lộ trình đào tạo chi tiết</h3>
+              <div class="rich-article-html" v-html="course.customRoadmap"></div>
+            </div>
 
-                <h3 class="section-heading">Bạn sẽ đạt được gì sau khóa học này?</h3>
-                <div class="outcomes-grid">
-                  <div v-for="(outcome, oIdx) in courseOutcomes" :key="oIdx" class="outcome-item">
-                    <span class="check-icon">✓</span>
-                    <span class="outcome-text">{{ outcome }}</span>
-                  </div>
-                </div>
-
-                <div style="padding-top: 24px; border-top: 1px solid #f1f5f9; margin-top: 24px;">
-                  <h3 class="section-heading">Yêu cầu & Đối tượng phù hợp</h3>
-                  <ul class="requirements-list">
-                    <li v-for="(req, rIdx) in courseRequirements" :key="rIdx">{{ req }}</li>
-                  </ul>
-                </div>
-              </div>
-
-              <!-- Tab 2: Curriculum -->
-              <div v-else-if="activeTab === 'curriculum'">
-                <div class="curriculum-header-row">
-                  <h3 class="section-heading" style="margin: 0;">{{ course.customRoadmap ? 'Lộ trình học tập chi tiết' : 'Chi tiết các bài học' }}</h3>
-                  <span v-if="!course.customRoadmap" class="lesson-badge">Tổng cộng {{ parsedCurriculum.length }} bài học</span>
-                </div>
-
-                <!-- Custom Roadmap HTML View -->
-                <div v-if="course.customRoadmap" class="rich-course-description" v-html="course.customRoadmap"></div>
-
-                <!-- Standard Curriculum Items -->
-                <div v-else-if="parsedCurriculum.length === 0" style="text-align: center; padding: 40px 0; color: #64748b; font-weight: 500;">
-                  Nội dung lộ trình chi tiết đang được cập nhật.
-                </div>
-
-                <div v-else class="curriculum-list">
-                  <div 
-                    v-for="(item, idx) in parsedCurriculum" 
-                    :key="idx" 
-                    class="curriculum-item"
-                  >
-                    <div style="display: flex; align-items: center; gap: 14px;">
-                      <span class="lesson-number">{{ idx + 1 }}</span>
-                      <div>
-                        <h4 class="lesson-title">{{ item.title || item.name || item }}</h4>
-                        <p v-if="item.duration" class="lesson-duration">⏱️ {{ item.duration }}</p>
-                      </div>
-                    </div>
-                    <span class="hd-tag">▶ Video HD</span>
+            <div v-else-if="parsedCurriculum.length > 0" class="article-section-block">
+              <h3 class="article-sub-heading">Nội dung bài giảng</h3>
+              <div class="article-curriculum-list">
+                <div v-for="(item, idx) in parsedCurriculum" :key="idx" class="article-curriculum-item">
+                  <span class="item-num">{{ idx + 1 }}</span>
+                  <div class="item-info">
+                    <h4 class="item-title">{{ item.title || item.name || item }}</h4>
+                    <span v-if="item.duration" class="item-dur">⏱️ {{ item.duration }}</span>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <!-- Tab 3: Reviews -->
-              <div v-else-if="activeTab === 'reviews'">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 16px;">
+            <!-- Requirements & Target Audience -->
+            <div v-if="courseRequirements.length > 0" class="article-section-block">
+              <h3 class="article-sub-heading">Đối tượng & Yêu cầu tham gia</h3>
+              <ul class="article-req-list">
+                <li v-for="(req, rIdx) in courseRequirements" :key="rIdx">{{ req }}</li>
+              </ul>
+            </div>
+
+            <!-- Instructor Info -->
+            <div v-if="courseLecturers.length > 0" class="article-section-block">
+              <h3 class="article-sub-heading">Đội ngũ Giảng viên & Chuyên gia</h3>
+              <div class="article-lecturers-grid">
+                <div v-for="lec in courseLecturers" :key="lec.id" class="article-lecturer-card">
+                  <img :src="lec.avatar || '/images/default-avatar.jpg'" :alt="lec.name" class="lec-avatar" />
                   <div>
-                    <h3 class="section-heading" style="margin: 0;">Đánh giá từ Học viên</h3>
-                    <p style="font-size: 13px; color: #64748b; margin: 4px 0 0 0;">{{ reviews.length }} nhận xét công khai từ học viên tham gia khóa học</p>
-                  </div>
-                  <div style="font-size: 24px; font-weight: 800; color: #d97706; display: flex; align-items: center; gap: 6px;">
-                    ⭐ {{ averageRating }} / 5.0
-                  </div>
-                </div>
-
-                <!-- Review Submission Box (Only for Enrolled Users or Admins) -->
-                <div v-if="isAlreadyEnrolled" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 30px;">
-                  <h4 style="font-size: 15px; font-weight: 700; color: #0f172a; margin-top: 0; margin-bottom: 12px;">Viết nhận xét của bạn</h4>
-                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                    <span style="font-size: 13px; font-weight: 600; color: #475569;">Chọn số sao:</span>
-                    <div style="display: flex; gap: 4px; cursor: pointer;">
-                      <span v-for="star in 5" :key="star" @click="newReview.rating = star" style="font-size: 20px; transition: transform 0.1s;" :style="{ color: star <= newReview.rating ? '#f59e0b' : '#cbd5e1' }">★</span>
-                    </div>
-                  </div>
-                  <textarea v-model="newReview.comment" placeholder="Chia sẻ trải nghiệm học tập của bạn về nội dung bài giảng, giảng viên..." style="width: 100%; min-height: 80px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box; outline: none;"></textarea>
-                  <button @click="submitReview" :disabled="submittingReview" class="btn-add-cart" style="width: auto; padding: 8px 20px; font-size: 13px;">
-                    {{ submittingReview ? 'Đang gửi...' : 'Gửi nhận xét' }}
-                  </button>
-                </div>
-
-                <!-- Reviews List -->
-                <div v-if="reviews.length === 0" style="text-align: center; padding: 40px 0; color: #64748b; font-size: 14px;">
-                  Chưa có nhận xét nào. Hãy là người đầu tiên đánh giá khóa học này!
-                </div>
-                <div v-else style="display: flex; flex-direction: column; gap: 16px;">
-                  <div v-for="rev in reviews" :key="rev.id" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; background: #fff;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                      <div style="display: flex; align-items: center; gap: 10px;">
-                        <div style="width: 36px; height: 36px; border-radius: 50%; background: #0284c7; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px;">
-                          {{ rev.user_fullname ? rev.user_fullname.charAt(0).toUpperCase() : 'H' }}
-                        </div>
-                        <div>
-                          <div style="font-weight: 700; font-size: 14px; color: #0f172a;">{{ rev.user_fullname }}</div>
-                          <div style="font-size: 11px; color: #94a3b8;">{{ formatDate(rev.created_at) }}</div>
-                        </div>
-                      </div>
-                      <div style="color: #f59e0b; font-size: 14px;">
-                        <span v-for="s in 5" :key="s">{{ s <= rev.rating ? '★' : '☆' }}</span>
-                      </div>
-                    </div>
-                    <p style="font-size: 14px; color: #334155; margin: 0; line-height: 1.5;">{{ rev.comment }}</p>
+                    <h4 class="lec-name">{{ lec.name }}</h4>
+                    <p class="lec-title">{{ lec.title }}</p>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-        </div>
+        </article>
 
-        <!-- Right Column: Sticky Sidebar Card -->
-        <div>
-          <div class="sticky-sidebar-card">
-            <!-- Thumbnail Image -->
-            <div class="course-preview-box">
-              <img 
-                :src="course.image || '/images/default.jpg'" 
-                :alt="course.title" 
-                class="preview-img"
-              />
-              <div class="play-overlay">
-                <div class="play-btn-circle">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="5 3 19 12 5 21 5 3"/>
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <!-- Price Info -->
-            <div class="price-display-box">
-              <div class="price-row">
-                <span class="current-price">{{ formatCurrency(course.price) }}</span>
-                <span v-if="course.originalPrice || course.original_price" class="old-price">
+        <!-- Right Side: Sticky Registration Sidebar -->
+        <aside class="course-article-sidebar">
+          <div class="sticky-register-card">
+            <div class="sidebar-price-header">
+              <span class="price-label">Học phí ưu đãi</span>
+              <div class="price-val-row">
+                <span class="price-current">{{ formatCurrency(course.price) }}</span>
+                <span v-if="course.originalPrice || course.original_price" class="price-old">
                   {{ formatCurrency(course.originalPrice || course.original_price) }}
                 </span>
-                <span v-if="(course.originalPrice || course.original_price) && Number(course.originalPrice || course.original_price) > Number(course.price)" class="discount-badge">
-                  Giảm {{ Math.round((1 - Number(course.price) / Number(course.originalPrice || course.original_price)) * 100) }}%
-                </span>
-              </div>
-              <p class="urgency-text">🔥 Ưu đãi có hạn - Đăng ký hôm nay tiết kiệm nhất</p>
-            </div>
-
-            <!-- Action Buttons -->
-            <!-- 🎓 Đã đăng ký: Hiển thị nút Vào học ngay -->
-            <div v-if="isAlreadyEnrolled" class="action-btn-group">
-              <router-link :to="'/courses/' + course.handle + '/study'" class="btn-buy-now" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                ▶ Vào học ngay
-              </router-link>
-              <div class="enrolled-badge" style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; border-radius: 10px; padding: 10px 16px; text-align: center; font-size: 13px; font-weight: 600; margin-top: 8px;">
-                ✅ Bạn đã đăng ký khóa học này. Chúc bạn học tốt!
               </div>
             </div>
 
-            <!-- 🛒 Chưa đăng ký: Hiển thị nút mua -->
-            <div v-else class="action-btn-group">
-              <button @click="addToCart" class="btn-add-cart">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-                  <line x1="3" y1="6" x2="21" y2="6"/>
-                  <path d="M16 10a4 4 0 0 1-8 0"/>
-                </svg>
-                Thêm vào giỏ hàng
-              </button>
-              <button @click="buyNow" class="btn-buy-now">
-                ⚡ Đăng ký học ngay
-              </button>
-              <button @click="handleToggleWishlist" class="btn-wishlist" :style="{ background: isWishlisted ? '#fef2f2' : '#f8fafc', color: isWishlisted ? '#ef4444' : '#475569', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '10px 16px', fontWeight: '600', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', width: '100%', marginTop: '8px' }">
-                <span>{{ isWishlisted ? '❤️ Đã lưu vào Yêu thích' : '🤍 Thêm vào Yêu thích' }}</span>
-              </button>
+            <div class="sidebar-perks-list">
+              <div class="sidebar-perk-item">✓ Đào tạo thực chiến 100% ứng dụng ngay</div>
+              <div class="sidebar-perk-item">✓ Giảng viên chuyên gia giàu kinh nghiệm</div>
+              <div class="sidebar-perk-item">✓ Cấp chứng nhận hoàn thành khóa học</div>
+              <div class="sidebar-perk-item">✓ Hỗ trợ giải đáp & tài liệu đi kèm</div>
             </div>
 
-            <!-- Perks List -->
-            <div class="perks-box">
-              <div class="perks-title">Khóa học bao gồm:</div>
-              <div class="perk-item">
-                <span class="perk-icon">🎥</span>
-                <span>Truy cập trọn đời tất cả video HD</span>
-              </div>
-              <div class="perk-item">
-                <span class="perk-icon">📁</span>
-                <span>Tài liệu & Mẫu Prompt đính kèm đầy đủ</span>
-              </div>
-              <div class="perk-item">
-                <span class="perk-icon">📜</span>
-                <span>Cấp chứng nhận hoàn thành khóa học</span>
-              </div>
-              <div class="perk-item">
-                <span class="perk-icon">💬</span>
-                <span>Nhóm hỗ trợ học viên giải đáp 24/7</span>
-              </div>
-            </div>
+            <router-link to="/contact" class="sidebar-register-btn" style="text-decoration: none; text-align: center; display: block; box-sizing: border-box;">
+              Đăng Ký Tư Vấn Ngay
+            </router-link>
 
-            <!-- Lecturers / Course Instructors Box -->
-            <div v-if="courseLecturers.length > 0" class="perks-box" style="margin-top: 20px;">
-              <div class="perks-title" style="margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-                <span>🎓 Đội ngũ Giảng viên:</span>
-              </div>
-              <div v-for="lec in courseLecturers" :key="lec.id" style="display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px dashed #e2e8f0;">
-                <img :src="lec.avatar || lec.avatar_drive_link || '/images/default-avatar.jpg'" :alt="lec.name" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7;" />
-                <div>
-                  <div style="font-weight: 700; color: #0f172a; font-size: 14px;">{{ lec.name }}</div>
-                  <div style="font-size: 12px; color: #0284c7; font-weight: 600;">{{ lec.title }}</div>
-                </div>
-              </div>
-            </div>
-
+            <a href="tel:0938566700" class="sidebar-hotline-btn">
+              📞 Hotline: 0938 566 700
+            </a>
           </div>
-        </div>
+        </aside>
 
       </div>
     </div>
@@ -454,6 +299,53 @@ const parsedCurriculum = computed(() => {
     return [curr];
   }
 });
+
+const registerForm = ref({
+  fullname: '',
+  phone: '',
+  email: '',
+  message: ''
+});
+const submittingRegister = ref(false);
+
+const scrollToRegister = () => {
+  const el = document.getElementById('course-register-form');
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth' });
+  }
+};
+
+const handleBottomRegister = async () => {
+  if (!registerForm.value.fullname || !registerForm.value.phone || !registerForm.value.email) {
+    courseStore.showToast('Vui lòng điền đầy đủ các thông tin bắt buộc (*)', 'warning');
+    return;
+  }
+
+  submittingRegister.value = true;
+  try {
+    const nameParts = registerForm.value.fullname.trim().split(' ');
+    const lastName = nameParts.length > 0 ? nameParts[nameParts.length - 1] : '';
+    const firstName = nameParts.length > 1 ? nameParts[0] : registerForm.value.fullname.trim();
+    const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : '';
+
+    await courseStore.sendContact(
+      firstName,
+      middleName,
+      lastName,
+      registerForm.value.email,
+      registerForm.value.phone,
+      course.value?.handle || 'course-detail-register',
+      registerForm.value.message || `Đăng ký tư vấn cho khóa học: ${course.value?.title || ''}`
+    );
+
+    courseStore.showToast('Cảm ơn bạn! Đã gửi thông tin đăng ký tư vấn thành công.', 'success');
+    registerForm.value = { fullname: '', phone: '', email: '', message: '' };
+  } catch (err) {
+    courseStore.showToast(err.message || 'Gửi thông tin thất bại. Vui lòng thử lại!', 'error');
+  } finally {
+    submittingRegister.value = false;
+  }
+};
 
 const loadCourse = async () => {
   loading.value = true;

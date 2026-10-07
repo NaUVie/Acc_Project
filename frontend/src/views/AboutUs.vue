@@ -47,7 +47,6 @@
     <section class="core-values-section">
       <div class="container">
         <div class="section-title-box reveal-on-scroll">
-          <span class="custom-ui-tag">GIÁ TRỊ CỐT LÕI</span>
           <h2 class="section-title">GIÁ TRỊ CỐT LÕI CỦA ACC (A - C - C)</h2>
           <p class="section-subtitle">Ba trụ cột định hình tư duy, hành động và văn hóa tại ACC Academy</p>
         </div>
@@ -144,17 +143,17 @@
         <div class="functions-open-grid">
           <div class="function-item reveal-on-scroll" style="--reveal-delay: 0.1s;">
             <span class="func-tag">CHỨC NĂNG #1</span>
-            <h3 class="func-title">ĐÀO TẠO DOANH NGHIỆP</h3>
+            <h3 class="func-title">ĐÀO TẠO INHOUSE</h3>
             <p class="func-desc">
-              Chương trình Inhouse may đo và các Khóa đào tạo cá nhân — chuyển hóa kiến thức quốc tế thành hành vi và hiệu suất trong tổ chức của bạn.
+              Chương trình Inhouse và các Khóa đào tạo cá nhân — chuyển hóa kiến thức quốc tế thành hành vi và hiệu suất trong tổ chức của bạn.
             </p>
           </div>
 
           <div class="function-item reveal-on-scroll" style="--reveal-delay: 0.25s;">
             <span class="func-tag alt">CHỨC NĂNG #2</span>
-            <h3 class="func-title">TUYỂN SINH ĐỘC QUYỀN ANDREWS</h3>
+            <h3 class="func-title">TUYỂN SINH ĐẠI HỌC ANDREWS</h3>
             <p class="func-desc">
-              Thạc sĩ MBA Andrews tại Việt Nam và GEI — Hội thảo Lãnh đạo cấp cao tại Michigan, Hoa Kỳ. ACC là đại diện duy nhất tại Việt Nam.
+              Thạc sĩ MBA Andrews tại Việt Nam và GEI — Hội thảo Lãnh đạo cấp cao tại Michigan, Hoa Kỳ. ACC là đại diện đặc quyền tại Việt Nam.
             </p>
           </div>
         </div>
@@ -165,7 +164,6 @@
     <section class="why-andrews-section">
       <div class="container">
         <div class="section-title-box reveal-on-scroll">
-          <span class="custom-ui-tag">HỢP TÁC CHIẾN LƯỢC</span>
           <h2 class="section-title">VÌ SAO ACC x ANDREWS</h2>
         </div>
 
@@ -201,7 +199,6 @@
     <section class="leadership-section">
       <div class="container">
         <div class="section-title-box reveal-on-scroll">
-          <span class="custom-ui-tag">ĐỘI NGŨ LÃNH ĐẠO</span>
           <h2 class="section-title">BAN ĐIỀU HÀNH & CỐ VẤN CAO CẤP</h2>
           <p class="section-subtitle">Hội tụ những tâm huyết, tri thức và kinh nghiệm từ các nhà quản lý, doanh nhân thực chiến</p>
         </div>
