@@ -18,7 +18,7 @@
           @mouseenter="selectMajorHover(major.id)"
         >
           <span class="indicator-bar"></span>
-          <span>{{ major.icon }} {{ major.name }}</span>
+          <span>{{ major.name }}</span>
           <span class="cat-count-badge">{{ getMajorCount(major.id) }}</span>
         </button>
       </div>
@@ -84,14 +84,13 @@ import { lecturersData } from '@/data/lecturers';
 const courseStore = useCourseStore();
 const selectedMajor = ref('all');
 
-const majors = [
-  { id: 'all', name: 'Tất cả chuyên ngành', icon: '🌟' },
-  { id: 'tai-chinh-lanh-dao', name: 'Tài chính & Lãnh đạo', icon: '👑' },
-  { id: 'ai-cong-nghe', name: 'AI & Công nghệ Số', icon: '🤖' },
-  { id: 'marketing-sales', name: 'Marketing & Sales', icon: '📈' },
-  { id: 'ky-nang-mem-quan-tri', name: 'Quản trị & Kỹ năng Mềm', icon: '🤝' },
-  { id: 'san-xuat-van-hanh', name: 'Sản xuất & Vận hành', icon: '🏭' }
-];
+const majors = computed(() => {
+  const list = courseStore.lecturerMajors || [];
+  return [
+    { id: 'all', name: 'Tất cả chuyên ngành' },
+    ...list
+  ];
+});
 
 const allLecturers = computed(() => {
   return courseStore.lecturers || [];
@@ -107,11 +106,14 @@ const selectMajorHover = (id) => {
 
 const getMajorCount = (id) => {
   if (id === 'all') return allLecturers.value.length;
-  return allLecturers.value.filter(l => l.majorId === id).length;
+  return allLecturers.value.filter(l => {
+    const ids = l.majorIds || (l.majorId ? [l.majorId] : []);
+    return ids.includes(id);
+  }).length;
 };
 
 const activeMajorMeta = computed(() => {
-  const currentMajor = majors.find(m => m.id === selectedMajor.value);
+  const currentMajor = majors.value.find(m => m.id === selectedMajor.value);
   if (!currentMajor || selectedMajor.value === 'all') {
     return {
       name: 'Tất cả Đội ngũ Giảng viên & Chuyên gia',
@@ -121,8 +123,8 @@ const activeMajorMeta = computed(() => {
   }
   return {
     name: `Chuyên gia ${currentMajor.name}`,
-    badge: currentMajor.name.toUpperCase(),
-    description: `Đội ngũ giảng viên thực chiến chuyên sâu thuộc lĩnh vực ${currentMajor.name} tại ACC Academy.`
+    badge: (currentMajor.badge || currentMajor.name).toUpperCase(),
+    description: currentMajor.description || `Đội ngũ giảng viên thực chiến chuyên sâu thuộc lĩnh vực ${currentMajor.name} tại ACC Academy.`
   };
 });
 
@@ -130,14 +132,18 @@ const filteredLecturers = computed(() => {
   if (selectedMajor.value === 'all') {
     return allLecturers.value;
   }
-  return allLecturers.value.filter(l => l.majorId === selectedMajor.value);
+  return allLecturers.value.filter(l => {
+    const ids = l.majorIds || (l.majorId ? [l.majorId] : []);
+    return ids.includes(selectedMajor.value);
+  });
 });
 
-onMounted(() => {
+onMounted(async () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (courseStore.lecturers.length === 0) {
-    courseStore.fetchLecturers();
-  }
+  await Promise.all([
+    courseStore.fetchLecturerMajors(),
+    courseStore.fetchLecturers()
+  ]);
 });
 </script>
 

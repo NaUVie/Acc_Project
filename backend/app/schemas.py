@@ -159,6 +159,31 @@ class BlogPostResponse(BlogPostBase):
     class Config:
         from_attributes = True
 
+# Lecturer Major Schemas
+class LecturerMajorBase(BaseModel):
+    id: str
+    name: str
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    badge: Optional[str] = None
+    position: Optional[int] = 0
+
+class LecturerMajorCreate(LecturerMajorBase):
+    pass
+
+class LecturerMajorUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    badge: Optional[str] = None
+    position: Optional[int] = None
+
+class LecturerMajorResponse(LecturerMajorBase):
+    created_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
 # Lecturer Schemas
 class LecturerBase(BaseModel):
     id: str
@@ -170,6 +195,9 @@ class LecturerBase(BaseModel):
     drive_profile: Optional[str] = None
     bio_short: Optional[str] = None
     details_html: Optional[str] = None
+    major_id: Optional[str] = None
+    major_name: Optional[str] = None
+    major_ids: Optional[str] = None
     position: Optional[int] = 0
     is_featured: Optional[bool] = False
 
@@ -185,6 +213,9 @@ class LecturerUpdate(BaseModel):
     drive_profile: Optional[str] = None
     bio_short: Optional[str] = None
     details_html: Optional[str] = None
+    major_id: Optional[str] = None
+    major_name: Optional[str] = None
+    major_ids: Optional[str] = None
     position: Optional[int] = None
     is_featured: Optional[bool] = None
 

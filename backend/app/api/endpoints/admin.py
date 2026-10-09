@@ -775,6 +775,34 @@ def export_revenue_csv(
     )
 
 
+# ==================== LECTURER MAJOR MANAGEMENT ====================
+
+@router.get("/lecturer-majors", response_model=List[schemas.LecturerMajorResponse])
+def get_all_lecturer_majors_admin(db: Session = Depends(get_db)):
+    return crud.get_lecturer_majors(db)
+
+@router.post("/lecturer-majors", response_model=schemas.LecturerMajorResponse, status_code=status.HTTP_201_CREATED)
+def create_lecturer_major_admin(major_in: schemas.LecturerMajorCreate, db: Session = Depends(get_db)):
+    existing = crud.get_lecturer_major_by_id(db, major_in.id)
+    if existing:
+        raise HTTPException(status_code=400, detail="Mã chuyên ngành (ID) này đã tồn tại!")
+    return crud.create_lecturer_major(db, major_in)
+
+@router.put("/lecturer-majors/{id}", response_model=schemas.LecturerMajorResponse)
+def update_lecturer_major_admin(id: str, major_in: schemas.LecturerMajorUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_lecturer_major(db, id, major_in)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Chuyên ngành không tồn tại")
+    return updated
+
+@router.delete("/lecturer-majors/{id}", status_code=status.HTTP_200_OK)
+def delete_lecturer_major_admin(id: str, db: Session = Depends(get_db)):
+    success = crud.delete_lecturer_major(db, id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Chuyên ngành không tồn tại")
+    return {"message": "Đã xóa chuyên ngành giảng viên thành công"}
+
+
 # ==================== LECTURER MANAGEMENT ====================
 
 @router.get("/lecturers", response_model=List[schemas.LecturerResponse])

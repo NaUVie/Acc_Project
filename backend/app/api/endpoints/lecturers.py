@@ -10,6 +10,10 @@ router = APIRouter()
 def read_lecturers(featured: bool = False, db: Session = Depends(get_db)):
     return crud.get_lecturers(db, featured_only=featured)
 
+@router.get("/majors", response_model=List[schemas.LecturerMajorResponse])
+def read_lecturer_majors(db: Session = Depends(get_db)):
+    return crud.get_lecturer_majors(db)
+
 @router.get("/{id}", response_model=schemas.LecturerResponse)
 def read_lecturer_by_id(id: str, db: Session = Depends(get_db)):
     lecturer = crud.get_lecturer_by_id(db, id)

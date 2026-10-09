@@ -49,6 +49,7 @@ export const useCourseStore = defineStore('courses', {
     programs: [],
     bundles: [],
     lecturers: [],
+    lecturerMajors: [],
     contactSettings: null,
     blogPosts: [],
     loading: false,
@@ -1225,6 +1226,85 @@ export const useCourseStore = defineStore('courses', {
       }
     },
 
+    // Lecturer Majors Actions
+    async fetchLecturerMajors() {
+      try {
+        const data = await this.apiRequest('/lecturers/majors');
+        if (Array.isArray(data)) {
+          this.lecturerMajors = data.map(m => ({
+            id: m.id,
+            name: m.name,
+            description: m.description || '',
+            icon: m.icon || '🎓',
+            badge: m.badge || m.name.toUpperCase(),
+            position: m.position || 0
+          }));
+        } else {
+          this.lecturerMajors = [];
+        }
+        return this.lecturerMajors;
+      } catch (err) {
+        console.error("Failed to fetch lecturer majors:", err);
+        return [];
+      }
+    },
+    async addAdminLecturerMajor(majorData) {
+      if (!this.token) return;
+      try {
+        const data = await this.apiRequest('/admin/lecturer-majors', {
+          method: 'POST',
+          body: JSON.stringify({
+            id: majorData.id,
+            name: majorData.name,
+            description: majorData.description || '',
+            icon: majorData.icon || '🎓',
+            badge: majorData.badge || majorData.name.toUpperCase(),
+            position: Number(majorData.position) || 0
+          })
+        });
+        await this.fetchLecturerMajors();
+        return data;
+      } catch (err) {
+        console.error("Failed to add lecturer major:", err);
+        throw err;
+      }
+    },
+    async updateAdminLecturerMajor(id, majorData) {
+      if (!this.token) return;
+      try {
+        const data = await this.apiRequest(`/admin/lecturer-majors/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            name: majorData.name,
+            description: majorData.description,
+            icon: majorData.icon,
+            badge: majorData.badge,
+            position: majorData.position !== undefined ? Number(majorData.position) : undefined
+          })
+        });
+        await this.fetchLecturerMajors();
+        await this.fetchLecturers();
+        return data;
+      } catch (err) {
+        console.error("Failed to update lecturer major:", err);
+        throw err;
+      }
+    },
+    async deleteAdminLecturerMajor(id) {
+      if (!this.token) return;
+      try {
+        const data = await this.apiRequest(`/admin/lecturer-majors/${id}`, {
+          method: 'DELETE'
+        });
+        await this.fetchLecturerMajors();
+        await this.fetchLecturers();
+        return data;
+      } catch (err) {
+        console.error("Failed to delete lecturer major:", err);
+        throw err;
+      }
+    },
+
     // Lecturers Action
     async fetchLecturers() {
       try {
@@ -1233,11 +1313,18 @@ export const useCourseStore = defineStore('courses', {
         if (Array.isArray(data)) {
           this.lecturers = data.map(l => {
             const staticItem = lecturersData.find(s => s.id === l.id) || {};
+            let mIds = [];
+            if (l.major_ids) {
+              mIds = l.major_ids.split(',').map(s => s.trim()).filter(Boolean);
+            } else if (l.major_id || staticItem.majorId) {
+              mIds = [l.major_id || staticItem.majorId];
+            }
             return {
               ...staticItem,
               ...l,
-              majorId: staticItem.majorId || 'ai-cong-nghe',
-              majorName: staticItem.majorName || 'AI & Công nghệ Số',
+              majorIds: mIds,
+              majorId: mIds[0] || l.major_id || staticItem.majorId || 'ai-cong-nghe',
+              majorName: l.major_name || staticItem.majorName || 'AI & Công nghệ Số',
               bioShort: l.bio_short || staticItem.bioShort || '',
               detailsHtml: l.details_html || staticItem.detailsHtml || '',
               avatarDriveLink: l.avatar_drive_link || staticItem.avatarDriveLink || '',
@@ -1255,6 +1342,8 @@ export const useCourseStore = defineStore('courses', {
     async addAdminLecturer(lecturer) {
       if (!this.token) return;
       try {
+        const majorIdsStr = Array.isArray(lecturer.majorIds) ? lecturer.majorIds.join(',') : (lecturer.majorIds || lecturer.majorId || '');
+        const primaryMajorId = Array.isArray(lecturer.majorIds) && lecturer.majorIds.length > 0 ? lecturer.majorIds[0] : (lecturer.majorId || null);
         await this.apiRequest('/admin/lecturers', {
           method: 'POST',
           body: JSON.stringify({
@@ -1266,7 +1355,10 @@ export const useCourseStore = defineStore('courses', {
             avatar_drive_link: lecturer.avatarDriveLink || '',
             drive_profile: lecturer.driveProfile || '',
             bio_short: lecturer.bioShort || '',
-            details_html: lecturer.detailsHtml || ''
+            details_html: lecturer.detailsHtml || '',
+            major_id: primaryMajorId,
+            major_ids: majorIdsStr,
+            major_name: lecturer.majorName || null
           })
         });
         await this.fetchLecturers();
@@ -1278,6 +1370,8 @@ export const useCourseStore = defineStore('courses', {
     async updateAdminLecturer(id, lecturer) {
       if (!this.token) return;
       try {
+        const majorIdsStr = Array.isArray(lecturer.majorIds) ? lecturer.majorIds.join(',') : (lecturer.majorIds || lecturer.majorId || '');
+        const primaryMajorId = Array.isArray(lecturer.majorIds) && lecturer.majorIds.length > 0 ? lecturer.majorIds[0] : (lecturer.majorId || null);
         await this.apiRequest(`/admin/lecturers/${id}`, {
           method: 'PUT',
           body: JSON.stringify({
@@ -1288,7 +1382,10 @@ export const useCourseStore = defineStore('courses', {
             avatar_drive_link: lecturer.avatarDriveLink,
             drive_profile: lecturer.driveProfile,
             bio_short: lecturer.bioShort,
-            details_html: lecturer.detailsHtml
+            details_html: lecturer.detailsHtml,
+            major_id: primaryMajorId,
+            major_ids: majorIdsStr,
+            major_name: lecturer.majorName || null
           })
         });
         await this.fetchLecturers();

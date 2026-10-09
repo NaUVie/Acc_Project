@@ -5,9 +5,12 @@
       <div class="content-header flex-between">
         <div>
           <h2>Quản lý Đội ngũ Giảng viên</h2>
-          <p>Danh sách các chuyên gia, giảng viên và cố vấn thực hiện các khóa học.</p>
+          <p>Danh sách các chuyên gia, giảng viên, cố vấn và quản lý các chuyên ngành đào tạo.</p>
         </div>
-        <button @click="openAddLecturerModal" class="btn btn-primary btn-sm">+ Thêm giảng viên mới</button>
+        <div style="display: flex; gap: 10px;">
+          <button @click="openMajorsModal" class="btn btn-secondary btn-sm" style="font-weight: 600;">🏷️ Quản lý Chuyên ngành</button>
+          <button @click="openAddLecturerModal" class="btn btn-primary btn-sm">+ Thêm giảng viên mới</button>
+        </div>
       </div>
 
       <!-- Search & Page Size Bar -->
@@ -15,7 +18,7 @@
         <input 
           v-model="searchQuery" 
           type="text" 
-          placeholder="Tìm theo tên, chức danh..." 
+          placeholder="Tìm theo tên, chức danh, chuyên ngành..." 
           class="admin-search-input"
           style="flex: 1; min-width: 200px;"
         />
@@ -39,6 +42,7 @@
               <th>Mã ID</th>
               <th>Họ & Tên</th>
               <th>Chức danh / Vị trí</th>
+              <th>Chuyên ngành</th>
               <th>Trang chủ (Max 4)</th>
               <th>Hành động</th>
             </tr>
@@ -63,6 +67,19 @@
               <td class="font-bold" style="color: #0f172a;">{{ l.name }}</td>
               <td>
                 <span class="badge badge-primary" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">{{ l.title }}</span>
+              </td>
+              <td>
+                <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                  <span 
+                    v-for="mId in (l.majorIds && l.majorIds.length > 0 ? l.majorIds : (l.majorId ? [l.majorId] : []))" 
+                    :key="mId" 
+                    class="badge badge-info" 
+                    style="background: #e0f2fe; color: #0284c7; border: 1px solid #bae6fd; font-size: 11px; padding: 3px 8px;"
+                  >
+                    {{ getMajorNameById(mId) }}
+                  </span>
+                  <span v-if="!l.majorIds || l.majorIds.length === 0" style="color: #94a3b8; font-size: 12px;">-- Chưa chọn --</span>
+                </div>
               </td>
               <td>
                 <button 
@@ -90,7 +107,7 @@
               </td>
             </tr>
             <tr v-if="filteredLecturers.length === 0">
-              <td colspan="7" class="text-center py-8 text-muted">Không tìm thấy giảng viên nào.</td>
+              <td colspan="8" class="text-center py-8 text-muted">Không tìm thấy giảng viên nào.</td>
             </tr>
           </tbody>
         </table>
@@ -138,6 +155,25 @@
         </div>
 
         <div class="form-group mt-3">
+          <label style="color: #1e293b; font-weight: 600;">Chuyên ngành đào tạo (Có thể tích chọn nhiều chuyên ngành)</label>
+          <div style="display: flex; gap: 12px 20px; flex-wrap: wrap; margin-top: 6px; background: #f8fafc; padding: 14px 18px; border-radius: 10px; border: 1px solid #cbd5e1;">
+            <label 
+              v-for="m in lecturerMajors" 
+              :key="m.id" 
+              style="display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: #334155; cursor: pointer; user-select: none;"
+            >
+              <input 
+                type="checkbox" 
+                :value="m.id" 
+                v-model="lecturerForm.majorIds" 
+                style="width: 17px; height: 17px; cursor: pointer; accent-color: #0284c7;" 
+              />
+              <span>{{ m.name }}</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group mt-3">
           <label style="color: #1e293b; font-weight: 600;">Hình ảnh Avatar (Tải từ máy hoặc dán URL)</label>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <input v-model="lecturerForm.avatar" type="text" required class="admin-input-style" placeholder="/images/default-avatar.jpg hoặc URL Cloudinary" style="flex: 1; min-width: 240px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
@@ -175,6 +211,116 @@
         </div>
       </form>
     </div>
+
+    <!-- MODAL LECTURER MAJORS CRUD -->
+    <div v-if="showMajorsModal" class="modal-overlay" @click.self="closeMajorsModal">
+      <div class="modal-content animate-fade-in" style="max-width: 700px;">
+        <div class="modal-header">
+          <h3>🏷️ Quản lý Chuyên ngành Giảng viên (Database)</h3>
+          <button class="close-btn" @click="closeMajorsModal">&times;</button>
+        </div>
+
+        <div class="modal-body" style="padding: 16px 0;">
+          <!-- Form Create / Edit Major -->
+          <form @submit.prevent="saveMajor" style="background: #f8fafc; padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
+            <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 15px; color: #0f172a; font-weight: 700;">
+              {{ isEditingMajor ? '✏️ Chỉnh sửa chuyên ngành' : '➕ Thêm chuyên ngành mới' }}
+            </h4>
+            
+            <div class="grid-2">
+              <div class="form-group">
+                <label style="font-size: 12px; font-weight: 600; color: #475569;">Mã ID chuyên ngành (Slug)</label>
+                <input 
+                  v-model="majorForm.id" 
+                  :disabled="isEditingMajor" 
+                  type="text" 
+                  required 
+                  class="admin-input-style" 
+                  placeholder="tai-chinh-lanh-dao" 
+                  style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-size: 13px;"
+                />
+              </div>
+              <div class="form-group">
+                <label style="font-size: 12px; font-weight: 600; color: #475569;">Tên chuyên ngành</label>
+                <input 
+                  v-model="majorForm.name" 
+                  @input="onMajorNameInput" 
+                  type="text" 
+                  required 
+                  class="admin-input-style" 
+                  placeholder="QUẢN TRỊ - TÀI CHÍNH" 
+                  style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-size: 13px;"
+                />
+              </div>
+            </div>
+
+            <div class="grid-2 mt-2">
+              <div class="form-group">
+                <label style="font-size: 12px; font-weight: 600; color: #475569;">Nhãn Badge Header</label>
+                <input 
+                  v-model="majorForm.badge" 
+                  type="text" 
+                  class="admin-input-style" 
+                  placeholder="QUẢN TRỊ - TÀI CHÍNH" 
+                  style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-size: 13px;"
+                />
+              </div>
+              <div class="form-group">
+                <label style="font-size: 12px; font-weight: 600; color: #475569;">Mô tả ngắn chuyên ngành</label>
+                <input 
+                  v-model="majorForm.description" 
+                  type="text" 
+                  class="admin-input-style" 
+                  placeholder="Đội ngũ chuyên gia chuyên sâu thuộc..." 
+                  style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-size: 13px;"
+                />
+              </div>
+            </div>
+
+            <div class="mt-3" style="display: flex; gap: 8px; justify-content: flex-end;">
+              <button v-if="isEditingMajor" type="button" class="btn btn-secondary btn-xs" @click="resetMajorForm">Hủy sửa</button>
+              <button type="submit" class="btn btn-primary btn-xs" style="padding: 6px 16px; font-weight: 700;">
+                {{ isEditingMajor ? 'Cập nhật chuyên ngành' : 'Tạo mới' }}
+              </button>
+            </div>
+          </form>
+
+          <!-- Majors List Table -->
+          <div class="table-responsive">
+            <table class="admin-table" style="font-size: 13px;">
+              <thead>
+                <tr>
+                  <th>ID Slug</th>
+                  <th>Tên Chuyên ngành</th>
+                  <th>Số Giảng viên</th>
+                  <th class="text-right">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="m in lecturerMajors" :key="m.id">
+                  <td><code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #0284c7;">{{ m.id }}</code></td>
+                  <td><strong>{{ m.name }}</strong></td>
+                  <td><span class="badge badge-info">{{ getMajorLecturersCount(m.id) }} người</span></td>
+                  <td class="text-right">
+                    <div class="action-buttons" style="justify-content: flex-end;">
+                      <button @click="editMajor(m)" class="btn-action edit" title="Sửa">✏️</button>
+                      <button @click="deleteMajor(m)" class="btn-action delete" title="Xóa">🗑️</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr v-if="lecturerMajors.length === 0">
+                  <td colspan="5" class="text-center py-4 text-muted">Chưa có chuyên ngành nào trong Database.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="display: flex; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary" @click="closeMajorsModal">Đóng</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -187,6 +333,7 @@ import Pagination from '@/components/Pagination.vue';
 const courseStore = useCourseStore();
 
 const lecturers = computed(() => courseStore.lecturers || []);
+const lecturerMajors = computed(() => courseStore.lecturerMajors || []);
 
 const localLecturers = ref([]);
 
@@ -197,6 +344,16 @@ watch(lecturers, (newList) => {
 const featuredCount = computed(() => {
   return lecturers.value.filter(l => l.is_featured).length;
 });
+
+const getMajorNameById = (id) => {
+  if (!id) return 'Chuyên gia';
+  const match = lecturerMajors.value.find(m => m.id === id);
+  return match ? match.name : id;
+};
+
+const getMajorLecturersCount = (majorId) => {
+  return lecturers.value.filter(l => l.majorId === majorId).length;
+};
 
 // Drag and drop state & handlers
 const draggedIndex = ref(null);
@@ -258,8 +415,10 @@ watch([searchQuery, pageSize], () => {
 const filteredLecturers = computed(() => {
   return localLecturers.value.filter(l => {
     const q = searchQuery.value.toLowerCase();
+    const mName = (l.majorName || getMajorNameById(l.majorId)).toLowerCase();
     return l.name.toLowerCase().includes(q) || 
            l.title.toLowerCase().includes(q) ||
+           mName.includes(q) ||
            (l.id && l.id.toLowerCase().includes(q));
   });
 });
@@ -283,6 +442,8 @@ const lecturerForm = ref({
   driveProfile: '',
   bioShort: '',
   detailsHtml: '',
+  majorId: '',
+  majorIds: [],
   is_featured: false
 });
 
@@ -292,8 +453,11 @@ const onNameInput = () => {
   }
 };
 
-onMounted(() => {
-  courseStore.fetchLecturers();
+onMounted(async () => {
+  await Promise.all([
+    courseStore.fetchLecturerMajors(),
+    courseStore.fetchLecturers()
+  ]);
 });
 
 const openAddLecturerModal = () => {
@@ -308,6 +472,8 @@ const openAddLecturerModal = () => {
     driveProfile: '',
     bioShort: '',
     detailsHtml: '',
+    majorId: lecturerMajors.value.length > 0 ? lecturerMajors.value[0].id : '',
+    majorIds: lecturerMajors.value.length > 0 ? [lecturerMajors.value[0].id] : [],
     is_featured: false
   };
   activeView.value = 'form';
@@ -315,6 +481,7 @@ const openAddLecturerModal = () => {
 
 const editLecturer = (l) => {
   isEditing.value = true;
+  const initialMajorIds = l.majorIds && l.majorIds.length > 0 ? [...l.majorIds] : (l.majorId ? [l.majorId] : []);
   lecturerForm.value = {
     id: l.id,
     name: l.name,
@@ -325,6 +492,8 @@ const editLecturer = (l) => {
     driveProfile: l.drive_profile || '',
     bioShort: l.bio_short || '',
     detailsHtml: l.details_html || '',
+    majorId: l.majorId || '',
+    majorIds: initialMajorIds,
     is_featured: l.is_featured || false
   };
   activeView.value = 'form';
@@ -383,6 +552,105 @@ const deleteLecturer = async (l) => {
       courseStore.showToast(`Đã xóa giảng viên "${l.name}" thành công.`, 'success');
     } catch (err) {
       courseStore.showToast(err.message || 'Không thể xóa giảng viên.', 'error');
+    }
+  }
+};
+
+// --- LECTURER MAJORS CRUD MODAL STATE & ACTIONS ---
+const showMajorsModal = ref(false);
+const isEditingMajor = ref(false);
+const majorForm = ref({
+  id: '',
+  name: '',
+  icon: '🎓',
+  badge: '',
+  description: '',
+  position: 0
+});
+
+const openMajorsModal = () => {
+  resetMajorForm();
+  showMajorsModal.value = true;
+};
+
+const closeMajorsModal = () => {
+  showMajorsModal.value = false;
+};
+
+const resetMajorForm = () => {
+  isEditingMajor.value = false;
+  majorForm.value = {
+    id: '',
+    name: '',
+    icon: '🎓',
+    badge: '',
+    description: '',
+    position: 0
+  };
+};
+
+const onMajorNameInput = () => {
+  if (!isEditingMajor.value) {
+    majorForm.value.id = slugify(majorForm.value.name);
+    majorForm.value.badge = majorForm.value.name.toUpperCase();
+  }
+};
+
+const editMajor = (m) => {
+  isEditingMajor.value = true;
+  majorForm.value = {
+    id: m.id,
+    name: m.name,
+    icon: m.icon || '🎓',
+    badge: m.badge || m.name.toUpperCase(),
+    description: m.description || '',
+    position: m.position || 0
+  };
+};
+
+const saveMajor = async () => {
+  try {
+    if (!majorForm.value.id.trim() || !majorForm.value.name.trim()) {
+      courseStore.showToast('Vui lòng nhập tên và mã chuyên ngành!', 'warning');
+      return;
+    }
+    if (isEditingMajor.value) {
+      await courseStore.updateAdminLecturerMajor(majorForm.value.id, majorForm.value);
+      courseStore.showToast('Cập nhật chuyên ngành thành công!', 'success');
+    } else {
+      if (lecturerMajors.value.some(m => m.id === majorForm.value.id)) {
+        courseStore.showToast('Mã ID chuyên ngành này đã tồn tại!', 'warning');
+        return;
+      }
+      await courseStore.addAdminLecturerMajor(majorForm.value);
+      courseStore.showToast('Thêm chuyên ngành mới thành công!', 'success');
+    }
+    resetMajorForm();
+  } catch (err) {
+    courseStore.showToast(err.message || 'Lỗi khi lưu chuyên ngành.', 'error');
+  }
+};
+
+const deleteMajor = async (m) => {
+  const count = getMajorLecturersCount(m.id);
+  let msg = `Bạn có chắc chắn muốn xóa chuyên ngành "${m.name}"?`;
+  if (count > 0) {
+    msg += `\n\n⚠️ Đang có ${count} giảng viên thuộc chuyên ngành này. Sau khi xóa, các giảng viên sẽ trở về trạng thái chưa thuộc chuyên ngành.`;
+  }
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận xóa chuyên ngành giảng viên',
+    message: msg,
+    confirmText: 'Đồng ý xóa',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
+    try {
+      await courseStore.deleteAdminLecturerMajor(m.id);
+      courseStore.showToast(`Đã xóa chuyên ngành "${m.name}".`, 'success');
+    } catch (err) {
+      courseStore.showToast(err.message || 'Lỗi khi xóa chuyên ngành.', 'error');
     }
   }
 };

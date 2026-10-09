@@ -204,6 +204,19 @@ class Testimonial(Base):
     video_url = Column(String(500), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
+class LecturerMajor(Base):
+    __tablename__ = "lecturer_majors"
+
+    id = Column(String(100), primary_key=True, index=True)
+    name = Column(String(150), nullable=False)
+    description = Column(Text, nullable=True)
+    icon = Column(String(50), nullable=True)
+    badge = Column(String(150), nullable=True)
+    position = Column(Integer, default=0)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    lecturers = relationship("Lecturer", back_populates="major")
+
 class Lecturer(Base):
     __tablename__ = "lecturers"
 
@@ -216,9 +229,14 @@ class Lecturer(Base):
     drive_profile = Column(String(500), nullable=True)
     bio_short = Column(Text, nullable=True)
     details_html = Column(Text, nullable=True)
+    major_id = Column(String(100), ForeignKey("lecturer_majors.id", ondelete="SET NULL"), nullable=True)
+    major_name = Column(String(150), nullable=True)
+    major_ids = Column(Text, nullable=True)
     position = Column(Integer, default=0)
     is_featured = Column(Boolean, default=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    major = relationship("LecturerMajor", back_populates="lecturers")
 
 class Project(Base):
     __tablename__ = "projects"

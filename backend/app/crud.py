@@ -735,6 +735,40 @@ def delete_testimonial(db: Session, testimonial_id: int):
     return False
 
 
+# --- Lecturer Major CRUD ---
+def get_lecturer_majors(db: Session):
+    return db.query(models.LecturerMajor).order_by(models.LecturerMajor.position.asc(), models.LecturerMajor.id.asc()).all()
+
+def get_lecturer_major_by_id(db: Session, major_id: str):
+    return db.query(models.LecturerMajor).filter(models.LecturerMajor.id == major_id).first()
+
+def create_lecturer_major(db: Session, major_in: schemas.LecturerMajorCreate):
+    db_major = models.LecturerMajor(**major_in.model_dump())
+    db.add(db_major)
+    db.commit()
+    db.refresh(db_major)
+    return db_major
+
+def update_lecturer_major(db: Session, major_id: str, major_in: schemas.LecturerMajorUpdate):
+    db_major = db.query(models.LecturerMajor).filter(models.LecturerMajor.id == major_id).first()
+    if not db_major:
+        return None
+    for key, value in major_in.model_dump(exclude_unset=True).items():
+        setattr(db_major, key, value)
+    db.commit()
+    db.refresh(db_major)
+    return db_major
+
+def delete_lecturer_major(db: Session, major_id: str):
+    db_major = db.query(models.LecturerMajor).filter(models.LecturerMajor.id == major_id).first()
+    if db_major:
+        # Nullify major_id for lecturers assigned to this major
+        db.query(models.Lecturer).filter(models.Lecturer.major_id == major_id).update({"major_id": None, "major_name": None})
+        db.delete(db_major)
+        db.commit()
+        return True
+    return False
+
 # --- Lecturer CRUD ---
 def get_lecturers(db: Session, featured_only: bool = False):
     query = db.query(models.Lecturer)
@@ -746,7 +780,12 @@ def get_lecturer_by_id(db: Session, lecturer_id: str):
     return db.query(models.Lecturer).filter(models.Lecturer.id == lecturer_id).first()
 
 def create_lecturer(db: Session, lecturer_in: schemas.LecturerCreate):
-    db_lecturer = models.Lecturer(**lecturer_in.model_dump())
+    data = lecturer_in.model_dump()
+    if data.get("major_id") and not data.get("major_name"):
+        m = get_lecturer_major_by_id(db, data["major_id"])
+        if m:
+            data["major_name"] = m.name
+    db_lecturer = models.Lecturer(**data)
     db.add(db_lecturer)
     db.commit()
     db.refresh(db_lecturer)
@@ -763,6 +802,11 @@ def update_lecturer(db: Session, lecturer_id: str, lecturer_in: schemas.Lecturer
         current_featured_count = db.query(models.Lecturer).filter(models.Lecturer.is_featured == True).count()
         if current_featured_count >= 4:
             raise ValueError("Đã đạt giới hạn tối đa 4 Giảng viên ưu tiên ngoài Trang chủ!")
+
+    if "major_id" in update_data and update_data["major_id"]:
+        m = get_lecturer_major_by_id(db, update_data["major_id"])
+        if m:
+            update_data["major_name"] = m.name
 
     for key, value in update_data.items():
         setattr(db_lecturer, key, value)

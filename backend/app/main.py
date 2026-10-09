@@ -100,14 +100,23 @@ def perform_startup_tasks():
                 if "is_featured" not in lec_cols:
                     conn.execute(text("ALTER TABLE lecturers ADD COLUMN is_featured BOOLEAN DEFAULT FALSE"))
                     print("Added column is_featured to lecturers table.")
+                if "major_id" not in lec_cols:
+                    conn.execute(text("ALTER TABLE lecturers ADD COLUMN major_id VARCHAR(100) NULL"))
+                    print("Added column major_id to lecturers table.")
+                if "major_name" not in lec_cols:
+                    conn.execute(text("ALTER TABLE lecturers ADD COLUMN major_name VARCHAR(150) NULL"))
+                    print("Added column major_name to lecturers table.")
+                if "major_ids" not in lec_cols:
+                    conn.execute(text("ALTER TABLE lecturers ADD COLUMN major_ids TEXT NULL"))
+                    print("Added column major_ids to lecturers table.")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
 
-    # Single DB session for initial seed and contact settings
+    # Single DB session for contact settings
     try:
         db = next(get_db())
         try:
-            # Only seed default settings if needed, do not force seed courses/lecturers on every restart
+            # Only seed default settings if needed
             setting_count = db.query(models.ContactSetting).count()
             if setting_count == 0:
                 db_setting = models.ContactSetting(

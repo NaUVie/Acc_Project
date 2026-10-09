@@ -110,6 +110,7 @@ onMounted(async () => {
     courseStore.fetchCategories().catch(() => {}),
     courseStore.fetchPrograms(),
     courseStore.fetchBundles(),
+    courseStore.fetchLecturerMajors().catch(() => {}),
     courseStore.fetchLecturers().catch(() => {}),
     courseStore.fetchAdminBanners().catch(() => {}),
     courseStore.fetchAdminTestimonials().catch(() => {}),
