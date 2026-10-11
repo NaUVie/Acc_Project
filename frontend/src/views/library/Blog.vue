@@ -114,8 +114,13 @@ import { useCourseStore } from '@/stores/courses';
 
 const courseStore = useCourseStore();
 
-onMounted(async () => {
-  await courseStore.fetchBlogs().catch(() => {});
+onMounted(() => {
+  if (!courseStore.blogPosts || courseStore.blogPosts.length === 0) {
+    courseStore.fetchBlogs().catch(() => {});
+  } else {
+    // Background refresh
+    courseStore.fetchBlogs().catch(() => {});
+  }
 });
 
 const categories = [

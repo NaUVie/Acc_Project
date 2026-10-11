@@ -414,14 +414,18 @@ const toggleFaq = (idx) => {
 
 onMounted(async () => {
   try {
+    const tasks = [];
     if (courseStore.courses.length === 0) {
-      await courseStore.fetchCourses();
+      tasks.push(courseStore.fetchCourses());
     }
     if (courseStore.programs.length === 0) {
-      await courseStore.fetchPrograms();
+      tasks.push(courseStore.fetchPrograms());
     }
     if (courseStore.token && !courseStore.userMe) {
-      await courseStore.fetchUserMe();
+      tasks.push(courseStore.fetchUserMe());
+    }
+    if (tasks.length > 0) {
+      await Promise.all(tasks);
     }
   } catch (err) {
     console.error('Failed to load data for ReferralProgram page:', err);

@@ -222,6 +222,13 @@ const handleQrError = (e) => {
 };
 
 onMounted(async () => {
+  // Check store cache first for instant 0ms rendering
+  const existingOrder = courseStore.orders.find(o => o.id === parseInt(orderId.value));
+  if (existingOrder) {
+    order.value = existingOrder;
+    loading.value = false;
+  }
+
   try {
     await courseStore.fetchOrders();
     const found = courseStore.orders.find(o => o.id === parseInt(orderId.value));

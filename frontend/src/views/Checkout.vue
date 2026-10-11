@@ -215,7 +215,14 @@ onMounted(async () => {
     form.value.fullname = courseStore.userMe.fullname || ''
     form.value.email = courseStore.userMe.email || ''
   }
-  await courseStore.fetchMyReferralSummary()
+  const tasks = [courseStore.fetchMyReferralSummary()];
+  if (!courseStore.userMe) tasks.push(courseStore.fetchUserMe());
+  if (courseStore.cart.length === 0) tasks.push(courseStore.fetchCart());
+  await Promise.all(tasks).catch(() => {});
+  if (courseStore.userMe) {
+    if (!form.value.fullname) form.value.fullname = courseStore.userMe.fullname || '';
+    if (!form.value.email) form.value.email = courseStore.userMe.email || '';
+  }
 })
 
 const cartItems = computed(() => {

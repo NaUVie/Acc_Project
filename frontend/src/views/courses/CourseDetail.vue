@@ -31,7 +31,7 @@
           <!-- Article Header -->
           <header class="article-header-box">
             <div class="article-badges">
-              <span class="cat-badge-pill">{{ getCategoryName(course.category) }}</span>
+              <!-- <span class="cat-badge-pill">{{ getCategoryName(course.category) }}</span> -->
               <span v-if="parentProgram" class="program-badge-pill">🎓 {{ parentProgram.title }}</span>
             </div>
             
@@ -133,13 +133,56 @@
               <div class="sidebar-perk-item">✓ Hỗ trợ giải đáp & tài liệu đi kèm</div>
             </div>
 
-            <router-link to="/contact" class="sidebar-register-btn" style="text-decoration: none; text-align: center; display: block; box-sizing: border-box;">
-              Đăng Ký Tư Vấn Ngay
-            </router-link>
+            <button type="button" class="sidebar-register-btn" style="width: 100%; box-sizing: border-box; cursor: pointer; border: none; font-family: var(--font-sans);" @click="buyNow">
+              Đăng Ký 
+            </button>
 
             <a href="tel:0938566700" class="sidebar-hotline-btn">
               📞 Hotline: 0938 566 700
             </a>
+
+            <!-- Sidebar Related Courses Widget (Cùng nằm trong sidebar container, cuộn tự nhiên) -->
+            <div v-if="relatedCourses.length > 0" class="sidebar-related-courses-box">
+              <div class="sidebar-related-header">
+                <span class="related-badge">GỢI Ý CHO BẠN</span>
+                <h3 class="sidebar-related-title">Khóa học liên quan</h3>
+              </div>
+
+              <div class="sidebar-related-list">
+                <div 
+                  v-for="relCourse in relatedCourses" 
+                  :key="relCourse.id" 
+                  class="sidebar-related-item"
+                >
+                  <router-link :to="'/course/' + (relCourse.handle || relCourse.id)" class="sidebar-rel-thumb-link">
+                    <img 
+                      :src="relCourse.image || '/images/Square-Cover-_1.webp'" 
+                      :alt="relCourse.title" 
+                      class="sidebar-rel-thumb" 
+                      loading="lazy" 
+                    />
+                  </router-link>
+                  <div class="sidebar-rel-info">
+                    <span class="sidebar-rel-cat">{{ getCategoryName(relCourse.category) }}</span>
+                    <h4 class="sidebar-rel-name">
+                      <router-link :to="'/course/' + (relCourse.handle || relCourse.id)">
+                        {{ relCourse.title }}
+                      </router-link>
+                    </h4>
+                    <div class="sidebar-rel-price-row">
+                      <span class="sidebar-rel-price">{{ formatCurrency(relCourse.price) }}</span>
+                      <span v-if="relCourse.originalPrice || relCourse.original_price" class="sidebar-rel-price-old">
+                        {{ formatCurrency(relCourse.originalPrice || relCourse.original_price) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <router-link :to="course?.category ? '/courses/category/' + course.category : '/courses'" class="sidebar-related-more-btn">
+                Xem tất cả khóa học &rarr;
+              </router-link>
+            </div>
           </div>
         </aside>
 
@@ -348,14 +391,29 @@ const handleBottomRegister = async () => {
 };
 
 const loadCourse = async () => {
-  loading.value = true;
-  error.value = null;
   const handle = route.params.handle;
+  if (!handle) {
+    loading.value = false;
+    return;
+  }
+
+  // 1. Kiểm tra ngay trong cache của Pinia store -> nếu có thì hiển thị tức thì (0ms delay)
+  const cached = courseStore.courses.find(c => c.handle === handle || c.slug === handle || String(c.id) === String(handle));
+  if (cached) {
+    course.value = cached;
+    loading.value = false;
+  } else {
+    loading.value = true;
+  }
+
+  error.value = null;
   try {
     const fetched = await courseStore.fetchCourseByHandle(handle);
     course.value = fetched;
   } catch (err) {
-    error.value = err.message || 'Không thể tải thông tin khóa học.';
+    if (!course.value) {
+      error.value = err.message || 'Không thể tải thông tin khóa học.';
+    }
   } finally {
     loading.value = false;
   }
@@ -409,8 +467,9 @@ const handleToggleWishlist = async () => {
 };
 
 const loadReviews = async () => {
-  if (!course.value) return;
-  reviews.value = await courseStore.fetchCourseReviews(course.value.handle);
+  const handle = course.value?.handle || route.params.handle;
+  if (!handle) return;
+  reviews.value = await courseStore.fetchCourseReviews(handle);
 };
 
 const submitReview = async () => {
@@ -457,10 +516,39 @@ const courseLecturers = computed(() => {
   return ids.map(id => courseStore.lecturers.find(l => String(l.id) === String(id))).filter(Boolean);
 });
 
-onMounted(() => {
-  loadCourse().then(() => {
-    loadReviews();
+// Khóa học liên quan: cùng category hoặc cùng programId, loại trừ chính khóa học hiện tại
+const relatedCourses = computed(() => {
+  if (!course.value || !courseStore.courses || courseStore.courses.length === 0) return [];
+  const currentId = course.value.id;
+  const currentHandle = course.value.handle;
+  const currentCategory = course.value.category;
+  const currentProgramId = course.value.programId;
+
+  // 1. Ưu tiên khóa học cùng chuyên mục (category) hoặc cùng chương trình (program)
+  let sameCategory = courseStore.courses.filter(c => {
+    if (c.id === currentId || c.handle === currentHandle) return false;
+    return (currentCategory && c.category === currentCategory) || 
+           (currentProgramId && c.programId === currentProgramId);
   });
+
+  // 2. Nếu không đủ 4 khóa học, lấy thêm các khóa học khác để gợi ý đủ tối đa 4 khóa
+  if (sameCategory.length < 4) {
+    const others = courseStore.courses.filter(c => {
+      if (c.id === currentId || c.handle === currentHandle) return false;
+      return !sameCategory.some(sc => sc.id === c.id);
+    });
+    sameCategory = [...sameCategory, ...others];
+  }
+
+  return sameCategory.slice(0, 4);
+});
+
+onMounted(() => {
+  loadCourse();
+  loadReviews();
+  if (courseStore.courses.length === 0) {
+    courseStore.fetchCourses();
+  }
   if (courseStore.token) {
     courseStore.fetchWishlist();
   }

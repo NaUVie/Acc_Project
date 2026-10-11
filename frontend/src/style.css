@@ -60,13 +60,13 @@
   --input-height: 2.625rem;
   --input-padding-inline: var(--spacing-4);
 
-  /* Typography settings (Skills Bridge style: Plus Jakarta Sans & Inter) */
-  --heading-font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Typography settings: Mulish */
+  --heading-font-family: var(--font-display);
   --heading-font-weight: 700;
   --heading-font-style: normal;
   --heading-text-transform: normal;
-  --heading-letter-spacing: -0.02em;
-  --text-font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --heading-letter-spacing: -0.01em;
+  --text-font-family: var(--font-sans);
   --text-font-weight: 400;
   --text-font-style: normal;
   --text-letter-spacing: 0.0em;
@@ -120,9 +120,13 @@
   --shadow-md: 0 5px 30px rgb(var(--text-primary) / 0.1);
   --shadow-block: 0px 18px 50px rgb(var(--text-primary) / 0.1);
 
-  /* SPA mapping colors to align with light mode */
-  --font-sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Plus Jakarta Sans', 'Inter', Georgia, serif;
+  /* FONT CHÍNH CỦA WEB:
+     - Heading / Tiêu đề: Manrope (hiện đại, công nghệ, hình học bo tròn tinh tế)
+     - Nội dung / Body: Mulish (dễ đọc, thanh thoát)
+  */
+  --font-sans: 'Mulish', 'Mulish Fallback', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'SFMono-Regular', Consolas, Monaco, monospace;
 
   --bg-primary: rgb(var(--background-primary));
   --bg-secondary: #ffffff;
@@ -168,6 +172,20 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Heading Typography: Áp dụng font sang trọng Cormorant Garamond */
+h1, h2, h3, h4,
+.heading-font,
+.article-main-title,
+.courses-title,
+.blogs-heading,
+.bento-title,
+.eco-main-title,
+.stats-title,
+.page-title {
+  font-family: var(--font-display) !important;
+  letter-spacing: -0.01em;
 }
 
 a {

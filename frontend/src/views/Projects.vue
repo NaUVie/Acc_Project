@@ -113,7 +113,9 @@ const syncCategoryFromQuery = () => {
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   syncCategoryFromQuery();
-  courseStore.fetchProjects();
+  if (!courseStore.projects || courseStore.projects.length === 0) {
+    courseStore.fetchProjects();
+  }
 });
 
 watch(() => route.query.cat, () => {

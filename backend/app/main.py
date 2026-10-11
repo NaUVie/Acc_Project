@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from .database import engine, Base, get_db
 from . import models
 from .api.api import api_router
@@ -120,11 +121,11 @@ def perform_startup_tasks():
             setting_count = db.query(models.ContactSetting).count()
             if setting_count == 0:
                 db_setting = models.ContactSetting(
-                    address="Tòa nhà ACC, 123 Đường Điện Biên Phủ, Quận Bình Thạnh, TP. Hồ Chí Minh",
-                    hotline="090 123 4567",
-                    email="support@accacademy.vn",
-                    zalo="https://zalo.me/0901234567",
-                    viber="https://viber.click/0901234567"
+                    address="156 Nam Kỳ Khởi Nghĩa, Quận 1, TP. Hồ Chí Minh",
+                    hotline="0938 566 700",
+                    email="info@acc-edu.vn",
+                    zalo="https://zalo.me/0938566700",
+                    viber="https://viber.click/0938566700"
                 )
                 db.add(db_setting)
                 db.commit()
@@ -159,6 +160,9 @@ default_origins = [
     "https://acc-academy-demo.vercel.app"
 ]
 origins = list(set(default_origins + custom_origins))
+
+# Compress large JSON responses (blog/course lists carry long HTML content)
+app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.add_middleware(
     CORSMiddleware,

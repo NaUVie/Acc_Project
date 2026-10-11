@@ -138,12 +138,18 @@ const filteredLecturers = computed(() => {
   });
 });
 
-onMounted(async () => {
+onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  await Promise.all([
-    courseStore.fetchLecturerMajors(),
-    courseStore.fetchLecturers()
-  ]);
+  const tasks = [];
+  if (courseStore.lecturerMajors.length === 0) {
+    tasks.push(courseStore.fetchLecturerMajors());
+  }
+  if (courseStore.lecturers.length === 0) {
+    tasks.push(courseStore.fetchLecturers());
+  }
+  if (tasks.length > 0) {
+    Promise.all(tasks).catch(() => {});
+  }
 });
 </script>
 

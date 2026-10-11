@@ -151,21 +151,23 @@ const route = useRoute();
 const router = useRouter();
 const courseStore = useCourseStore();
 
-const selectedCategory = ref('all');
+const selectedCategory = ref(route.params.categorySlug || 'all');
 
 onMounted(async () => {
-  if (courseStore.courses.length === 0) {
-    await courseStore.fetchCourses();
-  }
-  if (courseStore.categories && courseStore.categories.length === 0) {
-    await courseStore.fetchCategories();
-  }
-  
   const paramSlug = route.params.categorySlug;
   if (paramSlug) {
     selectedCategory.value = paramSlug;
-  } else {
-    selectedCategory.value = 'all';
+  }
+
+  const promises = [];
+  if (courseStore.courses.length === 0) {
+    promises.push(courseStore.fetchCourses());
+  }
+  if (courseStore.categories && courseStore.categories.length === 0) {
+    promises.push(courseStore.fetchCategories());
+  }
+  if (promises.length > 0) {
+    await Promise.all(promises).catch(() => {});
   }
 });
 

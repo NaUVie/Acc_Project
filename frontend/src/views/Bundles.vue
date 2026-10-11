@@ -424,7 +424,9 @@ const faqs = ref([
 ]);
 
 onMounted(() => {
-  courseStore.fetchBundles();
+  if (courseStore.bundles.length === 0) {
+    courseStore.fetchBundles();
+  }
   if (courseStore.courses.length === 0) {
     courseStore.fetchCourses();
   }

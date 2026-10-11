@@ -328,7 +328,7 @@
 
         <!-- Zalo Button at bottom -->
         <div class="drawer-footer">
-          <a href="https://zalo.me/your_zalo_number" target="_blank" rel="noopener" class="drawer-zalo-btn" aria-label="Chat Zalo">
+          <a href="https://zalo.me/0938566700" target="_blank" rel="noopener" class="drawer-zalo-btn" aria-label="Chat Zalo">
             <div class="zalo-bubble">
               <span class="zalo-text">Zalo</span>
             </div>
@@ -680,11 +680,15 @@ const realPrograms = computed(() => {
 onMounted(async () => {
   window.addEventListener('scroll', handleScroll, { capture: true, passive: true });
   try {
+    const tasks = [];
     if (courseStore.courses.length === 0) {
-      await courseStore.fetchCourses();
+      tasks.push(courseStore.fetchCourses());
     }
     if (courseStore.programs.length === 0) {
-      await courseStore.fetchPrograms();
+      tasks.push(courseStore.fetchPrograms());
+    }
+    if (tasks.length > 0) {
+      await Promise.all(tasks);
     }
     if (courseStore.programs.length > 0) {
       selectedProgramId.value = courseStore.programs[0].id;

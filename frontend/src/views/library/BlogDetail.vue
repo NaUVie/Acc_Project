@@ -72,11 +72,11 @@
               </div>
 
               <!-- CTA Consultation Box in Sidebar -->
-              <div class="sidebar-cta-card">
+              <!-- <div class="sidebar-cta-card">
                 <h4 class="sidebar-cta-title">Tư vấn đào tạo ACC</h4>
                 <p class="sidebar-cta-desc">Nhận lộ trình tư vấn cá nhân hóa & doanh nghiệp cùng chuyên gia.</p>
                 <router-link to="/contact" class="sidebar-cta-btn">Liên hệ tư vấn ngay</router-link>
-              </div>
+              </div> -->
             </div>
           </aside>
         </div>
@@ -130,6 +130,11 @@ const fetchPostDetail = async () => {
     currentPost.value = found;
   }
 
+  // Already have it in the store -> render immediately, refresh in background
+  if (found) {
+    isLoading.value = false;
+  }
+
   // Also fetch directly from backend API for fresh content
   try {
     const data = await courseStore.apiRequest(`/blogs/${handleOrId}`);
@@ -143,10 +148,11 @@ const fetchPostDetail = async () => {
   }
 };
 
-onMounted(async () => {
+onMounted(() => {
   isLoading.value = true;
-  await courseStore.fetchBlogs().catch(() => {});
-  await fetchPostDetail();
+  // Run detail + list (for sidebar related posts) in parallel instead of sequentially
+  courseStore.fetchBlogs().catch(() => {});
+  fetchPostDetail();
 });
 
 watch(() => route.params.handle, async () => {

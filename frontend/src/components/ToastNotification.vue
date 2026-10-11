@@ -41,7 +41,7 @@ const hideToast = () => {
   background: #ffffff;
   color: #1e293b;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 8px rgba(0, 0, 0, 0.08);
-  font-family: 'Inter', sans-serif;
+  font-family: var(--font-sans);
   font-size: 14px;
   font-weight: 600;
   max-width: 400px;
