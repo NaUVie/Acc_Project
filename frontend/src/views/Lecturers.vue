@@ -47,17 +47,17 @@
               <div class="mega-card-info">
                 <div class="card-header-badge-row">
                   <span class="mega-school-name">{{ l.majorName || 'Chuyên gia Đào tạo' }}</span>
-                  <span v-if="l.id === 'nguyen-tan-binh'" class="mini-role-tag gold">Viện trưởng Leadman</span>
-                  <span v-else-if="l.id === 'nguyen-vu-huy-hoang'" class="mini-role-tag blue">Giám đốc Đào tạo</span>
+                  <!-- <span v-if="l.id === 'nguyen-tan-binh'" class="mini-role-tag gold">Viện trưởng Leadman</span>
+                  <span v-else-if="l.id === 'nguyen-vu-huy-hoang'" class="mini-role-tag blue">Giám đốc Đào tạo</span> -->
                 </div>
                 <h4 class="mega-program-title" :title="l.name">{{ l.name }}</h4>
                 <p class="lecturer-sub-title">{{ l.title }}</p>
 
                 <!-- Statistics Badges -->
-                <div class="stats-row">
+                <!-- <div class="stats-row">
                   <span class="stat-pill">🎓 {{ l.totalStudents ? l.totalStudents.toLocaleString('vi-VN') : '10,000+' }} học viên</span>
                   <span class="stat-pill">🏫 {{ l.totalSessions || 150 }}+ buổi</span>
-                </div>
+                </div> -->
 
                 <p class="mega-program-desc">{{ l.bioShort }}</p>
                 <div class="mega-card-footer">
@@ -116,15 +116,13 @@ const activeMajorMeta = computed(() => {
   const currentMajor = majors.value.find(m => m.id === selectedMajor.value);
   if (!currentMajor || selectedMajor.value === 'all') {
     return {
-      name: 'Tất cả Đội ngũ Giảng viên & Chuyên gia',
-      badge: 'TOÀN BỘ GIẢNG VIÊN',
-      description: 'Quy tụ các chuyên gia thực chiến hàng đầu trong lĩnh vực AI, Quản trị, Tài chính, Marketing và Vận hành.'
+      name: ' Đội ngũ Giảng viên & Chuyên gia',
     };
   }
   return {
     name: `Chuyên gia ${currentMajor.name}`,
-    badge: (currentMajor.badge || currentMajor.name).toUpperCase(),
-    description: currentMajor.description || `Đội ngũ giảng viên thực chiến chuyên sâu thuộc lĩnh vực ${currentMajor.name} tại ACC Academy.`
+    // badge: (currentMajor.badge || currentMajor.name).toUpperCase(),
+    // description: currentMajor.description || `Đội ngũ giảng viên thực chiến chuyên sâu thuộc lĩnh vực ${currentMajor.name} tại ACC Academy.`
   };
 });
 

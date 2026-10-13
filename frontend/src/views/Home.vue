@@ -69,12 +69,12 @@
           <div class="ecosystem-container">
             <div class="eco-left">
               <div class="eco-content">
-                <p class="eco-desc">ACC Academy đồng hành cùng cá nhân, doanh nghiệp và tổ chức trong hành trình nâng cao năng lực, ứng dụng AI và chuyển đổi số vào thực tiễn.</p>
-                <p class="eco-desc">Chúng tôi kết hợp Đào tạo – Tư vấn – Công nghệ – Chiến lược, giúp đội ngũ không chỉ hiểu công nghệ mà còn biết cách ứng dụng hiệu quả vào công việc, tối ưu quy trình và tạo ra giá trị tăng trưởng bền vững.</p>
+                <p class="eco-desc">{{ homeIntroData.desc1 }}</p>
+                <p class="eco-desc">{{ homeIntroData.desc2 }}</p>
               </div>
               <div class="eco-counter-box">
                 <div class="eco-number">{{ formatNumber(ecoCount) }}+</div>
-                <div class="eco-counter-desc">CHƯƠNG TRÌNH & DỰ ÁN ĐÀO TẠO – TƯ VẤN ĐÃ TRIỂN KHAI</div>
+                <div class="eco-counter-desc">{{ homeIntroData.counter_label }}</div>
               </div>
             </div>
 
@@ -84,10 +84,10 @@
                 <video 
                   ref="ecoVideoRef" 
                   class="eco-video-element" 
-                  poster="/images/CoE-Thumb.png"
+                  :poster="homeIntroData.poster_url"
                   controls
                   playsinline
-                  :src="videoUrl"
+                  :src="homeIntroData.video_url"
                   @play="isVideoPlaying = true"
                   @pause="isVideoPlaying = false"
                   @ended="isVideoPlaying = false"
@@ -99,7 +99,7 @@
                       <polygon points="5 3 19 12 5 21 5 3"></polygon>
                     </svg>
                   </button>
-                  <span class="play-btn-label">XEM VIDEO GIỚI THIỆU ACC ACADEMY</span>
+                  <span class="play-btn-label">{{ homeIntroData.btn_label }}</span>
                 </div>
               </div>
             </div>
@@ -523,10 +523,24 @@ import { stripHtml } from '@/utils/stripHtml';
 const courseStore = useCourseStore();
 const testimonialStore = useTestimonialStore();
 
-// Ecosystem Video Player
+// Ecosystem Video Player & Dynamic Home Intro
 const ecoVideoRef = ref(null);
 const isVideoPlaying = ref(false);
-const videoUrl = ref('/videos/intro.mp4');
+
+const defaultHomeIntro = {
+  title: 'Kiến tạo năng lực – Dẫn dắt chuyển đổi bền vững',
+  desc1: 'ACC Academy đồng hành cùng cá nhân, doanh nghiệp và tổ chức trong hành trình nâng cao năng lực, ứng dụng AI và chuyển đổi số vào thực tiễn.',
+  desc2: 'Chúng tôi kết hợp Đào tạo – Tư vấn – Công nghệ – Chiến lược, giúp đội ngũ không chỉ hiểu công nghệ mà còn biết cách ứng dụng hiệu quả vào công việc, tối ưu quy trình và tạo ra giá trị tăng trưởng bền vững.',
+  counter_number: 500,
+  counter_label: 'CHƯƠNG TRÌNH & DỰ ÁN ĐÀO TẠO – TƯ VẤN ĐÃ TRIỂN KHAI',
+  video_url: '/videos/intro.mp4',
+  poster_url: '/images/CoE-Thumb.png',
+  btn_label: 'XEM VIDEO GIỚI THIỆU ACC ACADEMY'
+};
+
+const homeIntroData = computed(() => {
+  return courseStore.homeIntroSettings || defaultHomeIntro;
+});
 
 const handlePlayVideo = () => {
   if (ecoVideoRef.value) {
@@ -603,7 +617,10 @@ const nextSlide = () => {
 };
 
 // 2. Ecosystem & Stats Counter Animation
-const ecoTitleWords = ['Kiến', 'tạo', 'năng', 'lực', '–', 'Dẫn', 'dắt', 'chuyển', 'đổi', 'bền', 'vững'];
+const ecoTitleWords = computed(() => {
+  const title = (homeIntroData.value && homeIntroData.value.title) || 'Kiến tạo năng lực – Dẫn dắt chuyển đổi bền vững';
+  return title.trim().split(/\s+/);
+});
 const ecoTitleAnimated = ref(false);
 
 const setupEcoTitleObserver = () => {
@@ -647,7 +664,8 @@ const setupCountersObserver = () => {
     entries.forEach(entry => {
       if (entry.isIntersecting && !countersAnimated.value) {
         countersAnimated.value = true;
-        animateNumber(ecoCount, 500, 1200);
+        const targetEco = (homeIntroData.value && homeIntroData.value.counter_number) || 500;
+        animateNumber(ecoCount, targetEco, 1200);
         animateNumber(leadersCount, 17000, 1800);
         animateNumber(businessesCount, 70, 1500);
         animateNumber(marketsCount, 7, 1000);
@@ -1059,6 +1077,7 @@ onMounted(() => {
   if (courseStore.lecturers.length === 0) {
     courseStore.fetchLecturers();
   }
+  courseStore.fetchHomeIntroSettings();
 });
 
 onUnmounted(() => {

@@ -542,6 +542,31 @@ class ContactSettingResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# Home Intro Settings Schemas
+class HomeIntroSettingUpdate(BaseModel):
+    title: Optional[str] = None
+    desc1: Optional[str] = None
+    desc2: Optional[str] = None
+    counter_number: Optional[int] = None
+    counter_label: Optional[str] = None
+    video_url: Optional[str] = None
+    poster_url: Optional[str] = None
+    btn_label: Optional[str] = None
+
+class HomeIntroSettingResponse(BaseModel):
+    id: int
+    title: str
+    desc1: str
+    desc2: str
+    counter_number: int
+    counter_label: str
+    video_url: str
+    poster_url: str
+    btn_label: str
+
+    class Config:
+        from_attributes = True
+
 # Banner Schemas
 class BannerBase(BaseModel):
     title: str
@@ -681,6 +706,39 @@ class UserCourseCommissionResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# Project Review Schemas
+class ProjectReviewCreate(BaseModel):
+    author_name: str
+    author_email: Optional[str] = None
+    rating: int = 5
+    comment: str
 
+class ProjectReviewUpdate(BaseModel):
+    is_approved: Optional[bool] = None
+    rating: Optional[int] = None
+    comment: Optional[str] = None
 
+class ProjectReviewResponse(BaseModel):
+    id: int
+    project_id: str
+    author_name: str
+    rating: int
+    comment: str
+    created_at: datetime
 
+    class Config:
+        from_attributes = True
+
+class ProjectReviewAdminResponse(BaseModel):
+    id: int
+    project_id: str
+    user_id: Optional[int] = None
+    author_name: str
+    author_email: Optional[str] = None
+    rating: int
+    comment: str
+    is_approved: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True

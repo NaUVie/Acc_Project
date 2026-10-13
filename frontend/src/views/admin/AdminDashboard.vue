@@ -70,7 +70,7 @@ const tabs = [
   { id: 'coupons', name: 'Mã giảm giá', icon: '🎟️' },
   { id: 'commissions', name: 'Hoa hồng Affiliate', icon: '🤝' },
   { id: 'lecturers', name: 'Giảng viên', icon: '👨‍🏫' },
-  { id: 'banners', name: 'Banner Hero', icon: '🖼️' },
+  { id: 'banners', name: 'Banner & Video Trang chủ', icon: '🖼️' },
   { id: 'categories', name: 'Chuyên mục', icon: '🏷️' },
   { id: 'courses', name: 'Khóa học', icon: '📚' },
   { id: 'programs', name: 'Chương trình', icon: '🎓' },

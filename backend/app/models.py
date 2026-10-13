@@ -253,6 +253,24 @@ class Project(Base):
     content = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
+    reviews = relationship("ProjectReview", back_populates="project", cascade="all, delete-orphan")
+
+
+class ProjectReview(Base):
+    __tablename__ = "project_reviews"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    project_id = Column(String(100), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    author_name = Column(String(150), nullable=False)
+    author_email = Column(String(150), nullable=True)
+    rating = Column(Integer, default=5) # 1 to 5
+    comment = Column(Text, nullable=False)
+    is_approved = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    project = relationship("Project", back_populates="reviews")
+    user = relationship("User", backref="project_reviews")
 
 class Enrollment(Base):
     """Tracks which user has access to which course (after payment)."""
@@ -291,6 +309,20 @@ class Banner(Base):
     position = Column(Integer, default=0)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class HomeIntroSetting(Base):
+    __tablename__ = "home_intro_settings"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String(255), default="Kiến tạo năng lực – Dẫn dắt chuyển đổi bền vững")
+    desc1 = Column(Text, default="ACC Academy đồng hành cùng cá nhân, doanh nghiệp và tổ chức trong hành trình nâng cao năng lực, ứng dụng AI và chuyển đổi số vào thực tiễn.")
+    desc2 = Column(Text, default="Chúng tôi kết hợp Đào tạo – Tư vấn – Công nghệ – Chiến lược, giúp đội ngũ không chỉ hiểu công nghệ mà còn biết cách ứng dụng hiệu quả vào công việc, tối ưu quy trình và tạo ra giá trị tăng trưởng bền vững.")
+    counter_number = Column(Integer, default=500)
+    counter_label = Column(String(255), default="CHƯƠNG TRÌNH & DỰ ÁN ĐÀO TẠO – TƯ VẤN ĐÃ TRIỂN KHAI")
+    video_url = Column(String(500), default="/videos/intro.mp4")
+    poster_url = Column(String(500), default="/images/CoE-Thumb.png")
+    btn_label = Column(String(255), default="XEM VIDEO GIỚI THIỆU ACC ACADEMY")
+
 
 class CourseReview(Base):
     __tablename__ = "course_reviews"

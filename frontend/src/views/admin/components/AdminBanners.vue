@@ -1,17 +1,41 @@
 <template>
   <div class="tab-content animate-fade-in">
-    <!-- VIEW 1: LIST TABLE -->
-    <div v-if="activeView === 'list'">
-      <div class="content-header flex-between">
-        <div>
-          <h2>Quản lý Banner (Hero Carousel)</h2>
-          <p>Tùy chỉnh các banner quảng cáo và hình ảnh trình chiếu trên trang chủ.</p>
-        </div>
-        <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Banner mới</button>
-      </div>
+    <!-- SUB-NAV: HERO BANNERS VS HOME VIDEO & INTRO -->
+    <div class="mb-4" style="display: flex; gap: 10px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">
+      <button 
+        type="button" 
+        @click="subTab = 'banners'" 
+        class="btn btn-sm"
+        :class="subTab === 'banners' ? 'btn-primary' : 'btn-secondary'"
+        style="font-weight: 700; border-radius: 8px;"
+      >
+        Banner Hero ({{ banners.length }})
+      </button>
+      <button 
+        type="button" 
+        @click="openHomeIntroTab" 
+        class="btn btn-sm"
+        :class="subTab === 'home_intro' ? 'btn-primary' : 'btn-secondary'"
+        style="font-weight: 700; border-radius: 8px;"
+      >
+        Video & Giới thiệu Kiến tạo năng lực
+      </button>
+    </div>
 
-      <!-- Banners Table -->
-      <div class="table-responsive mt-6">
+    <!-- TAB 1: BANNERS CAROUSEL -->
+    <div v-if="subTab === 'banners'">
+      <!-- VIEW 1: LIST TABLE -->
+      <div v-if="activeView === 'list'">
+        <div class="content-header flex-between">
+          <div>
+            <h2>Quản lý Banner (Hero Carousel)</h2>
+            <p>Tùy chỉnh các banner quảng cáo và hình ảnh trình chiếu trên trang chủ.</p>
+          </div>
+          <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Banner mới</button>
+        </div>
+
+        <!-- Banners Table -->
+        <div class="table-responsive mt-6">
         <table class="admin-table">
           <thead>
             <tr>
@@ -150,6 +174,148 @@
         </div>
       </form>
     </div>
+    </div> <!-- END TAB 1: BANNERS -->
+
+    <!-- TAB 2: HOME INTRO & VIDEO CONFIGURATION -->
+    <div v-else-if="subTab === 'home_intro'" class="admin-page-card" style="background: #ffffff; color: #0f172a; border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
+      <div class="content-header flex-between pb-4 mb-4" style="border-bottom: 1px solid #e2e8f0;">
+        <div>
+          <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0 0 6px 0;">Cấu hình Phần "Kiến tạo năng lực — Dẫn dắt chuyển đổi bền vững" & Video</h2>
+          <p style="color: #64748b; margin: 0; font-size: 13.5px;">Tùy chỉnh tiêu đề, hai đoạn văn giới thiệu, số liệu bộ đếm, đường dẫn video giới thiệu và ảnh bìa hiển thị trên trang chủ.</p>
+        </div>
+        <button type="button" @click="loadHomeIntroSettings" class="btn btn-secondary btn-sm" :disabled="loadingIntro">
+          {{ loadingIntro ? 'Đang tải...' : 'Tải lại' }}
+        </button>
+      </div>
+
+      <form @submit.prevent="saveHomeIntro">
+        <div class="form-group mb-4">
+          <label style="color: #1e293b; font-weight: 700; font-size: 14px;">Tiêu đề chính (Hiệu ứng chữ từng từ) <span style="color: #e11d48;">*</span></label>
+          <input 
+            v-model="introForm.title" 
+            type="text" 
+            required 
+            class="admin-input-style" 
+            placeholder="Kiến tạo năng lực – Dẫn dắt chuyển đổi bền vững" 
+            style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 600;" 
+          />
+          <small class="text-muted" style="display: block; margin-top: 4px;">Mỗi từ trong câu tiêu đề này sẽ tự động chạy hiệu ứng xuất hiện trên trang chủ.</small>
+        </div>
+
+        <div class="grid grid-2 gap-4 mb-4">
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 700; font-size: 14px;">Đoạn giới thiệu 1 <span style="color: #e11d48;">*</span></label>
+            <textarea 
+              v-model="introForm.desc1" 
+              rows="4" 
+              required 
+              class="admin-input-style" 
+              placeholder="ACC Academy đồng hành cùng cá nhân, doanh nghiệp và tổ chức..." 
+              style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 700; font-size: 14px;">Đoạn giới thiệu 2 <span style="color: #e11d48;">*</span></label>
+            <textarea 
+              v-model="introForm.desc2" 
+              rows="4" 
+              required 
+              class="admin-input-style" 
+              placeholder="Chúng tôi kết hợp Đào tạo – Tư vấn – Công nghệ – Chiến lược..." 
+              style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="grid grid-2 gap-4 mb-4" style="background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 700; font-size: 14px;">Số đếm hiển thị (Counter number)</label>
+            <input 
+              v-model.number="introForm.counter_number" 
+              type="number" 
+              min="0" 
+              class="admin-input-style" 
+              placeholder="500" 
+              style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 700;" 
+            />
+            <small class="text-muted" style="display: block; margin-top: 4px;">Hệ thống sẽ tự động thêm dấu "+" và chạy hiệu ứng tăng số (Ví dụ: 500+).</small>
+          </div>
+
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 700; font-size: 14px;">Mô tả dưới số đếm</label>
+            <input 
+              v-model="introForm.counter_label" 
+              type="text" 
+              class="admin-input-style" 
+              placeholder="CHƯƠNG TRÌNH & DỰ ÁN ĐÀO TẠO – TƯ VẤN ĐÃ TRIỂN KHAI" 
+              style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" 
+            />
+          </div>
+        </div>
+
+        <!-- Video Configuration Section -->
+        <div class="p-4 mb-4" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px;">
+          <h4 style="margin: 0 0 12px 0; color: #166534; font-size: 15px; font-weight: 800;">Cấu hình Video Giới thiệu Trang chủ</h4>
+
+          <div class="form-group mb-3">
+            <label style="color: #14532d; font-weight: 700; font-size: 13.5px;">Đường dẫn Video (.mp4 / URL video) <span style="color: #e11d48;">*</span></label>
+            <div style="display: flex; gap: 8px;">
+              <input 
+                v-model="introForm.video_url" 
+                type="text" 
+                required 
+                class="admin-input-style" 
+                placeholder="/videos/intro.mp4 hoặc https://.../video.mp4" 
+                style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #86efac;" 
+              />
+              <input type="file" ref="videoFileRef" @change="uploadVideoFile" style="display: none;" accept="video/*" />
+              <button type="button" @click="$refs.videoFileRef.click()" class="btn btn-secondary btn-sm" :disabled="uploadingVideo">
+                {{ uploadingVideo ? 'Đang tải...' : 'Upload Video' }}
+              </button>
+            </div>
+            <small style="display: block; margin-top: 4px; color: #15803d;">Mặc định: /videos/intro.mp4. Bạn có thể dán link video trực tiếp hoặc bấm Upload video mới.</small>
+          </div>
+
+          <div class="grid grid-2 gap-4">
+            <div class="form-group">
+              <label style="color: #14532d; font-weight: 700; font-size: 13.5px;">Ảnh bìa Video (Poster Thumbnail)</label>
+              <div style="display: flex; gap: 8px;">
+                <input 
+                  v-model="introForm.poster_url" 
+                  type="text" 
+                  class="admin-input-style" 
+                  placeholder="/images/CoE-Thumb.png hoặc link ảnh" 
+                  style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #86efac;" 
+                />
+                <input type="file" ref="posterFileRef" @change="uploadPosterFile" style="display: none;" accept="image/*" />
+                <button type="button" @click="$refs.posterFileRef.click()" class="btn btn-secondary btn-sm">
+                  Upload Ảnh
+                </button>
+              </div>
+              <img v-if="introForm.poster_url" :src="introForm.poster_url" alt="Poster Preview" style="margin-top: 8px; max-height: 90px; object-fit: cover; border-radius: 8px; border: 1px solid #86efac;" referrerpolicy="no-referrer" />
+            </div>
+
+            <div class="form-group">
+              <label style="color: #14532d; font-weight: 700; font-size: 13.5px;">Chữ nút phát trên ảnh bìa</label>
+              <input 
+                v-model="introForm.btn_label" 
+                type="text" 
+                class="admin-input-style" 
+                placeholder="XEM VIDEO GIỚI THIỆU ACC ACADEMY" 
+                style="background: #ffffff; color: #0f172a; border: 1px solid #86efac;" 
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-end" style="gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
+          <button type="submit" class="btn btn-primary" :disabled="savingIntro" style="padding: 10px 24px; font-weight: 700;">
+            {{ savingIntro ? 'Đang lưu cài đặt...' : 'Lưu Thay Đổi Trang Chủ' }}
+          </button>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -158,6 +324,8 @@ import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 
 const courseStore = useCourseStore();
+
+const subTab = ref('banners'); // 'banners' or 'home_intro'
 
 const activeView = ref('list');
 const isEditing = ref(false);
@@ -172,6 +340,21 @@ const form = ref({
   is_external: false,
   position: 1,
   is_active: true
+});
+
+// Home Intro & Video Config States
+const loadingIntro = ref(false);
+const savingIntro = ref(false);
+const uploadingVideo = ref(false);
+const introForm = ref({
+  title: 'Kiến tạo năng lực – Dẫn dắt chuyển đổi bền vững',
+  desc1: 'ACC Academy đồng hành cùng cá nhân, doanh nghiệp và tổ chức trong hành trình nâng cao năng lực, ứng dụng AI và chuyển đổi số vào thực tiễn.',
+  desc2: 'Chúng tôi kết hợp Đào tạo – Tư vấn – Công nghệ – Chiến lược, giúp đội ngũ không chỉ hiểu công nghệ mà còn biết cách ứng dụng hiệu quả vào công việc, tối ưu quy trình và tạo ra giá trị tăng trưởng bền vững.',
+  counter_number: 500,
+  counter_label: 'CHƯƠNG TRÌNH & DỰ ÁN ĐÀO TẠO – TƯ VẤN ĐÃ TRIỂN KHAI',
+  video_url: '/videos/intro.mp4',
+  poster_url: '/images/CoE-Thumb.png',
+  btn_label: 'XEM VIDEO GIỚI THIỆU ACC ACADEMY'
 });
 
 const banners = computed(() => courseStore.adminBanners);
@@ -281,6 +464,98 @@ const deleteBannerItem = async (id) => {
     } catch (err) {
       courseStore.showToast("Lỗi khi xóa banner: " + err.message, 'error');
     }
+  }
+};
+
+// Home Intro Methods
+const openHomeIntroTab = async () => {
+  subTab.value = 'home_intro';
+  await loadHomeIntroSettings();
+};
+
+const loadHomeIntroSettings = async () => {
+  loadingIntro.value = true;
+  try {
+    const res = await courseStore.fetchHomeIntroSettings();
+    if (res) {
+      introForm.value = {
+        title: res.title || 'Kiến tạo năng lực – Dẫn dắt chuyển đổi bền vững',
+        desc1: res.desc1 || '',
+        desc2: res.desc2 || '',
+        counter_number: res.counter_number ?? 500,
+        counter_label: res.counter_label || 'CHƯƠNG TRÌNH & DỰ ÁN ĐÀO TẠO – TƯ VẤN ĐÃ TRIỂN KHAI',
+        video_url: res.video_url || '/videos/intro.mp4',
+        poster_url: res.poster_url || '/images/CoE-Thumb.png',
+        btn_label: res.btn_label || 'XEM VIDEO GIỚI THIỆU ACC ACADEMY'
+      };
+    }
+  } catch (err) {
+    console.error("Error loading home intro settings:", err);
+  } finally {
+    loadingIntro.value = false;
+  }
+};
+
+const uploadPosterFile = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${courseStore.token}`
+      },
+      body: formData
+    });
+    if (!res.ok) throw new Error('Upload ảnh thất bại');
+    const data = await res.json();
+    introForm.value.poster_url = data.url;
+    courseStore.showToast('Tải ảnh bìa video thành công!', 'success');
+  } catch (err) {
+    courseStore.showToast('Không thể upload ảnh bìa: ' + err.message, 'error');
+  }
+};
+
+const uploadVideoFile = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  uploadingVideo.value = true;
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${courseStore.token}`
+      },
+      body: formData
+    });
+    if (!res.ok) throw new Error('Upload video thất bại');
+    const data = await res.json();
+    introForm.value.video_url = data.url;
+    courseStore.showToast('Tải video thành công!', 'success');
+  } catch (err) {
+    courseStore.showToast('Không thể upload video: ' + err.message, 'error');
+  } finally {
+    uploadingVideo.value = false;
+  }
+};
+
+const saveHomeIntro = async () => {
+  savingIntro.value = true;
+  try {
+    await courseStore.updateHomeIntroSettings(introForm.value);
+    courseStore.showToast('Đã lưu cấu hình phần giới thiệu & video trang chủ thành công!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi lưu cài đặt: ' + (err.message || err), 'error');
+  } finally {
+    savingIntro.value = false;
   }
 };
 </script>

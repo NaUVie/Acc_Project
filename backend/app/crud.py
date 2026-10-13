@@ -883,4 +883,57 @@ def delete_project(db: Session, project_id: str):
         return True
     return False
 
+# --- Project Review CRUD ---
+def get_project_reviews(db: Session, project_id: str):
+    return db.query(models.ProjectReview).filter(
+        models.ProjectReview.project_id == project_id,
+        models.ProjectReview.is_approved == True
+    ).order_by(models.ProjectReview.created_at.desc()).all()
+
+def create_project_review(
+    db: Session,
+    project_id: str,
+    author_name: str,
+    author_email: Optional[str],
+    rating: int,
+    comment: str,
+    user_id: Optional[int] = None
+):
+    review = models.ProjectReview(
+        project_id=project_id,
+        user_id=user_id,
+        author_name=author_name,
+        author_email=author_email,
+        rating=max(1, min(5, rating)),
+        comment=comment,
+        is_approved=False # Requires admin approval
+    )
+    db.add(review)
+    db.commit()
+    db.refresh(review)
+    return review
+
+def get_all_project_reviews_admin(db: Session, project_id: Optional[str] = None):
+    query = db.query(models.ProjectReview)
+    if project_id:
+        query = query.filter(models.ProjectReview.project_id == project_id)
+    return query.order_by(models.ProjectReview.created_at.desc()).all()
+
+def update_project_review(db: Session, review_id: int, review_in: schemas.ProjectReviewUpdate):
+    review = db.query(models.ProjectReview).filter(models.ProjectReview.id == review_id).first()
+    if not review:
+        return None
+    for key, value in review_in.model_dump(exclude_unset=True).items():
+        setattr(review, key, value)
+    db.commit()
+    db.refresh(review)
+    return review
+
+def delete_project_review(db: Session, review_id: int):
+    review = db.query(models.ProjectReview).filter(models.ProjectReview.id == review_id).first()
+    if review:
+        db.delete(review)
+        db.commit()
+        return True
+    return False
 

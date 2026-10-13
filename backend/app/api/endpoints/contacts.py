@@ -21,6 +21,17 @@ def get_contact_settings(db: Session = Depends(get_db)):
         db.refresh(settings)
     return settings
 
+@router.get("/home-intro", response_model=schemas.HomeIntroSettingResponse)
+def get_public_home_intro_settings(db: Session = Depends(get_db)):
+    settings = db.query(models.HomeIntroSetting).first()
+    if not settings:
+        settings = models.HomeIntroSetting()
+        db.add(settings)
+        db.commit()
+        db.refresh(settings)
+    return settings
+
+
 @router.post("", response_model=schemas.ContactResponse, status_code=status.HTTP_201_CREATED)
 def create_contact_inquiry(
     contact_in: schemas.ContactCreate,

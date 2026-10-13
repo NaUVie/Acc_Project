@@ -33,7 +33,7 @@
           </ul>
         </div>
 
-        <!-- Col 4: Liên hệ -->
+        <!-- Col 4: Liên hệ & QR Zalo -->
         <div class="custom-footer-col contact-col">
           <h4 class="custom-footer-heading">Liên hệ</h4>
           <div class="contact-details">
@@ -49,6 +49,16 @@
               <span class="contact-label">Email:</span>
               <a href="mailto:info@acc-edu.vn">info@acc-edu.vn</a>
             </p>
+          </div>
+
+          <div class="footer-qr-zalo">
+            <div class="qr-zalo-img-wrapper">
+              <img src="/images/QR_Zalo.jpg" alt="QR Zalo ACC Academy" class="qr-zalo-img" loading="lazy" />
+            </div>
+            <div class="qr-zalo-info">
+              <span class="qr-zalo-title">Kết nối Zalo OA</span>
+              <span class="qr-zalo-desc">Quét mã QR để được hỗ trợ &amp; tư vấn nhanh nhất</span>
+            </div>
           </div>
         </div>
       </div>

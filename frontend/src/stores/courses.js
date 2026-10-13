@@ -103,7 +103,8 @@ export const useCourseStore = defineStore('courses', {
     adminBlogPosts: [],
     projects: [],
     banners: [],
-    contactSettings: null
+    contactSettings: null,
+    homeIntroSettings: null
   }),
 
   getters: {
@@ -1550,6 +1551,29 @@ export const useCourseStore = defineStore('courses', {
         throw err;
       }
     },
+    async fetchHomeIntroSettings() {
+      try {
+        const data = await this.apiRequest('/contacts/home-intro');
+        this.homeIntroSettings = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to fetch home intro settings:", err);
+        return null;
+      }
+    },
+    async updateHomeIntroSettings(settings) {
+      try {
+        const data = await this.apiRequest('/admin/home-intro', {
+          method: 'PUT',
+          body: JSON.stringify(settings)
+        });
+        this.homeIntroSettings = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to update home intro settings:", err);
+        throw err;
+      }
+    },
     async uploadImage(file) {
       const formData = new FormData();
       formData.append('file', file);
@@ -1594,6 +1618,61 @@ export const useCourseStore = defineStore('courses', {
         return data;
       } catch (err) {
         this.showToast(err.message || 'Không thể gửi đánh giá', 'error');
+        throw err;
+      }
+    },
+
+    // --- Project Reviews Actions ---
+    async fetchProjectReviews(projectId) {
+      try {
+        return await this.apiRequest(`/projects/${projectId}/reviews`);
+      } catch (err) {
+        console.warn(`Could not fetch reviews for project ${projectId}:`, err);
+        return [];
+      }
+    },
+
+    async submitProjectReview(projectId, reviewData) {
+      try {
+        const data = await this.apiRequest(`/projects/${projectId}/reviews`, {
+          method: 'POST',
+          body: JSON.stringify(reviewData)
+        });
+        this.showToast('Nhận xét của bạn đã được gửi thành công và đang chờ quản trị viên duyệt!', 'success');
+        return data;
+      } catch (err) {
+        this.showToast(err.message || 'Không thể gửi nhận xét', 'error');
+        throw err;
+      }
+    },
+
+    async fetchProjectReviewsAdmin(projectId = null) {
+      const url = projectId ? `/admin/project-reviews?project_id=${projectId}` : '/admin/project-reviews';
+      return await this.apiRequest(url);
+    },
+
+    async toggleProjectReviewApproval(reviewId) {
+      try {
+        const updated = await this.apiRequest(`/admin/project-reviews/${reviewId}/toggle-approval`, {
+          method: 'PUT'
+        });
+        this.showToast('Đã cập nhật trạng thái duyệt nhận xét!', 'success');
+        return updated;
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi khi cập nhật trạng thái', 'error');
+        throw err;
+      }
+    },
+
+    async deleteProjectReviewAdmin(reviewId) {
+      try {
+        await this.apiRequest(`/admin/project-reviews/${reviewId}`, {
+          method: 'DELETE'
+        });
+        this.showToast('Đã xóa nhận xét thành công!', 'success');
+        return true;
+      } catch (err) {
+        this.showToast(err.message || 'Lỗi khi xóa nhận xét', 'error');
         throw err;
       }
     },

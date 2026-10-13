@@ -648,6 +648,51 @@ def update_contact_settings(
     db.refresh(db_settings)
     return db_settings
 
+# ==================== HOME INTRO SETTINGS ====================
+
+@router.get("/home-intro", response_model=schemas.HomeIntroSettingResponse)
+def get_home_intro_settings_admin(db: Session = Depends(get_db)):
+    settings = db.query(models.HomeIntroSetting).first()
+    if not settings:
+        settings = models.HomeIntroSetting()
+        db.add(settings)
+        db.commit()
+        db.refresh(settings)
+    return settings
+
+@router.put("/home-intro", response_model=schemas.HomeIntroSettingResponse)
+def update_home_intro_settings_admin(
+    settings_in: schemas.HomeIntroSettingUpdate,
+    db: Session = Depends(get_db)
+):
+    settings = db.query(models.HomeIntroSetting).first()
+    if not settings:
+        settings = models.HomeIntroSetting()
+        db.add(settings)
+        db.commit()
+        db.refresh(settings)
+
+    if settings_in.title is not None:
+        settings.title = settings_in.title
+    if settings_in.desc1 is not None:
+        settings.desc1 = settings_in.desc1
+    if settings_in.desc2 is not None:
+        settings.desc2 = settings_in.desc2
+    if settings_in.counter_number is not None:
+        settings.counter_number = settings_in.counter_number
+    if settings_in.counter_label is not None:
+        settings.counter_label = settings_in.counter_label
+    if settings_in.video_url is not None:
+        settings.video_url = settings_in.video_url
+    if settings_in.poster_url is not None:
+        settings.poster_url = settings_in.poster_url
+    if settings_in.btn_label is not None:
+        settings.btn_label = settings_in.btn_label
+
+    db.commit()
+    db.refresh(settings)
+    return settings
+
 # ==================== BANNER MANAGEMENT ====================
 
 @router.get("/banners", response_model=List[schemas.BannerResponse])
@@ -875,6 +920,29 @@ def delete_project_admin(id: str, db: Session = Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="Dự án không tồn tại")
     return {"message": "Đã xóa dự án thành công"}
+
+# ==================== PROJECT REVIEWS MANAGEMENT ====================
+
+@router.get("/project-reviews", response_model=List[schemas.ProjectReviewAdminResponse])
+def get_all_project_reviews_admin(project_id: Optional[str] = None, db: Session = Depends(get_db)):
+    return crud.get_all_project_reviews_admin(db, project_id=project_id)
+
+@router.put("/project-reviews/{id}/toggle-approval", response_model=schemas.ProjectReviewAdminResponse)
+def toggle_project_review_approval(id: int, db: Session = Depends(get_db)):
+    review = db.query(models.ProjectReview).filter(models.ProjectReview.id == id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="Nhận xét không tồn tại")
+    review.is_approved = not review.is_approved
+    db.commit()
+    db.refresh(review)
+    return review
+
+@router.delete("/project-reviews/{id}", status_code=status.HTTP_200_OK)
+def delete_project_review_admin(id: int, db: Session = Depends(get_db)):
+    success = crud.delete_project_review(db, id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Nhận xét không tồn tại")
+    return {"message": "Đã xóa nhận xét thành công"}
 
 
 # ==================== BLOG POST MANAGEMENT ====================
