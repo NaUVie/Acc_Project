@@ -147,58 +147,70 @@
         <h3 class="partner-logos-title">130+ doanh nghiệp hàng đầu đã hợp tác</h3>
       </div>
       
-      <div class="partner-marquee-container">
-        <!-- Row 1: Scroll Left -->
-        <div class="partner-marquee-track partner-track-left">
-          <div 
-            v-for="(logo, idx) in partnerRow1" 
-            :key="'r1-a-' + idx" 
-            class="partner-logo-card"
-          >
-            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
-          </div>
-          <div 
-            v-for="(logo, idx) in partnerRow1" 
-            :key="'r1-b-' + idx" 
-            class="partner-logo-card"
-          >
-            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
-          </div>
-        </div>
-
-        <!-- Row 2: Scroll Right -->
-        <div class="partner-marquee-track partner-track-right">
-          <div 
-            v-for="(logo, idx) in partnerRow2" 
-            :key="'r2-a-' + idx" 
-            class="partner-logo-card"
-          >
-            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
-          </div>
-          <div 
-            v-for="(logo, idx) in partnerRow2" 
-            :key="'r2-b-' + idx" 
-            class="partner-logo-card"
-          >
-            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+      <div class="partner-display-wrapper">
+        <!-- Row 1: Fixed Top (6 đối tác cố định) -->
+        <div class="partner-fixed-row-container container">
+          <div class="partner-fixed-grid">
+            <component
+              :is="logo.link ? 'a' : 'div'"
+              v-for="(logo, idx) in partnerTopFixed" 
+              :key="'fixed-top-' + idx" 
+              :href="logo.link || undefined"
+              :target="logo.link ? '_blank' : undefined"
+              :rel="logo.link ? 'noopener noreferrer' : undefined"
+              class="partner-logo-card"
+              :title="logo.name"
+            >
+              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+            </component>
           </div>
         </div>
 
-        <!-- Row 3: Scroll Left -->
-        <div class="partner-marquee-track partner-track-left-alt">
-          <div 
-            v-for="(logo, idx) in partnerRow3" 
-            :key="'r3-a-' + idx" 
-            class="partner-logo-card"
-          >
-            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+        <!-- Row 2: Running Marquee (Hàng giữa chạy vô tận) -->
+        <div class="partner-marquee-container">
+          <div class="partner-marquee-track partner-track-left">
+            <component
+              :is="logo.link ? 'a' : 'div'"
+              v-for="(logo, idx) in partnerMarqueeList" 
+              :key="'marquee-a-' + idx" 
+              :href="logo.link || undefined"
+              :target="logo.link ? '_blank' : undefined"
+              :rel="logo.link ? 'noopener noreferrer' : undefined"
+              class="partner-logo-card"
+              :title="logo.name"
+            >
+              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+            </component>
+            <component
+              :is="logo.link ? 'a' : 'div'"
+              v-for="(logo, idx) in partnerMarqueeList" 
+              :key="'marquee-b-' + idx" 
+              :href="logo.link || undefined"
+              :target="logo.link ? '_blank' : undefined"
+              :rel="logo.link ? 'noopener noreferrer' : undefined"
+              class="partner-logo-card"
+              :title="logo.name"
+            >
+              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+            </component>
           </div>
-          <div 
-            v-for="(logo, idx) in partnerRow3" 
-            :key="'r3-b-' + idx" 
-            class="partner-logo-card"
-          >
-            <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+        </div>
+
+        <!-- Row 3: Fixed Bottom (6 đối tác cố định) -->
+        <div class="partner-fixed-row-container container">
+          <div class="partner-fixed-grid">
+            <component
+              :is="logo.link ? 'a' : 'div'"
+              v-for="(logo, idx) in partnerBottomFixed" 
+              :key="'fixed-bottom-' + idx" 
+              :href="logo.link || undefined"
+              :target="logo.link ? '_blank' : undefined"
+              :rel="logo.link ? 'noopener noreferrer' : undefined"
+              class="partner-logo-card"
+              :title="logo.name"
+            >
+              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+            </component>
           </div>
         </div>
       </div>
@@ -707,7 +719,7 @@ const setupPartnerObserver = () => {
   if (target) observer.observe(target);
 };
 
-const partnerLogos = [
+const defaultPartnerLogos = [
   { name: 'Đối tác 1', src: 'https://drive.google.com/thumbnail?id=120WyoSixRMCuWCMFeNjFKxsDzt74filf&sz=w400' },
   { name: 'Đối tác 2', src: 'https://drive.google.com/thumbnail?id=1ZININwRW94lavoqqoJ3eAArE5v6vsyZ5&sz=w400' },
   { name: 'Đối tác 3', src: 'https://drive.google.com/thumbnail?id=1CU6Pq9-wx_l2DPlb7uigkGIvCtcl921E&sz=w400' },
@@ -848,10 +860,34 @@ const partnerLogos = [
   { name: 'Đối tác 138', src: 'https://drive.google.com/thumbnail?id=1sI8f54M4LH2UmXZKWs9vNkBsYxZPnLeV&sz=w400' }
 ];
 
-const thirdPart = Math.ceil(partnerLogos.length / 3);
-const partnerRow1 = computed(() => partnerLogos.slice(0, thirdPart));
-const partnerRow2 = computed(() => partnerLogos.slice(thirdPart, thirdPart * 2));
-const partnerRow3 = computed(() => partnerLogos.slice(thirdPart * 2));
+const partnerLogos = computed(() => {
+  if (courseStore.partners && courseStore.partners.length > 0) {
+    return courseStore.partners;
+  }
+  return defaultPartnerLogos;
+});
+
+const partnerTopFixed = computed(() => {
+  const list = partnerLogos.value.filter(p => p.row_type === 'top_fixed');
+  if (list.length >= 6) return list.slice(0, 6);
+  if (list.length > 0) return list;
+  return partnerLogos.value.slice(0, 6);
+});
+
+const partnerBottomFixed = computed(() => {
+  const list = partnerLogos.value.filter(p => p.row_type === 'bottom_fixed');
+  if (list.length >= 6) return list.slice(0, 6);
+  if (list.length > 0) return list;
+  return partnerLogos.value.slice(6, 12);
+});
+
+const partnerMarqueeList = computed(() => {
+  const list = partnerLogos.value.filter(p => !p.row_type || p.row_type === 'marquee');
+  if (list.length > 0) return list;
+  return partnerLogos.value.slice(12);
+});
+
+
 
 
 // Bento Grid Cards Data with F5 Rotation
@@ -1078,6 +1114,7 @@ onMounted(() => {
     courseStore.fetchLecturers();
   }
   courseStore.fetchHomeIntroSettings();
+  courseStore.fetchPartners();
 });
 
 onUnmounted(() => {

@@ -110,6 +110,11 @@ def perform_startup_tasks():
                 if "major_ids" not in lec_cols:
                     conn.execute(text("ALTER TABLE lecturers ADD COLUMN major_ids TEXT NULL"))
                     print("Added column major_ids to lecturers table.")
+            if inspector.has_table("partners"):
+                part_cols = [c["name"] for c in inspector.get_columns("partners")]
+                if "row_type" not in part_cols:
+                    conn.execute(text("ALTER TABLE partners ADD COLUMN row_type VARCHAR(50) DEFAULT 'marquee'"))
+                    print("Added column row_type to partners table.")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
 

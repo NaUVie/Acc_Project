@@ -742,3 +742,32 @@ class ProjectReviewAdminResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+# Partner Schemas
+class PartnerBase(BaseModel):
+    name: str
+    src: str
+    link: Optional[str] = None
+    position: Optional[int] = 0
+    row_type: Optional[str] = "marquee" # "top_fixed", "marquee", "bottom_fixed"
+    is_active: Optional[bool] = True
+
+class PartnerCreate(PartnerBase):
+    pass
+
+class PartnerUpdate(BaseModel):
+    name: Optional[str] = None
+    src: Optional[str] = None
+    link: Optional[str] = None
+    position: Optional[int] = None
+    row_type: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class PartnerResponse(PartnerBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+

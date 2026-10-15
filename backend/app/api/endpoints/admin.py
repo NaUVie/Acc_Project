@@ -998,5 +998,31 @@ def delete_testimonial_admin(id: int, db: Session = Depends(get_db)):
     return {"message": "Đã xóa đánh giá thành công"}
 
 
+# ==================== PARTNER MANAGEMENT ====================
+
+@router.get("/partners", response_model=List[schemas.PartnerResponse])
+def get_all_partners_admin(db: Session = Depends(get_db)):
+    return crud.get_partners(db, active_only=False)
+
+@router.post("/partners", response_model=schemas.PartnerResponse, status_code=status.HTTP_201_CREATED)
+def create_partner_admin(partner_in: schemas.PartnerCreate, db: Session = Depends(get_db)):
+    return crud.create_partner(db, partner_in)
+
+@router.put("/partners/{id}", response_model=schemas.PartnerResponse)
+def update_partner_admin(id: int, partner_in: schemas.PartnerUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_partner(db, id, partner_in)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Đối tác không tồn tại")
+    return updated
+
+@router.delete("/partners/{id}", status_code=status.HTTP_200_OK)
+def delete_partner_admin(id: int, db: Session = Depends(get_db)):
+    success = crud.delete_partner(db, id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Đối tác không tồn tại")
+    return {"message": "Đã xóa đối tác thành công"}
+
+
+
 
 

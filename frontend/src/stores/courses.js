@@ -101,8 +101,10 @@ export const useCourseStore = defineStore('courses', {
     adminTestimonials: [],
     adminProjects: [],
     adminBlogPosts: [],
+    adminPartners: [],
     projects: [],
     banners: [],
+    partners: [],
     contactSettings: null,
     homeIntroSettings: null
   }),
@@ -266,6 +268,58 @@ export const useCourseStore = defineStore('courses', {
       await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners().catch(() => {})]);
       return data;
     },
+
+    // --- Partners Actions ---
+    async fetchPartners() {
+      try {
+        const data = await this.apiRequest('/courses/partners');
+        this.partners = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to fetch partners:", err);
+      }
+    },
+
+    async fetchAdminPartners() {
+      try {
+        const data = await this.apiRequest('/admin/partners');
+        this.adminPartners = data;
+        return data;
+      } catch (err) {
+        console.error("Failed to fetch admin partners:", err);
+        throw err;
+      }
+    },
+
+    async createPartner(partnerData) {
+      const data = await this.apiRequest('/admin/partners', {
+        method: 'POST',
+        body: JSON.stringify(partnerData)
+      });
+      await Promise.all([this.fetchAdminPartners().catch(() => {}), this.fetchPartners().catch(() => {})]);
+      this.showToast('Thêm đối tác thành công!', 'success');
+      return data;
+    },
+
+    async updatePartner(partnerId, partnerData) {
+      const data = await this.apiRequest(`/admin/partners/${partnerId}`, {
+        method: 'PUT',
+        body: JSON.stringify(partnerData)
+      });
+      await Promise.all([this.fetchAdminPartners().catch(() => {}), this.fetchPartners().catch(() => {})]);
+      this.showToast('Cập nhật đối tác thành công!', 'success');
+      return data;
+    },
+
+    async deletePartner(partnerId) {
+      const data = await this.apiRequest(`/admin/partners/${partnerId}`, {
+        method: 'DELETE'
+      });
+      await Promise.all([this.fetchAdminPartners().catch(() => {}), this.fetchPartners().catch(() => {})]);
+      this.showToast('Xóa đối tác thành công!', 'success');
+      return data;
+    },
+
 
     showToast(message, type = 'info', duration = 3500) {
       this.toast.message = message;

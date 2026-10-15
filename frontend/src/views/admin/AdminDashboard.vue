@@ -16,7 +16,6 @@
             :class="{ active: activeTab === tab.id }"
             @click="activeTab = tab.id"
           >
-            <span class="menu-icon">{{ tab.icon }}</span>
             <span class="menu-label">{{ tab.name }}</span>
           </button>
         </nav>
@@ -56,28 +55,30 @@ import AdminLecturers from './components/AdminLecturers.vue';
 import AdminTestimonials from './components/AdminTestimonials.vue';
 import AdminProjects from './components/AdminProjects.vue';
 import AdminBlogs from './components/AdminBlogs.vue';
+import AdminPartners from './components/AdminPartners.vue';
 
 const route = useRoute();
 const router = useRouter();
 const courseStore = useCourseStore();
 
-// Setup Tab navigation
+// Setup Tab navigation (Icons removed)
 const tabs = [
-  { id: 'overview', name: 'Tổng quan', icon: '📊' },
-  { id: 'blogs', name: 'Tin tức & Bài viết', icon: '📰' },
-  { id: 'projects', name: 'Dự án Case Study', icon: '💼' },
-  { id: 'testimonials', name: 'Cảm nhận học viên', icon: '💬' },
-  { id: 'coupons', name: 'Mã giảm giá', icon: '🎟️' },
-  { id: 'commissions', name: 'Hoa hồng Affiliate', icon: '🤝' },
-  { id: 'lecturers', name: 'Giảng viên', icon: '👨‍🏫' },
-  { id: 'banners', name: 'Banner & Video Trang chủ', icon: '🖼️' },
-  { id: 'categories', name: 'Chuyên mục', icon: '🏷️' },
-  { id: 'courses', name: 'Khóa học', icon: '📚' },
-  { id: 'programs', name: 'Chương trình', icon: '🎓' },
-  { id: 'bundles', name: 'Gói Combo', icon: '📦' },
-  { id: 'orders', name: 'Đơn hàng', icon: '🛍️' },
-  { id: 'users', name: 'Học viên', icon: '👥' },
-  { id: 'contacts', name: 'Liên hệ', icon: '✉️' }
+  { id: 'overview', name: 'Tổng quan' },
+  { id: 'partners', name: 'Doanh nghiệp hợp tác' },
+  { id: 'blogs', name: 'Tin tức & Bài viết' },
+  { id: 'projects', name: 'Dự án Case Study' },
+  { id: 'testimonials', name: 'Cảm nhận học viên' },
+  { id: 'coupons', name: 'Mã giảm giá' },
+  { id: 'commissions', name: 'Hoa hồng Affiliate' },
+  { id: 'lecturers', name: 'Giảng viên' },
+  { id: 'banners', name: 'Banner & Video Trang chủ' },
+  { id: 'categories', name: 'Chuyên mục' },
+  { id: 'courses', name: 'Khóa học' },
+  { id: 'programs', name: 'Chương trình' },
+  { id: 'bundles', name: 'Gói Combo' },
+  { id: 'orders', name: 'Đơn hàng' },
+  { id: 'users', name: 'Học viên' },
+  { id: 'contacts', name: 'Liên hệ' }
 ];
 
 const getInitialTab = () => {
@@ -115,13 +116,15 @@ onMounted(async () => {
     courseStore.fetchAdminBanners().catch(() => {}),
     courseStore.fetchAdminTestimonials().catch(() => {}),
     courseStore.fetchAdminProjects().catch(() => {}),
-    courseStore.fetchAdminBlogPosts().catch(() => {})
+    courseStore.fetchAdminBlogPosts().catch(() => {}),
+    courseStore.fetchAdminPartners().catch(() => {})
   ]);
 });
 
 const currentTabComponent = computed(() => {
   switch (activeTab.value) {
     case 'overview': return AdminOverview;
+    case 'partners': return AdminPartners;
     case 'blogs': return AdminBlogs;
     case 'projects': return AdminProjects;
     case 'testimonials': return AdminTestimonials;

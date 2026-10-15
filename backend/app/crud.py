@@ -937,3 +937,46 @@ def delete_project_review(db: Session, review_id: int):
         return True
     return False
 
+# --- Partner CRUD ---
+def get_partners(db: Session, active_only: bool = False):
+    query = db.query(models.Partner)
+    if active_only:
+        query = query.filter(models.Partner.is_active == True)
+    return query.order_by(models.Partner.position.asc(), models.Partner.id.asc()).all()
+
+def get_partner_by_id(db: Session, partner_id: int):
+    return db.query(models.Partner).filter(models.Partner.id == partner_id).first()
+
+def create_partner(db: Session, partner_in: schemas.PartnerCreate):
+    partner = models.Partner(
+        name=partner_in.name,
+        src=partner_in.src,
+        link=partner_in.link,
+        position=partner_in.position or 0,
+        row_type=partner_in.row_type or "marquee",
+        is_active=partner_in.is_active if partner_in.is_active is not None else True
+    )
+    db.add(partner)
+    db.commit()
+    db.refresh(partner)
+    return partner
+
+def update_partner(db: Session, partner_id: int, partner_in: schemas.PartnerUpdate):
+    partner = get_partner_by_id(db, partner_id)
+    if not partner:
+        return None
+    for key, value in partner_in.model_dump(exclude_unset=True).items():
+        setattr(partner, key, value)
+    db.commit()
+    db.refresh(partner)
+    return partner
+
+def delete_partner(db: Session, partner_id: int):
+    partner = get_partner_by_id(db, partner_id)
+    if partner:
+        db.delete(partner)
+        db.commit()
+        return True
+    return False
+
+

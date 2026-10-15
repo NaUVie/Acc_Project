@@ -392,5 +392,20 @@ class UserCourseCommission(Base):
     user = relationship("User", backref="custom_commissions")
     course = relationship("Course", back_populates="custom_commissions")
 
+class Partner(Base):
+    """Business Partner Logos displayed on Home page"""
+    __tablename__ = "partners"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False)
+    src = Column(String(500), nullable=False)
+    link = Column(String(500), nullable=True)
+    position = Column(Integer, default=0)
+    row_type = Column(String(50), default="marquee") # "top_fixed", "marquee", "bottom_fixed"
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+
+
 
 

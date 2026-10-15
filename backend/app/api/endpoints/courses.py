@@ -22,6 +22,11 @@ def read_categories(db: Session = Depends(get_db)):
 def read_banners(db: Session = Depends(get_db)):
     return crud.get_banners(db, active_only=True)
 
+@router.get("/partners", response_model=List[schemas.PartnerResponse])
+def read_partners(db: Session = Depends(get_db)):
+    return crud.get_partners(db, active_only=True)
+
+
 @router.get("/programs", response_model=List[schemas.ProgramResponse])
 def read_programs(db: Session = Depends(get_db)):
     return db.query(models.Program).all()
