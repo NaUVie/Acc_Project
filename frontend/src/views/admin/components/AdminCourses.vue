@@ -356,6 +356,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import { slugify } from '@/utils/slugify';
+import { formatImageUrl } from '@/utils/imageHelper';
 import Pagination from '@/components/Pagination.vue';
 import RichTextEditor from '@/components/RichTextEditor.vue';
 
@@ -538,7 +539,10 @@ const editCourseDetails = (c) => {
 
 const saveCourse = async () => {
   try {
-    const payload = { ...courseForm.value };
+    const payload = { 
+      ...courseForm.value,
+      image: formatImageUrl(courseForm.value.image)
+    };
     if (payload.category === 'custom') {
       if (!customCategorySlug.value.trim()) {
         courseStore.showToast('Vui lòng nhập mã slug cho chuyên mục mới!', 'warning');

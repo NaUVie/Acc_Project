@@ -81,10 +81,23 @@
             <!-- Video Player Section (Replaces eco-center image & eco-right services list) -->
             <div class="eco-video-wrapper">
               <div class="eco-video-card" :class="{ 'is-playing': isVideoPlaying }">
+                <!-- 1. Iframe Embed (YouTube / Google Drive) -->
+                <iframe 
+                  v-if="videoEmbedUrl && isVideoPlaying"
+                  :src="videoEmbedUrl"
+                  class="eco-video-element"
+                  title="Video Giới thiệu ACC Academy"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                ></iframe>
+
+                <!-- 2. HTML5 Video (Direct .mp4 / local file) -->
                 <video 
+                  v-else-if="!videoEmbedUrl"
                   ref="ecoVideoRef" 
                   class="eco-video-element" 
-                  :poster="homeIntroData.poster_url"
+                  :poster="formatImageUrl(homeIntroData.poster_url)"
                   controls
                   playsinline
                   :src="homeIntroData.video_url"
@@ -92,6 +105,16 @@
                   @pause="isVideoPlaying = false"
                   @ended="isVideoPlaying = false"
                 ></video>
+
+                <!-- Poster Image for Embed (when not playing yet) -->
+                <img 
+                  v-if="videoEmbedUrl && !isVideoPlaying" 
+                  :src="formatImageUrl(homeIntroData.poster_url) || '/images/CoE-Thumb.png'" 
+                  alt="Video Poster" 
+                  class="eco-video-element" 
+                />
+
+                <!-- Play Overlay Button -->
                 <div v-if="!isVideoPlaying" class="video-play-overlay" @click="handlePlayVideo">
                   <div class="play-pulse-ring"></div>
                   <button class="play-btn-circle" aria-label="Phát video">
@@ -353,7 +376,7 @@
             <router-link :to="'/giang-vien/' + l.id" class="team-card-wrapper group">
               <div class="team-card-image-box">
                 <img 
-                  :src="l.avatar" 
+                  :src="formatImageUrl(l.avatar)" 
                   :alt="l.name" 
                   class="team-card-img" 
                   @error="(e) => e.target.src = '/images/1_6.png'"
@@ -402,11 +425,11 @@
             class="home-feedback-card"
           >
             <div class="home-feedback-img-box" v-if="p.image">
-              <img :src="p.image" :alt="p.name" class="home-feedback-img" referrerpolicy="no-referrer" />
+              <img :src="formatImageUrl(p.image)" :alt="p.name" class="home-feedback-img" referrerpolicy="no-referrer" />
             </div>
             <div class="home-feedback-body">
               <div class="home-student-profile">
-                <img :src="p.avatar" :alt="p.name" class="home-profile-avatar" referrerpolicy="no-referrer" />
+                <img :src="formatImageUrl(p.avatar)" :alt="p.name" class="home-profile-avatar" referrerpolicy="no-referrer" />
                 <div>
                   <h4 class="home-profile-name">{{ p.name }}</h4>
                   <p class="home-profile-role">{{ p.role }} • {{ p.company }}</p>
@@ -531,6 +554,7 @@ import { useTestimonialStore } from '@/stores/testimonials';
 import { lecturersData } from '@/data/lecturers';
 import { photoTestimonialsData } from '@/data/testimonials';
 import { stripHtml } from '@/utils/stripHtml';
+import { formatImageUrl } from '@/utils/imageHelper';
 
 const courseStore = useCourseStore();
 const testimonialStore = useTestimonialStore();
@@ -554,10 +578,40 @@ const homeIntroData = computed(() => {
   return courseStore.homeIntroSettings || defaultHomeIntro;
 });
 
+// Helper to convert YouTube / Google Drive URLs to embeddable URLs
+const convertToEmbedUrl = (url) => {
+  if (!url) return null;
+  const cleanUrl = url.trim();
+
+  // 1. YouTube
+  // Matches: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID, youtube.com/shorts/ID
+  const ytMatch = cleanUrl.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+  if (ytMatch && ytMatch[1]) {
+    return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
+  }
+
+  // 2. Google Drive
+  // Matches: drive.google.com/file/d/FILE_ID/view, drive.google.com/open?id=FILE_ID
+  const driveMatch = cleanUrl.match(/drive\.google\.com\/(?:file\/d\/([a-zA-Z0-9_-]+)|open\?id=([a-zA-Z0-9_-]+))/i);
+  if (driveMatch) {
+    const fileId = driveMatch[1] || driveMatch[2];
+    if (fileId) {
+      return `https://drive.google.com/file/d/${fileId}/preview?autoplay=1`;
+    }
+  }
+
+  return null;
+};
+
+const videoEmbedUrl = computed(() => {
+  const url = homeIntroData.value?.video_url;
+  return convertToEmbedUrl(url);
+});
+
 const handlePlayVideo = () => {
-  if (ecoVideoRef.value) {
-    ecoVideoRef.value.play();
-    isVideoPlaying.value = true;
+  isVideoPlaying.value = true;
+  if (!videoEmbedUrl.value && ecoVideoRef.value) {
+    ecoVideoRef.value.play().catch(e => console.log('Autoplay blocked or aborted:', e));
   }
 };
 
@@ -566,8 +620,8 @@ const currentSlide = ref(0);
 const heroSlides = computed(() => {
   if (courseStore.banners && courseStore.banners.length > 0) {
     return courseStore.banners.map(b => ({
-      desktopImage: b.desktop_image,
-      mobileImage: b.mobile_image || b.desktop_image,
+      desktopImage: formatImageUrl(b.desktop_image),
+      mobileImage: formatImageUrl(b.mobile_image || b.desktop_image),
       link: b.link || '/',
       title: b.title,
       isExternal: !!b.is_external

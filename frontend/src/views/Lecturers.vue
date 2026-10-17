@@ -42,7 +42,7 @@
           >
             <div class="mega-card-link">
               <div class="mega-school-logo lecturer-avatar-box">
-                <img :src="l.avatar" :alt="l.name" @error="(e) => e.target.src = '/images/1_6.png'" referrerpolicy="no-referrer" />
+                <img :src="formatImageUrl(l.avatar)" :alt="l.name" @error="(e) => e.target.src = '/images/1_6.png'" referrerpolicy="no-referrer" />
               </div>
               <div class="mega-card-info">
                 <div class="card-header-badge-row">
@@ -80,6 +80,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import { lecturersData } from '@/data/lecturers';
+import { formatImageUrl } from '@/utils/imageHelper';
 
 const courseStore = useCourseStore();
 const selectedMajor = ref('all');

@@ -259,14 +259,14 @@
           <h4 style="margin: 0 0 12px 0; color: #166534; font-size: 15px; font-weight: 800;">Cấu hình Video Giới thiệu Trang chủ</h4>
 
           <div class="form-group mb-3">
-            <label style="color: #14532d; font-weight: 700; font-size: 13.5px;">Đường dẫn Video (.mp4 / URL video) <span style="color: #e11d48;">*</span></label>
+            <label style="color: #14532d; font-weight: 700; font-size: 13.5px;">Đường dẫn Video (Hỗ trợ Link YouTube, Google Drive, Direct MP4 hoặc Upload file) <span style="color: #e11d48;">*</span></label>
             <div style="display: flex; gap: 8px;">
               <input 
                 v-model="introForm.video_url" 
                 type="text" 
                 required 
                 class="admin-input-style" 
-                placeholder="/videos/intro.mp4 hoặc https://.../video.mp4" 
+                placeholder="Dán link YouTube, Google Drive (drive.google.com/file/d/...) hoặc URL .mp4" 
                 style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #86efac;" 
               />
               <input type="file" ref="videoFileRef" @change="uploadVideoFile" style="display: none;" accept="video/*" />
@@ -274,7 +274,9 @@
                 {{ uploadingVideo ? 'Đang tải...' : 'Upload Video' }}
               </button>
             </div>
-            <small style="display: block; margin-top: 4px; color: #15803d;">Mặc định: /videos/intro.mp4. Bạn có thể dán link video trực tiếp hoặc bấm Upload video mới.</small>
+            <small style="display: block; margin-top: 4px; color: #15803d;">
+              💡 <strong>Hệ thống hỗ trợ đa dạng:</strong> Dán link YouTube (thường / Shorts), link chia sẻ Google Drive (ví dụ link của bạn: <code>https://drive.google.com/file/d/.../view</code>), file video trực tiếp (.mp4) hoặc bấm "Upload Video".
+            </small>
           </div>
 
           <div class="grid grid-2 gap-4">
@@ -322,6 +324,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import { formatImageUrl } from '@/utils/imageHelper';
 
 const courseStore = useCourseStore();
 
@@ -433,11 +436,16 @@ const uploadImage = async (event, targetField) => {
 const saveBanner = async () => {
   saving.value = true;
   try {
+    const payload = {
+      ...form.value,
+      desktop_image: formatImageUrl(form.value.desktop_image),
+      mobile_image: form.value.mobile_image ? formatImageUrl(form.value.mobile_image) : ''
+    };
     if (isEditing.value) {
-      await courseStore.updateBanner(editingId.value, form.value);
+      await courseStore.updateBanner(editingId.value, payload);
       courseStore.showToast('Cập nhật banner thành công!', 'success');
     } else {
-      await courseStore.createBanner(form.value);
+      await courseStore.createBanner(payload);
       courseStore.showToast('Tạo banner mới thành công!', 'success');
     }
     activeView.value = 'list';
@@ -550,7 +558,11 @@ const uploadVideoFile = async (event) => {
 const saveHomeIntro = async () => {
   savingIntro.value = true;
   try {
-    await courseStore.updateHomeIntroSettings(introForm.value);
+    const payload = {
+      ...introForm.value,
+      poster_url: formatImageUrl(introForm.value.poster_url)
+    };
+    await courseStore.updateHomeIntroSettings(payload);
     courseStore.showToast('Đã lưu cấu hình phần giới thiệu & video trang chủ thành công!', 'success');
   } catch (err) {
     courseStore.showToast('Lỗi khi lưu cài đặt: ' + (err.message || err), 'error');

@@ -75,7 +75,7 @@
               <td>
                 <div style="position: relative; width: 80px; height: 50px; border-radius: 8px; overflow: hidden; background: #0f172a; border: 1px solid #cbd5e1;">
                   <img 
-                    :src="t.thumbnail || t.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'" 
+                    :src="formatImageUrl(t.thumbnail || t.image) || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'" 
                     :alt="t.name" 
                     style="width: 100%; height: 100%; object-fit: cover;" 
                     referrerpolicy="no-referrer"
@@ -205,7 +205,7 @@
                 <input type="file" ref="thumbFileRef" @change="uploadImage($event, 'thumbnail')" style="display: none;" accept="image/*" />
                 <button type="button" @click="$refs.thumbFileRef.click()" class="btn btn-secondary btn-sm">Upload</button>
               </div>
-              <img v-if="form.thumbnail" :src="form.thumbnail" alt="Preview Thumbnail" style="margin-top: 8px; width: 140px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;" referrerpolicy="no-referrer" />
+              <img v-if="form.thumbnail" :src="formatImageUrl(form.thumbnail)" alt="Preview Thumbnail" style="margin-top: 8px; width: 140px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;" referrerpolicy="no-referrer" />
             </div>
 
             <div class="form-group">
@@ -226,7 +226,7 @@
               <input type="file" ref="photoFileRef" @change="uploadImage($event, 'image')" style="display: none;" accept="image/*" />
               <button type="button" @click="$refs.photoFileRef.click()" class="btn btn-secondary btn-sm">Upload</button>
             </div>
-            <img v-if="form.image" :src="form.image" alt="Preview Photo" style="margin-top: 8px; max-height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;" referrerpolicy="no-referrer" />
+            <img v-if="form.image" :src="formatImageUrl(form.image)" alt="Preview Photo" style="margin-top: 8px; max-height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;" referrerpolicy="no-referrer" />
           </div>
 
           <div class="form-group mt-3">
@@ -260,6 +260,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import { formatImageUrl } from '@/utils/imageHelper';
 
 const courseStore = useCourseStore();
 
@@ -409,10 +410,15 @@ const saveTestimonial = async () => {
 
   saving.value = true;
   try {
+    const payload = {
+      ...form.value,
+      thumbnail: formatImageUrl(form.value.thumbnail),
+      image: formatImageUrl(form.value.image)
+    };
     if (isEditing.value) {
-      await courseStore.updateAdminTestimonial(editingId.value, form.value);
+      await courseStore.updateAdminTestimonial(editingId.value, payload);
     } else {
-      await courseStore.addAdminTestimonial(form.value);
+      await courseStore.addAdminTestimonial(payload);
     }
     activeView.value = 'list';
   } catch (err) {

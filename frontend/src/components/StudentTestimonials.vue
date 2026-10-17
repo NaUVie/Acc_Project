@@ -61,7 +61,7 @@
             @click="openVideo(v.videoUrl)"
           >
             <div class="video-thumb-wrapper">
-              <img :src="v.thumbnail" :alt="v.title" class="video-thumb-img" referrerpolicy="no-referrer" />
+              <img :src="formatImageUrl(v.thumbnail)" :alt="v.title" class="video-thumb-img" referrerpolicy="no-referrer" />
               <div class="play-overlay">
                 <div class="play-btn-circle">
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -96,12 +96,12 @@
             class="photo-card"
           >
             <div class="photo-card-img-wrapper" v-if="p.image">
-              <img :src="p.image" :alt="p.name" class="photo-card-img" referrerpolicy="no-referrer" />
+              <img :src="formatImageUrl(p.image)" :alt="p.name" class="photo-card-img" referrerpolicy="no-referrer" />
             </div>
 
             <div class="photo-card-content">
               <div class="student-profile">
-                <img :src="p.avatar" :alt="p.name" class="profile-avatar" referrerpolicy="no-referrer" />
+                <img :src="formatImageUrl(p.avatar)" :alt="p.name" class="profile-avatar" referrerpolicy="no-referrer" />
                 <div>
                   <h4 class="profile-name">{{ p.name }}</h4>
                   <p class="profile-title">{{ p.role }} • {{ p.company }}</p>
@@ -140,6 +140,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { youtubePlaylistUrl } from '@/data/testimonials';
 import { useTestimonialStore } from '@/stores/testimonials';
+import { formatImageUrl } from '@/utils/imageHelper';
 
 const testimonialStore = useTestimonialStore();
 

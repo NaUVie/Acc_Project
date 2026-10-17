@@ -16,7 +16,7 @@
         <!-- Part 1: Tầm nhìn & Sứ mệnh -->
         <div class="vm-editorial-row reveal-on-scroll">
           <div class="vm-img-box">
-            <img src="https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1000&auto=format&fit=crop" alt="Tầm nhìn và Sứ mệnh ACC" class="vm-section-img" />
+            <img src="https://lh3.googleusercontent.com/d/1vOlYLlceRvdI3ozGu31-KP8FIa-Vn0pl" alt="Tầm nhìn và Sứ mệnh ACC" class="vm-section-img" />
           </div>
           <div class="vm-text-box">
             <span class="custom-ui-tag">ĐỊNH HƯỚNG BỀN VỮNG</span>
@@ -37,7 +37,7 @@
             </p>
           </div>
           <div class="vm-img-box">
-            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1000&auto=format&fit=crop" alt="Sự khác biệt của ACC" class="vm-section-img" />
+            <img src="https://lh3.googleusercontent.com/d/1K-MqaNwQHes194nALDinlzsaYvVbyPeU" alt="Sự khác biệt của ACC" class="vm-section-img" />
           </div>
         </div>
       </div>

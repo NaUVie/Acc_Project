@@ -61,7 +61,7 @@
                 <span class="drag-handle" style="cursor: grab; font-size: 16px; color: #94a3b8; user-select: none;" title="Kéo thả để đổi thứ tự">☰ {{ (currentPage - 1) * pageSize + idx + 1 }}</span>
               </td>
               <td>
-                <img :src="l.avatar || l.avatar_drive_link || '/images/default-avatar.jpg'" :alt="l.name" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7;" />
+                <img :src="formatImageUrl(l.avatar || l.avatar_drive_link || '/images/default-avatar.jpg')" :alt="l.name" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7;" />
               </td>
               <td class="font-bold text-xs" style="color: #64748b;">{{ l.id }}</td>
               <td class="font-bold" style="color: #0f172a;">{{ l.name }}</td>
@@ -186,7 +186,7 @@
             Đang tải ảnh lên Cloudinary...
           </div>
           <div v-if="lecturerForm.avatar" class="mt-2">
-            <img :src="lecturerForm.avatar" alt="Preview" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7;" />
+            <img :src="formatImageUrl(lecturerForm.avatar)" alt="Preview" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7;" />
           </div>
         </div>
 
@@ -328,6 +328,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import { slugify } from '@/utils/slugify';
+import { formatImageUrl } from '@/utils/imageHelper';
 import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
@@ -520,15 +521,19 @@ const saveLecturer = async () => {
       courseStore.showToast('Vui lòng nhập mã ID duy nhất!', 'warning');
       return;
     }
+    const payload = {
+      ...lecturerForm.value,
+      avatar: formatImageUrl(lecturerForm.value.avatar)
+    };
     if (isEditing.value) {
-      await courseStore.updateAdminLecturer(lecturerForm.value.id, lecturerForm.value);
+      await courseStore.updateAdminLecturer(payload.id, payload);
       courseStore.showToast('Cập nhật giảng viên thành công!', 'success');
     } else {
-      if (lecturers.value.some(l => l.id === lecturerForm.value.id)) {
+      if (lecturers.value.some(l => l.id === payload.id)) {
         courseStore.showToast('Mã ID này đã được sử dụng!', 'warning');
         return;
       }
-      await courseStore.addAdminLecturer(lecturerForm.value);
+      await courseStore.addAdminLecturer(payload);
       courseStore.showToast('Thêm giảng viên mới thành công!', 'success');
     }
     activeView.value = 'list';

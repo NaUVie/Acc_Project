@@ -14,7 +14,7 @@
       <div class="lecturer-profile-card">
         <div class="lecturer-avatar-col">
           <img 
-            :src="lecturer.avatar" 
+            :src="formatImageUrl(lecturer.avatar)" 
             :alt="lecturer.name" 
             class="lecturer-avatar-img" 
             @error="(e) => e.target.src = '/images/1_6.png'"
@@ -113,7 +113,7 @@
               <router-link :to="'/giang-vien/' + item.id" class="team-card-wrapper group">
                 <div class="team-card-image-box">
                   <img 
-                    :src="item.avatar" 
+                    :src="formatImageUrl(item.avatar)" 
                     :alt="item.name" 
                     class="team-card-img"
                     @error="(e) => e.target.src = '/images/1_6.png'"
@@ -162,6 +162,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 import { lecturersData } from '@/data/lecturers';
+import { formatImageUrl } from '@/utils/imageHelper';
 
 const route = useRoute();
 const courseStore = useCourseStore();
