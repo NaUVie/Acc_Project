@@ -349,6 +349,7 @@ def create_course_admin(course_in: schemas.CourseAdminCreate, db: Session = Depe
         price=course_in.price,
         original_price=course_in.original_price,
         image=course_in.image,
+        cover_image=course_in.cover_image,
         description=course_in.description,
         duration=course_in.duration,
         level=course_in.level,
@@ -392,6 +393,8 @@ def update_course_admin(id: int, course_in: schemas.CourseAdminUpdate, db: Sessi
         db_course.original_price = course_in.original_price
     if course_in.image is not None:
         db_course.image = course_in.image
+    if course_in.cover_image is not None:
+        db_course.cover_image = course_in.cover_image
     if course_in.description is not None:
         db_course.description = course_in.description
     if course_in.duration is not None:

@@ -413,20 +413,9 @@ const uploadImage = async (event, targetField) => {
   const file = event.target.files[0];
   if (!file) return;
 
-  const formData = new FormData();
-  formData.append('file', file);
-
   try {
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${courseStore.token}`
-      },
-      body: formData
-    });
-    if (!res.ok) throw new Error('Upload thất bại');
-    const data = await res.json();
-    form.value[targetField] = data.url;
+    const url = await courseStore.uploadImage(file);
+    form.value[targetField] = url;
     courseStore.showToast('Tải ảnh lên thành công!', 'success');
   } catch (err) {
     courseStore.showToast('Không thể upload ảnh: ' + err.message, 'error');

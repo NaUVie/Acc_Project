@@ -125,20 +125,39 @@
           </div>
         </div>
 
-        <div class="form-group mt-3">
-          <label style="color: #1e293b; font-weight: 600;">Hình ảnh khóa học (Tải ảnh từ máy lên Cloudinary hoặc dán URL)</label>
-          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <input v-model="courseForm.image" type="text" required class="admin-input-style" placeholder="/images/default.jpg hoặc URL Cloudinary" style="flex: 1; min-width: 240px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-            <label class="btn btn-primary btn-sm" style="padding: 10px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600;">
-              <span>Tải ảnh từ máy</span>
-              <input type="file" accept="image/*" @change="uploadCourseImage" style="display: none;" />
-            </label>
+        <div class="grid-2 mt-3">
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 600;">Ảnh Thumbnail / Danh sách (Card)</label>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <input v-model="courseForm.image" type="text" required class="admin-input-style" placeholder="/images/default.jpg hoặc URL Cloudinary" style="flex: 1; min-width: 200px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+              <label class="btn btn-primary btn-sm" style="padding: 10px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600;">
+                <span>Tải ảnh</span>
+                <input type="file" accept="image/*" @change="uploadCourseImage" style="display: none;" />
+              </label>
+            </div>
+            <div v-if="uploadingCourseImage" style="font-size: 12px; color: #0284c7; margin-top: 4px; font-weight: 600;">
+              Đang tải ảnh thumbnail lên Cloudinary...
+            </div>
+            <div v-if="courseForm.image" class="mt-2">
+              <img :src="courseForm.image" alt="Thumbnail Preview" style="max-height: 100px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #ffffff;" />
+            </div>
           </div>
-          <div v-if="uploadingCourseImage" style="font-size: 12px; color: #0284c7; margin-top: 4px; font-weight: 600;">
-            Đang tải ảnh lên Cloudinary (Thư mục Acc Demo)...
-          </div>
-          <div v-if="courseForm.image" class="mt-2">
-            <img :src="courseForm.image" alt="Preview" style="max-height: 100px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: cover;" />
+
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 600;">Ảnh Bìa hiển thị trang chi tiết (Cover Image)</label>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <input v-model="courseForm.coverImage" type="text" class="admin-input-style" placeholder="Để trống sẽ dùng chung ảnh Thumbnail" style="flex: 1; min-width: 200px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+              <label class="btn btn-primary btn-sm" style="padding: 10px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600; background: #475569;">
+                <span>Tải ảnh</span>
+                <input type="file" accept="image/*" @change="uploadCourseCoverImage" style="display: none;" />
+              </label>
+            </div>
+            <div v-if="uploadingCoverImage" style="font-size: 12px; color: #0284c7; margin-top: 4px; font-weight: 600;">
+              Đang tải ảnh bìa chi tiết lên Cloudinary...
+            </div>
+            <div v-if="courseForm.coverImage" class="mt-2">
+              <img :src="courseForm.coverImage" alt="Cover Preview" style="max-height: 100px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #ffffff;" />
+            </div>
           </div>
         </div>
 
@@ -440,6 +459,7 @@ const activeView = ref('list');
 const isEditingCourse = ref(false);
 const editingCourseId = ref(null);
 const uploadingCourseImage = ref(false);
+const uploadingCoverImage = ref(false);
 
 const uploadCourseImage = async (e) => {
   const file = e.target.files[0];
@@ -448,19 +468,36 @@ const uploadCourseImage = async (e) => {
   try {
     const url = await courseStore.uploadImage(file);
     courseForm.value.image = url;
-    courseStore.showToast('Tải ảnh lên thành công!', 'success');
+    courseStore.showToast('Tải ảnh thumbnail thành công!', 'success');
   } catch (err) {
     courseStore.showToast('Lỗi khi tải ảnh lên Cloudinary: ' + err.message, 'error');
   } finally {
     uploadingCourseImage.value = false;
   }
 };
+
+const uploadCourseCoverImage = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  uploadingCoverImage.value = true;
+  try {
+    const url = await courseStore.uploadImage(file);
+    courseForm.value.coverImage = url;
+    courseStore.showToast('Tải ảnh bìa chi tiết thành công!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi tải ảnh bìa lên Cloudinary: ' + err.message, 'error');
+  } finally {
+    uploadingCoverImage.value = false;
+  }
+};
+
 const courseForm = ref({
   title: '',
   handle: '',
   category: 'dao-tao-doanh-nghiep',
   programId: null,
   image: '',
+  coverImage: '',
   price: 0,
   originalPrice: 0,
   duration: '12 tuần',
@@ -480,6 +517,7 @@ const openAddCourseModal = () => {
     category: 'dao-tao-doanh-nghiep',
     programId: null,
     image: '/images/default.jpg',
+    coverImage: '',
     price: 9800000,
     originalPrice: 12000000,
     duration: '12 tuần',
@@ -524,6 +562,7 @@ const editCourseDetails = (c) => {
     category: c.category,
     programId: c.programId || null,
     image: c.image,
+    coverImage: c.coverImage || '',
     price: c.price,
     originalPrice: c.originalPrice,
     duration: c.duration,
@@ -541,7 +580,8 @@ const saveCourse = async () => {
   try {
     const payload = { 
       ...courseForm.value,
-      image: formatImageUrl(courseForm.value.image)
+      image: formatImageUrl(courseForm.value.image),
+      coverImage: courseForm.value.coverImage ? formatImageUrl(courseForm.value.coverImage) : null
     };
     if (payload.category === 'custom') {
       if (!customCategorySlug.value.trim()) {

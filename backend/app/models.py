@@ -65,6 +65,7 @@ class Course(Base):
     price = Column(Integer, nullable=False)
     original_price = Column(Integer, nullable=True)
     image = Column(String(255), nullable=True)
+    cover_image = Column(String(255), nullable=True)
     description = Column(Text, nullable=True)
     duration = Column(String(50), nullable=True)
     level = Column(String(50), nullable=True)

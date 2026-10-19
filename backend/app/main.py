@@ -67,6 +67,9 @@ def perform_startup_tasks():
                 if "lecturer_ids" not in courses_cols:
                     conn.execute(text("ALTER TABLE courses ADD COLUMN lecturer_ids TEXT NULL"))
                     print("Added column lecturer_ids to courses table.")
+                if "cover_image" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN cover_image VARCHAR(255) NULL"))
+                    print("Added column cover_image to courses table.")
             
             if inspector.has_table("enrollments"):
                 enr_cols = [c["name"] for c in inspector.get_columns("enrollments")]

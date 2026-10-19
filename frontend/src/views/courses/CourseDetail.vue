@@ -49,8 +49,8 @@
           </header>
 
           <!-- Featured Cover Image -->
-          <div class="article-cover-box" v-if="course.image">
-            <img :src="course.image" :alt="course.title" class="article-cover-img" />
+          <div class="article-cover-box" v-if="course.coverImage || course.image">
+            <img :src="course.coverImage || course.image" :alt="course.title" class="article-cover-img" />
           </div>
 
           <!-- Main Article Content Body -->

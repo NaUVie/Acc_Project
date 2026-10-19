@@ -35,6 +35,7 @@ class CourseBase(BaseModel):
     price: int
     original_price: Optional[int] = None
     image: Optional[str] = None
+    cover_image: Optional[str] = None
     description: Optional[str] = None
     duration: Optional[str] = None
     level: Optional[str] = None
@@ -498,6 +499,7 @@ class CourseAdminCreate(BaseModel):
     price: int
     original_price: Optional[int] = None
     image: Optional[str] = None
+    cover_image: Optional[str] = None
     description: Optional[str] = None
     duration: Optional[str] = None
     level: Optional[str] = None
@@ -515,6 +517,7 @@ class CourseAdminUpdate(BaseModel):
     price: Optional[int] = None
     original_price: Optional[int] = None
     image: Optional[str] = None
+    cover_image: Optional[str] = None
     description: Optional[str] = None
     duration: Optional[str] = None
     level: Optional[str] = None

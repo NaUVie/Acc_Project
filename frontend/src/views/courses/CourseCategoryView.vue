@@ -433,16 +433,18 @@ const handleImageError = (e) => {
 
 .mega-school-logo {
   width: 100%;
-  height: 160px;
+  aspect-ratio: 16 / 9;
+  height: auto;
   border-radius: 10px;
   overflow: hidden;
-  background-color: #f1f5f9;
+  background-color: #ffffff;
 }
 
 .mega-school-logo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center center;
   transition: transform 0.4s ease;
 }
 

@@ -1173,12 +1173,14 @@
   width: 100%;
   height: 100%;
   position: relative;
+  background-color: #ffffff;
 }
 
 .home-course-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center center;
   transition: transform 0.5s ease;
 }
 
