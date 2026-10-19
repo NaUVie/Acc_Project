@@ -105,6 +105,7 @@ export const useCourseStore = defineStore('courses', {
     adminPartners: [],
     projects: [],
     banners: [],
+    bannersLoading: false,
     partners: [],
     contactSettings: null,
     homeIntroSettings: null
@@ -224,12 +225,15 @@ export const useCourseStore = defineStore('courses', {
 
     // --- Dynamic Catalog Actions ---
     async fetchBanners() {
+      this.bannersLoading = true;
       try {
         const data = await this.apiRequest('/courses/banners');
         this.banners = data;
         return data;
       } catch (err) {
         console.error("Failed to fetch banners:", err);
+      } finally {
+        this.bannersLoading = false;
       }
     },
 

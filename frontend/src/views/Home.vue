@@ -1,51 +1,59 @@
 <template>
   <div class="home-view">
     <!-- 1. Hero Section (Carousel) -->
-    <section class="hero-carousel-section" aria-label="Hero carousel banner">
+    <section v-if="courseStore.bannersLoading || heroSlides.length > 0" class="hero-carousel-section" aria-label="Hero carousel banner">
       <div class="carousel-container">
-        <div 
-          v-for="(slide, index) in heroSlides" 
-          :key="index"
-          class="carousel-slide"
-          :class="{ active: currentSlide === index }"
-        >
-          <a v-if="slide.isExternal" :href="slide.link" target="_blank" rel="noopener" class="slide-link">
-            <picture>
-              <source media="(max-width: 768px)" :srcset="slide.mobileImage" />
-              <img :src="slide.desktopImage" :alt="slide.title" class="slide-image" />
-            </picture>
-          </a>
-          <router-link v-else :to="slide.link" class="slide-link">
-            <picture>
-              <source media="(max-width: 768px)" :srcset="slide.mobileImage" />
-              <img :src="slide.desktopImage" :alt="slide.title" class="slide-image" />
-            </picture>
-          </router-link>
+        <!-- Skeleton Loading State -->
+        <div v-if="courseStore.bannersLoading" class="carousel-skeleton">
+          <div class="skeleton-shimmer"></div>
         </div>
 
-        <!-- Slider Arrows -->
-        <button class="carousel-arrow prev" @click="prevSlide" aria-label="Previous slide">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-        </button>
-        <button class="carousel-arrow next" @click="nextSlide" aria-label="Next slide">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M9 18l6-6-6-6" />
-          </svg>
-        </button>
-
-        <!-- Slider Dots -->
-        <div class="carousel-dots">
-          <button 
+        <!-- Slides -->
+        <template v-else>
+          <div 
             v-for="(slide, index) in heroSlides" 
             :key="index"
-            class="carousel-dot"
+            class="carousel-slide"
             :class="{ active: currentSlide === index }"
-            @click="setSlide(index)"
-            :aria-label="'Go to slide ' + (index + 1)"
-          ></button>
-        </div>
+          >
+            <a v-if="slide.isExternal" :href="slide.link" target="_blank" rel="noopener" class="slide-link">
+              <picture>
+                <source media="(max-width: 768px)" :srcset="slide.mobileImage" />
+                <img :src="slide.desktopImage" :alt="slide.title" class="slide-image" />
+              </picture>
+            </a>
+            <router-link v-else :to="slide.link" class="slide-link">
+              <picture>
+                <source media="(max-width: 768px)" :srcset="slide.mobileImage" />
+                <img :src="slide.desktopImage" :alt="slide.title" class="slide-image" />
+              </picture>
+            </router-link>
+          </div>
+
+          <!-- Slider Arrows (only if more than 1 slide) -->
+          <button v-if="heroSlides.length > 1" class="carousel-arrow prev" @click="prevSlide" aria-label="Previous slide">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <button v-if="heroSlides.length > 1" class="carousel-arrow next" @click="nextSlide" aria-label="Next slide">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
+
+          <!-- Slider Dots (only if more than 1 slide) -->
+          <div v-if="heroSlides.length > 1" class="carousel-dots">
+            <button 
+              v-for="(slide, index) in heroSlides" 
+              :key="index"
+              class="carousel-dot"
+              :class="{ active: currentSlide === index }"
+              @click="setSlide(index)"
+              :aria-label="'Go to slide ' + (index + 1)"
+            ></button>
+          </div>
+        </template>
       </div>
     </section>
 
@@ -548,11 +556,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import { useTestimonialStore } from '@/stores/testimonials';
 import { lecturersData } from '@/data/lecturers';
-import { photoTestimonialsData } from '@/data/testimonials';
 import { stripHtml } from '@/utils/stripHtml';
 import { formatImageUrl } from '@/utils/imageHelper';
 
@@ -619,41 +626,27 @@ const handlePlayVideo = () => {
 const currentSlide = ref(0);
 const heroSlides = computed(() => {
   if (courseStore.banners && courseStore.banners.length > 0) {
-    return courseStore.banners.map(b => ({
-      desktopImage: formatImageUrl(b.desktop_image),
-      mobileImage: formatImageUrl(b.mobile_image || b.desktop_image),
-      link: b.link || '/',
-      title: b.title,
-      isExternal: !!b.is_external
-    }));
+    return courseStore.banners.map(b => {
+      const link = (b.link || '/').trim();
+      const isHttp = /^https?:\/\//i.test(link) || link.startsWith('//');
+      return {
+        desktopImage: formatImageUrl(b.desktop_image),
+        mobileImage: formatImageUrl(b.mobile_image || b.desktop_image),
+        link: link || '/',
+        title: b.title,
+        isExternal: Boolean(b.is_external || isHttp)
+      };
+    });
   }
-  return [
-    {
-      desktopImage: '/images/CoE-Web.png',
-      mobileImage: '/images/CoE-Mobile.png',
-      link: '/corporate/coe',
-      title: 'AI Center of Excellence'
-    },
-    {
-      desktopImage: '/images/Website_dd1fbf97-8fbe-44ed-bfd9-1eaaa069fdb3.png',
-      mobileImage: '/images/SEB_Mobile.png',
-      link: '/courses/category/ky-nang-ai',
-      title: 'ChatGPT Work Automation'
-    },
-    {
-      desktopImage: '/images/website_bbadf8f3-a076-4351-ba9e-f9f077fd6271.webp',
-      mobileImage: '/images/mobile_34381454-0cf6-416c-9487-9a341853b38f.webp',
-      link: 'https://teamlacquan.vn/',
-      title: 'teamlacquan.vn',
-      isExternal: true
-    }
-  ];
+  return [];
 });
 
 let heroInterval = null;
 const startHeroAutoplay = () => {
+  stopHeroAutoplay();
+  if (heroSlides.value.length <= 1) return;
   heroInterval = setInterval(() => {
-    const len = heroSlides.value.length || 1;
+    const len = heroSlides.value.length;
     currentSlide.value = (currentSlide.value + 1) % len;
   }, 5000);
 };
@@ -681,6 +674,13 @@ const nextSlide = () => {
   stopHeroAutoplay();
   startHeroAutoplay();
 };
+
+watch(heroSlides, (newSlides) => {
+  if (currentSlide.value >= newSlides.length) {
+    currentSlide.value = 0;
+  }
+  startHeroAutoplay();
+});
 
 // 2. Ecosystem & Stats Counter Animation
 const ecoTitleWords = computed(() => {
@@ -1090,9 +1090,13 @@ const featuredLecturers = computed(() => {
   return lecturersData.filter(l => featuredLecturerIds.includes(l.id));
 });
 
-// 10. Student Shared Feedbacks photos for Home
+// 10. Student Shared Feedbacks photos for Home from API
 const homeStudentFeedbacks = computed(() => {
-  return photoTestimonialsData.slice(0, 3);
+  const photoList = testimonialStore.photoTestimonials || [];
+  if (photoList.length > 0) {
+    return photoList.slice(0, 3);
+  }
+  return (testimonialStore.testimonials || []).slice(0, 3);
 });
 
 // 11. Consultation Auto Pop-up Modal State & Handler
@@ -1169,6 +1173,7 @@ onMounted(() => {
   }
   courseStore.fetchHomeIntroSettings();
   courseStore.fetchPartners();
+  testimonialStore.fetchTestimonials();
 });
 
 onUnmounted(() => {
