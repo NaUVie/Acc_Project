@@ -54,7 +54,7 @@
                       class="badge badge-success mr-1 mb-1"
                       style="display: inline-block; margin-right: 4px; margin-bottom: 4px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;"
                     >
-                      ✓ {{ c.title }}
+                      {{ c.title }}
                     </span>
                     <span 
                       v-if="b.courses.length > 2"
@@ -79,7 +79,7 @@
                       class="badge badge-warning mr-1 mb-1"
                       style="display: inline-block; margin-right: 4px; margin-bottom: 4px; background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;"
                     >
-                      🎁 {{ g.title }}
+                      {{ g.title }}
                     </span>
                     <span 
                       v-if="(b.gift_courses || b.giftCourses || []).length > 2"

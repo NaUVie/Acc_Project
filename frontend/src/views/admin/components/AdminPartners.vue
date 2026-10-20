@@ -14,11 +14,11 @@
       <button 
         type="button" 
         @click="filterRowType = 'top_fixed'" 
-        class="btn btn-sm"
+        class="btn btn-sm" 
         :class="filterRowType === 'top_fixed' ? 'btn-primary' : 'btn-secondary'"
         style="font-weight: 700; border-radius: 8px;"
       >
-        📌 Hàng trên cố định ({{ topFixedCount }}/6)
+        Hàng trên cố định ({{ topFixedCount }}/6)
       </button>
       <button 
         type="button" 
@@ -27,7 +27,7 @@
         :class="filterRowType === 'marquee' ? 'btn-primary' : 'btn-secondary'"
         style="font-weight: 700; border-radius: 8px;"
       >
-        🔄 Hàng giữa chạy Marquee ({{ marqueeCount }})
+        Hàng giữa chạy Marquee ({{ marqueeCount }})
       </button>
       <button 
         type="button" 
@@ -36,7 +36,7 @@
         :class="filterRowType === 'bottom_fixed' ? 'btn-primary' : 'btn-secondary'"
         style="font-weight: 700; border-radius: 8px;"
       >
-        📌 Hàng dưới cố định ({{ bottomFixedCount }}/6)
+        Hàng dưới cố định ({{ bottomFixedCount }}/6)
       </button>
     </div>
 
@@ -60,7 +60,7 @@
           v-model="searchQuery" 
           type="text" 
           class="admin-input-style" 
-          placeholder="🔍 Tìm kiếm theo tên đối tác..." 
+          placeholder="Tìm kiếm theo tên đối tác..." 
           style="max-width: 300px; padding: 8px 14px; font-size: 14px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; border-radius: 8px;"
         />
         <select 
@@ -128,7 +128,7 @@
               </td>
               <td>
                 <a v-if="p.link" :href="p.link" target="_blank" rel="noopener" style="color: #0284c7; word-break: break-all; font-size: 13.5px; text-decoration: underline;">
-                  🔗 {{ p.link }}
+                  {{ p.link }}
                 </a>
                 <span v-else class="text-muted" style="font-size: 13px;">(Chưa có link)</span>
               </td>
@@ -139,7 +139,7 @@
                   :style="p.is_active ? 'background: #dcfce7; color: #15803d; border: none; cursor: pointer; padding: 6px 12px;' : 'background: #fee2e2; color: #b91c1c; border: none; cursor: pointer; padding: 6px 12px;'"
                   title="Nhấn để đổi trạng thái"
                 >
-                  {{ p.is_active ? '🟢 Đang hiển thị' : '🔴 Đã ẩn' }}
+                  {{ p.is_active ? 'Đang hiển thị' : 'Đã ẩn' }}
                 </button>
               </td>
               <td>
@@ -230,9 +230,9 @@
               class="admin-input-style"
               style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 600;"
             >
-              <option value="top_fixed">📌 Hàng trên cố định (Tối đa 6 đối tác)</option>
-              <option value="marquee">🔄 Hàng giữa chạy vô tận (Marquee)</option>
-              <option value="bottom_fixed">📌 Hàng dưới cố định (Tối đa 6 đối tác)</option>
+              <option value="top_fixed">Hàng trên cố định (Tối đa 6 đối tác)</option>
+              <option value="marquee">Hàng giữa chạy vô tận (Marquee)</option>
+              <option value="bottom_fixed">Hàng dưới cố định (Tối đa 6 đối tác)</option>
             </select>
             <small class="text-muted" style="display: block; margin-top: 4px;">
               {{ form.row_type === 'top_fixed' ? 'Sẽ hiển thị cố định ở hàng trên cùng của trang chủ.' : (form.row_type === 'bottom_fixed' ? 'Sẽ hiển thị cố định ở hàng dưới cùng của trang chủ.' : 'Sẽ chạy cuộn liên tục ở hàng giữa.') }}
@@ -343,9 +343,9 @@ const bottomFixedCount = computed(() => partners.value.filter(p => p.row_type ==
 const marqueeCount = computed(() => partners.value.filter(p => !p.row_type || p.row_type === 'marquee').length);
 
 const getRowLabel = (type) => {
-  if (type === 'top_fixed') return '📌 Hàng trên (Cố định)';
-  if (type === 'bottom_fixed') return '📌 Hàng dưới (Cố định)';
-  return '🔄 Hàng giữa (Chạy)';
+  if (type === 'top_fixed') return 'Hàng trên (Cố định)';
+  if (type === 'bottom_fixed') return 'Hàng dưới (Cố định)';
+  return 'Hàng giữa (Chạy)';
 };
 
 const getRowBadgeStyle = (type) => {

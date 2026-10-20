@@ -13,13 +13,13 @@
           <option value="year">365 ngày qua (Năm)</option>
         </select>
         <button @click="courseStore.exportAdminReport('orders', exportPeriod)" style="background: #0284c7; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-          📊 Xuất CSV Đơn hàng
+          Xuất CSV Đơn hàng
         </button>
         <button @click="courseStore.exportAdminReport('users', exportPeriod)" style="background: #0d9488; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-          👥 Xuất CSV Học viên
+          Xuất CSV Học viên
         </button>
         <button @click="courseStore.exportAdminReport('revenue', exportPeriod)" style="background: #16a34a; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-          💰 Báo cáo Doanh thu
+          Báo cáo Doanh thu
         </button>
       </div>
     </div>
@@ -27,7 +27,6 @@
     <!-- Stats Grid -->
     <div class="stats-grid">
       <div class="admin-stat-card">
-        <div class="stat-icon">💰</div>
         <div class="stat-info">
           <h3>Doanh thu</h3>
           <div class="stat-number">{{ formatPrice(totalRevenue) }}</div>
@@ -35,7 +34,6 @@
         </div>
       </div>
       <div class="admin-stat-card">
-        <div class="stat-icon">👥</div>
         <div class="stat-info">
           <h3>Học viên</h3>
           <div class="stat-number">{{ users.length }}</div>
@@ -43,7 +41,6 @@
         </div>
       </div>
       <div class="admin-stat-card">
-        <div class="stat-icon">📦</div>
         <div class="stat-info">
           <h3>Đơn hàng</h3>
           <div class="stat-number">{{ orders.length }}</div>
@@ -51,7 +48,6 @@
         </div>
       </div>
       <div class="admin-stat-card">
-        <div class="stat-icon">✉️</div>
         <div class="stat-info">
           <h3>Yêu cầu tư vấn</h3>
           <div class="stat-number">{{ contacts.filter(c => !c.isResolved).length }}</div>

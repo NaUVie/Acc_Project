@@ -1382,6 +1382,7 @@ export const useCourseStore = defineStore('courses', {
             return {
               ...staticItem,
               ...l,
+              major_positions: l.major_positions || {},
               majorIds: mIds,
               majorId: mIds[0] || l.major_id || staticItem.majorId || 'ai-cong-nghe',
               majorName: l.major_name || staticItem.majorName || 'AI & Công nghệ Số',
@@ -1418,7 +1419,10 @@ export const useCourseStore = defineStore('courses', {
             details_html: lecturer.detailsHtml || '',
             major_id: primaryMajorId,
             major_ids: majorIdsStr,
-            major_name: lecturer.majorName || null
+            major_name: lecturer.majorName || null,
+            position: lecturer.position !== undefined ? Number(lecturer.position) : 0,
+            major_positions: lecturer.major_positions || {},
+            is_featured: lecturer.is_featured || false
           })
         });
         await this.fetchLecturers();
@@ -1445,7 +1449,10 @@ export const useCourseStore = defineStore('courses', {
             details_html: lecturer.detailsHtml,
             major_id: primaryMajorId,
             major_ids: majorIdsStr,
-            major_name: lecturer.majorName || null
+            major_name: lecturer.majorName || null,
+            position: lecturer.position !== undefined ? Number(lecturer.position) : undefined,
+            major_positions: lecturer.major_positions !== undefined ? lecturer.major_positions : undefined,
+            is_featured: lecturer.is_featured
           })
         });
         await this.fetchLecturers();
@@ -1454,18 +1461,43 @@ export const useCourseStore = defineStore('courses', {
         throw err;
       }
     },
-    async reorderLecturers(reorderedList) {
+    async reorderLecturers(reorderedList, majorId = 'all') {
       if (!this.token) return;
       try {
         const payload = reorderedList.map((item, idx) => ({
           id: item.id,
           position: idx + 1
         }));
-        await this.apiRequest('/admin/lecturers/reorder', {
+        const queryParam = majorId && majorId !== 'all' ? `?major_id=${encodeURIComponent(majorId)}` : '';
+        await this.apiRequest(`/admin/lecturers/reorder${queryParam}`, {
           method: 'PUT',
           body: JSON.stringify(payload)
         });
-        this.lecturers = [...reorderedList.map((item, idx) => ({ ...item, position: idx + 1 }))];
+        
+        if (majorId && majorId !== 'all') {
+          // Update major_positions in state
+          this.lecturers = this.lecturers.map(l => {
+            const reorderedIdx = reorderedList.findIndex(item => item.id === l.id);
+            if (reorderedIdx !== -1) {
+              const majorPositions = { ...(l.major_positions || {}) };
+              majorPositions[majorId] = reorderedIdx + 1;
+              return { ...l, major_positions: majorPositions };
+            }
+            return l;
+          });
+        } else {
+          // Global ordering
+          const positionMap = new Map();
+          reorderedList.forEach((item, idx) => {
+            positionMap.set(item.id, idx + 1);
+          });
+          this.lecturers = this.lecturers.map(l => {
+            if (positionMap.has(l.id)) {
+              return { ...l, position: positionMap.get(l.id) };
+            }
+            return l;
+          }).sort((a, b) => (a.position ?? 999) - (b.position ?? 999));
+        }
       } catch (err) {
         console.error("Failed to reorder lecturers:", err);
         throw err;

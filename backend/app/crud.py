@@ -814,13 +814,20 @@ def update_lecturer(db: Session, lecturer_id: str, lecturer_in: schemas.Lecturer
     db.refresh(db_lecturer)
     return db_lecturer
 
-def reorder_lecturers(db: Session, items: list):
+def reorder_lecturers(db: Session, items: list, major_id: Optional[str] = None):
     for item in items:
         lec_id = item.id if hasattr(item, 'id') else item.get('id')
         pos = item.position if hasattr(item, 'position') else item.get('position')
         db_lec = db.query(models.Lecturer).filter(models.Lecturer.id == lec_id).first()
         if db_lec:
-            db_lec.position = pos
+            if major_id and major_id != 'all':
+                current_positions = dict(db_lec.major_positions or {})
+                current_positions[major_id] = pos
+                db_lec.major_positions = current_positions
+                from sqlalchemy.orm.attributes import flag_modified
+                flag_modified(db_lec, "major_positions")
+            else:
+                db_lec.position = pos
     db.commit()
     return True
 

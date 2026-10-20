@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, BigInteger, ForeignKey, Text, DateTime, Boolean, Table
+from sqlalchemy import Column, String, Integer, BigInteger, ForeignKey, Text, DateTime, Boolean, Table, JSON
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from .database import Base
@@ -234,6 +234,7 @@ class Lecturer(Base):
     major_name = Column(String(150), nullable=True)
     major_ids = Column(Text, nullable=True)
     position = Column(Integer, default=0)
+    major_positions = Column(JSON, nullable=True)
     is_featured = Column(Boolean, default=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 

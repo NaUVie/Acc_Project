@@ -1,7 +1,7 @@
 <template>
   <div class="admin-commissions-component">
     <div style="margin-bottom: 24px;">
-      <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">🤝 Cấu hình Hoa hồng Giới thiệu Tùy chỉnh (Affiliate Commissions)</h2>
+      <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Cấu hình Hoa hồng Giới thiệu Tùy chỉnh (Affiliate Commissions)</h2>
       <p style="font-size: 13px; color: #64748b; margin: 4px 0 0 0;">Cài đặt tỷ lệ % hoa hồng riêng biệt cho từng Học viên/CTV với từng Khóa học cụ thể.</p>
     </div>
 

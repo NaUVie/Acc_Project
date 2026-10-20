@@ -28,7 +28,7 @@
           <input 
             v-model="searchQuery" 
             type="text" 
-            placeholder="🔍 Tìm bài viết, tiêu đề..." 
+            placeholder="Tìm bài viết, tiêu đề..." 
             class="admin-input-style"
             style="padding-left: 14px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"
           />
@@ -70,14 +70,13 @@
                 </span>
               </td>
               <td>
-                <span class="text-muted" style="font-weight: 600; font-size: 13px;">📅 {{ b.date || 'N/A' }}</span>
+                <span class="text-muted" style="font-weight: 600; font-size: 13px;">{{ b.date || 'N/A' }}</span>
               </td>
               <td>
                 <code style="font-size: 12px; color: #0284c7; background: #f0f9ff; padding: 2px 6px; border-radius: 4px;">{{ b.handle }}</code>
               </td>
               <td>
                 <div class="action-buttons">
-                  <router-link :to="'/blog/' + b.handle" target="_blank" class="btn-action view" title="Xem bài viết công khai" style="text-decoration: none; color: inherit;">👁️</router-link>
                   <button @click="editBlog(b)" class="btn-action edit" title="Sửa bài viết">✏️</button>
                   <button @click="deleteItem(b.id)" class="btn-action delete" title="Xóa bài viết">🗑️</button>
                 </div>
@@ -176,7 +175,7 @@
 
         <!-- Detailed Content Editor (Rich Text) -->
         <div class="mt-6 p-4" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
-          <h4 style="margin: 0 0 12px 0; color: #022b9f; font-size: 16px; font-weight: 800;">📄 Nội dung chi tiết Bài viết (WYSIWYG Soạn thảo văn bản)</h4>
+          <h4 style="margin: 0 0 12px 0; color: #022b9f; font-size: 16px; font-weight: 800;">Nội dung chi tiết Bài viết (WYSIWYG Soạn thảo văn bản)</h4>
           <RichTextEditor 
             v-model="form.content" 
             placeholder="Soạn thảo nội dung bài viết tin tức đầy đủ (In đậm, In nghiêng, H2, H3, Danh sách, Link, Chèn bảng/ảnh)..." 
@@ -186,7 +185,7 @@
         <div class="flex-end gap-3 mt-6 pt-4" style="border-top: 1px solid #e2e8f0;">
           <button type="button" @click="activeView = 'list'" class="btn btn-secondary" style="padding: 10px 24px;">Hủy bỏ</button>
           <button type="submit" class="btn btn-primary" style="padding: 10px 24px; font-weight: 700;">
-            {{ isEditing ? '💾 Cập nhật Bài viết' : '✨ Tạo Bài viết mới' }}
+            {{ isEditing ? 'Cập nhật Bài viết' : 'Tạo Bài viết mới' }}
           </button>
         </div>
       </form>

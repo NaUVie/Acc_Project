@@ -58,7 +58,7 @@
               </td>
               <td>
                 <div class="action-buttons">
-                  <button @click="openCurriculumModal(c)" class="btn-action edit" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; font-size: 13px;" title="Quản lý bài giảng">📚</button>
+                  <button @click="openCurriculumModal(c)" class="btn-action edit" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; font-size: 12px; font-weight: 700; padding: 6px 10px; width: auto;" title="Quản lý bài giảng">Bài giảng</button>
                   <button @click="editCourseDetails(c)" class="btn-action edit" title="Sửa thông tin">✏️</button>
                   <button @click="deleteCourse(c.id)" class="btn-action delete" title="Xóa">🗑️</button>
                 </div>
@@ -204,7 +204,7 @@
             <!-- Selected Lecturers Tags -->
             <div v-if="selectedLecturersList.length > 0" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
               <span v-for="lec in selectedLecturersList" :key="lec.id" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
-                <span>👤 {{ lec.name }} - {{ lec.title }}</span>
+                <span>{{ lec.name }} - {{ lec.title }}</span>
                 <button type="button" @click="removeLecturerFromCourse(lec.id)" style="background: none; border: none; color: #ef4444; font-weight: 800; cursor: pointer; padding: 0 4px; font-size: 14px;">✕</button>
               </span>
             </div>

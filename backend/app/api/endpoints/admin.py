@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 import uuid
@@ -865,8 +865,12 @@ def create_lecturer_admin(lecturer_in: schemas.LecturerCreate, db: Session = Dep
     return crud.create_lecturer(db, lecturer_in)
 
 @router.put("/lecturers/reorder", status_code=status.HTTP_200_OK)
-def reorder_lecturers_admin(items: List[schemas.LecturerReorderItem], db: Session = Depends(get_db)):
-    crud.reorder_lecturers(db, items)
+def reorder_lecturers_admin(
+    items: List[schemas.LecturerReorderItem],
+    major_id: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    crud.reorder_lecturers(db, items, major_id=major_id)
     return {"message": "Đã cập nhật thứ tự giảng viên thành công"}
 
 @router.put("/lecturers/{id}/toggle-featured", response_model=schemas.LecturerResponse)

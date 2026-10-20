@@ -2,7 +2,7 @@
   <div class="admin-categories-tab">
     <div class="admin-header-actions mb-4">
       <div>
-        <h2 class="admin-title">🏷️ Quản lý Chuyên mục Khóa học</h2>
+        <h2 class="admin-title">Quản lý Chuyên mục Khóa học</h2>
         <p class="admin-subtitle">Thêm, sửa, xóa các chuyên mục phân loại khóa học (Kỹ năng AI, Kỹ năng mềm, Marketing, etc.)</p>
       </div>
       <button class="btn btn-primary" @click="openAddModal">
@@ -13,7 +13,6 @@
     <!-- SUMMARY CARDS -->
     <div class="admin-summary-grid mb-4">
       <div class="summary-card">
-        <div class="summary-icon">🏷️</div>
         <div class="summary-info">
           <span class="summary-label">Tổng chuyên mục</span>
           <span class="summary-value">{{ categories.length }}</span>
@@ -67,7 +66,7 @@
     <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
       <div class="modal-content animate-fade-in" style="max-width: 500px;">
         <div class="modal-header">
-          <h3>{{ isEditing ? '✏️ Sửa Tên Chuyên Mục' : '➕ Thêm Chuyên Mục Mới' }}</h3>
+          <h3>{{ isEditing ? 'Sửa Tên Chuyên Mục' : 'Thêm Chuyên Mục Mới' }}</h3>
           <button class="close-btn" @click="closeModal">&times;</button>
         </div>
         
@@ -185,7 +184,7 @@ const confirmDelete = async (cat) => {
   const count = getCourseCount(cat.slug);
   let msg = `Bạn có chắc chắn muốn xóa chuyên mục "${cat.name}"?`;
   if (count > 0) {
-    msg += `\n\n⚠️ Hiện tại đang có ${count} khóa học thuộc chuyên mục này. Vui lòng di chuyển hoặc xóa các khóa học trước khi xóa chuyên mục!`;
+    msg += `\n\nHiện tại đang có ${count} khóa học thuộc chuyên mục này. Vui lòng di chuyển hoặc xóa các khóa học trước khi xóa chuyên mục!`;
   }
   const isConfirmed = await courseStore.showConfirm({
     title: 'Xác nhận xóa chuyên mục',

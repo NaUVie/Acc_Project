@@ -5,7 +5,7 @@
       <!-- SIDEBAR NAV -->
       <aside class="admin-sidebar">
         <div class="sidebar-header">
-          <span class="admin-logo-badge">👑 ACC ADMIN</span>
+          <span class="admin-logo-badge">ACC ADMIN</span>
           <p class="admin-subtitle">Hệ thống quản trị vận hành</p>
         </div>
         <nav class="sidebar-menu">

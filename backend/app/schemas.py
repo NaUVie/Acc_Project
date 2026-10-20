@@ -200,6 +200,7 @@ class LecturerBase(BaseModel):
     major_name: Optional[str] = None
     major_ids: Optional[str] = None
     position: Optional[int] = 0
+    major_positions: Optional[dict] = None
     is_featured: Optional[bool] = False
 
 class LecturerCreate(LecturerBase):
@@ -218,6 +219,7 @@ class LecturerUpdate(BaseModel):
     major_name: Optional[str] = None
     major_ids: Optional[str] = None
     position: Optional[int] = None
+    major_positions: Optional[dict] = None
     is_featured: Optional[bool] = None
 
 class LecturerResponse(LecturerBase):

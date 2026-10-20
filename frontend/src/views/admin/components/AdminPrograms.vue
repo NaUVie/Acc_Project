@@ -45,7 +45,7 @@
                       class="badge badge-info mr-1 mb-1"
                       style="display: inline-block; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle;"
                     >
-                      🎓 {{ c.title }}
+                      {{ c.title }}
                     </span>
                     <span 
                       v-if="getChildCourses(p.id).length > 2"

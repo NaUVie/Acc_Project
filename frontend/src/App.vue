@@ -10,6 +10,7 @@
     </main>
     <Footer />
     <ZaloChatWidget />
+    <CallButtonWidget />
     <ToastNotification />
     <ConfirmModal />
   </div>
@@ -19,6 +20,7 @@
 import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
 import ZaloChatWidget from './components/ZaloChatWidget.vue';
+import CallButtonWidget from './components/CallButtonWidget.vue';
 import ToastNotification from './components/ToastNotification.vue';
 import ConfirmModal from './components/ConfirmModal.vue';
 </script>

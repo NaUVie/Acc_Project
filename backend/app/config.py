@@ -1,8 +1,15 @@
 import os
 from dotenv import load_dotenv
 
-# Load environmental variables from .env file
-load_dotenv()
+from pathlib import Path
+
+# Load environmental variables from .env file (check backend/.env as well as current dir)
+BASE_DIR = Path(__file__).resolve().parent.parent
+env_path = BASE_DIR / ".env"
+if env_path.exists():
+    load_dotenv(dotenv_path=env_path)
+else:
+    load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root:@localhost:3306/acc_academy")
 PORT = int(os.getenv("PORT", "8000"))

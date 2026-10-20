@@ -64,7 +64,7 @@
         <div class="contact-card-header">
           <div>
             <h4 class="font-bold">{{ c.lastName }} {{ c.middleName }} {{ c.firstName }}</h4>
-            <small class="text-muted">✉️ Email: {{ c.email }} | 📞 SĐT: {{ c.phone }} | Dịch vụ quan tâm: <span class="badge badge-info">{{ translateCourseHandle(c.courseHandle) }}</span></small>
+            <small class="text-muted">Email: {{ c.email }} | SĐT: {{ c.phone }} | Dịch vụ quan tâm: <span class="badge badge-info">{{ translateCourseHandle(c.courseHandle) }}</span></small>
           </div>
           <div style="display: flex; gap: 8px;">
             <button 

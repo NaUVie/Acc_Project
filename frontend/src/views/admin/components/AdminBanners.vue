@@ -63,12 +63,12 @@
               <td>
                 <div class="font-bold" style="color: #0f172a; font-size: 15px;">{{ b.title }}</div>
                 <small class="text-muted" style="word-break: break-all; display: block; margin-top: 2px;">
-                  🔗 {{ b.link || '(Không có)' }}
+                  {{ b.link || '(Không có)' }}
                 </small>
               </td>
               <td>
                 <span class="badge" :style="b.is_external ? 'background: #fef3c7; color: #b45309;' : 'background: #f1f5f9; color: #475569;'">
-                  {{ b.is_external ? '🌐 Ngoại bộ' : '🏠 Nội bộ' }}
+                  {{ b.is_external ? 'Ngoại bộ' : 'Nội bộ' }}
                 </span>
               </td>
               <td>
@@ -78,7 +78,7 @@
                   :style="b.is_active ? 'background: #dcfce7; color: #15803d; border: none; cursor: pointer; padding: 6px 12px;' : 'background: #fee2e2; color: #b91c1c; border: none; cursor: pointer; padding: 6px 12px;'"
                   title="Nhấn để đổi trạng thái"
                 >
-                  {{ b.is_active ? '🟢 Đang hiển thị' : '🔴 Đã ẩn' }}
+                  {{ b.is_active ? 'Đang hiển thị' : 'Đã ẩn' }}
                 </button>
               </td>
               <td>
@@ -275,7 +275,7 @@
               </button>
             </div>
             <small style="display: block; margin-top: 4px; color: #15803d;">
-              💡 <strong>Hệ thống hỗ trợ đa dạng:</strong> Dán link YouTube (thường / Shorts), link chia sẻ Google Drive (ví dụ link của bạn: <code>https://drive.google.com/file/d/.../view</code>), file video trực tiếp (.mp4) hoặc bấm "Upload Video".
+              <strong>Hệ thống hỗ trợ đa dạng:</strong> Dán link YouTube (thường / Shorts), link chia sẻ Google Drive (ví dụ link của bạn: <code>https://drive.google.com/file/d/.../view</code>), file video trực tiếp (.mp4) hoặc bấm "Upload Video".
             </small>
           </div>
 

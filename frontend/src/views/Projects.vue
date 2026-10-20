@@ -3,7 +3,6 @@
     <div class="container">
       <!-- Hero Section -->
       <div class="projects-hero">
-        <span class="custom-ui-tag hero-tag">DỰ ÁN ĐÀO TẠO & TƯ VẤN</span>
         <h1 class="hero-title">Dự án Đã Thực Hiện & Đang Triển Khai</h1>
         <p class="hero-subtitle">
           Khám phá các dự án đào tạo In-house thực chiến và tư vấn chuyển đổi số may đo cho các tập đoàn, doanh nghiệp hàng đầu do ACC Academy thực hiện.

@@ -25,14 +25,14 @@
             class="btn btn-sm"
             :class="filterType === 'video' ? 'btn-primary' : 'btn-secondary'"
           >
-            🎬 Video YouTube ({{ videoCount }})
+            Video YouTube ({{ videoCount }})
           </button>
           <button 
             @click="filterType = 'photo'" 
             class="btn btn-sm"
             :class="filterType === 'photo' ? 'btn-primary' : 'btn-secondary'"
           >
-            📸 Ảnh & Bài viết ({{ photoCount }})
+            Ảnh & Bài viết ({{ photoCount }})
           </button>
         </div>
 
@@ -40,7 +40,7 @@
           <input 
             v-model="searchQuery" 
             type="text" 
-            placeholder="🔍 Tìm theo tên học viên, chức danh, công ty..." 
+            placeholder="Tìm theo tên học viên, chức danh, công ty..." 
             class="admin-input-style"
             style="padding-left: 14px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"
           />
@@ -69,7 +69,7 @@
                   class="badge" 
                   :style="t.testimonial_type === 'video' ? 'background: #ffe4e6; color: #be123c;' : (t.testimonial_type === 'photo' ? 'background: #e0f2fe; color: #0369a1;' : 'background: #f1f5f9; color: #475569;')"
                 >
-                  {{ t.testimonial_type === 'video' ? '🎬 Video' : (t.testimonial_type === 'photo' ? '📸 Ảnh' : '📝 Trích dẫn') }}
+                  {{ t.testimonial_type === 'video' ? 'Video' : (t.testimonial_type === 'photo' ? 'Ảnh' : 'Trích dẫn') }}
                 </span>
               </td>
               <td>
@@ -88,12 +88,12 @@
               <td>
                 <div class="font-bold" style="color: #0f172a; font-size: 15px;">{{ t.name }}</div>
                 <small class="text-muted" style="display: block; margin-top: 2px; color: #475569;">
-                  💼 {{ t.role || 'Học viên' }} <span v-if="t.company">• {{ t.company }}</span>
+                  {{ t.role || 'Học viên' }} <span v-if="t.company">• {{ t.company }}</span>
                 </small>
               </td>
               <td>
                 <span v-if="t.course_name" class="badge" style="background: rgba(2, 43, 159, 0.08); color: #022b9f; font-weight: 700;">
-                  🎓 {{ t.course_name }}
+                  {{ t.course_name }}
                 </span>
                 <span v-else class="text-muted" style="font-size: 12px;">(Tất cả)</span>
               </td>
@@ -142,13 +142,13 @@
           <label style="color: #1e293b; font-weight: 700;">Phân loại Feedback học viên</label>
           <div style="display: flex; gap: 16px; margin-top: 6px;">
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
-              <input type="radio" v-model="form.testimonialType" value="video" /> 🎬 Video Feedback YouTube
+              <input type="radio" v-model="form.testimonialType" value="video" /> Video Feedback YouTube
             </label>
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
-              <input type="radio" v-model="form.testimonialType" value="photo" /> 📸 Hình ảnh & Feedback
+              <input type="radio" v-model="form.testimonialType" value="photo" /> Hình ảnh & Feedback
             </label>
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
-              <input type="radio" v-model="form.testimonialType" value="text" /> 📝 Trích dẫn ngắn
+              <input type="radio" v-model="form.testimonialType" value="text" /> Trích dẫn ngắn
             </label>
           </div>
         </div>
@@ -180,7 +180,7 @@
 
         <!-- Dynamic Fields for VIDEO TYPE -->
         <div v-if="form.testimonialType === 'video'" class="mt-4 p-4" style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 12px;">
-          <h4 style="margin: 0 0 12px 0; color: #be123c; font-size: 15px; font-weight: 800;">🎬 Cấu hình YouTube Video</h4>
+          <h4 style="margin: 0 0 12px 0; color: #be123c; font-size: 15px; font-weight: 800;">Cấu hình YouTube Video</h4>
           
           <div class="form-group">
             <label style="color: #9f1239; font-weight: 600;">Đường dẫn Video YouTube hoặc YouTube Video ID</label>
@@ -217,7 +217,7 @@
 
         <!-- Dynamic Fields for PHOTO or TEXT TYPE -->
         <div v-else class="mt-4 p-4" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
-          <h4 style="margin: 0 0 12px 0; color: #022b9f; font-size: 15px; font-weight: 800;">📸 Cấu hình Ảnh & Trích dẫn</h4>
+          <h4 style="margin: 0 0 12px 0; color: #022b9f; font-size: 15px; font-weight: 800;">Cấu hình Ảnh & Trích dẫn</h4>
 
           <div class="form-group" v-if="form.testimonialType === 'photo'">
             <label style="color: #1e293b; font-weight: 600;">Link Hình Ảnh Feedback Học viên</label>

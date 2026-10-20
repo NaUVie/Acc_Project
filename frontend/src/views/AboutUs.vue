@@ -255,7 +255,7 @@ const boardMembers = [
   {
     name: 'Ông Nguyễn Tiến Điệp',
     mainRole: 'Chủ tịch HĐQT Công ty CP Kết Nối Tri Thức ACC',
-    avatar: 'https://lh3.googleusercontent.com/d/1y873oVEfDRWZtIR3ap76akInzRcdzr_i',
+    avatar: '/images/VeChungToi/TienDiep.png',
     bioList: [
       'CEO Sadaco Tas',
       'Chủ tịch HĐQT CTY CP Tập đoàn Sài Gòn Tiến Đoàn',
@@ -277,7 +277,7 @@ const boardMembers = [
   {
     name: 'Bà Nguyễn Thị Thu Hoà',
     mainRole: 'Thành viên Hội Đồng Quản Trị ACC',
-    avatar: 'https://lh3.googleusercontent.com/d/1dxDcEc4aKb9IRqNxXLyGnfYiPAscmU2-',
+    avatar: '/images/VeChungToi/ThuHoa.png',
     bioList: [
       'Tổng Giám Đốc của ADP Group',
       'Nguyên Giám Đốc Marketing của Tập Đội BĐS Khang Điền',
@@ -287,7 +287,7 @@ const boardMembers = [
   {
     name: 'Ông Lê Nguyễn Ngọc Sơn',
     mainRole: 'Thành viên HĐQT Công ty CP Kết nối Tri thức ACC',
-    avatar: 'https://lh3.googleusercontent.com/d/1mTPihhgyRFOCd38YHvEPAXWF3WiY4uES',
+    avatar: '/images/VeChungToi/Ngocson.png',
     bioList: [
       'Giám Đốc Andrews Alumni Việt Nam',
       'Phó Giám Đốc Phát Triển Đại Học Andrews Hoa Kỳ tại Việt Nam'
@@ -296,7 +296,7 @@ const boardMembers = [
   {
     name: 'TS. Nguyễn Tấn Bình',
     mainRole: 'Cố vấn Cao cấp Công ty CP Kết nối Tri thức ACC',
-    avatar: 'https://lh3.googleusercontent.com/d/1pmPtgPuEfIetvDcA6uahwt0W_wD8ztCS',
+    avatar: '/images/VeChungToi/ThayBinh.png',
     bioList: [
       'Viện trưởng Viện nghiên cứu Khoa học Lãnh đạo & Quản trị Doanh nghiệp – Leadman',
       'Giảng viên cao cấp Andrews University Hoa Kỳ tại Việt Nam',
@@ -307,7 +307,7 @@ const boardMembers = [
   {
     name: 'Bà Nguyễn Thị Kim Anh',
     mainRole: 'Cố vấn Cao cấp Công ty CP Kết nối Tri thức ACC',
-    avatar: 'https://lh3.googleusercontent.com/d/1UH9NoZ0tte9t5t9NOQV3bVeIrlm-tk2t',
+    avatar: '/images/VeChungToi/KimAnh.png',
     bioList: [
       'Thạc sĩ Quản trị Kinh doanh, Andrews University, Hoa Kỳ',
       'Chủ tịch HĐQT Hệ thống Trường Việt Anh',
@@ -317,7 +317,7 @@ const boardMembers = [
   {
     name: 'Bà Nguyễn Thị Mỹ Dung',
     mainRole: 'Co-Founder Công ty CP Kết nối Tri thức ACC',
-    avatar: 'https://lh3.googleusercontent.com/d/1uNbmoydSy6Tcq9YMPVPl0qyfb5-5iAIe',
+    avatar: '/images/VeChungToi/MYDUNG.png',
     bioList: [
       'Nguyên Giám đốc chi nhánh Techcombank',
       'Thạc sĩ QTKD trường Đại học Andrews (ĐH Quốc tế, ĐHQG Tp.HCM)',
@@ -327,7 +327,7 @@ const boardMembers = [
   {
     name: 'Bà Ngô Vũ Ngọc Thảo',
     mainRole: 'Co-Founder Công ty CP Kết nối Tri thức ACC',
-    avatar: 'https://lh3.googleusercontent.com/d/1JFqlgVfq3SA2uHil314Ac_7MRR39C3C6',
+    avatar: '/images/VeChungToi/NgocThao.png',
     bioList: [
       'Trưởng phòng Cao cấp Tập đoàn L’Oreal Việt Nam',
       'Trưởng ban Học Thuật – Trường ĐH Andrews (ĐH Quốc tế - ĐHQG Tp.HCM)',
@@ -373,7 +373,7 @@ const boardMembers = [
   margin: 0;
   line-height: 1.15;
   letter-spacing: -0.5px;
-  white-space: nowrap;
+  /* white-space wrap on mobile */
 }
 
 .hero-subtext {
@@ -890,5 +890,215 @@ const boardMembers = [
 .reveal-on-scroll.is-revealed {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ==========================================================================
+   Responsive Design for AboutUs Page
+   ========================================================================== */
+@media (max-width: 991px) {
+  .about-us-page {
+    padding-top: 80px;
+    padding-bottom: 60px;
+  }
+
+  .about-hero-section {
+    padding: 20px 16px 24px;
+    gap: 12px;
+  }
+
+  .hero-slogan-title {
+    font-size: clamp(22px, 5.5vw, 36px);
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .hero-subtext {
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .vm-editorial-row {
+    gap: 28px;
+    margin-bottom: 50px;
+  }
+
+  .vm-img-box {
+    height: 280px;
+  }
+
+  /* Keep logical order on mobile/tablet: image then text */
+  .vm-editorial-row.reverse .vm-img-box {
+    order: -1;
+  }
+
+  .core-values-section,
+  .core-functions-section,
+  .why-andrews-section,
+  .vision-mission-section {
+    margin-bottom: 60px;
+  }
+
+  .manifesto-clean-box {
+    padding: 28px 20px;
+  }
+
+  .manifesto-title {
+    font-size: 20px;
+  }
+
+  .manifesto-quote {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+}
+
+@media (max-width: 640px) {
+  .about-us-page {
+    padding-top: 70px;
+    padding-bottom: 40px;
+  }
+
+  .about-hero-section {
+    padding: 16px 12px 20px;
+  }
+
+  .hero-slogan-title {
+    font-size: 24px;
+    letter-spacing: normal;
+  }
+
+  .hero-subtext {
+    font-size: 14px;
+  }
+
+  .vm-editorial-row {
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .vm-img-box {
+    height: 220px;
+    border-radius: 14px;
+  }
+
+  .vm-title {
+    font-size: 20px;
+    margin: 8px 0 10px 0;
+  }
+
+  .vm-text {
+    font-size: 14.5px;
+    line-height: 1.65;
+  }
+
+  .section-title-box {
+    margin-bottom: 32px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .section-subtitle {
+    font-size: 14px;
+  }
+
+  .values-open-grid {
+    gap: 24px;
+  }
+
+  .value-item {
+    padding-top: 16px;
+  }
+
+  .value-letter {
+    font-size: 34px;
+  }
+
+  .value-name {
+    font-size: 17px;
+  }
+
+  .value-desc {
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+
+  .action-box {
+    padding-top: 12px;
+  }
+
+  .manifesto-clean-box {
+    padding: 20px 16px;
+    border-radius: 14px;
+  }
+
+  .manifesto-title {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .manifesto-quote {
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .functions-open-grid {
+    gap: 16px;
+  }
+
+  .function-item {
+    padding: 20px 18px;
+    border-radius: 14px;
+  }
+
+  .func-title {
+    font-size: 17px;
+  }
+
+  .func-desc {
+    font-size: 14px;
+  }
+
+  .andrews-clean-grid {
+    gap: 20px;
+  }
+
+  .card-num {
+    font-size: 26px;
+  }
+
+  .andrews-item h3 {
+    font-size: 15.5px;
+  }
+
+  .andrews-item p {
+    font-size: 13.5px;
+  }
+
+  .leadership-grid {
+    gap: 20px;
+  }
+
+  .leader-avatar-wrapper {
+    height: 240px;
+  }
+
+  .leader-info {
+    padding: 16px;
+  }
+
+  .leader-name {
+    font-size: 17px;
+  }
+
+  .leader-main-role {
+    font-size: 12.5px;
+    margin-bottom: 10px;
+  }
+
+  .leader-bio-list li {
+    font-size: 12.5px;
+  }
 }
 </style>

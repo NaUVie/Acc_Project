@@ -4,25 +4,8 @@
       <!-- Section Header -->
       <div class="section-header">
         <h2 class="section-title">
-          Góc nhìn & Phản hồi Thực tế từ <span class="highlight-text">Học viên ACC Academy</span>
+          Góc nhìn & Phản hồi Thực tế từ Học viên ACC Academy
         </h2>
-     
-
-        <!-- YouTube Playlist Banner Button -->
-        <div class="youtube-playlist-banner">
-          <div class="yt-banner-info">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="#FF0000">
-              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-            </svg>
-            <div>
-              <h4 class="yt-title">FEEDBACK TỪ HỌC VIÊN TRÊN YOUTUBE</h4>
-              <p class="yt-subtitle">Xem trọn bộ {{ videoTestimonialsData.length }} Video Phỏng vấn thực tế học viên ACC trên YouTube</p>
-            </div>
-          </div>
-          <a :href="youtubePlaylistUrl" target="_blank" rel="noopener noreferrer" class="btn-yt-playlist">
-            <span>XEM TRÊN YOUTUBE PLAYLIST &rarr;</span>
-          </a>
-        </div>
       </div>
 
       <!-- Filter Tabs -->
@@ -39,21 +22,22 @@
           :class="{ active: activeTab === 'video' }"
           @click="activeTab = 'video'"
         >
-          🎬 Video Feedback YouTube ({{ videoTestimonialsData.length }})
+          Video Feedback YouTube ({{ videoTestimonialsData.length }})
         </button>
         <button 
           class="tab-btn"
           :class="{ active: activeTab === 'photo' }"
           @click="activeTab = 'photo'"
         >
-          📸 Hình ảnh & Cảm nhận ({{ photoTestimonialsData.length }})
+          Hình ảnh & Cảm nhận ({{ photoTestimonialsData.length }})
         </button>
       </div>
 
       <!-- Video Feedbacks Grid -->
       <div v-if="activeTab === 'all' || activeTab === 'video'" class="feedback-sub-section">
-        <h3 class="sub-section-title">🎬 Video Feedback thực tế từ Học viên ({{ videoTestimonialsData.length }} Video)</h3>
-        <div class="video-grid">
+        <h3 class="sub-section-title">Video Feedback từ Học viên </h3>
+        
+        <div v-if="videoTestimonialsData.length > 0" class="video-grid">
           <div 
             v-for="(v, idx) in videoTestimonialsData" 
             :key="v.id" 
@@ -69,27 +53,46 @@
                   </svg>
                 </div>
               </div>
-              <span class="video-badge">VIDEO #{{ idx + 1 }}</span>
             </div>
             <div class="video-card-body">
-              <span class="program-tag-badge" v-if="v.courseName">🎓 {{ v.courseName }}</span>
+              <span class="program-tag-badge" v-if="v.courseName"> {{ v.courseName }}</span>
               <h4 class="video-card-title">{{ v.title }}</h4>
               <div class="student-profile-info">
-                <span class="s-name">👤 {{ v.studentName || v.name }}</span>
-                <span class="s-role" v-if="v.role || v.company">💼 {{ v.role }} <span v-if="v.company">• {{ v.company }}</span></span>
+                <span class="s-name"> {{ v.studentName || v.name }}</span>
+                <span class="s-role" v-if="v.role || v.company">{{ v.role }} <span v-if="v.company">• {{ v.company }}</span></span>
               </div>
               <span class="yt-link-small">
-                Bấm để xem video ngay &blackrtrif;
+                Bấm để xem video ngay ;
               </span>
             </div>
           </div>
+        </div>
+
+        <div v-else class="empty-feedback-box">
+          <p class="empty-feedback-text">Hiện chưa có video cảm nhận nào từ học viên.</p>
+        </div>
+
+        <!-- YouTube Playlist Banner Button -->
+        <div class="youtube-playlist-banner">
+          <div class="yt-banner-info">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="#FF0000">
+              <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+            </svg>
+            <div>
+              <h4 class="yt-title">FEEDBACK TỪ HỌC VIÊN TRÊN YOUTUBE</h4>
+            </div>
+          </div>
+          <a :href="youtubePlaylistUrl" target="_blank" rel="noopener noreferrer" class="btn-yt-playlist">
+            <span>XEM THÊM TRÊN YOUTUBE&rarr;</span>
+          </a>
         </div>
       </div>
 
       <!-- Photo & Text Feedbacks Grid -->
       <div v-if="activeTab === 'all' || activeTab === 'photo'" class="feedback-sub-section style-mt">
-        <h3 class="sub-section-title">📸 Hình ảnh & Cảm nhận Học viên</h3>
-        <div class="photo-grid">
+        <h3 class="sub-section-title"> Hình ảnh & Cảm nhận Học viên</h3>
+        
+        <div v-if="photoTestimonialsData.length > 0" class="photo-grid">
           <div 
             v-for="p in photoTestimonialsData" 
             :key="p.id" 
@@ -113,6 +116,10 @@
               <span class="course-badge">{{ p.courseName }}</span>
             </div>
           </div>
+        </div>
+
+        <div v-else class="empty-feedback-box">
+          <p class="empty-feedback-text">Hiện chưa có hình ảnh & cảm nhận nào từ học viên.</p>
         </div>
       </div>
     </div>
@@ -213,7 +220,7 @@ const closeVideo = () => {
 
 .youtube-playlist-banner {
   width: 100%;
-  margin-top: 20px;
+  margin-top: 32px;
   padding: 20px 28px;
   background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%);
   border: 1.5px solid #fecdd3;
@@ -630,5 +637,21 @@ const closeVideo = () => {
   width: 100%;
   height: 100%;
   border: 0;
+}
+
+.empty-feedback-box {
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 16px;
+  padding: 48px 24px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.empty-feedback-text {
+  color: #64748b;
+  font-size: 15px;
+  margin: 0;
+  font-weight: 500;
 }
 </style>

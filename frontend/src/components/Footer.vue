@@ -39,15 +39,15 @@
           <div class="contact-details">
             <p class="contact-row">
               <span class="contact-label">Địa chỉ:</span>
-              <span>156 Nam Kỳ Khởi Nghĩa, Quận 1, TP. HCM</span>
+              <span>{{ contactInfo.address }}</span>
             </p>
             <p class="contact-row">
               <span class="contact-label">Hotline:</span>
-              <a href="tel:0938566700">0938 566 700</a>
+              <a :href="'tel:' + rawPhone">{{ contactInfo.hotline }}</a>
             </p>
             <p class="contact-row">
               <span class="contact-label">Email:</span>
-              <a href="mailto:info@acc-edu.vn">info@acc-edu.vn</a>
+              <a :href="'mailto:' + contactInfo.email">{{ contactInfo.email }}</a>
             </p>
           </div>
 
@@ -73,6 +73,30 @@
 </template>
 
 <script setup>
+import { computed, onMounted } from 'vue';
+import { useCourseStore } from '@/stores/courses';
+
+const courseStore = useCourseStore();
+
+onMounted(() => {
+  if (!courseStore.contactSettings) {
+    courseStore.fetchContactSettings();
+  }
+});
+
+const contactInfo = computed(() => {
+  const s = courseStore.contactSettings;
+  return {
+    address: s?.address || '156 Nam Kỳ Khởi Nghĩa, Phường Bến Nghé, Quận 1, TP. HCM',
+    hotline: s?.hotline || '0938 566 700',
+    email: s?.email || 'info@acc-edu.vn',
+    zalo: s?.zalo || 'https://zalo.me/0938566700'
+  };
+});
+
+const rawPhone = computed(() => {
+  return contactInfo.value.hotline.replace(/\s+/g, '');
+});
 </script>
 
 <style scoped src="@/styles/components/Footer.css"></style>

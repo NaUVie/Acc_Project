@@ -3,58 +3,58 @@
     <div class="container">
       <!-- Header Section -->
       <div class="contact-hero">
-        <h1 class="hero-title">Liên hệ với <span class="highlight-text">Học viện ACC</span></h1>
+        <h1 class="hero-title">Liên hệ với <span class="highlight-text"> ACC Academy </span></h1>
         
       </div>
 
       <div class="contact-grid">
         <!-- Office Info & Maps Section -->
         <div class="info-section">
-          <!-- VP HCM -->
-          <div class="info-card">
-
-            <div class="info-details">
-              <h3>Văn phòng TP. Hồ Chí Minh</h3>
-              <p class="address">156 Nam Kỳ Khởi Nghĩa, Quận 1, TP. Hồ Chí Minh</p>
-              <a 
-                href="https://maps.google.com/?q=156+Nam+K%E1%BB%B3+Kh%E1%BB%9Fi+Ngh%C4%A9a+H%E1%BB%93+Ch%C3%AD+Minh" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="btn-map-link"
-              >
-                <span>Xem vị trí trên Google Maps &rarr;</span>
-              </a>
-            </div>
-          </div>
-
-
-          <!-- Direct Contacts -->
-          <div class="info-card contact-direct-card">
-            <div class="direct-item">
-              <div>
-                <span class="direct-label">Hotline tư vấn</span>
-                <a href="tel:0938566700" class="direct-val">0938 566 700</a>
+          <div class="contact-combined-card">
+            <!-- Office Address & Location -->
+            <div class="info-header-block">
+              <div class="info-details">
+                <h3>Văn phòng TP. Hồ Chí Minh</h3>
+                <p class="address">{{ contactInfo.address }}</p>
+                <a 
+                  :href="'https://maps.google.com/?q=' + encodeURIComponent(contactInfo.address)" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  class="btn-map-link"
+                >
+                  <span>Xem vị trí trên Google Maps &rarr;</span>
+                </a>
               </div>
             </div>
-            <div class="direct-item">
-              <div>
-                <span class="direct-label">Email hỗ trợ</span>
-                <a href="mailto:info@acc-edu.vn" class="direct-val">info@acc-edu.vn</a>
+
+            <!-- Direct Contacts: Hotline & Email -->
+            <div class="contact-direct-group">
+              <div class="direct-item">
+                <div>
+                  <span class="direct-label">Hotline tư vấn</span>
+                  <a :href="'tel:' + rawPhone" class="direct-val">{{ contactInfo.hotline }}</a>
+                </div>
+              </div>
+              <div class="direct-item">
+                <div>
+                  <span class="direct-label">Email hỗ trợ</span>
+                  <a :href="'mailto:' + contactInfo.email" class="direct-val">{{ contactInfo.email }}</a>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Embedded Google Maps -->
-          <div class="map-embed-box">
-            <h4 class="map-title">Bản đồ vị trí Văn phòng ACC (TP.HCM)</h4>
-            <div class="map-iframe-wrapper">
-              <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.467822986427!2d106.6953043!3d10.7754238!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f385bc19363%3A0x6b3b55c689d0b5e2!2s156%20Nam%20K%E1%BB%B3%20Kh%E1%BB%9Fi%20Ngh%C4%A9a!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn" 
-                title="Bản đồ Google Maps VP ACC Nam Kỳ Khởi Nghĩa" 
-                allowfullscreen="" 
-                loading="lazy" 
-                referrerpolicy="no-referrer-when-downgrade"
-              ></iframe>
+            <!-- Embedded Google Maps -->
+            <div class="map-embed-section">
+              <h4 class="map-title">Bản đồ vị trí Văn phòng ACC (TP.HCM)</h4>
+              <div class="map-iframe-wrapper">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.467822986427!2d106.6953043!3d10.7754238!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f385bc19363%3A0x6b3b55c689d0b5e2!2s156%20Nam%20K%E1%BB%B3%20Kh%E1%BB%9Fi%20Ngh%C4%A9a!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn" 
+                  title="Bản đồ Google Maps VP ACC Nam Kỳ Khởi Nghĩa" 
+                  allowfullscreen="" 
+                  loading="lazy" 
+                  referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+              </div>
             </div>
           </div>
         </div>
@@ -198,8 +198,24 @@ const onCategoryChange = () => {
   formData.value.subCategory = '';
 };
 
+const contactInfo = computed(() => {
+  const s = courseStore.contactSettings;
+  return {
+    address: s?.address || '156 Nam Kỳ Khởi Nghĩa, Quận 1, TP. Hồ Chí Minh',
+    hotline: s?.hotline || '0938 566 700',
+    email: s?.email || 'info@acc-edu.vn'
+  };
+});
+
+const rawPhone = computed(() => {
+  return contactInfo.value.hotline.replace(/\s+/g, '');
+});
+
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (!courseStore.contactSettings) {
+    courseStore.fetchContactSettings();
+  }
 
   // Handle pre-filled category from URL query if provided
   const categoryQuery = route.query.category;
@@ -315,74 +331,68 @@ const submitForm = async () => {
   gap: 24px;
 }
 
-.info-card {
+.contact-combined-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 24px;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
   display: flex;
-  gap: 18px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
-  transition: transform 0.25s ease, border-color 0.25s ease;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.info-card:hover {
-  transform: translateY(-3px);
-  border-color: #022b9f;
-}
-
-.icon-box {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  background: rgba(2, 43, 159, 0.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  flex-shrink: 0;
+.info-header-block {
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 20px;
 }
 
 .info-details h3 {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 800;
   color: #0f172a;
-  margin: 0 0 6px 0;
+  margin: 0 0 10px 0;
 }
 
 .address {
-  font-size: 14.5px;
+  font-size: 15px;
   color: #334155;
   line-height: 1.5;
   margin: 0 0 12px 0;
 }
 
 .btn-map-link {
-  font-size: 13px;
+  display: inline-block;
+  font-size: 13.5px;
   font-weight: 700;
   color: #022b9f;
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
 .btn-map-link:hover {
   text-decoration: underline;
 }
 
-.contact-direct-card {
-  flex-direction: column;
+.contact-direct-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 16px;
-  background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
-  border: 1.5px solid #c7d2fe;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+@media (max-width: 600px) {
+  .contact-direct-group {
+    grid-template-columns: 1fr;
+  }
 }
 
 .direct-item {
   display: flex;
   align-items: center;
-  gap: 14px;
-}
-
-.direct-icon {
-  font-size: 20px;
 }
 
 .direct-label {
@@ -391,36 +401,40 @@ const submitForm = async () => {
   font-weight: 700;
   color: #64748b;
   text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
 .direct-val {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 800;
   color: #022b9f;
   text-decoration: none;
 }
 
-.map-embed-box {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+.direct-val:hover {
+  text-decoration: underline;
+}
+
+.map-embed-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .map-title {
   font-size: 15px;
   font-weight: 800;
   color: #0f172a;
-  margin: 0 0 14px 0;
+  margin: 0;
 }
 
 .map-iframe-wrapper {
   position: relative;
   width: 100%;
-  height: 240px;
-  border-radius: 12px;
+  height: 280px;
+  border-radius: 14px;
   overflow: hidden;
+  border: 1px solid #e2e8f0;
 }
 
 .map-iframe-wrapper iframe {

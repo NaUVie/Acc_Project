@@ -131,10 +131,18 @@ const filteredLecturers = computed(() => {
   if (selectedMajor.value === 'all') {
     return allLecturers.value;
   }
-  return allLecturers.value.filter(l => {
-    const ids = l.majorIds || (l.majorId ? [l.majorId] : []);
-    return ids.includes(selectedMajor.value);
-  });
+  const majorId = selectedMajor.value;
+  return allLecturers.value
+    .filter(l => {
+      const ids = l.majorIds || (l.majorId ? [l.majorId] : []);
+      return ids.includes(majorId);
+    })
+    .sort((a, b) => {
+      const posA = a.major_positions && a.major_positions[majorId] !== undefined ? a.major_positions[majorId] : (a.position ?? 999);
+      const posB = b.major_positions && b.major_positions[majorId] !== undefined ? b.major_positions[majorId] : (b.position ?? 999);
+      if (posA !== posB) return posA - posB;
+      return (a.name || '').localeCompare(b.name || '', 'vi');
+    });
 });
 
 onMounted(() => {
