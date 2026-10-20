@@ -138,7 +138,7 @@
                   <p class="course-meta">Thời lượng: {{ course.duration || '12 tuần' }} • Trình độ: {{ course.level || 'Trung cấp' }}</p>
                   <div class="card-action-row">
                     <router-link :to="'/courses/' + course.handle + '/study'" class="btn btn-primary btn-sm w-full">
-                      🚀 Vào lớp học ngay
+                      Vào lớp học ngay
                     </router-link>
                   </div>
                 </div>

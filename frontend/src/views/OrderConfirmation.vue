@@ -19,7 +19,6 @@
       <div v-else>
         <!-- Banner -->
         <div :class="['oc-banner', order.status === 'paid' ? 'banner-paid' : 'banner-pending']">
-          <div class="banner-icon">{{ order.status === 'paid' ? '🎉' : '⏳' }}</div>
           <div class="banner-text">
             <h1 class="banner-title">
               {{ order.status === 'paid' ? 'Thanh toán thành công!' : 'Đặt hàng thành công!' }}
