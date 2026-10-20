@@ -94,6 +94,22 @@ def create_vnpay_url(
     if forwarded_for:
         client_ip = forwarded_for.split(",")[0].strip()
 
+    # Determine dynamic return_url based on Origin/Referer of client, fallback to config
+    origin = request.headers.get("origin")
+    referer = request.headers.get("referer")
+    base_client_url = None
+    if origin:
+        base_client_url = origin.rstrip("/")
+    elif referer:
+        import urllib.parse
+        parsed = urllib.parse.urlparse(referer)
+        base_client_url = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+        
+    if base_client_url:
+        actual_return_url = f"{base_client_url}/payment/vnpay-return"
+    else:
+        actual_return_url = VNPAY_RETURN_URL
+
     payment_url = vnpay.generate_vnpay_url(
         order_id=order.id,
         amount=order.total_price,
@@ -102,7 +118,7 @@ def create_vnpay_url(
         tmn_code=VNPAY_TMN_CODE,
         hash_secret=VNPAY_HASH_SECRET,
         payment_url=VNPAY_PAYMENT_URL,
-        return_url=VNPAY_RETURN_URL,
+        return_url=actual_return_url,
         bank_code=bank_code
     )
 
