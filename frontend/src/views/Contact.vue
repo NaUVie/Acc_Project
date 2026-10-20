@@ -316,19 +316,21 @@ const submitForm = async () => {
   display: grid;
   grid-template-columns: 1fr;
   gap: 40px;
+  align-items: stretch;
 }
 
 @media (min-width: 992px) {
   .contact-grid {
     grid-template-columns: 1fr 1.15fr;
     gap: 48px;
+    align-items: stretch;
   }
 }
 
 .info-section {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  height: 100%;
 }
 
 .contact-combined-card {
@@ -340,6 +342,7 @@ const submitForm = async () => {
   display: flex;
   flex-direction: column;
   gap: 24px;
+  height: 100%;
 }
 
 .info-header-block {
@@ -419,6 +422,7 @@ const submitForm = async () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  flex: 1;
 }
 
 .map-title {
@@ -431,7 +435,8 @@ const submitForm = async () => {
 .map-iframe-wrapper {
   position: relative;
   width: 100%;
-  height: 280px;
+  flex: 1;
+  min-height: 280px;
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid #e2e8f0;
@@ -450,6 +455,15 @@ const submitForm = async () => {
   border-radius: 24px;
   padding: 36px;
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .form-title {
