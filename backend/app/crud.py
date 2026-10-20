@@ -179,7 +179,7 @@ def checkout_cart(db: Session, user_id: int):
             price=item.course.price
         )
         db.add(db_item)
-        db.delete(item) # Remove from cart online
+        # Giữ lại sản phẩm trong giỏ hàng, chỉ xóa khi đơn hàng đã thanh toán thành công (pay_order)
 
     db.commit()
     db.refresh(db_order)
@@ -207,6 +207,14 @@ def pay_order(db: Session, order_id: int):
     # Transition order status to paid
     db_order.status = "paid"
     
+    # Xóa các khóa học đã thanh toán thành công khỏi giỏ hàng của user
+    paid_course_ids = [item.course_id for item in db_order.items if item.course_id]
+    if paid_course_ids:
+        db.query(models.CartItem).filter(
+            models.CartItem.user_id == db_order.user_id,
+            models.CartItem.course_id.in_(paid_course_ids)
+        ).delete(synchronize_session=False)
+
     # Create Enrollment records for each course in this order
     for item in db_order.items:
         existing_enrollment = db.query(models.Enrollment).filter(
@@ -536,7 +544,7 @@ def checkout_cart_with_options(db: Session, user_id: int, coupon_code: Optional[
             price=item.course.price
         )
         db.add(db_item)
-        db.delete(item)
+        # Giữ lại sản phẩm trong giỏ hàng, chỉ xóa khi đơn hàng đã thanh toán thành công (pay_order)
 
     db.commit()
     db.refresh(db_order)

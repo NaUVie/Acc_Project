@@ -125,10 +125,23 @@
                     <span class="bank-value price">{{ formatCurrency(order.totalPrice) }}</span>
                   </div>
 
+                  <!-- VNPay Sandbox Pay Button -->
+                  <button @click="payWithVnpay" :disabled="paying" class="btn-primary-solid w-full mb-3" style="width: 100%; padding: 12px; font-weight: 700; border-radius: 8px; font-size: 14px; background: #0284c7; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>💳 Thanh toán qua cổng VNPAY</span>
+                  </button>
+
+                  <div style="font-size: 12px; color: #64748b; margin-bottom: 12px; line-height: 1.4; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1;">
+                    <strong style="color: #0f172a;">Thông tin thẻ test VNPAY Sandbox:</strong><br/>
+                    • Ngân hàng: <strong>NCB</strong><br/>
+                    • Số thẻ: <strong>9704198526191432198</strong><br/>
+                    • Tên: <strong>NGUYEN VAN A</strong> | Ngày: <strong>07/15</strong><br/>
+                    • OTP: <strong>123456</strong>
+                  </div>
+
                   <!-- Mock Pay Button for Testing -->
                   <button @click="mockConfirmPayment" :disabled="paying" class="btn-mock-pay">
                     <span v-if="paying">⏳ Đang xử lý...</span>
-                    <span v-else>✅ Xác nhận đã chuyển khoản (Demo)</span>
+                    <span v-else>✅ Xác nhận đã chuyển khoản (Thủ công)</span>
                   </button>
                 </div>
               </div>
@@ -239,6 +252,24 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+const payWithVnpay = async () => {
+  paying.value = true;
+  try {
+    const res = await courseStore.createVnpayPaymentUrl(parseInt(orderId.value));
+    if (res && res.payment_url) {
+      window.location.href = res.payment_url;
+      return;
+    } else if (res && res.status === 'paid') {
+      order.value = { ...order.value, status: 'paid' };
+      courseStore.showToast('Đơn hàng đã được thanh toán thành công!', 'success');
+    }
+  } catch (err) {
+    courseStore.showToast(err.message || 'Không thể tạo cổng thanh toán VNPAY', 'error');
+  } finally {
+    paying.value = false;
+  }
+};
 
 const mockConfirmPayment = async () => {
   paying.value = true;

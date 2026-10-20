@@ -46,3 +46,8 @@ Thumbs.db
 *.swp
 *.tmp
 *.local
+
+# Temporary markdown & notes
+suadoi.md
+*.scratch.*
+

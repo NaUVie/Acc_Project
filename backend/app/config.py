@@ -35,3 +35,9 @@ if cloudinary_url and "cloudinary://" in cloudinary_url:
         print(f"Error parsing CLOUDINARY_URL: {e}")
 
 CLOUDINARY_FOLDER = os.getenv("CLOUDINARY_FOLDER", "Acc Demo")
+
+# VNPay Sandbox Configuration
+VNPAY_TMN_CODE = os.getenv("VNPAY_TMN_CODE", "2QXUI4J4")
+VNPAY_HASH_SECRET = os.getenv("VNPAY_HASH_SECRET", "KASJDKASJDKASJDKASJDKASJDKASJDKA")
+VNPAY_PAYMENT_URL = os.getenv("VNPAY_PAYMENT_URL", "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html")
+VNPAY_RETURN_URL = os.getenv("VNPAY_RETURN_URL", "http://localhost:5173/payment/vnpay-return")

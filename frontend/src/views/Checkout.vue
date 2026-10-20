@@ -45,34 +45,24 @@
             </h2>
 
             <div class="payment-methods">
+              <label class="payment-option" :class="{ active: paymentMethod === 'vnpay' }">
+                <input type="radio" v-model="paymentMethod" value="vnpay" />
+                <div class="option-content">
+                  <div class="option-header">
+                    <span class="option-title">Cổng thanh toán VNPAY (Thẻ ATM, QR VNPAY, Thẻ Quốc Tế)</span>
+                    <span class="badge-recommended">Thanh toán trực tiếp - Tự động</span>
+                  </div>
+                  <p class="option-desc">Chuyển hướng trực tiếp sang cổng VNPAY (môi trường Demo Sandbox) để thanh toán an toàn và kích hoạt ngay tức thì.</p>
+                </div>
+              </label>
+
               <label class="payment-option" :class="{ active: paymentMethod === 'qr' }">
                 <input type="radio" v-model="paymentMethod" value="qr" />
                 <div class="option-content">
                   <div class="option-header">
-                    <span class="option-title">Quét mã QR Ngân hàng (VietQR / Chuyển khoản 24/7)</span>
-                    <span class="badge-recommended">Khuyên dùng - Duyệt tự động</span>
+                    <span class="option-title">Chuyển khoản Ngân hàng qua VietQR</span>
                   </div>
-                  <p class="option-desc">Mở app Ngân hàng (MB, Vietcombank, Techcombank, VPBank...) quét mã QR để kích hoạt khóa học tức thì.</p>
-                </div>
-              </label>
-
-              <label class="payment-option" :class="{ active: paymentMethod === 'momo' }">
-                <input type="radio" v-model="paymentMethod" value="momo" />
-                <div class="option-content">
-                  <div class="option-header">
-                    <span class="option-title">Ví điện tử MoMo / ZaloPay</span>
-                  </div>
-                  <p class="option-desc">Thanh toán nhanh chóng qua ứng dụng ví điện tử MoMo hoặc ZaloPay.</p>
-                </div>
-              </label>
-
-              <label class="payment-option" :class="{ active: paymentMethod === 'card' }">
-                <input type="radio" v-model="paymentMethod" value="card" />
-                <div class="option-content">
-                  <div class="option-header">
-                    <span class="option-title">Thẻ ATM nội địa / Thẻ quốc tế (Visa, Mastercard)</span>
-                  </div>
-                  <p class="option-desc">Cổng thanh toán bảo mật OnePay / VNPay hỗ trợ thẻ tất cả các ngân hàng Việt Nam & Quốc tế.</p>
+                  <p class="option-desc">Nhận thông tin số tài khoản và mã QR để chuyển khoản thủ công sau khi tạo đơn.</p>
                 </div>
               </label>
             </div>
@@ -184,7 +174,7 @@ const router = useRouter()
 const courseStore = useCourseStore()
 
 const loading = ref(false)
-const paymentMethod = ref('qr')
+const paymentMethod = ref('vnpay')
 
 const form = ref({
   fullname: '',
@@ -310,6 +300,19 @@ const handlePlaceOrder = async () => {
   try {
     const order = await courseStore.checkoutWithOptions(couponCodeApplied.value || null, useStoreCredit.value)
     if (order && order.id) {
+      if (paymentMethod.value === 'vnpay' && order.status !== 'paid' && order.total_price > 0) {
+        // Generate VNPay URL & redirect
+        try {
+          const vnpRes = await courseStore.createVnpayPaymentUrl(order.id);
+          if (vnpRes && vnpRes.payment_url) {
+            window.location.href = vnpRes.payment_url;
+            return;
+          }
+        } catch (vnpErr) {
+          console.error("VNPay init error:", vnpErr);
+          courseStore.showToast("Không thể khởi tạo cổng VNPAY. Chuyển sang xem thông tin đơn hàng.", "warning");
+        }
+      }
       router.push(`/order/${order.id}`)
     } else {
       router.push('/dashboard')

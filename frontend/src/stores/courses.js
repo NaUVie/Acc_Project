@@ -941,8 +941,40 @@ export const useCourseStore = defineStore('courses', {
         await this.fetchOrders();
         await this.fetchEnrollments(); // refresh access list after payment
         await this.fetchUserMe();
+        await this.fetchCart(); // Xóa khóa học đã thanh toán khỏi giỏ hàng
         return order;
       } catch (err) {
+        throw err;
+      }
+    },
+
+    async createVnpayPaymentUrl(orderId, bankCode = null) {
+      if (!this.token) return null;
+      try {
+        const query = bankCode ? `?bank_code=${encodeURIComponent(bankCode)}` : '';
+        const res = await this.apiRequest(`/orders/${orderId}/vnpay-url${query}`, {
+          method: 'POST'
+        });
+        return res;
+      } catch (err) {
+        console.error("Failed to create VNPay URL:", err);
+        throw err;
+      }
+    },
+
+    async verifyVnpayReturn(queryParams) {
+      try {
+        const search = new URLSearchParams(queryParams).toString();
+        const res = await this.apiRequest(`/orders/vnpay-return?${search}`);
+        if (this.token) {
+          await this.fetchOrders();
+          await this.fetchEnrollments();
+          await this.fetchUserMe();
+          await this.fetchCart(); // Cập nhật lại giỏ hàng (chỉ xóa khi giao dịch thành công)
+        }
+        return res;
+      } catch (err) {
+        console.error("Failed to verify VNPay return:", err);
         throw err;
       }
     },

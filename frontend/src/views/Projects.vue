@@ -23,21 +23,21 @@
           :class="{ active: currentCategory === 'du-an-doanh-nghiep' }"
           @click="selectCategory('du-an-doanh-nghiep')"
         >
-          🏢 Dự án Doanh nghiệp
+           Dự án Doanh nghiệp
         </button>
         <button 
           class="tab-btn" 
           :class="{ active: currentCategory === 'du-an-ca-nhan' }"
           @click="selectCategory('du-an-ca-nhan')"
         >
-          👤 Dự án Cá nhân
+           Dự án Cá nhân
         </button>
         <button 
           class="tab-btn" 
           :class="{ active: currentCategory === 'du-an-nha-nuoc' }"
           @click="selectCategory('du-an-nha-nuoc')"
         >
-          🏛️ Dự án Nhà nước
+           Dự án Nhà nước
         </button>
       </div>
 
@@ -57,8 +57,8 @@
 
           <div class="card-body">
             <div class="card-meta">
-              <span class="meta-date">📅 {{ item.date }}</span>
-              <span v-if="item.client" class="meta-client">🏛️ {{ item.client }}</span>
+              <span class="meta-date">{{ item.date }}</span>
+              <span v-if="item.client" class="meta-client">{{ item.client }}</span>
             </div>
             <h3 class="card-title">
               <router-link :to="'/du-an/' + item.id" class="title-link">

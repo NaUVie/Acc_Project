@@ -138,7 +138,7 @@
             </button>
 
             <a href="tel:0938566700" class="sidebar-hotline-btn">
-              📞 Hotline: 0938 566 700
+             Hotline: 0938 566 700
             </a>
 
             <!-- Sidebar Related Courses Widget (Cùng nằm trong sidebar container, cuộn tự nhiên) -->

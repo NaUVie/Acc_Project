@@ -160,6 +160,11 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/payment/vnpay-return',
+    name: 'VnpayReturn',
+    component: () => import('../views/VnpayReturn.vue')
+  },
+  {
     path: '/admin',
     name: 'AdminDashboard',
     component: () => import('../views/admin/AdminDashboard.vue'),
