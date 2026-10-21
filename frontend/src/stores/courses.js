@@ -39,6 +39,12 @@ const mapCourse = (c) => ({
   lecturerIds: c.lecturer_ids
 });
 
+// Shared in-flight promises to prevent duplicate simultaneous requests
+let fetchCoursesPromise = null;
+let fetchBlogsPromise = null;
+let fetchProjectsPromise = null;
+let fetchBannersPromise = null;
+
 export const useCourseStore = defineStore('courses', {
   state: () => ({
     // Catalog states
@@ -54,6 +60,12 @@ export const useCourseStore = defineStore('courses', {
     contactSettings: null,
     blogPosts: [],
     loading: false,
+    coursesLoaded: false,
+    blogsLoaded: false,
+    blogsLoading: false,
+    projectsLoaded: false,
+    projectsLoading: false,
+    bannersLoaded: false,
     error: null,
 
     // Auth states
@@ -224,17 +236,31 @@ export const useCourseStore = defineStore('courses', {
     },
 
     // --- Dynamic Catalog Actions ---
-    async fetchBanners() {
-      this.bannersLoading = true;
-      try {
-        const data = await this.apiRequest('/courses/banners');
-        this.banners = data;
-        return data;
-      } catch (err) {
-        console.error("Failed to fetch banners:", err);
-      } finally {
-        this.bannersLoading = false;
+    async fetchBanners(force = false) {
+      if (!force && this.bannersLoaded && this.banners.length > 0) {
+        return this.banners;
       }
+      if (fetchBannersPromise) {
+        return fetchBannersPromise;
+      }
+
+      this.bannersLoading = true;
+      fetchBannersPromise = (async () => {
+        try {
+          const data = await this.apiRequest('/courses/banners');
+          this.banners = data || [];
+          this.bannersLoaded = true;
+          return this.banners;
+        } catch (err) {
+          console.error("Failed to fetch banners:", err);
+          return this.banners;
+        } finally {
+          this.bannersLoading = false;
+          fetchBannersPromise = null;
+        }
+      })();
+
+      return fetchBannersPromise;
     },
 
     async fetchAdminBanners() {
@@ -253,7 +279,7 @@ export const useCourseStore = defineStore('courses', {
         method: 'POST',
         body: JSON.stringify(bannerData)
       });
-      await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners().catch(() => {})]);
+      await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners(true).catch(() => {})]);
       return data;
     },
 
@@ -262,7 +288,7 @@ export const useCourseStore = defineStore('courses', {
         method: 'PUT',
         body: JSON.stringify(bannerData)
       });
-      await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners().catch(() => {})]);
+      await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners(true).catch(() => {})]);
       return data;
     },
 
@@ -270,7 +296,7 @@ export const useCourseStore = defineStore('courses', {
       const data = await this.apiRequest(`/admin/banners/${bannerId}`, {
         method: 'DELETE'
       });
-      await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners().catch(() => {})]);
+      await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners(true).catch(() => {})]);
       return data;
     },
 
@@ -446,7 +472,7 @@ export const useCourseStore = defineStore('courses', {
         body: JSON.stringify(payload)
       });
       await this.fetchPrograms();
-      await this.fetchCourses();
+      await this.fetchCourses(true);
       return data;
     },
 
@@ -463,7 +489,7 @@ export const useCourseStore = defineStore('courses', {
         body: JSON.stringify(payload)
       });
       await this.fetchPrograms();
-      await this.fetchCourses();
+      await this.fetchCourses(true);
       return data;
     },
 
@@ -472,7 +498,7 @@ export const useCourseStore = defineStore('courses', {
         method: 'DELETE'
       });
       await this.fetchPrograms();
-      await this.fetchCourses();
+      await this.fetchCourses(true);
       return data;
     },
 
@@ -567,20 +593,35 @@ export const useCourseStore = defineStore('courses', {
       return data;
     },
 
-    async fetchCourses() {
-      this.loading = true;
-      try {
-        const [coursesData] = await Promise.all([
-          this.apiRequest('/courses'),
-          this.fetchCategories().catch(() => {}),
-          this.fetchBanners().catch(() => {})
-        ]);
-        this.courses = coursesData.map(mapCourse);
-      } catch (err) {
-        this.error = err.message;
-      } finally {
-        this.loading = false;
+    async fetchCourses(force = false) {
+      if (!force && this.coursesLoaded && this.courses.length > 0) {
+        return this.courses;
       }
+      if (fetchCoursesPromise) {
+        return fetchCoursesPromise;
+      }
+
+      this.loading = true;
+      fetchCoursesPromise = (async () => {
+        try {
+          const [coursesData] = await Promise.all([
+            this.apiRequest('/courses'),
+            this.fetchCategories().catch(() => {}),
+            this.fetchBanners().catch(() => {})
+          ]);
+          this.courses = coursesData.map(mapCourse);
+          this.coursesLoaded = true;
+          return this.courses;
+        } catch (err) {
+          this.error = err.message;
+          return this.courses;
+        } finally {
+          this.loading = false;
+          fetchCoursesPromise = null;
+        }
+      })();
+
+      return fetchCoursesPromise;
     },
 
     async fetchCourseByHandle(handle) {
@@ -633,13 +674,31 @@ export const useCourseStore = defineStore('courses', {
       }
     },
 
-    async fetchBlogs() {
-      try {
-        const data = await this.apiRequest('/blogs');
-        this.blogPosts = data; // schema properties match exactly
-      } catch (err) {
-        console.error("Failed to load blog posts:", err);
+    async fetchBlogs(force = false) {
+      if (!force && this.blogsLoaded && this.blogPosts.length > 0) {
+        return this.blogPosts;
       }
+      if (fetchBlogsPromise) {
+        return fetchBlogsPromise;
+      }
+
+      this.blogsLoading = true;
+      fetchBlogsPromise = (async () => {
+        try {
+          const data = await this.apiRequest('/blogs');
+          this.blogPosts = data || [];
+          this.blogsLoaded = true;
+          return this.blogPosts;
+        } catch (err) {
+          console.error("Failed to load blog posts:", err);
+          return this.blogPosts;
+        } finally {
+          this.blogsLoading = false;
+          fetchBlogsPromise = null;
+        }
+      })();
+
+      return fetchBlogsPromise;
     },
 
     async sendContact(firstName, middleName, lastName, email, phone, courseHandle, message) {
@@ -1210,7 +1269,7 @@ export const useCourseStore = defineStore('courses', {
           })
         });
         await this.fetchPrograms();
-        await this.fetchCourses();
+        await this.fetchCourses(true);
       } catch (err) {
         console.error("Failed to add admin program:", err);
         throw err;
@@ -1231,7 +1290,7 @@ export const useCourseStore = defineStore('courses', {
           body: JSON.stringify(payload)
         });
         await this.fetchPrograms();
-        await this.fetchCourses();
+        await this.fetchCourses(true);
       } catch (err) {
         console.error("Failed to update admin program:", err);
         throw err;
@@ -1244,7 +1303,7 @@ export const useCourseStore = defineStore('courses', {
           method: 'DELETE'
         });
         await this.fetchPrograms();
-        await this.fetchCourses();
+        await this.fetchCourses(true);
       } catch (err) {
         console.error("Failed to delete admin program:", err);
         throw err;
@@ -1590,7 +1649,7 @@ export const useCourseStore = defineStore('courses', {
           method: 'POST',
           body: JSON.stringify(payload)
         });
-        await this.fetchCourses();
+        await this.fetchCourses(true);
       } catch (err) {
         console.error("Failed to add admin course:", err);
         throw err;
@@ -1621,7 +1680,7 @@ export const useCourseStore = defineStore('courses', {
           method: 'PUT',
           body: JSON.stringify(payload)
         });
-        await this.fetchCourses();
+        await this.fetchCourses(true);
       } catch (err) {
         console.error("Failed to update admin course:", err);
         throw err;
@@ -2120,31 +2179,50 @@ export const useCourseStore = defineStore('courses', {
     },
 
     // --- Admin Projects CRUD ---
-    async fetchProjects() {
-      try {
-        const data = await this.apiRequest('/projects');
-        if (Array.isArray(data) && data.length > 0) {
-          this.projects = data.map(p => ({
-            id: p.id,
-            category: p.category,
-            categoryName: p.category_name,
-            title: p.title,
-            summary: p.summary,
-            image: p.image,
-            date: p.date,
-            client: p.client,
-            driveProfile: p.drive_profile,
-            content: typeof p.content === 'string' ? (JSON.parse(p.content || '[]')) : (p.content || [])
-          }));
-        } else {
+    async fetchProjects(force = false) {
+      if (!force && this.projectsLoaded && this.projects.length > 0) {
+        return this.projects;
+      }
+      if (fetchProjectsPromise) {
+        return fetchProjectsPromise;
+      }
+
+      this.projectsLoading = true;
+      fetchProjectsPromise = (async () => {
+        try {
+          const data = await this.apiRequest('/projects');
+          if (Array.isArray(data) && data.length > 0) {
+            this.projects = data.map(p => ({
+              id: p.id,
+              category: p.category,
+              categoryName: p.category_name,
+              title: p.title,
+              summary: p.summary,
+              image: p.image,
+              date: p.date,
+              client: p.client,
+              driveProfile: p.drive_profile,
+              content: typeof p.content === 'string' ? (JSON.parse(p.content || '[]')) : (p.content || [])
+            }));
+          } else {
+            const { projectsData } = await import('@/data/projects.js');
+            this.projects = projectsData;
+          }
+          this.projectsLoaded = true;
+          return this.projects;
+        } catch (err) {
+          console.error("Failed to fetch projects:", err);
           const { projectsData } = await import('@/data/projects.js');
           this.projects = projectsData;
+          this.projectsLoaded = true;
+          return this.projects;
+        } finally {
+          this.projectsLoading = false;
+          fetchProjectsPromise = null;
         }
-      } catch (err) {
-        console.error("Failed to fetch projects:", err);
-        const { projectsData } = await import('@/data/projects.js');
-        this.projects = projectsData;
-      }
+      })();
+
+      return fetchProjectsPromise;
     },
 
     async fetchAdminProjects() {
@@ -2178,7 +2256,7 @@ export const useCourseStore = defineStore('courses', {
           body: JSON.stringify(payload)
         });
         await this.fetchAdminProjects();
-        await this.fetchProjects();
+        await this.fetchProjects(true);
         this.showToast('Thêm dự án thành công!', 'success');
       } catch (err) {
         console.error("Failed to add admin project:", err);
@@ -2206,7 +2284,7 @@ export const useCourseStore = defineStore('courses', {
           body: JSON.stringify(payload)
         });
         await this.fetchAdminProjects();
-        await this.fetchProjects();
+        await this.fetchProjects(true);
         this.showToast('Cập nhật dự án thành công!', 'success');
       } catch (err) {
         console.error("Failed to update admin project:", err);
@@ -2222,7 +2300,7 @@ export const useCourseStore = defineStore('courses', {
           method: 'DELETE'
         });
         await this.fetchAdminProjects();
-        await this.fetchProjects();
+        await this.fetchProjects(true);
         this.showToast('Đã xóa dự án thành công!', 'success');
       } catch (err) {
         console.error("Failed to delete admin project:", err);

@@ -56,7 +56,7 @@
     <!-- Contacts List -->
     <div class="contacts-list mt-6">
       <div 
-        v-for="c in filteredContacts" 
+        v-for="c in paginatedContacts" 
         :key="c.id" 
         class="contact-message-card glass-card mb-4"
         :class="{ resolved: c.isResolved }"
@@ -86,12 +86,21 @@
         Không có lời nhắn nào được tìm thấy.
       </div>
     </div>
+
+    <!-- Pagination Component -->
+    <Pagination 
+      v-if="filteredContacts.length > pageSize"
+      v-model:currentPage="currentPage"
+      :totalItems="filteredContacts.length"
+      :pageSize="pageSize"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
 
@@ -133,6 +142,8 @@ const saveSettings = async () => {
 const contacts = computed(() => courseStore.adminContacts);
 
 const contactSearch = ref('');
+const currentPage = ref(1);
+const pageSize = ref(10);
 
 const filteredContacts = computed(() => {
   return contacts.value.filter(c => {
@@ -143,6 +154,15 @@ const filteredContacts = computed(() => {
            c.phone.toLowerCase().includes(searchVal) ||
            c.message.toLowerCase().includes(searchVal);
   });
+});
+
+const paginatedContacts = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredContacts.value.slice(start, start + pageSize.value);
+});
+
+watch(contactSearch, () => {
+  currentPage.value = 1;
 });
 
 const toggleContactStatus = async (contactId) => {

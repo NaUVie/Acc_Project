@@ -34,7 +34,7 @@
       <div v-if="activeView === 'list'">
         <div class="content-header flex-between">
           <div>
-            <h2>Quản lý Dự án & Case Study Thực tế</h2>
+            <h2>Quản lý Dự án </h2>
             <p>Quản lý các dự án đào tạo, tư vấn chuyển đổi số đã thực hiện cho các Tập đoàn, Doanh nghiệp và Cá nhân.</p>
           </div>
           <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Dự án mới</button>
@@ -98,7 +98,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="p in filteredProjects" :key="p.id">
+            <tr v-for="p in paginatedProjects" :key="p.id">
               <td>
                 <img 
                   :src="p.image || '/images/default.jpg'" 
@@ -142,6 +142,14 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination for Projects Table -->
+      <Pagination 
+        v-if="filteredProjects.length > projectsPageSize"
+        v-model:currentPage="projectsPage"
+        :totalItems="filteredProjects.length"
+        :pageSize="projectsPageSize"
+      />
     </div>
 
     <!-- VIEW 2: FORM ADD/EDIT -->
@@ -549,6 +557,10 @@ const loadingReviews = ref(false);
 const reviewStatusFilter = ref('pending'); // 'all', 'pending', 'approved'
 const reviewProjectFilter = ref('all');
 
+// Main Projects Pagination
+const projectsPage = ref(1);
+const projectsPageSize = ref(10);
+
 // Admin Reviews Pagination & Detail Modal
 const adminReviewsPage = ref(1);
 const adminReviewsPageSize = ref(10);
@@ -592,6 +604,15 @@ const filteredProjects = computed(() => {
     }
     return true;
   });
+});
+
+const paginatedProjects = computed(() => {
+  const start = (projectsPage.value - 1) * projectsPageSize.value;
+  return filteredProjects.value.slice(start, start + projectsPageSize.value);
+});
+
+watch([filterCategory, searchQuery], () => {
+  projectsPage.value = 1;
 });
 
 onMounted(async () => {

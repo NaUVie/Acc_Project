@@ -1,132 +1,141 @@
 <template>
   <div class="blog-page">
-    <header class="blog-banner bg-secondary">
-      <div class="container">
-        <div class="blog-banner-content v-stack gap-10 text-center justify-items-center">
-          <div class="v-stack gap-5 sm:gap-8">
-            <h1 class="h0">Bài viết mới nhất</h1>
-          </div>
-        </div>
-        
-        <!-- Category Filter Tab List -->
-        <div class="scroll-area bleed sm:unbleed justify-items-center">
-          <div class="nav-categories">
-            <ul class="h-stack bold text-base" role="tablist">
-              <li 
-                v-for="cat in categories" 
-                :key="cat"
-                role="tab" 
-                :aria-selected="selectedCategory === cat ? 'true' : 'false'"
-              >
-                <a 
-                  href="#" 
-                  :class="{ selected: selectedCategory === cat }"
-                  @click.prevent="selectedCategory = cat"
-                >
-                  {{ cat }}
-                </a>
-              </li>
-            </ul>
+    <div class="container">
+      <!-- Hero Section đồng bộ phong cách ACC Academy -->
+      <div class="blog-hero">
+        <h1 class="hero-title">Tin tức, Kiến thức </h1>
+      
+
+        <!-- Search Box -->
+        <div class="search-filter-wrapper">
+          <div class="search-input-container">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input 
+              type="text" 
+              v-model="searchQuery" 
+              placeholder="Tìm kiếm bài viết theo từ khóa, chủ đề..." 
+              class="search-input"
+            />
+            <button v-if="searchQuery" class="clear-search-btn" @click="searchQuery = ''" title="Xóa tìm kiếm">
+              &times;
+            </button>
           </div>
         </div>
       </div>
-    </header>
 
-    <div class="blog-posts__container container">
-      <!-- Search Box for premium interaction -->
-      <div class="search-filter-wrapper">
-        <div class="search-input-container">
-          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input 
-            type="text" 
-            v-model="searchQuery" 
-            placeholder="Tìm kiếm bài viết..." 
-            class="search-input"
-          />
-        </div>
+      <!-- Category Filter Tabs -->
+      <div class="category-tabs">
+        <button 
+          v-for="cat in availableCategories" 
+          :key="cat"
+          class="cat-tab-btn"
+          :class="{ active: selectedCategory === cat }"
+          @click="changeCategory(cat)"
+        >
+          {{ cat === 'All posts' ? 'Tất cả bài viết' : cat }}
+        </button>
+      </div>
+
+      <!-- Result Counter (nếu có tìm kiếm hoặc lọc) -->
+      <div class="results-header" v-if="filteredPosts.length > 0">
+        <span class="results-count">
+          Hiển thị <strong>{{ paginatedPosts.length }}</strong> trên tổng số <strong>{{ filteredPosts.length }}</strong> bài viết
+        </span>
       </div>
 
       <!-- Blog Grid -->
-      <div class="blog-posts" v-if="filteredPosts.length > 0">
+      <div class="blog-grid" v-if="filteredPosts.length > 0" ref="blogGridRef">
         <article 
-          v-for="post in filteredPosts" 
+          v-for="post in paginatedPosts" 
           :key="post.id" 
-          class="blog-post-card snap-center group"
+          class="blog-card"
         >
-          <router-link :to="post.link || '/blog/' + post.handle" class="blog-post-card__figure rounded">
-            <span class="badge badge--primary">{{ post.category }}</span>
-            <img 
-              :src="post.image" 
-              :alt="post.title"
-              class="w-full h-full object-cover zoom-image"
-              loading="lazy"
-            />
+          <router-link :to="post.link || '/blog/' + post.handle" class="card-image-link">
+            <div class="card-image-wrapper">
+              <img 
+                :src="post.image || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop'" 
+                :alt="post.title"
+                class="card-image"
+                loading="lazy"
+                decoding="async"
+              />
+              <span class="category-badge">{{ post.category }}</span>
+            </div>
           </router-link>
-          <div class="blog-post-card__info">
-            <div class="v-stack gap-4 sm:gap-5">
-              <div class="v-stack gap-3 sm:gap-4">
-                <p class="h3">
-                  <router-link :to="post.link || '/blog/' + post.handle">{{ post.title }}</router-link>
-                </p>
-                <p>{{ post.excerpt }}</p>
-              </div>
-              <div class="blog-post-card__meta">
-                <div class="text-with-icon link-faded">
-                  <svg role="presentation" fill="none" focusable="false" stroke-width="1.5" width="16" height="16" class="icon icon-blog-date" viewBox="0 0 16 16">
-                    <path d="M5.372 1v2.877M10.455 1v2.877" stroke="currentColor" stroke-linecap="round"></path>
-                    <path d="M14.338 7.632H1.497l.179-4.57 6.164-.448 6.497.448v4.57Z" fill="currentColor" fill-opacity=".12"></path>
-                    <path d="M1.224 12.073c.183 1.631 1.508 2.925 3.147 3.004a73.18 73.18 0 0 0 3.546.083c1.256 0 2.413-.028 3.546-.083 1.639-.079 2.964-1.374 3.146-3.004.124-1.099.225-2.224.225-3.37 0-1.147-.102-2.273-.225-3.371-.182-1.631-1.507-2.925-3.146-3.004a73.22 73.22 0 0 0-3.546-.083 73.22 73.22 0 0 0-3.546.083c-1.639.079-2.964 1.374-3.147 3.004C1.101 6.43 1 7.556 1 8.703c0 1.146.102 2.272.224 3.37ZM1.331 7.202h13.24" stroke="currentColor"></path>
-                  </svg>
-                  <span class="text-sm">{{ post.date }}</span>
-                </div>
-              </div>
+
+          <div class="card-body">
+            <div class="card-meta">
+              <span class="meta-date">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                  <line x1="16" y1="2" x2="16" y2="6"></line>
+                  <line x1="8" y1="2" x2="8" y2="6"></line>
+                  <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                {{ post.date || 'Mới cập nhật' }}
+              </span>
+              <span class="meta-author">ACC Editorial</span>
+            </div>
+
+            <h3 class="card-title">
+              <router-link :to="post.link || '/blog/' + post.handle" class="title-link">
+                {{ post.title }}
+              </router-link>
+            </h3>
+
+            <p class="card-excerpt">{{ post.excerpt }}</p>
+
+            <div class="card-footer">
+              <router-link :to="post.link || '/blog/' + post.handle" class="btn-read-more">
+                <span>Đọc bài viết</span>
+                <span class="arrow">&rarr;</span>
+              </router-link>
             </div>
           </div>
         </article>
       </div>
 
-      <!-- Empty State -->
-      <div v-else class="empty-results">
-        <p>Không tìm thấy bài viết phù hợp.</p>
-        <button @click="resetFilters" class="reset-btn">Xem tất cả bài viết</button>
-      </div>
+      <!-- Pagination Component -->
+      <Pagination 
+        v-if="filteredPosts.length > pageSize"
+        v-model:currentPage="currentPage"
+        :totalItems="filteredPosts.length"
+        :pageSize="pageSize"
+        @page-change="onPageChange"
+      />
 
-      <!-- Pagination -->
-      <nav class="pagination" role="navigation" aria-label="Pagination navigation" v-if="filteredPosts.length > 0">
-        <span class="pagination__item pagination__item--disabled">
-          <span class="animated-arrow animated-arrow--reverse"></span>
-        </span>
-        <span class="pagination__current">1  /  1</span>
-        <span class="pagination__item pagination__item--disabled">
-          <span class="animated-arrow"></span>
-        </span>
-      </nav>
+      <!-- Empty State -->
+      <div v-if="filteredPosts.length === 0" class="empty-state">
+        <h3 class="empty-title">Không tìm thấy bài viết phù hợp</h3>
+        <p class="empty-desc">Thử tìm kiếm với từ khóa khác hoặc chuyển danh mục hiển thị.</p>
+        <button @click="resetFilters" class="btn-reset">
+          Xem tất cả bài viết
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
+const blogGridRef = ref(null);
 
 onMounted(() => {
   if (!courseStore.blogPosts || courseStore.blogPosts.length === 0) {
     courseStore.fetchBlogs().catch(() => {});
-  } else {
-    // Background refresh
-    courseStore.fetchBlogs().catch(() => {});
   }
 });
 
-const categories = [
+const defaultCategories = [
   'All posts',
   'AI 2026',
-  'AI Automation',
   'Công cụ AI',
   'Làm việc hiệu suất',
   'Lãnh đạo & Quản lý'
@@ -134,21 +143,65 @@ const categories = [
 
 const selectedCategory = ref('All posts');
 const searchQuery = ref('');
+const currentPage = ref(1);
+const pageSize = ref(6); // 6 bài viết mỗi trang (chia đều lưới 2 hoặc 3 cột)
 
-const posts = computed(() => courseStore.getBlogPosts);
+const posts = computed(() => courseStore.getBlogPosts || []);
+
+// Tự động thu thập các danh mục bài viết thực tế có trong data
+const availableCategories = computed(() => {
+  const cats = new Set(defaultCategories);
+  posts.value.forEach(p => {
+    if (p.category) cats.add(p.category);
+  });
+  return Array.from(cats);
+});
 
 const filteredPosts = computed(() => {
   return posts.value.filter(post => {
     const matchesCategory = selectedCategory.value === 'All posts' || post.category === selectedCategory.value;
-    const matchesSearch = (post.title && post.title.toLowerCase().includes(searchQuery.value.toLowerCase())) || 
-                          (post.excerpt && post.excerpt.toLowerCase().includes(searchQuery.value.toLowerCase()));
+    const q = searchQuery.value.toLowerCase().trim();
+    const matchesSearch = !q || 
+      (post.title && post.title.toLowerCase().includes(q)) || 
+      (post.excerpt && post.excerpt.toLowerCase().includes(q)) ||
+      (post.category && post.category.toLowerCase().includes(q));
     return matchesCategory && matchesSearch;
   });
 });
 
+// Danh sách bài viết được cắt theo trang hiện tại
+const paginatedPosts = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return filteredPosts.value.slice(start, end);
+});
+
+// Reset về trang 1 khi người dùng đổi từ khóa hoặc đổi danh mục
+watch([searchQuery, selectedCategory], () => {
+  currentPage.value = 1;
+});
+
+const changeCategory = (cat) => {
+  selectedCategory.value = cat;
+  currentPage.value = 1;
+};
+
+const onPageChange = () => {
+  nextTick(() => {
+    if (blogGridRef.value) {
+      const topOffset = blogGridRef.value.getBoundingClientRect().top + window.scrollY - 100;
+      window.scrollTo({
+        top: topOffset,
+        behavior: 'smooth'
+      });
+    }
+  });
+};
+
 const resetFilters = () => {
   selectedCategory.value = 'All posts';
   searchQuery.value = '';
+  currentPage.value = 1;
 };
 </script>
 

@@ -42,9 +42,9 @@
       </div>
 
       <!-- Projects Grid -->
-      <div class="projects-grid">
+      <div class="projects-grid" ref="projectsGridRef">
         <div 
-          v-for="item in filteredProjects" 
+          v-for="item in paginatedProjects" 
           :key="item.id"
           class="project-card"
         >
@@ -85,20 +85,33 @@
           </div>
         </div>
       </div>
+
+      <!-- Pagination Component -->
+      <Pagination 
+        v-if="filteredProjects.length > pageSize"
+        v-model:currentPage="currentPage"
+        :totalItems="filteredProjects.length"
+        :pageSize="pageSize"
+        @page-change="onPageChange"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import Pagination from '@/components/Pagination.vue';
 
 const route = useRoute();
 const router = useRouter();
 const courseStore = useCourseStore();
 
 const currentCategory = ref('all');
+const currentPage = ref(1);
+const pageSize = ref(6); // 6 dự án mỗi trang (lưới 2 hoặc 3 cột cân đối)
+const projectsGridRef = ref(null);
 
 const syncCategoryFromQuery = () => {
   const cat = route.query.cat;
@@ -123,6 +136,7 @@ watch(() => route.query.cat, () => {
 
 const selectCategory = (cat) => {
   currentCategory.value = cat;
+  currentPage.value = 1;
   if (cat === 'all') {
     router.push({ path: '/du-an' });
   } else {
@@ -138,6 +152,20 @@ const filteredProjects = computed(() => {
   }
   return allProjects.value.filter(item => item.category === currentCategory.value);
 });
+
+const paginatedProjects = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredProjects.value.slice(start, start + pageSize.value);
+});
+
+const onPageChange = () => {
+  nextTick(() => {
+    if (projectsGridRef.value) {
+      const topOffset = projectsGridRef.value.getBoundingClientRect().top + window.scrollY - 100;
+      window.scrollTo({ top: topOffset, behavior: 'smooth' });
+    }
+  });
+};
 </script>
 
 <style scoped>

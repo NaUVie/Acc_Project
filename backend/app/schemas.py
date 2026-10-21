@@ -160,6 +160,19 @@ class BlogPostResponse(BlogPostBase):
     class Config:
         from_attributes = True
 
+class BlogPostListResponse(BaseModel):
+    id: int
+    title: str
+    handle: str
+    category: str
+    excerpt: Optional[str] = None
+    image: Optional[str] = None
+    date: Optional[str] = None
+    link: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
 # Lecturer Major Schemas
 class LecturerMajorBase(BaseModel):
     id: str

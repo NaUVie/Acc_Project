@@ -369,12 +369,12 @@ const handleEnrollBundle = async (bundleObj) => {
   );
 
   // If not found in memory, try refreshing course list
-  if (!bundleCourseItem) {
+  if (!bundleCourseItem && courseStore.courses.length === 0) {
     await courseStore.fetchCourses();
     bundleCourseItem = courseStore.courses.find(c => 
       c.handle === bundleObj.handle || 
       c.id === bundleObj.id || 
-      c.title === bundleObj.title ||
+      c.title === bundleObj.title || 
       (c.category === 'bundles' && c.handle === bundleObj.handle)
     );
   }

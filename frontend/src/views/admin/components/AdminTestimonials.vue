@@ -62,7 +62,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="t in filteredTestimonials" :key="t.id">
+            <tr v-for="t in paginatedTestimonials" :key="t.id">
               <td class="font-bold text-center">#{{ t.id }}</td>
               <td>
                 <span 
@@ -120,6 +120,14 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination Component -->
+      <Pagination 
+        v-if="filteredTestimonials.length > pageSize"
+        v-model:currentPage="currentPage"
+        :totalItems="filteredTestimonials.length"
+        :pageSize="pageSize"
+      />
     </div>
 
     <!-- VIEW 2: FORM ADD/EDIT -->
@@ -258,8 +266,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import Pagination from '@/components/Pagination.vue';
 import { formatImageUrl } from '@/utils/imageHelper';
 
 const courseStore = useCourseStore();
@@ -267,6 +276,8 @@ const courseStore = useCourseStore();
 const activeView = ref('list');
 const filterType = ref('all');
 const searchQuery = ref('');
+const currentPage = ref(1);
+const pageSize = ref(10);
 const isEditing = ref(false);
 const editingId = ref(null);
 const saving = ref(false);
@@ -309,6 +320,15 @@ const filteredTestimonials = computed(() => {
     }
     return true;
   });
+});
+
+const paginatedTestimonials = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredTestimonials.value.slice(start, start + pageSize.value);
+});
+
+watch([filterType, searchQuery], () => {
+  currentPage.value = 1;
 });
 
 onMounted(async () => {

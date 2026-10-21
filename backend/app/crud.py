@@ -3,19 +3,19 @@ import json
 from datetime import datetime, timezone
 from typing import Optional
 from sqlalchemy import func
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload, joinedload
 from . import models, schemas, auth
 
 # --- Category & Course CRUD ---
 def get_courses(db: Session, category_slug: str = None):
-    query = db.query(models.Course)
+    query = db.query(models.Course).options(selectinload(models.Course.tags))
     if category_slug:
         clean_slug = category_slug.strip().lower()
         query = query.filter(func.lower(models.Course.category_slug) == clean_slug)
     return query.all()
 
 def get_course_by_handle(db: Session, handle: str):
-    return db.query(models.Course).filter(models.Course.handle == handle).first()
+    return db.query(models.Course).options(selectinload(models.Course.tags)).filter(models.Course.handle == handle).first()
 
 def get_categories(db: Session):
     return db.query(models.Category).all()
@@ -78,7 +78,9 @@ def create_user(db: Session, user_in: schemas.UserCreate):
 
 # --- Cart CRUD ---
 def get_cart_items(db: Session, user_id: int):
-    return db.query(models.CartItem).filter(models.CartItem.user_id == user_id).all()
+    return db.query(models.CartItem).options(
+        joinedload(models.CartItem.course).selectinload(models.Course.tags)
+    ).filter(models.CartItem.user_id == user_id).all()
 
 def add_to_cart(db: Session, user_id: int, course_id: int):
     # Check if course is already in the cart
@@ -114,7 +116,9 @@ def clear_cart(db: Session, user_id: int):
 
 # --- Order & Checkout CRUD ---
 def get_user_orders(db: Session, user_id: int):
-    return db.query(models.Order).filter(models.Order.user_id == user_id).all()
+    return db.query(models.Order).options(
+        selectinload(models.Order.items).joinedload(models.OrderItem.course)
+    ).filter(models.Order.user_id == user_id).all()
 
 def checkout_cart(db: Session, user_id: int):
     cart_items = get_cart_items(db, user_id=user_id)
@@ -387,7 +391,9 @@ def get_user_enrollments(db: Session, user_id: int):
         db.add_all(new_enrollments)
         db.commit()
 
-    return db.query(models.Enrollment).filter(models.Enrollment.user_id == user_id).all()
+    return db.query(models.Enrollment).options(
+        joinedload(models.Enrollment.course).selectinload(models.Course.tags)
+    ).filter(models.Enrollment.user_id == user_id).all()
 
 def check_enrollment(db: Session, user_id: int, course_id: int) -> bool:
     existing = db.query(models.Enrollment).filter(

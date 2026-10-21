@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from sqlalchemy.orm import Session, selectinload
 from typing import List, Optional
 from ...database import get_db
 from ... import schemas, crud, models, auth
@@ -8,35 +8,46 @@ router = APIRouter()
 
 @router.get("", response_model=List[schemas.CoursePublicResponse])
 def read_courses(
+    response: Response,
     category: Optional[str] = Query(None, description="Filter courses by category slug"),
     db: Session = Depends(get_db)
 ):
+    response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
     courses = crud.get_courses(db, category_slug=category)
     return courses
 
 @router.get("/categories", response_model=List[schemas.CategoryResponse])
-def read_categories(db: Session = Depends(get_db)):
+def read_categories(response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
     return crud.get_categories(db)
 
 @router.get("/banners", response_model=List[schemas.BannerResponse])
-def read_banners(db: Session = Depends(get_db)):
+def read_banners(response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
     return crud.get_banners(db, active_only=True)
 
 @router.get("/partners", response_model=List[schemas.PartnerResponse])
-def read_partners(db: Session = Depends(get_db)):
+def read_partners(response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
     return crud.get_partners(db, active_only=True)
 
 
 @router.get("/programs", response_model=List[schemas.ProgramResponse])
-def read_programs(db: Session = Depends(get_db)):
+def read_programs(response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
     return db.query(models.Program).all()
 
 @router.get("/bundles", response_model=List[schemas.BundleResponse])
-def read_bundles(db: Session = Depends(get_db)):
-    return db.query(models.Bundle).all()
+def read_bundles(response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
+    return db.query(models.Bundle).options(
+        selectinload(models.Bundle.courses).selectinload(models.Course.tags),
+        selectinload(models.Bundle.gift_courses).selectinload(models.Course.tags)
+    ).all()
 
 @router.get("/{handle}", response_model=schemas.CoursePublicResponse)
-def read_course(handle: str, db: Session = Depends(get_db)):
+def read_course(handle: str, response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
     course = crud.get_course_by_handle(db, handle=handle)
     if not course:
         raise HTTPException(

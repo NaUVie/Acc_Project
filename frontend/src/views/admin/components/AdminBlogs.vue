@@ -49,7 +49,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="b in filteredBlogs" :key="b.id">
+            <tr v-for="b in paginatedBlogs" :key="b.id">
               <td>
                 <img 
                   :src="b.image || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop'" 
@@ -90,6 +90,14 @@
           </tbody>
         </table>
       </div>
+
+      <!-- Pagination Component -->
+      <Pagination 
+        v-if="filteredBlogs.length > pageSize"
+        v-model:currentPage="currentPage"
+        :totalItems="filteredBlogs.length"
+        :pageSize="pageSize"
+      />
     </div>
 
     <!-- VIEW 2: FORM ADD/EDIT -->
@@ -194,9 +202,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import RichTextEditor from '@/components/RichTextEditor.vue';
+import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
 
@@ -206,6 +215,8 @@ const editingId = ref(null);
 
 const filterCategory = ref('all');
 const searchQuery = ref('');
+const currentPage = ref(1);
+const pageSize = ref(8);
 const imageFileRef = ref(null);
 
 const categories = [
@@ -239,6 +250,15 @@ const filteredBlogs = computed(() => {
                        (b.handle && b.handle.toLowerCase().includes(q));
     return matchCategory && matchQuery;
   });
+});
+
+const paginatedBlogs = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredBlogs.value.slice(start, start + pageSize.value);
+});
+
+watch([filterCategory, searchQuery], () => {
+  currentPage.value = 1;
 });
 
 onMounted(async () => {

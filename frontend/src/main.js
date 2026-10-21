@@ -11,14 +11,11 @@ const pinia = createPinia();
 app.use(pinia);
 app.use(router);
 
-// Pre-fetch catalogs and sync cart/profile dynamically
+// Global stores initialization
 const courseStore = useCourseStore();
 const testimonialStore = useTestimonialStore();
 
-courseStore.fetchCourses();
-courseStore.fetchBlogs();
-testimonialStore.fetchTestimonials();
-
+// Sync user data dynamically only if authenticated
 if (courseStore.token) {
   Promise.all([
     courseStore.fetchUserMe(),

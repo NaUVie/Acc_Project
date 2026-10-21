@@ -39,7 +39,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="u in filteredUsers" :key="u.id">
+          <tr v-for="u in paginatedUsers" :key="u.id">
             <td class="font-bold">#{{ u.id }}</td>
             <td class="font-bold">{{ u.fullname }}</td>
             <td>{{ u.email }}</td>
@@ -77,6 +77,14 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination Component -->
+    <Pagination 
+      v-if="filteredUsers.length > pageSize"
+      v-model:currentPage="currentPage"
+      :totalItems="filteredUsers.length"
+      :pageSize="pageSize"
+    />
 
     <!-- ==================== MODAL: ADD/EDIT USER ==================== -->
     <div v-if="userModalOpen" class="modal-overlay">
@@ -123,8 +131,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
 
@@ -132,6 +141,8 @@ const users = computed(() => courseStore.adminUsers);
 
 const userSearch = ref('');
 const userFilterRole = ref('all');
+const currentPage = ref(1);
+const pageSize = ref(10);
 
 const filteredUsers = computed(() => {
   return users.value.filter(u => {
@@ -141,6 +152,15 @@ const filteredUsers = computed(() => {
     const matchesRole = userFilterRole.value === 'all' || u.role === userFilterRole.value;
     return matchesSearch && matchesRole;
   });
+});
+
+const paginatedUsers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredUsers.value.slice(start, start + pageSize.value);
+});
+
+watch([userSearch, userFilterRole], () => {
+  currentPage.value = 1;
 });
 
 // CRUD User Modal States

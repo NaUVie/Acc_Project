@@ -39,7 +39,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="order in filteredOrders" :key="order.id">
+          <tr v-for="order in paginatedOrders" :key="order.id">
             <td class="font-bold">#{{ order.id }}</td>
             <td>
               <div>{{ order.userFullname }}</div>
@@ -75,6 +75,14 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Pagination Component -->
+    <Pagination 
+      v-if="filteredOrders.length > pageSize"
+      v-model:currentPage="currentPage"
+      :totalItems="filteredOrders.length"
+      :pageSize="pageSize"
+    />
 
     <!-- ==================== MODAL: ADD/EDIT ORDER ==================== -->
     <div v-if="orderModalOpen" class="modal-overlay">
@@ -149,8 +157,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
 
@@ -160,6 +169,8 @@ const courses = computed(() => courseStore.courses);
 
 const orderSearch = ref('');
 const orderFilterStatus = ref('all');
+const currentPage = ref(1);
+const pageSize = ref(10);
 
 const filteredOrders = computed(() => {
   return orders.value.filter(o => {
@@ -169,6 +180,15 @@ const filteredOrders = computed(() => {
     const matchesStatus = orderFilterStatus.value === 'all' || o.status === orderFilterStatus.value;
     return matchesSearch && matchesStatus;
   });
+});
+
+const paginatedOrders = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredOrders.value.slice(start, start + pageSize.value);
+});
+
+watch([orderSearch, orderFilterStatus], () => {
+  currentPage.value = 1;
 });
 
 // CRUD Order Modal States

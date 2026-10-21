@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from ...database import get_db
@@ -7,11 +7,13 @@ from ... import models, schemas, crud, auth
 router = APIRouter()
 
 @router.get("", response_model=List[schemas.ProjectResponse])
-def read_projects(category: Optional[str] = None, db: Session = Depends(get_db)):
+def read_projects(response: Response, category: Optional[str] = None, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
     return crud.get_projects(db, category=category)
 
 @router.get("/{id}", response_model=schemas.ProjectResponse)
-def read_project_by_id(id: str, db: Session = Depends(get_db)):
+def read_project_by_id(id: str, response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
     project = crud.get_project_by_id(db, id)
     if not project:
         raise HTTPException(
