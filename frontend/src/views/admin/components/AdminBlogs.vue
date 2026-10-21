@@ -244,7 +244,7 @@ const blogPosts = computed(() => courseStore.adminBlogPosts.length > 0 ? courseS
 const filteredBlogs = computed(() => {
   return blogPosts.value.filter(b => {
     const matchCategory = filterCategory.value === 'all' || b.category === filterCategory.value;
-    const q = searchQuery.value.toLowerCase();
+    const q = (searchQuery.value || '').toLowerCase().trim();
     const matchQuery = !q || (b.title && b.title.toLowerCase().includes(q)) || 
                        (b.excerpt && b.excerpt.toLowerCase().includes(q)) ||
                        (b.handle && b.handle.toLowerCase().includes(q));

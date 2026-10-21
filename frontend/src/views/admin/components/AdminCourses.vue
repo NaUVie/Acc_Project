@@ -441,9 +441,11 @@ watch([courseSearch, courseFilterCategory], () => {
 });
 
 const filteredCourses = computed(() => {
-  return courses.value.filter(c => {
-    const matchesSearch = c.title.toLowerCase().includes(courseSearch.value.toLowerCase()) || 
-                          c.description.toLowerCase().includes(courseSearch.value.toLowerCase());
+  const query = (courseSearch.value || '').toLowerCase().trim();
+  return (courses.value || []).filter(c => {
+    const title = (c.title || '').toLowerCase();
+    const desc = (c.description || '').toLowerCase();
+    const matchesSearch = !query || title.includes(query) || desc.includes(query);
     const matchesCat = courseFilterCategory.value === 'all' || c.category === courseFilterCategory.value;
     return matchesSearch && matchesCat;
   });

@@ -309,7 +309,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 
 const courseStore = useCourseStore();
@@ -355,8 +355,10 @@ const getRowBadgeStyle = (type) => {
 };
 
 const filteredPartners = computed(() => {
-  return partners.value.filter(p => {
-    const matchQuery = !searchQuery.value || p.name.toLowerCase().includes(searchQuery.value.toLowerCase());
+  const query = (searchQuery.value || '').toLowerCase().trim();
+  return (partners.value || []).filter(p => {
+    const pName = (p.name || '').toLowerCase();
+    const matchQuery = !query || pName.includes(query);
     const matchStatus = filterStatus.value === 'all' || 
       (filterStatus.value === 'active' && p.is_active) ||
       (filterStatus.value === 'hidden' && !p.is_active);
@@ -367,6 +369,10 @@ const filteredPartners = computed(() => {
 });
 
 const totalPages = computed(() => Math.ceil(filteredPartners.value.length / pageSize) || 1);
+
+watch([filterRowType, filterStatus, searchQuery], () => {
+  currentPage.value = 1;
+});
 
 const paginatedPartners = computed(() => {
   const start = (currentPage.value - 1) * pageSize;

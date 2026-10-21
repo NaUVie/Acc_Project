@@ -536,7 +536,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import RichTextEditor from '@/components/RichTextEditor.vue';
 import Pagination from '@/components/Pagination.vue';

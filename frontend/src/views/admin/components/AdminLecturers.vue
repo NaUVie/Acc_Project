@@ -690,12 +690,16 @@ const filteredLecturers = computed(() => {
     }
 
     // Filter by search query
-    const q = searchQuery.value.toLowerCase();
-    const mNames = (l.majorIds || [l.majorId]).map(mId => getMajorNameById(mId).toLowerCase()).join(' ');
-    return l.name.toLowerCase().includes(q) || 
-           l.title.toLowerCase().includes(q) ||
+    const q = (searchQuery.value || '').toLowerCase().trim();
+    const lName = (l.name || '').toLowerCase();
+    const lTitle = (l.title || '').toLowerCase();
+    const lId = (l.id || '').toString().toLowerCase();
+    const mNames = (l.majorIds || [l.majorId]).filter(Boolean).map(mId => getMajorNameById(mId).toLowerCase()).join(' ');
+    return !q || 
+           lName.includes(q) || 
+           lTitle.includes(q) ||
            mNames.includes(q) ||
-           (l.id && l.id.toLowerCase().includes(q));
+           lId.includes(q);
   });
 
   if (selectedMajorFilter.value !== 'all') {

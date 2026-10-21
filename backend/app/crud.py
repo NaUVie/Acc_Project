@@ -1,7 +1,7 @@
-import uuid
+﻿import uuid
 import json
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload, joinedload
 from . import models, schemas, auth
@@ -125,11 +125,14 @@ def checkout_cart(db: Session, user_id: int):
     if not cart_items:
         return None
 
-    # Filter out items user is already enrolled in
+    # Filter out items user is already enrolled in using batch query
+    cart_course_ids = [item.course_id for item in cart_items if item.course_id]
+    enrolled_course_ids = get_user_enrolled_course_ids(db, user_id, cart_course_ids)
+    
     valid_cart_items = []
     has_removed = False
     for item in cart_items:
-        if check_enrollment(db, user_id=user_id, course_id=item.course_id):
+        if item.course_id in enrolled_course_ids:
             db.delete(item)
             has_removed = True
         else:
@@ -395,27 +398,36 @@ def get_user_enrollments(db: Session, user_id: int):
         joinedload(models.Enrollment.course).selectinload(models.Course.tags)
     ).filter(models.Enrollment.user_id == user_id).all()
 
-def check_enrollment(db: Session, user_id: int, course_id: int) -> bool:
-    existing = db.query(models.Enrollment).filter(
-        models.Enrollment.user_id == user_id,
-        models.Enrollment.course_id == course_id
-    ).first()
-    if existing:
-        return True
+def get_user_enrolled_course_ids(db: Session, user_id: int, course_ids: Optional[List[int]] = None) -> set:
+    """Batch retrieves set of enrolled course IDs for a user with minimal queries"""
+    q_enr = db.query(models.Enrollment.course_id).filter(models.Enrollment.user_id == user_id)
+    if course_ids:
+        q_enr = q_enr.filter(models.Enrollment.course_id.in_(course_ids))
+    enrolled = {r[0] for r in q_enr.all()}
 
-    # Fallback to paid order items check
-    paid_order_item = db.query(models.OrderItem).join(models.Order).filter(
+    # Check paid orders fallback for any courses not yet in Enrollment table
+    q_paid = db.query(models.OrderItem.course_id, models.OrderItem.order_id).join(models.Order).filter(
         models.Order.user_id == user_id,
-        models.Order.status == "paid",
-        models.OrderItem.course_id == course_id
-    ).first()
-    if paid_order_item:
-        auto_enr = models.Enrollment(user_id=user_id, course_id=course_id, order_id=paid_order_item.order_id)
-        db.add(auto_enr)
+        models.Order.status == "paid"
+    )
+    if course_ids:
+        q_paid = q_paid.filter(models.OrderItem.course_id.in_(course_ids))
+    
+    missing_enr = []
+    for c_id, o_id in q_paid.all():
+        if c_id and c_id not in enrolled:
+            enrolled.add(c_id)
+            missing_enr.append(models.Enrollment(user_id=user_id, course_id=c_id, order_id=o_id))
+    
+    if missing_enr:
+        db.add_all(missing_enr)
         db.commit()
-        return True
 
-    return False
+    return enrolled
+
+def check_enrollment(db: Session, user_id: int, course_id: int) -> bool:
+    enrolled_ids = get_user_enrolled_course_ids(db, user_id, [course_id])
+    return course_id in enrolled_ids
 
 def enroll_user_in_course(db: Session, user_id: int, course_id: int, order_id: Optional[int] = None):
     existing = db.query(models.Enrollment).filter(
@@ -465,11 +477,14 @@ def checkout_cart_with_options(db: Session, user_id: int, coupon_code: Optional[
     if not cart_items:
         return None
 
-    # Filter out items user is already enrolled in
+    # Filter out items user is already enrolled in using batch query
+    cart_course_ids = [item.course_id for item in cart_items if item.course_id]
+    enrolled_course_ids = get_user_enrolled_course_ids(db, user_id, cart_course_ids)
+    
     valid_cart_items = []
     has_removed = False
     for item in cart_items:
-        if check_enrollment(db, user_id=user_id, course_id=item.course_id):
+        if item.course_id in enrolled_course_ids:
             db.delete(item)
             has_removed = True
         else:

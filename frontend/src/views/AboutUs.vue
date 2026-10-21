@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="about-us-page">
     <!-- Hero Section with ACC Slogan -->
     <section class="about-hero-section reveal-on-scroll">
@@ -16,7 +16,7 @@
         <!-- Part 1: Tầm nhìn & Sứ mệnh -->
         <div class="vm-editorial-row reveal-on-scroll">
           <div class="vm-img-box">
-            <img src="https://lh3.googleusercontent.com/d/1vOlYLlceRvdI3ozGu31-KP8FIa-Vn0pl" alt="Tầm nhìn và Sứ mệnh ACC" class="vm-section-img" />
+            <img src="https://lh3.googleusercontent.com/d/1vOlYLlceRvdI3ozGu31-KP8FIa-Vn0pl" alt="Tầm nhìn và Sứ mệnh ACC" class="vm-section-img" loading="lazy" decoding="async" width="540" height="360" />
           </div>
           <div class="vm-text-box">
             <span class="custom-ui-tag">ĐỊNH HƯỚNG BỀN VỮNG</span>
@@ -37,7 +37,7 @@
             </p>
           </div>
           <div class="vm-img-box">
-            <img src="https://lh3.googleusercontent.com/d/1K-MqaNwQHes194nALDinlzsaYvVbyPeU" alt="Sự khác biệt của ACC" class="vm-section-img" />
+            <img src="https://lh3.googleusercontent.com/d/1K-MqaNwQHes194nALDinlzsaYvVbyPeU" alt="Sự khác biệt của ACC" class="vm-section-img" loading="lazy" decoding="async" width="540" height="360" />
           </div>
         </div>
       </div>
@@ -214,7 +214,7 @@
               <img 
                 :src="member.avatar" 
                 :alt="member.name" 
-                class="leader-avatar"
+                class="leader-avatar" loading="lazy" decoding="async" width="280" height="280"
                 @error="(e) => e.target.src = '/images/1_6.png'"
                 referrerpolicy="no-referrer"
               />

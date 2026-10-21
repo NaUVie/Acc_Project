@@ -146,13 +146,17 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 
 const filteredContacts = computed(() => {
-  return contacts.value.filter(c => {
-    const searchVal = contactSearch.value.toLowerCase();
-    const fullName = `${c.lastName} ${c.middleName} ${c.firstName}`.toLowerCase();
-    return fullName.includes(searchVal) || 
-           c.email.toLowerCase().includes(searchVal) ||
-           c.phone.toLowerCase().includes(searchVal) ||
-           c.message.toLowerCase().includes(searchVal);
+  const searchVal = (contactSearch.value || '').toLowerCase().trim();
+  return (contacts.value || []).filter(c => {
+    const fullName = [c.lastName, c.middleName, c.firstName].filter(Boolean).join(' ').toLowerCase();
+    const email = (c.email || '').toLowerCase();
+    const phone = (c.phone || '').toLowerCase();
+    const message = (c.message || '').toLowerCase();
+    return !searchVal || 
+           fullName.includes(searchVal) || 
+           email.includes(searchVal) || 
+           phone.includes(searchVal) || 
+           message.includes(searchVal);
   });
 });
 

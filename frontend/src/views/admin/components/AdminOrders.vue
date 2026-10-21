@@ -173,10 +173,12 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 
 const filteredOrders = computed(() => {
-  return orders.value.filter(o => {
-    const matchesSearch = o.id.toString().includes(orderSearch.value) || 
-                          o.userFullname.toLowerCase().includes(orderSearch.value.toLowerCase()) ||
-                          o.userEmail.toLowerCase().includes(orderSearch.value.toLowerCase());
+  const query = (orderSearch.value || '').toLowerCase().trim();
+  return (orders.value || []).filter(o => {
+    const orderIdStr = (o.id || '').toString();
+    const fullname = (o.userFullname || '').toLowerCase();
+    const email = (o.userEmail || '').toLowerCase();
+    const matchesSearch = !query || orderIdStr.includes(query) || fullname.includes(query) || email.includes(query);
     const matchesStatus = orderFilterStatus.value === 'all' || o.status === orderFilterStatus.value;
     return matchesSearch && matchesStatus;
   });

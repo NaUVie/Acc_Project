@@ -135,7 +135,14 @@
                 class="user-dropdown-link admin-highlight" 
                 @click="isUserDropdownOpen = false"
               >
-                <span class="dropdown-icon">👑</span>
+                <span class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                  </svg>
+                </span>
                 <div class="dropdown-link-text">
                   <span class="link-title">Trang quản trị hệ thống</span>
                   <span class="link-desc">Quản lý khóa học, đơn hàng & học viên</span>
@@ -143,7 +150,12 @@
               </router-link>
 
               <router-link to="/dashboard" class="user-dropdown-link" @click="isUserDropdownOpen = false">
-                <span class="dropdown-icon">🎓</span>
+                <span class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                    <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+                  </svg>
+                </span>
                 <div class="dropdown-link-text">
                   <span class="link-title">Khóa học của tôi</span>
                   <span class="link-desc">Vào học & xem tiến độ</span>
@@ -151,7 +163,15 @@
               </router-link>
 
               <router-link to="/gioi-thieu" class="user-dropdown-link" @click="isUserDropdownOpen = false">
-                <span class="dropdown-icon">🎁</span>
+                <span class="dropdown-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 12 20 22 4 22 4 12"></polyline>
+                    <rect x="2" y="7" width="20" height="5"></rect>
+                    <line x1="12" y1="22" x2="12" y2="7"></line>
+                    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
+                    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
+                  </svg>
+                </span>
                 <div class="dropdown-link-text">
                   <span class="link-title">Giới thiệu & Nhận thưởng</span>
                   <span class="link-desc">Nhận đến 29.000.000 VNĐ hoa hồng</span>
@@ -162,7 +182,13 @@
             <div class="user-dropdown-divider"></div>
 
             <button class="user-dropdown-logout" @click="handleLogout">
-              <span class="dropdown-icon">🚪</span>
+              <span class="dropdown-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                  <polyline points="16 17 21 12 16 7"></polyline>
+                  <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+              </span>
               <span>Đăng xuất tài khoản</span>
             </button>
           </div>

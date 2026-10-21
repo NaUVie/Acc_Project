@@ -49,7 +49,7 @@
           class="project-card"
         >
           <div class="card-image-wrapper">
-            <img :src="item.image" :alt="item.title" class="card-image" referrerpolicy="no-referrer" />
+            <img :src="item.image" :alt="item.title" class="card-image" loading="lazy" decoding="async" width="400" height="250" referrerpolicy="no-referrer" />
             <span class="category-badge" :class="item.category">
               {{ item.categoryName }}
             </span>

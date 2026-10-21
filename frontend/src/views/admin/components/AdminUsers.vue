@@ -145,10 +145,12 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 
 const filteredUsers = computed(() => {
-  return users.value.filter(u => {
-    const matchesSearch = u.fullname.toLowerCase().includes(userSearch.value.toLowerCase()) || 
-                          u.email.toLowerCase().includes(userSearch.value.toLowerCase()) ||
-                          u.referralCode.toLowerCase().includes(userSearch.value.toLowerCase());
+  const query = (userSearch.value || '').toLowerCase().trim();
+  return (users.value || []).filter(u => {
+    const fullname = (u.fullname || '').toLowerCase();
+    const email = (u.email || '').toLowerCase();
+    const refCode = (u.referralCode || '').toLowerCase();
+    const matchesSearch = !query || fullname.includes(query) || email.includes(query) || refCode.includes(query);
     const matchesRole = userFilterRole.value === 'all' || u.role === userFilterRole.value;
     return matchesSearch && matchesRole;
   });

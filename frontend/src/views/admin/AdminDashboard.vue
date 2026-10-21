@@ -104,20 +104,20 @@ watch(activeTab, (newTab) => {
 
 onMounted(async () => {
   await Promise.all([
-    courseStore.fetchAdminUsers(),
-    courseStore.fetchAdminOrders(),
-    courseStore.fetchAdminContacts(),
-    courseStore.fetchCourses(),
-    courseStore.fetchCategories().catch(() => {}),
-    courseStore.fetchPrograms(),
-    courseStore.fetchBundles(),
-    courseStore.fetchLecturerMajors().catch(() => {}),
-    courseStore.fetchLecturers().catch(() => {}),
-    courseStore.fetchAdminBanners().catch(() => {}),
-    courseStore.fetchAdminTestimonials().catch(() => {}),
-    courseStore.fetchAdminProjects().catch(() => {}),
-    courseStore.fetchAdminBlogPosts().catch(() => {}),
-    courseStore.fetchAdminPartners().catch(() => {})
+    courseStore.fetchAdminUsers().catch(err => console.warn("fetchAdminUsers failed:", err)),
+    courseStore.fetchAdminOrders().catch(err => console.warn("fetchAdminOrders failed:", err)),
+    courseStore.fetchAdminContacts().catch(err => console.warn("fetchAdminContacts failed:", err)),
+    courseStore.fetchCourses().catch(err => console.warn("fetchCourses failed:", err)),
+    courseStore.fetchCategories().catch(err => console.warn("fetchCategories failed:", err)),
+    courseStore.fetchPrograms().catch(err => console.warn("fetchPrograms failed:", err)),
+    courseStore.fetchBundles().catch(err => console.warn("fetchBundles failed:", err)),
+    courseStore.fetchLecturerMajors().catch(err => console.warn("fetchLecturerMajors failed:", err)),
+    courseStore.fetchLecturers().catch(err => console.warn("fetchLecturers failed:", err)),
+    courseStore.fetchAdminBanners().catch(err => console.warn("fetchAdminBanners failed:", err)),
+    courseStore.fetchAdminTestimonials().catch(err => console.warn("fetchAdminTestimonials failed:", err)),
+    courseStore.fetchAdminProjects().catch(err => console.warn("fetchAdminProjects failed:", err)),
+    courseStore.fetchAdminBlogPosts().catch(err => console.warn("fetchAdminBlogPosts failed:", err)),
+    courseStore.fetchAdminPartners().catch(err => console.warn("fetchAdminPartners failed:", err))
   ]);
 });
 
