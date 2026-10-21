@@ -58,7 +58,7 @@
               </td>
               <td>
                 <div class="action-buttons">
-                  <button @click="openCurriculumModal(c)" class="btn-action edit" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; font-size: 12px; font-weight: 700; padding: 6px 10px; width: auto;" title="Quản lý bài giảng">Bài giảng</button>
+                  <button @click="openCurriculumModal(c)" class="btn-action edit" title="Quản lý giáo trình & bài giảng">📚</button>
                   <button @click="editCourseDetails(c)" class="btn-action edit" title="Sửa thông tin">✏️</button>
                   <button @click="deleteCourse(c.id)" class="btn-action delete" title="Xóa">🗑️</button>
                 </div>
