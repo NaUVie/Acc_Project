@@ -9,8 +9,7 @@
       </router-view>
     </main>
     <Footer />
-    <ZaloChatWidget />
-    <CallButtonWidget />
+    <ContactSpeedDial />
     <ToastNotification />
     <ConfirmModal />
   </div>
@@ -19,8 +18,7 @@
 <script setup>
 import Header from './components/Header.vue';
 import Footer from './components/Footer.vue';
-import ZaloChatWidget from './components/ZaloChatWidget.vue';
-import CallButtonWidget from './components/CallButtonWidget.vue';
+import ContactSpeedDial from './components/ContactSpeedDial.vue';
 import ToastNotification from './components/ToastNotification.vue';
 import ConfirmModal from './components/ConfirmModal.vue';
 </script>

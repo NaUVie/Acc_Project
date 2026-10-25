@@ -255,7 +255,7 @@ const boardMembers = [
   {
     name: 'Ông Nguyễn Tiến Điệp',
     mainRole: 'Chủ tịch HĐQT Công ty CP Kết Nối Tri Thức ACC',
-    avatar: '/images/VeChungToi/TienDiep.png',
+    avatar: '/images/VeChungToi/TienDiep.webp',
     bioList: [
       'CEO Sadaco Tas',
       'Chủ tịch HĐQT CTY CP Tập đoàn Sài Gòn Tiến Đoàn',
@@ -277,7 +277,7 @@ const boardMembers = [
   {
     name: 'Bà Nguyễn Thị Thu Hoà',
     mainRole: 'Thành viên Hội Đồng Quản Trị ACC',
-    avatar: '/images/VeChungToi/ThuHoa.png',
+    avatar: '/images/VeChungToi/ThuHoa.webp',
     bioList: [
       'Tổng Giám Đốc của ADP Group',
       'Nguyên Giám Đốc Marketing của Tập Đội BĐS Khang Điền',
@@ -287,7 +287,7 @@ const boardMembers = [
   {
     name: 'Ông Lê Nguyễn Ngọc Sơn',
     mainRole: 'Thành viên HĐQT Công ty CP Kết nối Tri thức ACC',
-    avatar: '/images/VeChungToi/Ngocson.png',
+    avatar: '/images/VeChungToi/Ngocson.webp',
     bioList: [
       'Giám Đốc Andrews Alumni Việt Nam',
       'Phó Giám Đốc Phát Triển Đại Học Andrews Hoa Kỳ tại Việt Nam'
@@ -296,7 +296,7 @@ const boardMembers = [
   {
     name: 'TS. Nguyễn Tấn Bình',
     mainRole: 'Cố vấn Cao cấp Công ty CP Kết nối Tri thức ACC',
-    avatar: '/images/VeChungToi/ThayBinh.png',
+    avatar: '/images/VeChungToi/ThayBinh.webp',
     bioList: [
       'Viện trưởng Viện nghiên cứu Khoa học Lãnh đạo & Quản trị Doanh nghiệp – Leadman',
       'Giảng viên cao cấp Andrews University Hoa Kỳ tại Việt Nam',
@@ -307,7 +307,7 @@ const boardMembers = [
   {
     name: 'Bà Nguyễn Thị Kim Anh',
     mainRole: 'Cố vấn Cao cấp Công ty CP Kết nối Tri thức ACC',
-    avatar: '/images/VeChungToi/KimAnh.png',
+    avatar: '/images/VeChungToi/KimAnh.webp',
     bioList: [
       'Thạc sĩ Quản trị Kinh doanh, Andrews University, Hoa Kỳ',
       'Chủ tịch HĐQT Hệ thống Trường Việt Anh',
@@ -317,7 +317,7 @@ const boardMembers = [
   {
     name: 'Bà Nguyễn Thị Mỹ Dung',
     mainRole: 'Co-Founder Công ty CP Kết nối Tri thức ACC',
-    avatar: '/images/VeChungToi/MYDUNG.png',
+    avatar: '/images/VeChungToi/MYDUNG.webp',
     bioList: [
       'Nguyên Giám đốc chi nhánh Techcombank',
       'Thạc sĩ QTKD trường Đại học Andrews (ĐH Quốc tế, ĐHQG Tp.HCM)',
@@ -327,7 +327,7 @@ const boardMembers = [
   {
     name: 'Bà Ngô Vũ Ngọc Thảo',
     mainRole: 'Co-Founder Công ty CP Kết nối Tri thức ACC',
-    avatar: '/images/VeChungToi/NgocThao.png',
+    avatar: '/images/VeChungToi/NgocThao.webp',
     bioList: [
       'Trưởng phòng Cao cấp Tập đoàn L’Oreal Việt Nam',
       'Trưởng ban Học Thuật – Trường ĐH Andrews (ĐH Quốc tế - ĐHQG Tp.HCM)',

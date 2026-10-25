@@ -169,6 +169,36 @@ const routes = [
     meta: { requiresAdmin: true }
   },
   {
+    path: '/terms-of-service',
+    alias: ['/terms', '/dieu-khoan-dich-vu'],
+    name: 'TermsOfService',
+    component: () => import('../views/LegalPolicy.vue')
+  },
+  {
+    path: '/privacy-policy',
+    alias: ['/privacy', '/chinh-sach-bao-mat'],
+    name: 'PrivacyPolicy',
+    component: () => import('../views/LegalPolicy.vue')
+  },
+  {
+    path: '/refund-policy',
+    alias: ['/chinh-sach-hoan-tien'],
+    name: 'RefundPolicy',
+    component: () => import('../views/LegalPolicy.vue')
+  },
+  {
+    path: '/payment-guide',
+    alias: ['/huong-dan-thanh-toan'],
+    name: 'PaymentGuide',
+    component: () => import('../views/LegalPolicy.vue')
+  },
+  {
+    path: '/delivery-policy',
+    alias: ['/chinh-sach-giao-nhan', '/kich-hoat-khoa-hoc'],
+    name: 'DeliveryPolicy',
+    component: () => import('../views/LegalPolicy.vue')
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('../views/NotFound.vue')

@@ -1,8 +1,8 @@
 .custom-footer {
-  background-color: #0f172a;
+  background-color: #0b1120;
   color: #94a3b8;
-  padding-top: 48px;
-  padding-bottom: 28px;
+  padding-top: 50px;
+  padding-bottom: 24px;
   font-size: 13.5px;
   line-height: 1.6;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -10,27 +10,29 @@
 }
 
 .custom-footer-container {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding-inline: 20px;
+  padding-inline: 24px;
 }
 
+/* LƯỚI FOOTER 4 CỘT CHUẨN MỰC, KHÔNG BỊ CO CỤM HAY XUỐNG HÀNG LẺ */
 .custom-footer-top {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 32px;
-  margin-bottom: 36px;
+  gap: 36px;
+  margin-bottom: 40px;
 }
 
 @media (min-width: 640px) {
   .custom-footer-top {
     grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
   }
 }
 
 @media (min-width: 1024px) {
   .custom-footer-top {
-    grid-template-columns: 3fr 1.8fr 1.8fr 2.6fr;
+    grid-template-columns: 3.2fr 2.3fr 2.3fr 2.8fr;
     gap: 40px;
   }
 }
@@ -40,33 +42,91 @@
   flex-direction: column;
 }
 
+/* CỘT 1: THƯƠNG HIỆU & PHÁP NHÂN */
 .custom-footer-logo {
   display: inline-block;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .footer-logo-img {
-  max-height: 36px;
+  max-height: 40px;
   width: auto;
   filter: brightness(0) invert(1);
   display: block;
 }
 
-.custom-footer-slogan {
-  color: #64748b;
-  margin: 0;
-  font-size: 13.5px;
-  line-height: 1.6;
-  max-width: 320px;
+.custom-footer-company {
+  color: #f1f5f9;
+  font-size: 12.5px;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
 }
 
+.custom-footer-slogan {
+  color: #64748b;
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 330px;
+}
+
+.contact-compact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.compact-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.45;
+}
+
+.compact-label {
+  color: #64748b;
+  font-weight: 600;
+  font-size: 12.5px;
+  min-width: 50px;
+  flex-shrink: 0;
+}
+
+.compact-row a {
+  color: #38bdf8;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.compact-row a:hover {
+  color: #7dd3fc;
+  text-decoration: underline;
+}
+
+/* CỘT 2 & 3: MENU LIÊN KẾT */
 .custom-footer-heading {
   color: #f8fafc;
   font-size: 14px;
   font-weight: 700;
-  margin: 0 0 14px 0;
-  letter-spacing: 0.3px;
+  margin: 0 0 16px 0;
+  letter-spacing: 0.4px;
   text-transform: uppercase;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.custom-footer-heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 28px;
+  height: 2px;
+  background: #0284c7;
+  border-radius: 2px;
 }
 
 .custom-footer-linklist {
@@ -82,62 +142,38 @@
   color: #94a3b8;
   text-decoration: none;
   font-size: 13.5px;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
+  display: inline-block;
+  line-height: 1.4;
 }
 
 .custom-footer-linklist a:hover {
   color: #ffffff;
+  transform: translateX(3px);
 }
 
-/* Contact Details */
-.contact-details {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.contact-row {
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  font-size: 13.5px;
-  color: #94a3b8;
-}
-
-.contact-label {
+/* CỘT 4: HỖ TRỢ & ZALO QR */
+.connect-desc {
+  font-size: 13px;
   color: #64748b;
-  font-size: 12px;
-  font-weight: 600;
+  margin: 0 0 14px 0;
+  line-height: 1.5;
 }
 
-.contact-row a {
-  color: #f1f5f9;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.2s ease;
-}
-
-.contact-row a:hover {
-  color: #38bdf8;
-}
-
-/* Zalo QR Code Section */
 .footer-qr-zalo {
-  margin-top: 18px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 14px;
+  padding: 12px 14px;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
   transition: all 0.25s ease;
 }
 
 .footer-qr-zalo:hover {
   background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(56, 189, 248, 0.35);
+  border-color: rgba(56, 189, 248, 0.4);
 }
 
 .qr-zalo-img-wrapper {
@@ -148,7 +184,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
 }
 
 .qr-zalo-img {
@@ -162,33 +198,82 @@
 .qr-zalo-info {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .qr-zalo-title {
   color: #f1f5f9;
   font-weight: 700;
   font-size: 13px;
-  letter-spacing: 0.2px;
 }
 
 .qr-zalo-desc {
   color: #94a3b8;
-  font-size: 11.5px;
-  line-height: 1.4;
+  font-size: 12px;
+  margin-bottom: 4px;
 }
 
-/* Bottom Bar */
+.btn-chat-zalo {
+  font-size: 12px;
+  font-weight: 700;
+  color: #38bdf8;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.btn-chat-zalo:hover {
+  color: #bae6fd;
+  text-decoration: underline;
+}
+
+/* THANH BẢN QUYỀN ĐÁY (BOTTOM BAR) */
 .custom-footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
   padding-top: 20px;
   display: flex;
+  flex-direction: column;
+  gap: 12px;
   align-items: center;
   justify-content: space-between;
+}
+
+@media (min-width: 768px) {
+  .custom-footer-bottom {
+    flex-direction: row;
+  }
 }
 
 .copyright-text {
   margin: 0;
   color: #64748b;
   font-size: 12.5px;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .copyright-text {
+    text-align: left;
+  }
+}
+
+.footer-bottom-links {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-bottom-links a {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 12.5px;
+  transition: color 0.2s ease;
+}
+
+.footer-bottom-links a:hover {
+  color: #94a3b8;
+}
+
+.footer-bottom-links .dot {
+  color: rgba(255, 255, 255, 0.15);
+  font-size: 10px;
 }

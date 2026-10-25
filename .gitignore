@@ -49,5 +49,11 @@ Thumbs.db
 
 # Temporary markdown & notes
 suadoi.md
+suadoi2.md
 *.scratch.*
+clean_images.py
+logo.jpg
+logo2.jpg
+QR_Zalo.jpg
+run_all.bat
 

@@ -39,10 +39,13 @@ async def upload_image(
     try:
         file_bytes = await file.read()
         # Upload file directly to Cloudinary folder "Acc Demo"
+        # Auto-convert to WebP and optimize quality (q_auto:good) to keep file sizes lightweight
         result = cloudinary.uploader.upload(
             file_bytes,
             folder=CLOUDINARY_FOLDER,
-            resource_type="image"
+            resource_type="image",
+            format="webp",
+            quality="auto:good"
         )
         
         secure_url = result.get("secure_url") or result.get("url")

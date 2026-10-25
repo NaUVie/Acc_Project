@@ -9,15 +9,72 @@
           <p class="admin-subtitle">Hệ thống quản trị vận hành</p>
         </div>
         <nav class="sidebar-menu">
-          <button 
-            v-for="tab in tabs" 
-            :key="tab.id"
-            class="sidebar-menu-item"
-            :class="{ active: activeTab === tab.id }"
-            @click="activeTab = tab.id"
-          >
-            <span class="menu-label">{{ tab.name }}</span>
-          </button>
+          <div class="menu-group">
+            <button 
+              class="sidebar-menu-item"
+              :class="{ active: activeTab === 'overview' }"
+              @click="activeTab = 'overview'"
+            >
+              <span class="menu-label">Tổng quan</span>
+            </button>
+          </div>
+
+          <!-- Nhóm 1: Kinh doanh & Khách hàng -->
+          <div class="accordion-group">
+            <button class="accordion-header" :class="{ 'has-active': businessTabs.some(t => t.id === activeTab) }" @click="toggleGroup('business')">
+              <span class="accordion-title">Kinh doanh & Khách</span>
+              <span class="accordion-arrow" :class="{ open: openGroups.business }">▾</span>
+            </button>
+            <div v-show="openGroups.business" class="accordion-body">
+              <button 
+                v-for="tab in businessTabs" 
+                :key="tab.id"
+                class="sidebar-menu-item sub-item"
+                :class="{ active: activeTab === tab.id }"
+                @click="activeTab = tab.id"
+              >
+                <span class="menu-label">{{ tab.name }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Nhóm 2: Đào tạo & Học thuật -->
+          <div class="accordion-group">
+            <button class="accordion-header" :class="{ 'has-active': educationTabs.some(t => t.id === activeTab) }" @click="toggleGroup('education')">
+              <span class="accordion-title">Đào tạo & Khóa học</span>
+              <span class="accordion-arrow" :class="{ open: openGroups.education }">▾</span>
+            </button>
+            <div v-show="openGroups.education" class="accordion-body">
+              <button 
+                v-for="tab in educationTabs" 
+                :key="tab.id"
+                class="sidebar-menu-item sub-item"
+                :class="{ active: activeTab === tab.id }"
+                @click="activeTab = tab.id"
+              >
+                <span class="menu-label">{{ tab.name }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Nhóm 3: Marketing & Nội dung Website -->
+          <div class="accordion-group">
+            <button class="accordion-header" :class="{ 'has-active': marketingTabs.some(t => t.id === activeTab) }" @click="toggleGroup('marketing')">
+              <span class="accordion-title">Marketing & Nội dung</span>
+              <span class="accordion-arrow" :class="{ open: openGroups.marketing }">▾</span>
+            </button>
+            <div v-show="openGroups.marketing" class="accordion-body">
+              <button 
+                v-for="tab in marketingTabs" 
+                :key="tab.id"
+                class="sidebar-menu-item sub-item"
+                :class="{ active: activeTab === tab.id }"
+                @click="activeTab = tab.id"
+              >
+                <span class="menu-label">{{ tab.name }}</span>
+              </button>
+            </div>
+          </div>
         </nav>
         <div class="sidebar-footer">
           <router-link to="/" class="btn btn-outline btn-sm w-full text-center">
@@ -61,24 +118,36 @@ const route = useRoute();
 const router = useRouter();
 const courseStore = useCourseStore();
 
-// Setup Tab navigation (Icons removed)
-const tabs = [
-  { id: 'overview', name: 'Tổng quan' },
-  { id: 'partners', name: 'Doanh nghiệp hợp tác' },
+// Tab navigation phân theo nhóm logic
+const businessTabs = [
+  { id: 'orders', name: 'Đơn hàng' },
+  { id: 'users', name: 'Học viên & Người dùng' },
+  { id: 'contacts', name: 'Liên hệ tư vấn' },
+  { id: 'coupons', name: 'Mã giảm giá' },
+  { id: 'commissions', name: 'Hoa hồng Affiliate' }
+];
+
+const educationTabs = [
+  { id: 'categories', name: 'Chuyên mục' },
+  { id: 'courses', name: 'Khóa học' },
+  { id: 'programs', name: 'Chương trình đào tạo' },
+  { id: 'bundles', name: 'Gói Combo' },
+  { id: 'lecturers', name: 'Giảng viên & Chuyên gia' }
+];
+
+const marketingTabs = [
+  { id: 'banners', name: 'Banner & Video Trang chủ' },
   { id: 'blogs', name: 'Tin tức & Bài viết' },
   { id: 'projects', name: 'Dự án Case Study' },
   { id: 'testimonials', name: 'Cảm nhận học viên' },
-  { id: 'coupons', name: 'Mã giảm giá' },
-  { id: 'commissions', name: 'Hoa hồng Affiliate' },
-  { id: 'lecturers', name: 'Giảng viên' },
-  { id: 'banners', name: 'Banner & Video Trang chủ' },
-  { id: 'categories', name: 'Chuyên mục' },
-  { id: 'courses', name: 'Khóa học' },
-  { id: 'programs', name: 'Chương trình' },
-  { id: 'bundles', name: 'Gói Combo' },
-  { id: 'orders', name: 'Đơn hàng' },
-  { id: 'users', name: 'Học viên' },
-  { id: 'contacts', name: 'Liên hệ' }
+  { id: 'partners', name: 'Doanh nghiệp hợp tác' }
+];
+
+const tabs = [
+  { id: 'overview', name: 'Tổng quan' },
+  ...businessTabs,
+  ...educationTabs,
+  ...marketingTabs
 ];
 
 const getInitialTab = () => {
@@ -94,6 +163,22 @@ const getInitialTab = () => {
 };
 
 const activeTab = ref(getInitialTab());
+
+const openGroups = ref({
+  business: businessTabs.some(t => t.id === activeTab.value),
+  education: educationTabs.some(t => t.id === activeTab.value),
+  marketing: marketingTabs.some(t => t.id === activeTab.value)
+});
+
+const toggleGroup = (group) => {
+  openGroups.value[group] = !openGroups.value[group];
+};
+
+watch(activeTab, (newTab) => {
+  if (businessTabs.some(t => t.id === newTab)) openGroups.value.business = true;
+  if (educationTabs.some(t => t.id === newTab)) openGroups.value.education = true;
+  if (marketingTabs.some(t => t.id === newTab)) openGroups.value.marketing = true;
+});
 
 watch(activeTab, (newTab) => {
   localStorage.setItem('acc_admin_active_tab', newTab);
