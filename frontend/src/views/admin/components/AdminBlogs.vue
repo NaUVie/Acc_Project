@@ -171,7 +171,9 @@
           <div style="display: flex; gap: 8px;">
             <input v-model="form.image" type="text" class="admin-input-style" placeholder="https://... hoặc URL ảnh" style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
             <input type="file" ref="imageFileRef" @change="uploadImage" style="display: none;" accept="image/*" />
-            <button type="button" @click="$refs.imageFileRef.click()" class="btn btn-secondary btn-sm">Upload</button>
+            <button type="button" @click="$refs.imageFileRef.click()" class="btn btn-secondary btn-sm" :disabled="uploadingImage">
+              {{ uploadingImage ? 'Đang tải...' : 'Upload' }}
+            </button>
           </div>
           <img v-if="form.image" :src="form.image" alt="Preview Image" style="margin-top: 8px; max-height: 120px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;" referrerpolicy="no-referrer" />
         </div>
@@ -218,6 +220,7 @@ const searchQuery = ref('');
 const currentPage = ref(1);
 const pageSize = ref(8);
 const imageFileRef = ref(null);
+const uploadingImage = ref(false);
 
 const categories = [
   'all',
@@ -317,14 +320,27 @@ const generateSlug = () => {
   }
 };
 
-const uploadImage = (e) => {
+const uploadImage = async (e) => {
   const file = e.target.files[0];
-  if (file) {
+  if (!file) return;
+
+  uploadingImage.value = true;
+  try {
+    const url = await courseStore.uploadImage(file);
+    form.value.image = url;
+    courseStore.showToast('Tải ảnh đại diện thành công!', 'success');
+  } catch (err) {
+    console.error("Upload blog image error:", err);
+    // Fallback: nếu lỗi upload server thì dùng base64
     const reader = new FileReader();
     reader.onload = (evt) => {
       form.value.image = evt.target.result;
     };
     reader.readAsDataURL(file);
+    courseStore.showToast('Không thể tải ảnh lên máy chủ, đã lưu dạng base64: ' + err.message, 'warning');
+  } finally {
+    uploadingImage.value = false;
+    e.target.value = '';
   }
 };
 

@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, Integer, BigInteger, ForeignKey, Text, DateTime, Boolean, Table, JSON
+from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from .database import Base
@@ -102,11 +103,11 @@ class BlogPost(Base):
     title = Column(String(255), nullable=False)
     handle = Column(String(100), nullable=False, unique=True, index=True)
     category = Column(String(100), nullable=False)
-    excerpt = Column(Text, nullable=True)
-    image = Column(String(255), nullable=True)
+    excerpt = Column(Text().with_variant(LONGTEXT, "mysql"), nullable=True)
+    image = Column(String(1000), nullable=True)
     date = Column(String(50), nullable=True)
     link = Column(String(255), nullable=True)
-    content = Column(Text, nullable=True)
+    content = Column(Text().with_variant(LONGTEXT, "mysql"), nullable=True)
 
 class Contact(Base):
     __tablename__ = "contacts"
@@ -252,7 +253,7 @@ class Project(Base):
     date = Column(String(100), nullable=True)
     client = Column(String(150), nullable=True)
     drive_profile = Column(String(500), nullable=True)
-    content = Column(Text, nullable=True)
+    content = Column(Text().with_variant(LONGTEXT, "mysql"), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     reviews = relationship("ProjectReview", back_populates="project", cascade="all, delete-orphan")

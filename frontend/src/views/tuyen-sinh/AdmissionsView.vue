@@ -33,7 +33,7 @@
       <div id="mba" class="program-card glass-card animate-slide-up">
         <div class="program-grid">
           <div class="program-media">
-            <img src="/images/service_card_2.webp" alt="MBA Andrews Hoa Kỳ" class="program-img" />
+            <img src="/images/andrew.jpg" alt="MBA Andrews Hoa Kỳ" class="program-img" />
             <div class="program-tag-overlay">Bằng Quốc tế Hoa Kỳ</div>
           </div>
           <div class="program-content">
@@ -116,7 +116,7 @@
       <div id="gel" class="program-card glass-card animate-slide-up">
         <div class="program-grid">
           <div class="program-media">
-            <img src="/images/service_card.webp" alt="Global Executive Leadership (GEL)" class="program-img" />
+            <img src="/images/GEL.jpg" alt="Global Executive Leadership (GEL)" class="program-img" />
             <div class="program-tag-overlay badge-gold">Lãnh đạo Cấp cao</div>
           </div>
           <div class="program-content">

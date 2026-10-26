@@ -950,9 +950,10 @@ const rawBentoCards = [
     id: 'ca-nhan',
     title: 'Đào tạo cho cá nhân',
     desc: 'Trang bị hệ thống tư duy và công cụ để mỗi cá nhân trở thành phiên bản xuất sắc nhất trong sự nghiệp của mình',
-    bgClass: 'bg-dark-blue',
+    bgClass: 'bg-dark-blue has-dark-overlay',
     contentClass: 'content-center text-white',
-    bgImage: '/images/service_card.webp',
+    bgImage: '/images/canhan.jpg',
+    bgImgClass: 'bento-bg-tint',
     link: '/courses/category/dao-tao-ca-nhan'
   },
   {
@@ -961,7 +962,7 @@ const rawBentoCards = [
     desc: 'Xây dựng năng lực thích ứng cao cho tổ chức thông qua các lộ trình đào tạo được thiết kế riêng',
     bgClass: 'bg-slate-gray',
     contentClass: 'content-top text-white',
-    mockupImage: '/images/Service_card_dfee141b-d689-4e2c-bec9-350c9f407f84.png',
+    mockupImage: '/images/inhouse.jpg',
     link: '/courses/category/dao-tao-doanh-nghiep'
   },
   {
@@ -970,7 +971,7 @@ const rawBentoCards = [
     desc: 'Thạc sĩ MBA Andrews tại Việt Nam và GEI - Hội thảo Lãnh đạo cấp cao tại Michigan, Hoa Kỳ.',
     bgClass: 'bg-slate-gray',
     contentClass: 'content-top text-white',
-    bgImage: '/images/service_card_2.webp',
+    bgImage: '/images/mba.jpg',
     bgImgClass: 'bento-bg-tint',
     link: '/tuyen-sinh'
   }

@@ -39,12 +39,12 @@
                 <h4 class="mega-program-title" :title="course.title">{{ course.title }}</h4>
                 <p class="mega-program-desc">{{ stripHtml(course.description) }}</p>
                 <div class="mega-card-footer">
-                  <div class="mega-course-price">
+                  <!-- <div class="mega-course-price">
                     <span class="current-price">{{ formatPrice(course.price) }}</span>
                     <span v-if="course.originalPrice && course.originalPrice > course.price" class="original-price">
                       {{ formatPrice(course.originalPrice) }}
                     </span>
-                  </div>
+                  </div> -->
                   <div class="btn-link-stretch">
                     <div class="arrow-stretch-box">
                       <span class="line-body"></span>

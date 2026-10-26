@@ -19,7 +19,9 @@
       <button type="button" class="toolbar-btn" @click="format('insertOrderedList')" title="Danh sách đánh số">1. Danh sách</button>
       <span class="toolbar-divider"></span>
       <button type="button" class="toolbar-btn" @click="addLink" title="Chèn đường dẫn (Link)">🔗 Link</button>
-      <button type="button" class="toolbar-btn" @click="$refs.editorImageFileRef.click()" title="Chèn hình ảnh vào nội dung">🖼️ Chèn ảnh</button>
+      <button type="button" class="toolbar-btn" @click="$refs.editorImageFileRef.click()" :disabled="isUploadingImage" title="Chèn hình ảnh vào nội dung">
+        {{ isUploadingImage ? '⏳ Đang tải...' : '🖼️ Chèn ảnh' }}
+      </button>
       <input type="file" ref="editorImageFileRef" @change="insertImage" style="display: none;" accept="image/*" />
       <span class="toolbar-divider" v-if="selectedImg"></span>
       <template v-if="selectedImg">
@@ -60,6 +62,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import { useCourseStore } from '@/stores/courses';
 
 const props = defineProps({
   modelValue: {
@@ -76,6 +79,8 @@ const emit = defineEmits(['update:modelValue']);
 
 const editorRef = ref(null);
 const editorImageFileRef = ref(null);
+const courseStore = useCourseStore();
+const isUploadingImage = ref(false);
 
 onMounted(() => {
   if (editorRef.value) {
@@ -185,9 +190,19 @@ const alignImage = (position) => {
   }
 };
 
-const insertImage = (e) => {
+const insertImage = async (e) => {
   const file = e.target.files[0];
-  if (file) {
+  if (!file) return;
+
+  isUploadingImage.value = true;
+  try {
+    const imgUrl = await courseStore.uploadImage(file);
+    document.execCommand('insertImage', false, imgUrl);
+    onInput();
+    courseStore.showToast?.('Chèn ảnh thành công!', 'success');
+  } catch (err) {
+    console.error('Upload editor image error:', err);
+    // Fallback nếu máy chủ upload gặp sự cố
     const reader = new FileReader();
     reader.onload = (evt) => {
       const imgUrl = evt.target.result;
@@ -195,6 +210,9 @@ const insertImage = (e) => {
       onInput();
     };
     reader.readAsDataURL(file);
+    courseStore.showToast?.('Không thể tải ảnh lên máy chủ, đã chèn tạm ảnh base64', 'warning');
+  } finally {
+    isUploadingImage.value = false;
     e.target.value = ''; // Reset input file
   }
 };

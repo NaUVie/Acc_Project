@@ -117,10 +117,10 @@
         <aside class="course-article-sidebar">
           <div class="sticky-register-card">
             <div class="sidebar-price-header">
-              <span class="price-label">Học phí ưu đãi</span>
+              <span class="price-label">{{ hasDiscount(course) ? 'Học phí ưu đãi' : 'Học phí' }}</span>
               <div class="price-val-row">
                 <span class="price-current">{{ formatCurrency(course.price) }}</span>
-                <span v-if="course.originalPrice || course.original_price" class="price-old">
+                <span v-if="hasDiscount(course)" class="price-old">
                   {{ formatCurrency(course.originalPrice || course.original_price) }}
                 </span>
               </div>
@@ -171,7 +171,7 @@
                     </h4>
                     <div class="sidebar-rel-price-row">
                       <span class="sidebar-rel-price">{{ formatCurrency(relCourse.price) }}</span>
-                      <span v-if="relCourse.originalPrice || relCourse.original_price" class="sidebar-rel-price-old">
+                      <span v-if="hasDiscount(relCourse)" class="sidebar-rel-price-old">
                         {{ formatCurrency(relCourse.originalPrice || relCourse.original_price) }}
                       </span>
                     </div>
@@ -219,6 +219,13 @@ const isAlreadyEnrolled = computed(() => {
 });
 const error = ref(null);
 const activeTab = ref('overview');
+
+const hasDiscount = (c) => {
+  if (!c) return false;
+  const orig = Number(c.originalPrice || c.original_price || 0);
+  const cur = Number(c.price || 0);
+  return orig > cur;
+};
 
 const formatCurrency = (val) => {
   if (!val && val !== 0) return '0đ';

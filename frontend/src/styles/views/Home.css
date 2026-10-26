@@ -862,6 +862,31 @@
   filter: brightness(0.55) contrast(1.15);
 }
 
+.bento-card.has-dark-overlay::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(2, 14, 43, 0.45) 0%, rgba(2, 14, 43, 0.65) 100%);
+  z-index: 2;
+  pointer-events: none;
+  transition: background 0.3s ease;
+}
+
+.bento-card.has-dark-overlay:hover::after {
+  background: linear-gradient(180deg, rgba(2, 14, 43, 0.35) 0%, rgba(2, 14, 43, 0.55) 100%);
+}
+
+.bento-card.has-dark-overlay .bento-card-title {
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.55);
+}
+
+.bento-card.has-dark-overlay .bento-card-desc {
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
+}
+
 
 /* High Specificity Arrow button */
 .bento-arrow-btn {

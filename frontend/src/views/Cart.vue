@@ -49,7 +49,7 @@
 
                 <div class="col-price">
                   <span class="price-current">{{ formatCurrency(item.price) }}</span>
-                  <span v-if="item.originalPrice" class="price-original">{{ formatCurrency(item.originalPrice) }}</span>
+                  <span v-if="item.originalPrice && item.originalPrice > item.price" class="price-original">{{ formatCurrency(item.originalPrice) }}</span>
                 </div>
 
                 <div class="col-quantity">

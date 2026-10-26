@@ -52,7 +52,7 @@
           <span class="price-list__sale text-on-sale">
             {{ formatPrice(course.price) }}
           </span>
-          <span v-if="course.originalPrice" class="price-list__compare text-subdued line-through">
+          <span v-if="discount > 0" class="price-list__compare text-subdued line-through">
             {{ formatPrice(course.originalPrice) }}
           </span>
         </div>
