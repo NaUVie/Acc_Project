@@ -321,7 +321,14 @@
 
         <div class="flex-between mt-6 pt-4" style="border-top: 1px solid #e2e8f0;">
           <button type="button" @click="activeView = 'list'" class="btn btn-secondary btn-sm" style="padding: 10px 24px;">Hủy bỏ</button>
-          <button type="submit" class="btn btn-primary btn-sm" style="padding: 10px 32px; font-weight: 700;">Lưu thông tin giảng viên</button>
+          <button 
+            type="submit" 
+            class="btn btn-primary btn-sm" 
+            :disabled="uploadingAvatar" 
+            style="padding: 10px 32px; font-weight: 700;"
+          >
+            {{ uploadingAvatar ? 'Đang tải ảnh...' : 'Lưu thông tin giảng viên' }}
+          </button>
         </div>
       </form>
     </div>
@@ -809,23 +816,43 @@ const uploadAvatar = async (e) => {
   try {
     const url = await courseStore.uploadImage(file);
     lecturerForm.value.avatar = url;
+    lecturerForm.value.avatarDriveLink = ''; // Clear old drive link so it doesn't conflict
     courseStore.showToast('Tải ảnh đại diện thành công!', 'success');
   } catch (err) {
     courseStore.showToast('Lỗi khi tải ảnh: ' + err.message, 'error');
   } finally {
     uploadingAvatar.value = false;
+    if (e.target) e.target.value = '';
   }
 };
 
 const saveLecturer = async () => {
+  if (uploadingAvatar.value) {
+    courseStore.showToast('Ảnh đang tải lên, vui lòng đợi trong giây lát...', 'warning');
+    return;
+  }
   try {
     if (!lecturerForm.value.id.trim()) {
       courseStore.showToast('Vui lòng nhập mã ID duy nhất!', 'warning');
       return;
     }
+
+    const cleanAvatar = (lecturerForm.value.avatar || '').trim();
+    let finalAvatar = formatImageUrl(cleanAvatar);
+    let finalDriveLink = lecturerForm.value.avatarDriveLink || '';
+
+    // If the input avatar is a Google Drive link, update avatarDriveLink
+    if (cleanAvatar.includes('drive.google.com')) {
+      finalDriveLink = cleanAvatar;
+    } else if (cleanAvatar.startsWith('http') && !cleanAvatar.includes('drive.google.com')) {
+      // Direct / Cloudinary URL: clear old drive link to prevent stale fallback
+      finalDriveLink = '';
+    }
+
     const payload = {
       ...lecturerForm.value,
-      avatar: formatImageUrl(lecturerForm.value.avatar)
+      avatar: finalAvatar,
+      avatarDriveLink: finalDriveLink
     };
     if (isEditing.value) {
       await courseStore.updateAdminLecturer(payload.id, payload);

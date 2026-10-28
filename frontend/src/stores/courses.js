@@ -1457,9 +1457,11 @@ export const useCourseStore = defineStore('courses', {
     },
 
     // Lecturers Action
-    async fetchLecturers() {
+    async fetchLecturers(force = false) {
       try {
-        const data = await this.apiRequest('/lecturers');
+        const endpoint = this.token ? '/admin/lecturers' : '/lecturers';
+        const url = force ? `${endpoint}?_t=${Date.now()}` : endpoint;
+        const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
         const { lecturersData } = await import('@/data/lecturers.js');
         if (Array.isArray(data)) {
           this.lecturers = data.map(l => {
@@ -1479,6 +1481,7 @@ export const useCourseStore = defineStore('courses', {
               majorName: l.major_name || staticItem.majorName || 'AI & Công nghệ Số',
               bioShort: l.bio_short || staticItem.bioShort || '',
               detailsHtml: l.details_html || staticItem.detailsHtml || '',
+              avatar: l.avatar || staticItem.avatar || '',
               avatarDriveLink: l.avatar_drive_link || staticItem.avatarDriveLink || '',
               driveProfile: l.drive_profile || staticItem.driveProfile || ''
             };
@@ -1496,7 +1499,7 @@ export const useCourseStore = defineStore('courses', {
       try {
         const majorIdsStr = Array.isArray(lecturer.majorIds) ? lecturer.majorIds.join(',') : (lecturer.majorIds || lecturer.majorId || '');
         const primaryMajorId = Array.isArray(lecturer.majorIds) && lecturer.majorIds.length > 0 ? lecturer.majorIds[0] : (lecturer.majorId || null);
-        await this.apiRequest('/admin/lecturers', {
+        const created = await this.apiRequest('/admin/lecturers', {
           method: 'POST',
           body: JSON.stringify({
             id: lecturer.id,
@@ -1516,7 +1519,8 @@ export const useCourseStore = defineStore('courses', {
             is_featured: lecturer.is_featured || false
           })
         });
-        await this.fetchLecturers();
+        await this.fetchLecturers(true);
+        return created;
       } catch (err) {
         console.error("Failed to add lecturer:", err);
         throw err;
@@ -1527,14 +1531,14 @@ export const useCourseStore = defineStore('courses', {
       try {
         const majorIdsStr = Array.isArray(lecturer.majorIds) ? lecturer.majorIds.join(',') : (lecturer.majorIds || lecturer.majorId || '');
         const primaryMajorId = Array.isArray(lecturer.majorIds) && lecturer.majorIds.length > 0 ? lecturer.majorIds[0] : (lecturer.majorId || null);
-        await this.apiRequest(`/admin/lecturers/${id}`, {
+        const updated = await this.apiRequest(`/admin/lecturers/${id}`, {
           method: 'PUT',
           body: JSON.stringify({
             name: lecturer.name,
             title: lecturer.title,
             tagline: lecturer.tagline,
             avatar: lecturer.avatar,
-            avatar_drive_link: lecturer.avatarDriveLink,
+            avatar_drive_link: lecturer.avatarDriveLink || '',
             drive_profile: lecturer.driveProfile,
             bio_short: lecturer.bioShort,
             details_html: lecturer.detailsHtml,
@@ -1546,7 +1550,26 @@ export const useCourseStore = defineStore('courses', {
             is_featured: lecturer.is_featured
           })
         });
-        await this.fetchLecturers();
+
+        // Directly update in local state so UI reflects change immediately
+        if (updated) {
+          const index = this.lecturers.findIndex(l => l.id === id);
+          if (index !== -1) {
+            const mIds = updated.major_ids ? updated.major_ids.split(',').map(s => s.trim()).filter(Boolean) : (updated.major_id ? [updated.major_id] : []);
+            this.lecturers[index] = {
+              ...this.lecturers[index],
+              ...updated,
+              majorIds: mIds,
+              majorId: mIds[0] || updated.major_id,
+              majorName: updated.major_name,
+              avatar: updated.avatar,
+              avatarDriveLink: updated.avatar_drive_link || ''
+            };
+          }
+        }
+
+        await this.fetchLecturers(true);
+        return updated;
       } catch (err) {
         console.error("Failed to update lecturer:", err);
         throw err;

@@ -173,7 +173,7 @@
     </div>
 
     <!-- 4. Partner Logos Section -->
-    <section class="partner-logos-section" v-show="partnerLogos.length > 0">
+    <section class="partner-logos-section" v-show="partnerLogos.length > 0 && isPartnersReady">
       <div class="partner-logos-header container">
         <h3 class="partner-logos-title">130+ doanh nghiệp hàng đầu đã hợp tác</h3>
       </div>
@@ -192,7 +192,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" />
             </component>
           </div>
         </div>
@@ -210,7 +210,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" />
             </component>
             <component
               :is="logo.link ? 'a' : 'div'"
@@ -222,7 +222,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" />
             </component>
           </div>
         </div>
@@ -240,7 +240,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="lazy" referrerpolicy="no-referrer" />
+              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" />
             </component>
           </div>
         </div>
@@ -756,22 +756,7 @@ const formatPrice = (value) => {
   return value;
 };
 
-// 3. Partner Logo Stagger Reveal
-const partnerRevealActive = ref(false);
-const setupPartnerObserver = () => {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        partnerRevealActive.value = true;
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.05 });
-
-  const target = document.querySelector('.partner-logos-section');
-  if (target) observer.observe(target);
-};
-
+// 3. Partner Logos Setup & Preloading
 const partnerLogos = computed(() => {
   return courseStore.partners || [];
 });
@@ -788,8 +773,72 @@ const partnerMarqueeList = computed(() => {
   return partnerLogos.value.filter(p => !p.row_type || p.row_type === 'marquee');
 });
 
+const isPartnersReady = ref(false);
 
+const preloadImage = (src) => {
+  return new Promise((resolve) => {
+    if (!src) return resolve();
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = src;
+  });
+};
 
+const preloadPartnerLogos = async (partners) => {
+  if (!partners || partners.length === 0) {
+    isPartnersReady.value = true;
+    return;
+  }
+
+  // Preload priority images first (top fixed, bottom fixed, and first 10 marquee images)
+  const topImages = partners.filter(p => p.row_type === 'top_fixed').slice(0, 6).map(p => p.src);
+  const marqueeFirstImages = partners.filter(p => !p.row_type || p.row_type === 'marquee').slice(0, 10).map(p => p.src);
+  const bottomImages = partners.filter(p => p.row_type === 'bottom_fixed').slice(0, 6).map(p => p.src);
+
+  const initialImagesToLoad = [...new Set([...topImages, ...marqueeFirstImages, ...bottomImages])].filter(Boolean);
+
+  if (initialImagesToLoad.length === 0) {
+    isPartnersReady.value = true;
+    return;
+  }
+
+  // Wait for initial images to load (with a max timeout of 1200ms so slow networks don't get stuck)
+  const preloadPromise = Promise.all(initialImagesToLoad.map(preloadImage));
+  const timeoutPromise = new Promise(resolve => setTimeout(resolve, 1200));
+
+  await Promise.race([preloadPromise, timeoutPromise]);
+  isPartnersReady.value = true;
+
+  // Background preload the remaining marquee images so they are ready before they scroll in
+  const remainingImages = partners.map(p => p.src).filter(src => src && !initialImagesToLoad.includes(src));
+  remainingImages.forEach(src => {
+    const img = new Image();
+    img.src = src;
+  });
+};
+
+watch(partnerLogos, (newPartners) => {
+  if (newPartners && newPartners.length > 0 && !isPartnersReady.value) {
+    preloadPartnerLogos(newPartners);
+  }
+}, { immediate: true });
+
+// Partner Logo Reveal Observer
+const partnerRevealActive = ref(false);
+const setupPartnerObserver = () => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        partnerRevealActive.value = true;
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.05 });
+
+  const target = document.querySelector('.partner-logos-section');
+  if (target) observer.observe(target);
+};
 
 // Bento Grid Cards Data with F5 Rotation
 const rawBentoCards = [
