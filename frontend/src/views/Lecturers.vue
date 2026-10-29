@@ -59,8 +59,8 @@
                   <span class="stat-pill">🏫 {{ l.totalSessions || 150 }}+ buổi</span>
                 </div> -->
 
-                <p class="mega-program-desc">{{ l.bioShort }}</p>
-                <div class="mega-card-footer">
+                <p class="mega-program-desc" style="white-space: pre-line;">{{ l.bioShort }}</p>
+                <div class="mega-card-footer" v-if="l.show_detail_btn || l.showDetailBtn">
                   <router-link :to="'/giang-vien/' + l.id" class="mega-enroll-btn">Xem chi tiết giới thiệu &rarr;</router-link>
                 </div>
               </div>

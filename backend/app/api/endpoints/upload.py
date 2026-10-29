@@ -1,6 +1,9 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, status, Query
+from fastapi import APIRouter, UploadFile, File, HTTPException, status, Query, Depends
 from fastapi.responses import Response
+from pydantic import BaseModel
+from typing import Optional
 import urllib.request
+import urllib.parse
 import re
 import cloudinary
 import cloudinary.uploader
@@ -22,7 +25,6 @@ cloudinary.config(
 )
 
 from ... import auth, models
-from fastapi import Depends
 
 @router.get("/proxy-image")
 async def proxy_image(url: str = Query(..., description="URL của ảnh cần tải qua proxy")):
@@ -119,3 +121,47 @@ async def upload_image(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Lỗi khi tải ảnh lên Cloudinary: {str(e)}"
         )
+
+
+class DeleteImageRequest(BaseModel):
+    url: Optional[str] = None
+    public_id: Optional[str] = None
+
+
+@router.post("/delete-image")
+async def delete_image(
+    req: DeleteImageRequest,
+    current_user: models.User = Depends(auth.get_current_user)
+):
+    """
+    Safely delete an old image from Cloudinary.
+    Accepts either full URL or public_id.
+    Validates that the file belongs to Cloudinary before attempting deletion.
+    """
+    public_id = req.public_id
+    
+    if not public_id and req.url:
+        clean_url = req.url.strip()
+        # Only process if it is indeed a Cloudinary URL
+        if "cloudinary.com" in clean_url:
+            # Extract public_id matching /image/upload/(v.../)?(folder/name).(ext)
+            m = re.search(r'/image/upload/(?:v\d+/)?(.+?)(?:\.[a-zA-Z0-9]+)?$', clean_url)
+            if m:
+                public_id = urllib.parse.unquote(m.group(1))
+    
+    if not public_id:
+        # Not a Cloudinary image (e.g. Google Drive link, local asset, or empty)
+        return {"success": True, "message": "Không phải ảnh Cloudinary, bỏ qua.", "deleted": False}
+    
+    try:
+        res = cloudinary.uploader.destroy(public_id, resource_type="image")
+        result_status = res.get("result")
+        return {
+            "success": True,
+            "public_id": public_id,
+            "result": result_status,
+            "deleted": result_status == "ok"
+        }
+    except Exception as e:
+        print(f"Warning: Cloudinary delete failed for {public_id}: {str(e)}")
+        return {"success": False, "error": str(e), "public_id": public_id}

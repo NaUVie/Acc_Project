@@ -55,8 +55,15 @@
       <!-- Detail Article Section -->
       <article class="lecturer-article-body">
         <h2 class="section-title">Giới thiệu chi tiết</h2>
-        <p class="bio-lead">{{ lecturer.bioShort }}</p>
-        <div class="content-rich" v-html="lecturer.detailsHtml"></div>
+        <div v-if="lecturer.bioShort" class="bio-lead">{{ lecturer.bioShort }}</div>
+        <div 
+          v-if="lecturer.detailsHtml" 
+          class="content-rich" 
+          v-html="formatLecturerDetails(lecturer.detailsHtml)"
+        ></div>
+        <div v-else-if="!lecturer.bioShort" class="content-rich" style="color: #94a3b8; font-style: italic;">
+          Nội dung giới thiệu chi tiết của giảng viên đang được cập nhật...
+        </div>
 
         <!-- Sticky / Bottom Callout Button -->
         <div class="drive-bottom-box" v-if="lecturer.driveProfile">
@@ -197,6 +204,16 @@ const cardsToShow = computed(() => {
 const maxIndex = computed(() => {
   return Math.max(0, otherLecturers.value.length - cardsToShow.value);
 });
+
+const formatLecturerDetails = (content) => {
+  if (!content) return '';
+  // Nếu đã chứa thẻ HTML (p, div, br, h1-h6, img, ul, ol...), giữ nguyên
+  if (/<(?:p|div|br|h[1-6]|img|ul|ol|li|table|blockquote|span|b|strong|i|em)[>\s]/i.test(content)) {
+    return content;
+  }
+  // Nếu là văn bản thuần có xuống dòng: tự động chuyển \n thành <br>
+  return content.replace(/\r\n/g, '<br>').replace(/\n/g, '<br>');
+};
 
 const prevSlide = () => {
   if (currentIndex.value > 0) {
@@ -371,33 +388,70 @@ watch(() => route.params.id, () => {
 
 .bio-lead {
   font-size: 17px;
-  line-height: 1.7;
+  line-height: 1.8;
   color: #334155;
   font-weight: 500;
   margin-bottom: 24px;
+  white-space: pre-line;
 }
 
 .content-rich {
   font-size: 16px;
   line-height: 1.8;
-  color: #475569;
+  color: #334155;
+  word-break: break-word;
 }
 
+.content-rich p,
+.content-rich div,
+.content-rich span {
+  text-indent: 0 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+.content-rich p {
+  margin-bottom: 18px;
+  line-height: 1.8;
+}
+
+.content-rich img {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 12px;
+  margin: 20px auto;
+  display: block;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.content-rich h2,
+.content-rich h3,
 .content-rich h4 {
-  font-size: 18px;
   font-weight: 700;
   color: #0f172a;
-  margin-top: 24px;
-  margin-bottom: 12px;
+  margin-top: 28px;
+  margin-bottom: 14px;
 }
 
-.content-rich ul {
-  padding-left: 24px;
+.content-rich ul,
+.content-rich ol {
+  padding-left: 28px;
   margin-bottom: 24px;
 }
 
 .content-rich li {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+
+.content-rich blockquote {
+  border-left: 4px solid #0284c7;
+  padding: 14px 20px;
+  margin: 24px 0;
+  background: #f8fafc;
+  border-radius: 0 10px 10px 0;
+  color: #334155;
+  font-style: italic;
 }
 
 .drive-bottom-box {

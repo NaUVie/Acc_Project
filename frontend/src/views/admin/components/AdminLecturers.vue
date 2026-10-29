@@ -69,6 +69,7 @@
               <th style="max-width: 200px;">Chức danh / Vị trí</th>
               <th style="max-width: 220px;">Chuyên ngành</th>
               <th style="width: 105px; text-align: center;">Trang chủ</th>
+              <th style="width: 110px; text-align: center;">Nút chi tiết</th>
               <th style="width: 90px; text-align: center;">Hành động</th>
             </tr>
           </thead>
@@ -166,15 +167,36 @@
                 </button>
               </td>
               <td style="text-align: center;">
+                <button 
+                  type="button" 
+                  @click="toggleShowDetail(l)" 
+                  class="btn btn-xs" 
+                  :style="{
+                    background: (l.show_detail_btn || l.showDetailBtn) ? '#ecfdf5' : '#f8fafc',
+                    color: (l.show_detail_btn || l.showDetailBtn) ? '#059669' : '#94a3b8',
+                    border: (l.show_detail_btn || l.showDetailBtn) ? '1px solid #a7f3d0' : '1px solid #cbd5e1',
+                    borderRadius: '20px',
+                    padding: '3px 10px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    whiteSpace: 'nowrap'
+                  }"
+                  :title="(l.show_detail_btn || l.showDetailBtn) ? 'Đang BẬT nút xem chi tiết ở danh sách giảng viên' : 'Đang TẮT nút xem chi tiết (mặc định)'"
+                >
+                  {{ (l.show_detail_btn || l.showDetailBtn) ? '👁️ Hiện nút' : '🚫 Ẩn nút' }}
+                </button>
+              </td>
+              <td style="text-align: center;">
                 <div class="action-buttons" style="justify-content: center; gap: 6px;">
-                  <button @click="openCropper(l.avatar || l.avatar_drive_link, async (url) => { await courseStore.updateLecturer(l.id, { avatar: url, avatar_drive_link: '' }); l.avatar = url; courseStore.showToast('Đã cắt và cập nhật ảnh giảng viên!', 'success'); }, 'square', '✂ Cắt Avatar Giảng Viên: ' + l.name)" class="btn-action edit" title="Cắt lại Avatar (1:1)" style="color: #0284c7;">✂️</button>
+                  <button @click="openCropper(l.avatar || l.avatar_drive_link, async (url) => { await courseStore.updateAdminLecturer(l.id, { ...l, avatar: url, avatar_drive_link: '' }); l.avatar = url; l.avatar_drive_link = ''; courseStore.showToast('Đã cắt và cập nhật ảnh giảng viên!', 'success'); }, 'square', '✂ Cắt Avatar Giảng Viên: ' + l.name)" class="btn-action edit" title="Cắt lại Avatar (1:1)" style="color: #0284c7;">✂️</button>
                   <button @click="editLecturer(l)" class="btn-action edit" title="Sửa thông tin">✏️</button>
                   <button @click="deleteLecturer(l)" class="btn-action delete" title="Xóa">🗑️</button>
                 </div>
               </td>
             </tr>
             <tr v-if="filteredLecturers.length === 0">
-              <td colspan="7" class="text-center py-8 text-muted">Không tìm thấy giảng viên nào.</td>
+              <td colspan="8" class="text-center py-8 text-muted">Không tìm thấy giảng viên nào.</td>
             </tr>
           </tbody>
         </table>
@@ -268,9 +290,28 @@
           <label for="is_featured_chk" style="color: #1e293b; font-weight: 600; cursor: pointer; margin: 0;">Hiển thị nổi bật ngoài Trang chủ (Tối đa 4 người)</label>
         </div>
 
+        <div class="form-group mt-3" style="display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" id="show_detail_btn_chk" v-model="lecturerForm.show_detail_btn" style="width: 18px; height: 18px; cursor: pointer;" />
+          <label for="show_detail_btn_chk" style="color: #1e293b; font-weight: 600; cursor: pointer; margin: 0;">👁️ Hiển thị nút "Xem chi tiết giới thiệu" ở thẻ Giảng viên (Mặc định tắt)</label>
+        </div>
+
         <div class="form-group mt-3">
           <label style="color: #1e293b; font-weight: 600;">Giới thiệu tóm tắt (Bio Short)</label>
-          <textarea v-model="lecturerForm.bioShort" rows="3" class="admin-input-style" placeholder="Đoạn mô tả tóm tắt quá trình công tác, thành tựu..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
+          <textarea v-model="lecturerForm.bioShort" rows="3" class="admin-input-style" placeholder="Đoạn mô tả ngắn tóm tắt quá trình công tác, thành tựu..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
+        </div>
+
+        <!-- Detailed Content Editor (Rich Text) -->
+        <div class="form-group mt-4 p-4" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+            <label style="color: #0f172a; font-weight: 700; font-size: 14.5px; margin: 0;">
+              📝 Nội dung Giới thiệu chi tiết (Soạn thảo văn bản, Chèn ảnh, Xuống hàng, Định dạng)
+            </label>
+            <span style="font-size: 12px; color: #64748b;">Hỗ trợ chèn ảnh, đề mục H2/H3, in đậm, danh sách...</span>
+          </div>
+          <RichTextEditor 
+            v-model="lecturerForm.detailsHtml" 
+            placeholder="Nhập nội dung chi tiết về quá trình công tác, thành tựu, hình ảnh hoạt động đào tạo của giảng viên (nội dung này sẽ hiển thị ở trang Chi tiết Giảng viên)..." 
+          />
         </div>
 
         <!-- Position Settings -->
@@ -456,6 +497,7 @@ import { slugify } from '@/utils/slugify';
 import { formatImageUrl } from '@/utils/imageHelper';
 import Pagination from '@/components/Pagination.vue';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
+import RichTextEditor from '@/components/RichTextEditor.vue';
 
 const courseStore = useCourseStore();
 
@@ -465,6 +507,7 @@ const cropTargetUrl = ref('');
 const cropAspectRatio = ref('square');
 const cropModalTitle = ref('✂ Cắt & Căn Chỉnh Avatar Giảng Viên');
 let cropTargetCallback = null;
+const pendingDeleteImages = ref([]);
 
 const openCropper = (url, callback, ratio = 'square', title = '✂ Cắt & Căn Chỉnh Avatar Giảng Viên') => {
   if (!url) return;
@@ -478,6 +521,12 @@ const openCropper = (url, callback, ratio = 'square', title = '✂ Cắt & Căn 
 const onFileSelectForCrop = (event, callback, ratio = 'square', title = '✂ Cắt & Căn Chỉnh Avatar Giảng Viên') => {
   const file = event.target?.files?.[0];
   if (!file) return;
+  // Khi đổi ảnh mới hoàn toàn từ máy: đưa ảnh cũ vào hàng đợi chờ lưu thành công mới xóa
+  if (isEditing.value && lecturerForm.value.avatar && lecturerForm.value.avatar.includes('cloudinary.com')) {
+    if (!pendingDeleteImages.value.includes(lecturerForm.value.avatar)) {
+      pendingDeleteImages.value.push(lecturerForm.value.avatar);
+    }
+  }
   const reader = new FileReader();
   reader.onload = (e) => {
     openCropper(e.target.result, callback, ratio, title);
@@ -717,6 +766,18 @@ const toggleFeatured = async (l) => {
   }
 };
 
+const toggleShowDetail = async (l) => {
+  const currentVal = !!(l.show_detail_btn || l.showDetailBtn);
+  const newVal = !currentVal;
+  try {
+    await courseStore.updateAdminLecturer(l.id, { ...l, show_detail_btn: newVal });
+    l.show_detail_btn = newVal;
+    courseStore.showToast(newVal ? `Đã BẬT nút "Xem chi tiết" cho giảng viên ${l.name}!` : `Đã ẨN nút "Xem chi tiết" của ${l.name}.`, 'info');
+  } catch (err) {
+    courseStore.showToast(err.message || 'Không thể thay đổi trạng thái nút chi tiết.', 'error');
+  }
+};
+
 const searchQuery = ref('');
 const selectedMajorFilter = ref('all');
 const currentPage = ref(1);
@@ -790,7 +851,8 @@ const lecturerForm = ref({
   majorIds: [],
   position: 0,
   major_positions: {},
-  is_featured: false
+  is_featured: false,
+  show_detail_btn: false
 });
 
 const onNameInput = () => {
@@ -808,6 +870,7 @@ onMounted(async () => {
 
 const openAddLecturerModal = () => {
   isEditing.value = false;
+  pendingDeleteImages.value = [];
   lecturerForm.value = {
     id: '',
     name: '',
@@ -822,13 +885,15 @@ const openAddLecturerModal = () => {
     majorIds: lecturerMajors.value.length > 0 ? [lecturerMajors.value[0].id] : [],
     position: (lecturers.value.length || 0) + 1,
     major_positions: {},
-    is_featured: false
+    is_featured: false,
+    show_detail_btn: false
   };
   activeView.value = 'form';
 };
 
 const editLecturer = (l) => {
   isEditing.value = true;
+  pendingDeleteImages.value = [];
   const initialMajorIds = l.majorIds && l.majorIds.length > 0 ? [...l.majorIds] : (l.majorId ? [l.majorId] : []);
   lecturerForm.value = {
     id: l.id,
@@ -838,13 +903,14 @@ const editLecturer = (l) => {
     avatar: l.avatar || l.avatar_drive_link || '/images/default-avatar.jpg',
     avatarDriveLink: l.avatar_drive_link || '',
     driveProfile: l.drive_profile || '',
-    bioShort: l.bio_short || '',
-    detailsHtml: l.details_html || '',
+    bioShort: l.bio_short || l.bioShort || '',
+    detailsHtml: l.details_html || l.detailsHtml || '',
     majorId: l.majorId || '',
     majorIds: initialMajorIds,
     position: l.position ?? 1,
     major_positions: l.major_positions ? { ...l.major_positions } : {},
-    is_featured: l.is_featured || false
+    is_featured: l.is_featured || false,
+    show_detail_btn: !!(l.show_detail_btn ?? l.showDetailBtn ?? false)
   };
   activeView.value = 'form';
 };
@@ -855,6 +921,12 @@ const uploadAvatar = async (e) => {
   uploadingAvatar.value = true;
   try {
     const url = await courseStore.uploadImage(file);
+    // Nếu đổi ảnh mới: đưa ảnh cũ vào hàng đợi xóa
+    if (isEditing.value && lecturerForm.value.avatar && lecturerForm.value.avatar.includes('cloudinary.com')) {
+      if (!pendingDeleteImages.value.includes(lecturerForm.value.avatar)) {
+        pendingDeleteImages.value.push(lecturerForm.value.avatar);
+      }
+    }
     lecturerForm.value.avatar = url;
     lecturerForm.value.avatarDriveLink = ''; // Clear old drive link so it doesn't conflict
     courseStore.showToast('Tải ảnh đại diện thành công!', 'success');
@@ -892,7 +964,9 @@ const saveLecturer = async () => {
     const payload = {
       ...lecturerForm.value,
       avatar: finalAvatar,
-      avatarDriveLink: finalDriveLink
+      avatarDriveLink: finalDriveLink,
+      detailsHtml: lecturerForm.value.detailsHtml || '',
+      show_detail_btn: !!lecturerForm.value.show_detail_btn
     };
     if (isEditing.value) {
       await courseStore.updateAdminLecturer(payload.id, payload);
@@ -905,6 +979,15 @@ const saveLecturer = async () => {
       await courseStore.addAdminLecturer(payload);
       courseStore.showToast('Thêm giảng viên mới thành công!', 'success');
     }
+
+    // Chỉ sau khi lưu DB thành công mới xóa các ảnh cũ trong hàng đợi
+    if (pendingDeleteImages.value.length > 0) {
+      for (const oldImg of pendingDeleteImages.value) {
+        courseStore.deleteImage(oldImg);
+      }
+      pendingDeleteImages.value = [];
+    }
+
     activeView.value = 'list';
   } catch (err) {
     courseStore.showToast(err.message || 'Không thể lưu giảng viên.', 'error');
@@ -923,6 +1006,10 @@ const deleteLecturer = async (l) => {
   if (isConfirmed) {
     try {
       await courseStore.deleteAdminLecturer(l.id);
+      // Xóa ảnh đại diện trên Cloudinary nếu có
+      if (l.avatar && l.avatar.includes('cloudinary.com')) {
+        courseStore.deleteImage(l.avatar);
+      }
       courseStore.showToast(`Đã xóa giảng viên "${l.name}" thành công.`, 'success');
     } catch (err) {
       courseStore.showToast(err.message || 'Không thể xóa giảng viên.', 'error');

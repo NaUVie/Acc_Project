@@ -215,6 +215,7 @@ class LecturerBase(BaseModel):
     position: Optional[int] = 0
     major_positions: Optional[dict] = None
     is_featured: Optional[bool] = False
+    show_detail_btn: Optional[bool] = False
 
 class LecturerCreate(LecturerBase):
     pass
@@ -234,6 +235,7 @@ class LecturerUpdate(BaseModel):
     position: Optional[int] = None
     major_positions: Optional[dict] = None
     is_featured: Optional[bool] = None
+    show_detail_btn: Optional[bool] = None
 
 class LecturerResponse(LecturerBase):
     created_at: Optional[datetime] = None
