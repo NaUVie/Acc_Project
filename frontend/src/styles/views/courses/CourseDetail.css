@@ -212,6 +212,21 @@
   font-size: 16px;
   line-height: 1.8;
   color: #334155;
+  word-break: break-word;
+}
+
+.rich-article-html :deep(p),
+.rich-article-html :deep(div),
+.rich-article-html :deep(span),
+.rich-article-html :deep(h1),
+.rich-article-html :deep(h2),
+.rich-article-html :deep(h3),
+.rich-article-html :deep(h4),
+.rich-article-html :deep(h5),
+.rich-article-html :deep(h6) {
+  text-indent: 0 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
 
 .rich-article-html :deep(h2) {

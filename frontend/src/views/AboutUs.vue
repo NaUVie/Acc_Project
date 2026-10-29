@@ -148,9 +148,9 @@
         <div class="functions-open-grid">
           <div class="function-item reveal-on-scroll" style="--reveal-delay: 0.1s;">
             <span class="func-tag">CHỨC NĂNG #1</span>
-            <h3 class="func-title">ĐÀO TẠO INHOUSE</h3>
+            <h3 class="func-title">ĐÀO TẠO </h3>
             <p class="func-desc">
-              Chương trình Inhouse và các Khóa đào tạo cá nhân — chuyển hóa kiến thức quốc tế thành hành vi và hiệu suất trong tổ chức của bạn.
+              Chương trình đào tạo inhouse may đo cho Doanh nghiệp và các Khóa đào tạo cá nhân.
             </p>
           </div>
 
@@ -158,7 +158,7 @@
             <span class="func-tag alt">CHỨC NĂNG #2</span>
             <h3 class="func-title">TUYỂN SINH ĐẠI HỌC ANDREWS</h3>
             <p class="func-desc">
-              Thạc sĩ MBA Andrews tại Việt Nam và GEI — Hội thảo Lãnh đạo cấp cao tại Michigan, Hoa Kỳ. ACC là đại diện đặc quyền tại Việt Nam.
+              Thạc sĩ MBA Andrews tại Việt Nam và GEI — Hội thảo Lãnh đạo cấp cao tại Michigan, Hoa Kỳ.
             </p>
           </div>
         </div>
@@ -181,7 +181,7 @@
 
           <div class="andrews-item reveal-on-scroll" style="--reveal-delay: 0.2s;">
             <div class="card-num">02</div>
-            <h3>Đại diện duy nhất tại Việt Nam</h3>
+            <h3>Đại diện tại Việt Nam</h3>
             <p>Toàn bộ quy trình tuyển sinh, học bổng và đồng hành học viên đi qua một đầu mối thống nhất tại ACC.</p>
           </div>
 
@@ -271,7 +271,7 @@ const boardMembers = [
   {
     name: 'Ông Ngô Trí Thủy',
     mainRole: 'Tổng Giám đốc Công ty CP Kết Nối Tri Thức ACC',
-    avatar: 'https://lh3.googleusercontent.com/d/1THDFH6imcOJYzXJIi6yqddowOsmGGwwQ',
+    avatar: '/images/VeChungToi/NgoTriThuy.webp',
     bioList: [
       'Thành viên sáng lập - Phó Chủ tịch HĐQT Imap Logistics',
       'Thành viên sáng lập – Thành viên HĐQT Icom Trading',

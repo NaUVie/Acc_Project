@@ -54,6 +54,7 @@
       contenteditable="true"
       @input="onInput"
       @blur="onBlur"
+      @paste="onPaste"
       @click="onEditorClick"
       :placeholder="placeholder"
     ></div>
@@ -126,6 +127,63 @@ const addLink = () => {
   const url = prompt('Nhập đường dẫn URL:');
   if (url) {
     document.execCommand('createLink', false, url);
+    onInput();
+  }
+};
+
+const onPaste = (e) => {
+  e.preventDefault();
+  const clipboardData = e.clipboardData || window.clipboardData;
+  if (!clipboardData) return;
+
+  const html = clipboardData.getData('text/html');
+  const text = clipboardData.getData('text/plain');
+
+  if (html) {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      // Loại bỏ các thẻ rác từ Word / Office
+      const removeElements = doc.querySelectorAll('o\\:p, xml, style, meta, link, script');
+      removeElements.forEach(el => el.remove());
+
+      // Loại bỏ triệt để các thuộc tính làm thụt lề dòng hoặc làm cách khoảng bên trái
+      const allElements = doc.body.querySelectorAll('*');
+      allElements.forEach(el => {
+        const styleAttr = el.getAttribute('style');
+        if (styleAttr) {
+          const cleanedStyle = styleAttr
+            .replace(/mso-[^;]+;?/gi, '')
+            .replace(/text-indent\s*:[^;]+;?/gi, '')
+            .replace(/margin-left\s*:[^;]+;?/gi, '')
+            .replace(/padding-left\s*:[^;]+;?/gi, '')
+            .replace(/tab-stops\s*:[^;]+;?/gi, '')
+            .replace(/font-family\s*:[^;]+;?/gi, '')
+            .trim();
+          if (cleanedStyle) {
+            el.setAttribute('style', cleanedStyle);
+          } else {
+            el.removeAttribute('style');
+          }
+        }
+      });
+
+      const cleanHtml = doc.body.innerHTML;
+      document.execCommand('insertHTML', false, cleanHtml);
+      onInput();
+      return;
+    } catch (err) {
+      console.warn('HTML sanitize error, falling back to text paste:', err);
+    }
+  }
+
+  if (text) {
+    const formatted = text
+      .split('\n')
+      .map(line => line.trim())
+      .join('<br>');
+    document.execCommand('insertHTML', false, formatted);
     onInput();
   }
 };
@@ -283,6 +341,43 @@ const insertImage = async (e) => {
   font-size: 14px;
   line-height: 1.6;
   outline: none;
+  word-break: break-word;
+}
+
+/* Triệt tiêu thụt lề khi nhảy xuống dòng hoặc dán văn bản */
+.rich-editor-content :deep(p),
+.rich-editor-content :deep(div),
+.rich-editor-content :deep(span),
+.rich-editor-content :deep(h1),
+.rich-editor-content :deep(h2),
+.rich-editor-content :deep(h3),
+.rich-editor-content :deep(h4),
+.rich-editor-content :deep(h5),
+.rich-editor-content :deep(h6) {
+  text-indent: 0 !important;
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}
+
+.rich-editor-content :deep(p),
+.rich-editor-content :deep(div) {
+  margin-top: 0;
+  margin-bottom: 0.75em;
+  line-height: 1.6;
+}
+
+.rich-editor-content :deep(ul),
+.rich-editor-content :deep(ol) {
+  margin: 0.75em 0;
+  padding-left: 24px !important;
+  list-style-position: outside;
+}
+
+.rich-editor-content :deep(li) {
+  text-indent: 0 !important;
+  margin-left: 0 !important;
+  padding-left: 4px !important;
+  margin-bottom: 4px;
 }
 
 .rich-editor-content[placeholder]:empty:before {

@@ -62,7 +62,7 @@
         <!-- Contact Form -->
         <div class="form-container">
           <form class="contact-form" @submit.prevent="submitForm">
-            <h2 class="form-title">Nhận tư vấn từ chuyên gia ACC</h2>
+            <h2 class="form-title">Nhận tư vấn </h2>
             <p class="form-desc">Vui lòng điền thông tin và lựa chọn dịch vụ quan tâm bên dưới.</p>
 
             <div class="form-row">
@@ -168,26 +168,26 @@ const formData = ref({
 });
 
 // Map main categories to dynamic sub options
-const subCategoryMap = {
-  postgraduate: [
-    'Thạc sĩ quản trị kinh doanh tổng hợp',
-    'Thạc sĩ quản trị kinh doanh chuyên ngành tài chính',
-    'Global Executive Institute',
-    'Mini MBA'
-  ],
-  corporate: [
-    'Đào tạo AI INHOUSE cho Doanh nghiệp',
-    'Quản trị & Bảo mật Dữ liệu Doanh nghiệp',
-    'Xây dựng Khung năng lực & Phát triển Nhân sự',
-    'Năng lực Lãnh đạo & Kỹ năng mềm Doanh nghiệp'
-  ],
-  individual: [
-    'Khóa học AI dành cho CEO & Lãnh đạo Doanh nghiệp',
-    'AI ứng dụng trong Kế toán - Tài chính - MKT',
-    'Kỹ năng Cốt lõi & Nghiệp vụ Trọng tài viên',
-    'Quản trị & Bảo vệ Dữ liệu Cá nhân'
-  ]
-};
+// const subCategoryMap = {
+//   postgraduate: [
+//     'Thạc sĩ quản trị kinh doanh tổng hợp',
+//     'Thạc sĩ quản trị kinh doanh chuyên ngành tài chính',
+//     'Global Executive Institute',
+//     'Mini MBA'
+//   ],
+//   corporate: [
+//     'Đào tạo AI INHOUSE cho Doanh nghiệp',
+//     'Quản trị & Bảo mật Dữ liệu Doanh nghiệp',
+//     'Xây dựng Khung năng lực & Phát triển Nhân sự',
+//     'Năng lực Lãnh đạo & Kỹ năng mềm Doanh nghiệp'
+//   ],
+//   // individual: [
+//   //   'Khóa học AI dành cho CEO & Lãnh đạo Doanh nghiệp',
+//   //   'AI ứng dụng trong Kế toán - Tài chính - MKT',
+//   //   'Kỹ năng Cốt lõi & Nghiệp vụ Trọng tài viên',
+//   //   'Quản trị & Bảo vệ Dữ liệu Cá nhân'
+//   // ]
+// };
 
 const currentSubOptions = computed(() => {
   if (!formData.value.serviceCategory) return [];
@@ -201,7 +201,7 @@ const onCategoryChange = () => {
 const contactInfo = computed(() => {
   const s = courseStore.contactSettings;
   return {
-    address: s?.address || '156 Nam Kỳ Khởi Nghĩa, Quận 1, TP. Hồ Chí Minh',
+    address: s?.address || '156 Nam Kỳ Khởi Nghĩa, Phường Sài Gòn, TP.HCM',
     hotline: s?.hotline || '0938 566 700',
     email: s?.email || 'info@acc-edu.vn'
   };

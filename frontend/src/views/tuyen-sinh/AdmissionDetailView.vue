@@ -12,7 +12,7 @@
         <h1 class="hero-title">{{ program.title }}</h1>
         <p class="hero-subtitle">{{ program.subtitle }}</p>
 
-        <div class="article-meta-row">
+        <!-- <div class="article-meta-row">
           <div class="meta-author">
             <div>
               <div class="author-name">Hội đồng Tuyển sinh ACC Academy & Đại học Andrews</div>
@@ -22,16 +22,16 @@
           <router-link :to="`/contact?program=${program.id}`" class="btn btn-consult">
             Đăng ký tư vấn ngay &rarr;
           </router-link>
-        </div>
+        </div> -->
       </div>
     </section>
 
     <!-- Main Content Container -->
     <div class="container article-layout">
       <main class="article-main-body glass-card">
-        <!-- <div class="cover-image-box">
+        <div class="cover-image-box">
           <img :src="program.image" :alt="program.title" class="cover-img" />
-        </div> -->
+        </div>
 
         <!-- Article Sections -->
         <div class="content-sections">
@@ -118,7 +118,7 @@ const programsData = {
     title: 'MBA Andrews Hoa Kỳ: Học quản trị theo chuẩn Mỹ, phát triển sự nghiệp tại Việt Nam',
     category: 'BẰNG QUỐC TẾ HOA KỲ',
     subtitle: 'Bạn muốn nâng cao năng lực quản trị, mở rộng tư duy kinh doanh và sẵn sàng cho bước tiến mới trong sự nghiệp? Chương trình Thạc sĩ Quản trị Kinh doanh (MBA) của Đại học Andrews, Hoa Kỳ mang đến cơ hội học tập chương trình quốc tế ngay tại Việt Nam.',
-    image: '/images/service_card_2.webp',
+    image: '/images/andrew.jpg',
     officialLink: 'https://andrews.edu.vn/',
     meta: {
       target: 'Chủ doanh nghiệp, Quản lý cấp cao & C-Level',
@@ -146,7 +146,7 @@ const programsData = {
     title: 'Chương trình Mini MBA Practical – Quản trị Tinh gọn Thực chiến',
     category: 'QUẢN TRỊ TINH GỌN',
     subtitle: 'Cô đọng tinh hoa quản trị MBA trong 3-6 tháng dành cho Quản lý cấp trung và Chủ doanh nghiệp SMEs.',
-    image: '/images/Service_card_2.png',
+    image: '/images/mba.jpg',
     meta: {
       target: 'Quản lý phòng ban, Giám đốc chức năng & SMEs',
       duration: '3 - 6 tháng',
@@ -166,24 +166,24 @@ const programsData = {
   },
   'gei': {
     id: 'gei',
-    title: 'Viện Lãnh đạo Toàn cầu GEI (GOLBAL EXECUTIVE INSTITUTE)',
+    title: 'Global Executive Institute (GEI): Chương trình phát triển năng lực lãnh đạo trong thời đại AI',
     category: 'LÃNH ĐẠO TOÀN CẦU',
-    subtitle: 'Chương trình Huấn luyện Lãnh đạo Cấp cao & Study Tour Quốc tế tại Michigan (Hoa Kỳ).',
-    image: '/images/service_card.webp',
+    subtitle: 'Trong bối cảnh trí tuệ nhân tạo đang tác động sâu rộng đến hoạt động của doanh nghiệp và cơ quan công quyền, nhà lãnh đạo cần nhiều hơn khả năng tiếp cận công nghệ. Họ cần biết cách kết nối AI với chiến lược tổ chức, đánh giá cơ hội và rủi ro, đồng thời dẫn dắt quá trình đổi mới theo hướng tạo ra giá trị bền vững.',
+    image: '/images/GEL.jpg',
     meta: {
-      target: 'Chủ tịch, CEO, Tổng giám đốc Tập đoàn',
-      duration: 'Theo khóa & Study Tour 10 ngày',
-      format: 'Hội thảo & Trải nghiệm thực tế tại Mỹ',
-      degree: 'Chứng nhận Lãnh đạo Toàn cầu từ LEADMAN & Andrews'
+      target: 'Lãnh đạo doanh nghiệp & Khu vực công',
+      duration: 'Linh hoạt theo chuyên đề & Thực tế',
+      format: 'Đào tạo, Hội thảo & Tham quan thực tế',
+      degree: 'Chứng nhận AUCORE – Đại học Andrews (Hoa Kỳ)'
     },
     sections: [
       {
-        heading: '1. Định vị Chương trình GEI',
-        content: '<p>GEI được thiết kế dành riêng cho các nhà lãnh đạo kiệt xuất hướng tới mục tiêu vươn tầm thế giới. Chương trình kết hợp giữa các buổi hội thảo cấp cao và chuyến đi khảo sát thực địa tại các tập đoàn Fortune 500 tại Mỹ.</p>'
+        heading: '1. Giới thiệu về Global Executive Institute (GEI)',
+        content: '<p>Global Executive Institute (GEI) là chương trình lãnh đạo cấp cao thuộc AUCORE – Trung tâm Năng lực Tổ chức và Xuất sắc của Đại học Andrews, Hoa Kỳ.</p><p>Chương trình dành cho lãnh đạo doanh nghiệp và khu vực công, tập trung vào các lĩnh vực như phát triển bền vững, ESG, chuyển đổi số, trí tuệ nhân tạo và năng lực tài chính. Thông qua đào tạo, nghiên cứu và hợp tác, GEI hướng đến việc trang bị cho người học tư duy và năng lực cần thiết để điều hành tổ chức trong môi trường kinh doanh biến đổi nhanh chóng.</p>'
       },
       {
-        heading: '2. Đặc quyền Học viên GEI',
-        content: '<p>Kết nối trực tiếp với hội đồng cố vấn quốc tế, mở rộng quan hệ đối tác chiến lược và trải nghiệm môi trường học thuật hàng đầu tại Đại học Andrews (Michigan, USA).</p>'
+        heading: '2. Kết nối kiến thức với thực tiễn quản trị',
+        content: '<p>GEI không giới hạn việc học trong lớp học. Các hoạt động tham quan thực tế để tìm hiểu các mô hình vận hành trong những lĩnh vực khác nhau mở ra cơ hội quan sát trực tiếp các bài toán quản trị liên quan đến hiệu quả hoạt động, sử dụng nguồn lực, đầu tư, phát triển nhân lực và tính bền vững. Qua đó, người học có thể liên hệ các nội dung được thảo luận với bối cảnh tổ chức và ngành nghề của mình.</p><p>Chương trình cũng tạo không gian trao đổi giữa các nhà lãnh đạo đến từ nhiều lĩnh vực. Việc chia sẻ kinh nghiệm và góc nhìn giúp học viên mở rộng cách tiếp cận trước những thách thức chung, đồng thời xem xét khả năng vận dụng kiến thức vào thực tế điều hành.</p><p>Với sự kết hợp giữa nền tảng học thuật, nội dung quản trị và trải nghiệm thực tế, Global Executive Institute hướng đến việc giúp các nhà lãnh đạo hiểu rõ hơn tiềm năng của công nghệ mới, đưa ra quyết định có cơ sở và dẫn dắt đổi mới gắn với mục tiêu của tổ chức.</p>'
       }
     ]
   }
@@ -339,25 +339,40 @@ onMounted(() => {
   line-height: 1.75;
 }
 
-.section-text p {
+:deep(.section-text p) {
   margin-bottom: 12px;
+  line-height: 1.75;
 }
 
-.section-text p:last-child {
+:deep(.section-text p:last-child) {
   margin-bottom: 0;
 }
 
-.section-text ul {
-  padding-left: 22px;
-  margin: 12px 0 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  list-style-type: disc;
+:deep(.section-text ul) {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 14px 0 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
 }
 
-.section-text li {
-  line-height: 1.7;
+:deep(.section-text li) {
+  position: relative !important;
+  padding-left: 24px !important;
+  line-height: 1.75 !important;
+  color: #334155 !important;
+}
+
+:deep(.section-text li::before) {
+  content: "•";
+  position: absolute;
+  left: 6px;
+  top: -2px;
+  color: #022B9F;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.5;
 }
 
 .article-cta-box {
