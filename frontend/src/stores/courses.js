@@ -1483,7 +1483,8 @@ export const useCourseStore = defineStore('courses', {
               detailsHtml: l.details_html || staticItem.detailsHtml || '',
               avatar: l.avatar || staticItem.avatar || '',
               avatarDriveLink: l.avatar_drive_link || staticItem.avatarDriveLink || '',
-              driveProfile: l.drive_profile || staticItem.driveProfile || ''
+              driveProfile: l.drive_profile || staticItem.driveProfile || '',
+              show_detail_btn: l.show_detail_btn !== undefined ? !!l.show_detail_btn : (staticItem.show_detail_btn ?? false)
             };
           });
         } else {
@@ -1516,7 +1517,8 @@ export const useCourseStore = defineStore('courses', {
             major_name: lecturer.majorName || null,
             position: lecturer.position !== undefined ? Number(lecturer.position) : 0,
             major_positions: lecturer.major_positions || {},
-            is_featured: lecturer.is_featured || false
+            is_featured: lecturer.is_featured || false,
+            show_detail_btn: !!lecturer.show_detail_btn
           })
         });
         await this.fetchLecturers(true);
@@ -1547,7 +1549,8 @@ export const useCourseStore = defineStore('courses', {
             major_name: lecturer.majorName || null,
             position: lecturer.position !== undefined ? Number(lecturer.position) : undefined,
             major_positions: lecturer.major_positions !== undefined ? lecturer.major_positions : undefined,
-            is_featured: lecturer.is_featured
+            is_featured: lecturer.is_featured,
+            show_detail_btn: lecturer.show_detail_btn !== undefined ? !!lecturer.show_detail_btn : undefined
           })
         });
 
@@ -1563,7 +1566,8 @@ export const useCourseStore = defineStore('courses', {
               majorId: mIds[0] || updated.major_id,
               majorName: updated.major_name,
               avatar: updated.avatar,
-              avatarDriveLink: updated.avatar_drive_link || ''
+              avatarDriveLink: updated.avatar_drive_link || '',
+              show_detail_btn: !!updated.show_detail_btn
             };
           }
         }
@@ -1803,6 +1807,28 @@ export const useCourseStore = defineStore('courses', {
       
       const data = await res.json();
       return data.url;
+    },
+
+    async deleteImage(urlOrPublicId) {
+      if (!urlOrPublicId || typeof urlOrPublicId !== 'string') return;
+      const cleanTarget = urlOrPublicId.trim();
+      // Only send if it's a Cloudinary URL or has public_id folder
+      if (!cleanTarget.includes('cloudinary.com') && !cleanTarget.startsWith('Acc Demo/')) {
+        return;
+      }
+      try {
+        const headers = { 'Content-Type': 'application/json' };
+        if (this.token) {
+          headers['Authorization'] = `Bearer ${this.token}`;
+        }
+        await fetch(`${API_BASE}/upload/delete-image`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ url: cleanTarget })
+        });
+      } catch (err) {
+        console.warn('Delete image warning:', err);
+      }
     },
 
     // --- Engagement Actions (Reviews, Notes, Wishlist) ---

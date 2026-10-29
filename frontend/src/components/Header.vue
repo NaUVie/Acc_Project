@@ -55,7 +55,7 @@
               <div class="dropdown-desc">Chương trình Thạc sĩ Quản trị Kinh doanh hàng đầu Hoa Kỳ tại Việt Nam</div>
             </a>
             <a href="https://alumni.andrews.edu.vn/" target="_blank" rel="noopener noreferrer" class="dropdown-item">
-              <div class="dropdown-title">Viện Khoa học Lãnh đạo và Quản trị doanh nghiệp – LEADMAN</div>
+              <div class="dropdown-title"> VIỆN KHOA HỌC LÃNH ĐẠO VÀ QUẢN TRỊ DOANH NGHIỆP - LEADMAN</div>
               <div class="dropdown-desc">Mạng lưới kết nối lãnh đạo và cựu học viên Andrews</div>
             </a>
           </div>
@@ -253,7 +253,7 @@
           </div>
           <div class="mobile-nav-links" v-show="activeMobileSection === 'trusted-partners'">
             <a href="https://andrews.edu.vn/" target="_blank" rel="noopener noreferrer" @click="closeMobileMenu">MBA ĐẠI HỌC ANDREWS, HOA KỲ</a>
-            <a href="https://alumni.andrews.edu.vn/" target="_blank" rel="noopener noreferrer" @click="closeMobileMenu">Viện Khoa học Lãnh đạo và Quản trị doanh nghiệp – LEADMAN</a>
+            <a href="https://alumni.andrews.edu.vn/" target="_blank" rel="noopener noreferrer" @click="closeMobileMenu">VIỆN KHOA HỌC LÃNH ĐẠO VÀ QUẢN TRỊ DOANH NGHIỆP - LEADMAN</a>
           </div>
         </div>
 
@@ -539,7 +539,7 @@ const drawerItems = computed(() => {
     case 'trusted-partners':
       return [
         { title: 'MBA ĐẠI HỌC ANDREWS, HOA KỲ', externalLink: 'https://andrews.edu.vn/' },
-        { title: 'Viện Khoa học Lãnh đạo và Quản trị doanh nghiệp – LEADMAN', externalLink: 'https://alumni.andrews.edu.vn/' }
+        { title: 'VIỆN KHOA HỌC LÃNH ĐẠO VÀ QUẢN TRỊ DOANH NGHIỆP - LEADMAN', externalLink: 'https://alumni.andrews.edu.vn/' }
       ];
     case 'post-graduate':
       return [
