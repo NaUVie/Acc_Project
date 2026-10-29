@@ -259,6 +259,8 @@
   font-size: 16px;
   line-height: 1.65;
   color: var(--text-secondary);
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .eco-counter-box {
@@ -389,7 +391,7 @@
 
 .stats-header {
   text-align: center;
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto 56px auto;
   display: flex;
   flex-direction: column;
@@ -401,11 +403,13 @@
   font-weight: 800;
   line-height: 1.3;
   color: #101828;
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
   .stats-title {
     font-size: 24px;
+    white-space: normal;
   }
 }
 
@@ -413,6 +417,17 @@
   font-size: 16px;
   line-height: 1.6;
   color: var(--text-secondary);
+}
+
+.stats-subtitle .stats-line-1,
+.stats-subtitle .stats-line-2 {
+  display: block;
+}
+
+@media (min-width: 900px) {
+  .stats-subtitle .stats-line-1 {
+    white-space: nowrap;
+  }
 }
 
 .stats-grid {
@@ -619,29 +634,33 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 28px;
+  padding: 10px 18px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
 .partner-logo-card:hover {
   border-color: #022b9f;
   box-shadow: 0 12px 28px rgba(2, 43, 159, 0.16);
-  transform: translateY(-4px) scale(1.02);
+  transform: translateY(-4px);
 }
 
 .partner-logo-img {
+  width: 100%;
+  height: 100%;
   max-width: 100%;
-  max-height: 82px;
+  max-height: 88px;
   object-fit: contain;
-  filter: grayscale(10%);
-  opacity: 0.95;
-  transition: all 0.25s ease;
+  object-position: center;
+  filter: none;
+  opacity: 1;
+  transform: scale(var(--logo-scale, 1));
+  transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .partner-logo-card:hover .partner-logo-img {
-  filter: grayscale(0%);
-  opacity: 1;
+  transform: scale(calc(var(--logo-scale, 1) * 1.05));
 }
 
 /* 5. Bento Grid Section */
@@ -652,7 +671,7 @@
 
 .bento-header {
   text-align: center;
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto 56px auto;
   display: flex;
   flex-direction: column;
@@ -663,11 +682,13 @@
   font-size: 36px;
   font-weight: 800;
   color: #101828;
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
   .bento-title {
     font-size: 28px;
+    white-space: normal;
   }
 }
 
@@ -675,6 +696,17 @@
   font-size: 16px;
   line-height: 1.6;
   color: var(--text-secondary);
+}
+
+.bento-subtitle .bento-line-1,
+.bento-subtitle .bento-line-2 {
+  display: block;
+}
+
+@media (min-width: 900px) {
+  .bento-subtitle .bento-line-1 {
+    white-space: nowrap;
+  }
 }
 
 .bento-grid-container {

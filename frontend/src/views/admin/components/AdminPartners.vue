@@ -110,7 +110,7 @@
               </td>
               <td>
                 <div style="width: 110px; height: 50px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 4px;">
-                  <img :src="p.src" :alt="p.name" style="max-width: 100%; max-height: 100%; object-fit: contain;" referrerpolicy="no-referrer" />
+                  <img :src="formatImageUrl(p.src)" :alt="p.name" @error="handleLogoError" style="max-width: 100%; max-height: 100%; object-fit: contain;" referrerpolicy="no-referrer" />
                 </div>
               </td>
               <td>
@@ -144,6 +144,7 @@
               </td>
               <td>
                 <div class="action-buttons">
+                  <button @click="openCropper(p.src, async (url) => { await courseStore.updatePartner(p.id, { src: url }); p.src = url; courseStore.showToast('Đã cắt và cập nhật logo đối tác!', 'success'); }, 'partner', '✂ Cắt Logo Đối Tác: ' + p.name)" class="btn-action edit" title="Cắt lại logo" style="color: #0284c7;">✂️</button>
                   <button @click="editPartner(p)" class="btn-action edit" title="Sửa Đối tác">✏️</button>
                   <button @click="deletePartnerItem(p.id)" class="btn-action delete" title="Xóa Đối tác">🗑️</button>
                 </div>
@@ -252,13 +253,14 @@
                 placeholder="https://... hoặc /images/..." 
                 style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" 
               />
-              <input type="file" ref="logoFileRef" @change="uploadLogo" style="display: none;" accept="image/*" />
+              <input type="file" ref="logoFileRef" @change="onFileSelectForCrop($event, (url) => { form.src = url; }, 'partner', '✂ Cắt & Căn Chỉnh Logo Đối Tác')" style="display: none;" accept="image/*" />
               <button type="button" @click="$refs.logoFileRef.click()" class="btn btn-secondary btn-sm" :disabled="uploadingLogo">
                 {{ uploadingLogo ? 'Đang tải...' : 'Upload Logo' }}
               </button>
             </div>
-            <div v-if="form.src" style="margin-top: 10px; display: inline-block; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
-              <img :src="form.src" alt="Logo Preview" style="max-height: 70px; max-width: 180px; object-fit: contain;" referrerpolicy="no-referrer" />
+            <div v-if="form.src" style="margin-top: 10px; display: flex; align-items: center; gap: 12px; padding: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
+              <img :src="formatImageUrl(form.src)" alt="Logo Preview" @error="handleLogoError" style="max-height: 60px; max-width: 160px; object-fit: contain;" referrerpolicy="no-referrer" />
+              <button type="button" class="btn btn-sm btn-secondary" style="font-size: 12px; font-weight: 600; color: #0284c7; border-color: #bae6fd;" @click="openCropper(form.src, (url) => { form.src = url; }, 'partner', '✂ Cắt & Căn Chỉnh Logo Đối Tác')">✂ Cắt lại logo</button>
             </div>
           </div>
 
@@ -305,14 +307,69 @@
         </div>
       </form>
     </div>
+    <!-- Image Cropper Modal -->
+    <ImageCropperModal :isOpen="isCropperOpen" :imageUrl="cropTargetUrl" :aspectRatio="cropAspectRatio" :title="cropModalTitle" @close="isCropperOpen = false" @cropped="handleCroppedImage" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import { formatImageUrl } from '@/utils/imageHelper';
+import ImageCropperModal from '@/components/ImageCropperModal.vue';
 
 const courseStore = useCourseStore();
+
+const handleLogoError = (e) => {
+  const img = e.target;
+  if (!img || img.dataset.retried) return;
+  img.dataset.retried = 'true';
+  const m = img.src.match(/(?:d\/|[?&]id=)([a-zA-Z0-9_-]+)/);
+  if (m && m[1]) {
+    const fileId = m[1];
+    if (img.src.includes('lh3.googleusercontent.com')) {
+      img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+    } else {
+      img.src = `https://lh3.googleusercontent.com/d/${fileId}=s400`;
+    }
+  }
+};
+
+
+// Cropper States
+const isCropperOpen = ref(false);
+const cropTargetUrl = ref('');
+const cropAspectRatio = ref('partner');
+const cropModalTitle = ref('✂ Cắt & Căn Chỉnh Logo Đối Tác');
+let cropTargetCallback = null;
+
+const openCropper = (url, callback, ratio = 'partner', title = '✂ Cắt & Căn Chỉnh Logo Đối Tác') => {
+  if (!url) return;
+  cropTargetUrl.value = url;
+  cropAspectRatio.value = ratio;
+  cropModalTitle.value = title;
+  cropTargetCallback = callback;
+  isCropperOpen.value = true;
+};
+
+const onFileSelectForCrop = (event, callback, ratio = 'partner', title = '✂ Cắt & Căn Chỉnh Logo Đối Tác') => {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    openCropper(e.target.result, callback, ratio, title);
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+};
+
+const handleCroppedImage = async (newUrl) => {
+  isCropperOpen.value = false;
+  if (cropTargetCallback) {
+    await cropTargetCallback(newUrl);
+  }
+};
+
 
 const activeView = ref('list');
 const isEditing = ref(false);

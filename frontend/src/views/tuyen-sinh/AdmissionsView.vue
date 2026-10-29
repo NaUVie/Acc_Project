@@ -5,10 +5,12 @@
       <div class="container hero-container">
 
         <h1 class="hero-title animate-fade-in">
-          Nâng tầm Lãnh đạo & Khai phá <span class="gradient-text">Tiềm năng Quản trị</span>
+          Nâng tầm Lãnh đạo <br />
+          & Khai phá <span class="gradient-text">Tiềm năng Quản trị</span>
         </h1>
         <p class="hero-subtitle animate-fade-in">
-          Tổng hợp các chương trình đào tạo Thạc sĩ Quản trị Kinh doanh và Đào tạo Lãnh đạo cấp cao Quốc tế hợp tác cùng Đại học Andrews (Hoa Kỳ).
+          Tổng hợp các chương trình đào tạo Thạc sĩ Quản trị Kinh doanh và Đào tạo Lãnh đạo cấp cao Quốc tế<br />
+          hợp tác cùng Đại học Andrews (Hoa Kỳ).
         </p>
 
         <!-- Quick Jump Pills -->
@@ -19,8 +21,8 @@
           <!-- <button @click="scrollToSection('mini-mba')" class="jump-pill">
             ⚡ Mini MBA
           </button> -->
-          <button @click="scrollToSection('gel')" class="jump-pill">
-          GEL (Global Executive Leadership)
+          <button @click="scrollToSection('gei')" class="jump-pill">
+          GEI (GOLBAL EXECUTIVE INSTITUTE)
           </button>
         </div>
       </div>
@@ -112,16 +114,16 @@
         </div>
       </div> -->
 
-      <!-- Program 3: GEL (Global Executive Leadership) -->
-      <div id="gel" class="program-card glass-card animate-slide-up">
+      <!-- Program 3: GEI (GOLBAL EXECUTIVE INSTITUTE) -->
+      <div id="gei" class="program-card glass-card animate-slide-up">
         <div class="program-grid">
           <div class="program-media">
-            <img src="/images/GEL.jpg" alt="Global Executive Leadership (GEL)" class="program-img" />
+            <img src="/images/GEL.jpg" alt="GOLBAL EXECUTIVE INSTITUTE (GEI)" class="program-img" />
             <div class="program-tag-overlay badge-gold">Lãnh đạo Cấp cao</div>
           </div>
           <div class="program-content">
             <span class="program-category">VIỆN LÃNH ĐẠO TOÀN CẦU</span>
-            <h2 class="program-title">GEL (Global Executive Leadership)</h2>
+            <h2 class="program-title">GEI (GOLBAL EXECUTIVE INSTITUTE)</h2>
             <p class="program-desc">
               Chương trình Đào tạo Lãnh đạo Cấp cao và Study Tour quốc tế tại Michigan (Hoa Kỳ). 
               Thiết kế dành riêng cho Lãnh đạo Tổng công ty, Tập đoàn và Doanh nghiệp lớn 
@@ -141,10 +143,10 @@
             </div>
 
             <div class="program-footer">
-              <router-link to="/tuyen-sinh/detail/gel" class="btn btn-primary">
-                Xem chi tiết bài viết GEL &rarr;
+              <router-link to="/tuyen-sinh/detail/gei" class="btn btn-primary">
+                Xem chi tiết bài viết GEI &rarr;
               </router-link>
-              <router-link to="/contact?program=gel" class="btn btn-outline">
+              <router-link to="/contact?program=gei" class="btn btn-outline">
                 Đăng ký tư vấn tuyển sinh
               </router-link>
             </div>
@@ -182,7 +184,7 @@ onMounted(() => {
 .admissions-hero {
   text-align: center;
   padding: 40px 20px 60px;
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
 }
 

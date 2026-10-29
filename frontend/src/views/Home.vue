@@ -143,7 +143,10 @@
         <div class="container">
           <div class="stats-header">
             <h2 class="stats-title">Năng lực & Giá trị thực tiễn</h2>
-            <p class="stats-subtitle">Mỗi chương trình đào tạo và tư vấn của ACC Academy được thiết kế dựa trên nhu cầu thực tế, hướng đến khả năng ứng dụng ngay và tạo ra giá trị bền vững cho cá nhân, doanh nghiệp và tổ chức.</p>
+            <p class="stats-subtitle">
+              <span class="stats-line-1">Mỗi chương trình đào tạo và tư vấn của ACC Academy được thiết kế dựa trên nhu cầu thực tế,</span>
+              <span class="stats-line-2">hướng đến khả năng ứng dụng ngay và tạo ra giá trị bền vững cho cá nhân, doanh nghiệp và tổ chức.</span>
+            </p>
           </div>
 
           <div class="stats-grid">
@@ -192,7 +195,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" />
+              <img :src="formatImageUrl(logo.src, 's400')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
             </component>
           </div>
         </div>
@@ -210,7 +213,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" />
+              <img :src="formatImageUrl(logo.src, 's400')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
             </component>
             <component
               :is="logo.link ? 'a' : 'div'"
@@ -222,7 +225,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" />
+              <img :src="formatImageUrl(logo.src, 's400')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
             </component>
           </div>
         </div>
@@ -240,7 +243,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="logo.src" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" />
+              <img :src="formatImageUrl(logo.src, 's400')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
             </component>
           </div>
         </div>
@@ -253,9 +256,10 @@
         <div class="bento-header">
           <h2 class="bento-title">Năng lực cốt lõi của ACC Academy</h2>
           <p class="bento-subtitle">
-            ACC — Học viện Cổ phần Kết nối Tri thức — là đơn vị giáo dục chuyên biệt dành cho cá nhân và doanh nghiệp, được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ).<br />
+            <span class="bento-line-1">ACC — Học viện Cổ phần Kết nối Tri thức — là đơn vị giáo dục chuyên biệt dành cho cá nhân và doanh nghiệp,</span>
+            <span class="bento-line-2">được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ).</span><br />
             <strong>Chúng tôi không bán khóa học.</strong><br />
-            Chúng tôi kiến tạo năng lực có thể đo lường, đi cùng tổ chức của bạn đến kết quả thực
+            Chúng tôi kiến tạo năng lực có thể đo lường, đi cùng tổ chức của bạn đến kết quả thực.
           </p>
         </div>
 
@@ -775,13 +779,43 @@ const partnerMarqueeList = computed(() => {
 
 const isPartnersReady = ref(false);
 
+const handleLogoError = (e) => {
+  const img = e.target;
+  if (!img || img.dataset.retried) return;
+  img.dataset.retried = 'true';
+  const m = img.src.match(/(?:d\/|[?&]id=)([a-zA-Z0-9_-]+)/);
+  if (m && m[1]) {
+    const fileId = m[1];
+    if (img.src.includes('lh3.googleusercontent.com')) {
+      img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+    } else {
+      img.src = `https://lh3.googleusercontent.com/d/${fileId}=s400`;
+    }
+  }
+};
+
+const handleLogoLoad = (e) => {
+  const img = e.target;
+  if (!img || !img.naturalWidth || !img.naturalHeight) return;
+  const ratio = img.naturalWidth / img.naturalHeight;
+  // If logo is square or vertical (ratio < 1.35), scale up to balance visual area with wide horizontal logos
+  if (ratio < 1.35) {
+    img.style.setProperty('--logo-scale', '1.2');
+  } else if (ratio < 1.85) {
+    img.style.setProperty('--logo-scale', '1.1');
+  } else {
+    img.style.setProperty('--logo-scale', '1');
+  }
+};
+
 const preloadImage = (src) => {
   return new Promise((resolve) => {
     if (!src) return resolve();
     const img = new Image();
+    img.referrerPolicy = 'no-referrer';
     img.onload = () => resolve();
     img.onerror = () => resolve();
-    img.src = src;
+    img.src = formatImageUrl(src, 's400');
   });
 };
 
@@ -1007,6 +1041,32 @@ const contactForm = ref({
   message: ''
 });
 
+const MODAL_STORAGE_KEY = 'acc_home_consult_modal_date';
+let modalTimer = null;
+
+const checkAndShowContactModal = () => {
+  try {
+    const today = new Date().toDateString();
+    const lastShownDate = localStorage.getItem(MODAL_STORAGE_KEY);
+    if (lastShownDate === today) {
+      return;
+    }
+
+    modalTimer = setTimeout(() => {
+      isContactModalOpen.value = true;
+      try {
+        localStorage.setItem(MODAL_STORAGE_KEY, today);
+      } catch (e) {
+        // Ignore localStorage error if storage is restricted
+      }
+    }, 600);
+  } catch (err) {
+    modalTimer = setTimeout(() => {
+      isContactModalOpen.value = true;
+    }, 600);
+  }
+};
+
 const closeContactModal = () => {
   isContactModalOpen.value = false;
 };
@@ -1057,10 +1117,8 @@ onMounted(() => {
   setupCountersObserver();
   setupPartnerObserver();
 
-  // Auto pop-up consultation modal on mount (with short delay for smooth entrance)
-  setTimeout(() => {
-    isContactModalOpen.value = true;
-  }, 600);
+  // Auto pop-up consultation modal (at most once per day)
+  checkAndShowContactModal();
 
   if (courseStore.courses.length === 0) {
     courseStore.fetchCourses();
@@ -1075,6 +1133,9 @@ onMounted(() => {
 
 onUnmounted(() => {
   stopHeroAutoplay();
+  if (modalTimer) {
+    clearTimeout(modalTimer);
+  }
 });
 </script>
 

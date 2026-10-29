@@ -167,6 +167,7 @@
               </td>
               <td style="text-align: center;">
                 <div class="action-buttons" style="justify-content: center; gap: 6px;">
+                  <button @click="openCropper(l.avatar || l.avatar_drive_link, async (url) => { await courseStore.updateLecturer(l.id, { avatar: url, avatar_drive_link: '' }); l.avatar = url; courseStore.showToast('Đã cắt và cập nhật ảnh giảng viên!', 'success'); }, 'square', '✂ Cắt Avatar Giảng Viên: ' + l.name)" class="btn-action edit" title="Cắt lại Avatar (1:1)" style="color: #0284c7;">✂️</button>
                   <button @click="editLecturer(l)" class="btn-action edit" title="Sửa thông tin">✏️</button>
                   <button @click="deleteLecturer(l)" class="btn-action delete" title="Xóa">🗑️</button>
                 </div>
@@ -245,14 +246,15 @@
             <input v-model="lecturerForm.avatar" type="text" required class="admin-input-style" placeholder="/images/default-avatar.jpg hoặc URL Cloudinary" style="flex: 1; min-width: 240px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
             <label class="btn btn-primary btn-sm" style="padding: 10px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600;">
               <span>Tải ảnh từ máy</span>
-              <input type="file" accept="image/*" @change="uploadAvatar" style="display: none;" />
+              <input type="file" accept="image/*" @change="onFileSelectForCrop($event, (url) => { lecturerForm.avatar = url; lecturerForm.avatarDriveLink = ''; }, 'square', '✂ Cắt Avatar Giảng Viên (1:1)')" style="display: none;" />
             </label>
           </div>
           <div v-if="uploadingAvatar" style="font-size: 12px; color: #0284c7; margin-top: 4px; font-weight: 600;">
             Đang tải ảnh lên Cloudinary...
           </div>
-          <div v-if="lecturerForm.avatar" class="mt-2">
-            <img :src="formatImageUrl(lecturerForm.avatar)" alt="Preview" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7;" />
+          <div v-if="lecturerForm.avatar" class="mt-2" style="display: flex; align-items: center; gap: 12px;">
+            <img :src="formatImageUrl(lecturerForm.avatar)" alt="Preview" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7;" />
+            <button type="button" class="btn btn-sm btn-secondary" style="font-size: 12px; font-weight: 600; color: #0284c7; border-color: #bae6fd;" @click="openCropper(lecturerForm.avatar, (url) => { lecturerForm.avatar = url; lecturerForm.avatarDriveLink = ''; }, 'square', '✂ Cắt Avatar Giảng Viên (1:1)')">✂ Cắt lại ảnh</button>
           </div>
         </div>
 
@@ -442,6 +444,8 @@
         </div>
       </div>
     </div>
+    <!-- Image Cropper Modal -->
+    <ImageCropperModal :isOpen="isCropperOpen" :imageUrl="cropTargetUrl" :aspectRatio="cropAspectRatio" :title="cropModalTitle" @close="isCropperOpen = false" @cropped="handleCroppedImage" />
   </div>
 </template>
 
@@ -451,8 +455,44 @@ import { useCourseStore } from '@/stores/courses';
 import { slugify } from '@/utils/slugify';
 import { formatImageUrl } from '@/utils/imageHelper';
 import Pagination from '@/components/Pagination.vue';
+import ImageCropperModal from '@/components/ImageCropperModal.vue';
 
 const courseStore = useCourseStore();
+
+// Cropper States
+const isCropperOpen = ref(false);
+const cropTargetUrl = ref('');
+const cropAspectRatio = ref('square');
+const cropModalTitle = ref('✂ Cắt & Căn Chỉnh Avatar Giảng Viên');
+let cropTargetCallback = null;
+
+const openCropper = (url, callback, ratio = 'square', title = '✂ Cắt & Căn Chỉnh Avatar Giảng Viên') => {
+  if (!url) return;
+  cropTargetUrl.value = url;
+  cropAspectRatio.value = ratio;
+  cropModalTitle.value = title;
+  cropTargetCallback = callback;
+  isCropperOpen.value = true;
+};
+
+const onFileSelectForCrop = (event, callback, ratio = 'square', title = '✂ Cắt & Căn Chỉnh Avatar Giảng Viên') => {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    openCropper(e.target.result, callback, ratio, title);
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+};
+
+const handleCroppedImage = async (newUrl) => {
+  isCropperOpen.value = false;
+  if (cropTargetCallback) {
+    await cropTargetCallback(newUrl);
+  }
+};
+
 
 const isReorderMode = ref(false);
 

@@ -58,6 +58,7 @@
               </td>
               <td>
                 <div class="action-buttons">
+                  <button @click="openCropper(c.image, async (url) => { await courseStore.updateCourse(c.id, { image: url }); c.image = url; courseStore.showToast('Đã cắt và cập nhật ảnh khóa học!', 'success'); }, 'square', '✂ Cắt Thumbnail Khóa Học: ' + c.title)" class="btn-action edit" title="Cắt lại Thumbnail (1:1)" style="color: #0284c7;">✂️</button>
                   <button @click="openCurriculumModal(c)" class="btn-action edit" title="Quản lý giáo trình & bài giảng">📚</button>
                   <button @click="editCourseDetails(c)" class="btn-action edit" title="Sửa thông tin">✏️</button>
                   <button @click="deleteCourse(c.id)" class="btn-action delete" title="Xóa">🗑️</button>
@@ -132,14 +133,15 @@
               <input v-model="courseForm.image" type="text" required class="admin-input-style" placeholder="/images/default.jpg hoặc URL Cloudinary" style="flex: 1; min-width: 200px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
               <label class="btn btn-primary btn-sm" style="padding: 10px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600;">
                 <span>Tải ảnh</span>
-                <input type="file" accept="image/*" @change="uploadCourseImage" style="display: none;" />
+                <input type="file" accept="image/*" @change="onFileSelectForCrop($event, (url) => { courseForm.image = url; }, 'square', '✂ Cắt Thumbnail Khóa Học (1:1)')" style="display: none;" />
               </label>
             </div>
             <div v-if="uploadingCourseImage" style="font-size: 12px; color: #0284c7; margin-top: 4px; font-weight: 600;">
               Đang tải ảnh thumbnail lên Cloudinary...
             </div>
-            <div v-if="courseForm.image" class="mt-2">
-              <img :src="courseForm.image" alt="Thumbnail Preview" style="max-height: 100px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #ffffff;" />
+            <div v-if="courseForm.image" class="mt-2" style="display: flex; align-items: center; gap: 12px;">
+              <img :src="courseForm.image" alt="Thumbnail Preview" style="max-height: 80px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #ffffff;" />
+              <button type="button" class="btn btn-sm btn-secondary" style="font-size: 12px; font-weight: 600; color: #0284c7; border-color: #bae6fd;" @click="openCropper(courseForm.image, (url) => { courseForm.image = url; }, 'square', '✂ Cắt Thumbnail Khóa Học (1:1)')">✂ Cắt lại ảnh</button>
             </div>
           </div>
 
@@ -149,14 +151,15 @@
               <input v-model="courseForm.coverImage" type="text" class="admin-input-style" placeholder="Để trống sẽ dùng chung ảnh Thumbnail" style="flex: 1; min-width: 200px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
               <label class="btn btn-primary btn-sm" style="padding: 10px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600; background: #475569;">
                 <span>Tải ảnh</span>
-                <input type="file" accept="image/*" @change="uploadCourseCoverImage" style="display: none;" />
+                <input type="file" accept="image/*" @change="onFileSelectForCrop($event, (url) => { courseForm.coverImage = url; }, 'wide', '✂ Cắt Cover Khóa Học (16:9)')" style="display: none;" />
               </label>
             </div>
             <div v-if="uploadingCoverImage" style="font-size: 12px; color: #0284c7; margin-top: 4px; font-weight: 600;">
               Đang tải ảnh bìa chi tiết lên Cloudinary...
             </div>
-            <div v-if="courseForm.coverImage" class="mt-2">
-              <img :src="courseForm.coverImage" alt="Cover Preview" style="max-height: 100px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #ffffff;" />
+            <div v-if="courseForm.coverImage" class="mt-2" style="display: flex; align-items: center; gap: 12px;">
+              <img :src="courseForm.coverImage" alt="Cover Preview" style="max-height: 80px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: contain; background: #ffffff;" />
+              <button type="button" class="btn btn-sm btn-secondary" style="font-size: 12px; font-weight: 600; color: #0284c7; border-color: #bae6fd;" @click="openCropper(courseForm.coverImage, (url) => { courseForm.coverImage = url; }, 'wide', '✂ Cắt Cover Khóa Học (16:9)')">✂ Cắt lại ảnh</button>
             </div>
           </div>
         </div>
@@ -368,6 +371,8 @@
         <button type="button" @click="saveCurriculum" class="btn btn-primary btn-sm" style="padding: 10px 32px; font-weight: 700;">Lưu giáo trình khóa học</button>
       </div>
     </div>
+    <!-- Image Cropper Modal -->
+    <ImageCropperModal :isOpen="isCropperOpen" :imageUrl="cropTargetUrl" :aspectRatio="cropAspectRatio" :title="cropModalTitle" @close="isCropperOpen = false" @cropped="handleCroppedImage" />
   </div>
 </template>
 
@@ -378,8 +383,44 @@ import { slugify } from '@/utils/slugify';
 import { formatImageUrl } from '@/utils/imageHelper';
 import Pagination from '@/components/Pagination.vue';
 import RichTextEditor from '@/components/RichTextEditor.vue';
+import ImageCropperModal from '@/components/ImageCropperModal.vue';
 
 const courseStore = useCourseStore();
+
+// Cropper States
+const isCropperOpen = ref(false);
+const cropTargetUrl = ref('');
+const cropAspectRatio = ref('square');
+const cropModalTitle = ref('✂ Cắt & Căn Chỉnh Hình Ảnh Khóa Học');
+let cropTargetCallback = null;
+
+const openCropper = (url, callback, ratio = 'square', title = '✂ Cắt & Căn Chỉnh Hình Ảnh Khóa Học') => {
+  if (!url) return;
+  cropTargetUrl.value = url;
+  cropAspectRatio.value = ratio;
+  cropModalTitle.value = title;
+  cropTargetCallback = callback;
+  isCropperOpen.value = true;
+};
+
+const onFileSelectForCrop = (event, callback, ratio = 'square', title = '✂ Cắt & Căn Chỉnh Hình Ảnh Khóa Học') => {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    openCropper(e.target.result, callback, ratio, title);
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+};
+
+const handleCroppedImage = async (newUrl) => {
+  isCropperOpen.value = false;
+  if (cropTargetCallback) {
+    await cropTargetCallback(newUrl);
+  }
+};
+
 
 const courses = computed(() => courseStore.courses);
 const categories = computed(() => courseStore.categories || []);

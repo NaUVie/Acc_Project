@@ -3,9 +3,14 @@
     <!-- Hero Section with ACC Slogan -->
     <section class="about-hero-section reveal-on-scroll">
       <div class="container">
-        <h1 class="hero-slogan-title">CONNECT TO LEARN – LEARN TO LEAD</h1>
+        <h1 class="hero-slogan-title">
+          <span class="slogan-part">CONNECT TO LEARN</span>
+          <span class="slogan-space"> </span>
+          <span class="slogan-part">– LEARN TO LEAD</span>
+        </h1>
         <p class="hero-subtext">
-          Học viện Cổ phần Kết nối Tri thức (ACC) — Đơn vị giáo dục chuyên biệt dành cho cán bộ và doanh nghiệp, được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ).
+          <span class="subtext-line subtext-line-1">Học viện Cổ phần Kết nối Tri thức (ACC) — Đơn vị giáo dục chuyên biệt dành cho cán bộ và doanh nghiệp,</span>
+          <span class="subtext-line subtext-line-2">được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ).</span>
         </p>
       </div>
     </section>
@@ -347,7 +352,7 @@ const boardMembers = [
 
 .about-hero-section {
   text-align: center;
-  max-width: 900px;
+  max-width: 1140px;
   margin-inline: auto;
   padding: 40px 20px 30px;
   display: flex;
@@ -373,7 +378,11 @@ const boardMembers = [
   margin: 0;
   line-height: 1.15;
   letter-spacing: -0.5px;
-  /* white-space wrap on mobile */
+}
+
+.hero-slogan-title .slogan-part {
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .hero-subtext {
@@ -382,6 +391,17 @@ const boardMembers = [
   line-height: 1.6;
   margin: 0;
   font-weight: 500;
+  max-width: 1100px;
+}
+
+.hero-subtext .subtext-line {
+  display: block;
+}
+
+@media (min-width: 900px) {
+  .hero-subtext .subtext-line-1 {
+    white-space: nowrap;
+  }
 }
 
 .banner-image-section {

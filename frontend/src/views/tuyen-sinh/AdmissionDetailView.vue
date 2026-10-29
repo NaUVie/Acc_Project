@@ -14,7 +14,6 @@
 
         <div class="article-meta-row">
           <div class="meta-author">
-            <span class="avatar-icon">🏛️</span>
             <div>
               <div class="author-name">Hội đồng Tuyển sinh ACC Academy & Đại học Andrews</div>
               <div class="publish-date">Cập nhật kỳ tuyển sinh 2026</div>
@@ -30,9 +29,9 @@
     <!-- Main Content Container -->
     <div class="container article-layout">
       <main class="article-main-body glass-card">
-        <div class="cover-image-box">
+        <!-- <div class="cover-image-box">
           <img :src="program.image" :alt="program.title" class="cover-img" />
-        </div>
+        </div> -->
 
         <!-- Article Sections -->
         <div class="content-sections">
@@ -50,7 +49,7 @@
             <router-link :to="`/contact?program=${program.id}`" class="btn btn-primary-large">
               Đăng ký Tuyển sinh Ngay
             </router-link>
-            <a :href="program.officialLink || 'https://zalo.me/0901234567'" target="_blank" class="btn btn-zalo">
+            <a :href=" 'https://zalo.me/0938566700'" target="_blank" class="btn btn-zalo">
               Tư vấn qua Zalo Hotline
             </a>
           </div>
@@ -79,9 +78,7 @@
               <span class="val">{{ program.meta.degree }}</span>
             </div>
           </div>
-          <router-link :to="`/contact?program=${program.id}`" class="btn btn-block-primary">
-            Nhận Đề án Tuyển sinh (PDF)
-          </router-link>
+
         </div>
 
         <!-- Related Programs Widget -->
@@ -118,29 +115,29 @@ const route = useRoute();
 const programsData = {
   'mba': {
     id: 'mba',
-    title: 'Chương trình Thạc sĩ Quản trị Kinh doanh (MBA Andrews Hoa Kỳ)',
+    title: 'MBA Andrews Hoa Kỳ: Học quản trị theo chuẩn Mỹ, phát triển sự nghiệp tại Việt Nam',
     category: 'BẰNG QUỐC TẾ HOA KỲ',
-    subtitle: 'Tấm bằng MBA bảo chứng toàn cầu từ đại học lâu đời nước Mỹ, chuẩn hóa năng lực lãnh đạo thời kỳ chuyển đổi số.',
+    subtitle: 'Bạn muốn nâng cao năng lực quản trị, mở rộng tư duy kinh doanh và sẵn sàng cho bước tiến mới trong sự nghiệp? Chương trình Thạc sĩ Quản trị Kinh doanh (MBA) của Đại học Andrews, Hoa Kỳ mang đến cơ hội học tập chương trình quốc tế ngay tại Việt Nam.',
     image: '/images/service_card_2.webp',
     officialLink: 'https://andrews.edu.vn/',
     meta: {
       target: 'Chủ doanh nghiệp, Quản lý cấp cao & C-Level',
-      duration: '18 tháng',
-      format: 'Cuối tuần & Kết hợp Trực tuyến',
+      duration: '18 – 20 tháng',
+      format: 'Cuối tuần (phù hợp người đi làm)',
       degree: 'Bằng Thạc sĩ do ĐH Andrews (Hoa Kỳ) trực tiếp cấp'
     },
     sections: [
       {
-        heading: '1. Giới thiệu về Đại học Andrews (Hoa Kỳ)',
-        content: '<p>Được thành lập vào năm 1874 tại bang Michigan (Hoa Kỳ), Đại học Andrews là một trong những trường đại học lâu đời và uy tín hàng đầu tại Mỹ. Trường đạt kiểm định chất lượng vùng Higher Learning Commission (HLC) – kiểm định uy tín nhất tại Hoa Kỳ.</p><p>Chương trình MBA Andrews tại Việt Nam mang đến chương trình học nguyên bản được thiết kế phù hợp với bối cảnh kinh tế Châu Á – TBD.</p>'
+        heading: '1. Vì sao chọn Đại học Andrews?',
+        content: '<p>Được thành lập năm 1874 tại bang Michigan, Đại học Andrews là một trường đại học lâu đời của Hoa Kỳ với cộng đồng sinh viên và cựu học viên quốc tế rộng lớn. Chương trình kinh doanh của trường được kiểm định chuyên ngành bởi IACBE; Đại học Andrews được kiểm định vùng bởi Higher Learning Commission (HLC) và được Bộ Giáo dục — Đào tạo Việt Nam chính thức công nhận.</p>'
       },
       {
         heading: '2. Cấu trúc Chương trình Đào tạo',
-        content: '<p>Chương trình gồm 12 môn học trọng yếu bao gồm: Quản trị Chiến lược, Tài chính Doanh nghiệp, Đổi mới Sáng tạo, Marketing Toàn cầu và Lãnh đạo Đa văn hóa. Mọi môn học được chuẩn hóa theo hệ thống giáo trình của Hoa Kỳ.</p>'
+        content: '<p>Chương trình học tinh gọn, phù hợp người đi làm kéo dài khoảng 18–20 tháng, với lịch học tập trung vào cuối tuần. Học viên được trang bị kiến thức từ nền tảng đến chuyên sâu về quản trị kinh doanh, với nội dung đào tạo theo chương trình MBA của Đại học Andrews.</p><p>Các môn học có thể bao gồm lãnh đạo và hành vi tổ chức, quản trị tài chính, marketing chiến lược, quản trị nguồn nhân lực, kinh doanh quốc tế và quản trị chiến lược.</p>'
       },
       {
-        heading: '3. Điều kiện Tuyển sinh & Hồ sơ',
-        content: '<p>Ứng viên cần tốt nghiệp Đại học ngành bất kỳ, có tối thiểu 2 năm kinh nghiệm làm việc và đạt yêu cầu kiểm tra trình độ tiếng Anh đầu vào của nhà trường.</p>'
+        heading: '3. Điều kiện tuyển sinh tham khảo',
+        content: '<ul><li>Tốt nghiệp đại học; đáp ứng yêu cầu GPA của chương trình, thường từ 2.6/4.0, hoặc thỏa điều kiện về điểm GPA của ít nhất 50% số môn học.</li><li>Trình độ tiếng Anh tương đương IELTS 5.5; chứng chỉ VSTEP bậc 4 có thể được xem xét theo quy định tuyển sinh.</li><li>Điều kiện GMAT có thể được đáp ứng bằng điểm GMAT theo yêu cầu, hoặc theo phương án thay thế dành cho ứng viên đủ kinh nghiệm làm việc và hoàn thành các môn Thống kê, Đại số theo yêu cầu của chương trình.</li><li>Bằng Cử nhân Ngôn ngữ Anh được giảng dạy hoàn toàn bằng tiếng Anh có thể thuộc diện xét miễn chứng chỉ tiếng Anh.</li></ul><p><em>* Điều kiện cụ thể có thể khác theo hồ sơ và đợt tuyển sinh. Ứng viên nên liên hệ chương trình để được xác nhận yêu cầu hiện hành.</em></p>'
       }
     ]
   },
@@ -167,9 +164,9 @@ const programsData = {
       }
     ]
   },
-  'gel': {
-    id: 'gel',
-    title: 'Viện Lãnh đạo Toàn cầu GEL (Global Executive Leadership)',
+  'gei': {
+    id: 'gei',
+    title: 'Viện Lãnh đạo Toàn cầu GEI (GOLBAL EXECUTIVE INSTITUTE)',
     category: 'LÃNH ĐẠO TOÀN CẦU',
     subtitle: 'Chương trình Huấn luyện Lãnh đạo Cấp cao & Study Tour Quốc tế tại Michigan (Hoa Kỳ).',
     image: '/images/service_card.webp',
@@ -181,11 +178,11 @@ const programsData = {
     },
     sections: [
       {
-        heading: '1. Định vị Chương trình GEL',
-        content: '<p>GEL được thiết kế dành riêng cho các nhà lãnh đạo kiệt xuất hướng tới mục tiêu vươn tầm thế giới. Chương trình kết hợp giữa các buổi hội thảo cấp cao và chuyến đi khảo sát thực địa tại các tập đoàn Fortune 500 tại Mỹ.</p>'
+        heading: '1. Định vị Chương trình GEI',
+        content: '<p>GEI được thiết kế dành riêng cho các nhà lãnh đạo kiệt xuất hướng tới mục tiêu vươn tầm thế giới. Chương trình kết hợp giữa các buổi hội thảo cấp cao và chuyến đi khảo sát thực địa tại các tập đoàn Fortune 500 tại Mỹ.</p>'
       },
       {
-        heading: '2. Đặc quyền Học viên GEL',
+        heading: '2. Đặc quyền Học viên GEI',
         content: '<p>Kết nối trực tiếp với hội đồng cố vấn quốc tế, mở rộng quan hệ đối tác chiến lược và trải nghiệm môi trường học thuật hàng đầu tại Đại học Andrews (Michigan, USA).</p>'
       }
     ]
@@ -196,7 +193,7 @@ const programId = computed(() => {
   const param = route.params.id || route.path.split('/').pop();
   if (param === 'mba' || param.includes('mba')) return 'mba';
   if (param === 'mini-mba' || param.includes('mini')) return 'mini-mba';
-  if (param === 'gei' || param === 'gel' || param.includes('gel')) return 'gel';
+  if (param === 'gei' || param === 'gei' || param.includes('gei')) return 'gei';
   return 'mba';
 });
 
@@ -340,6 +337,27 @@ onMounted(() => {
   font-size: 16px;
   color: #334155;
   line-height: 1.75;
+}
+
+.section-text p {
+  margin-bottom: 12px;
+}
+
+.section-text p:last-child {
+  margin-bottom: 0;
+}
+
+.section-text ul {
+  padding-left: 22px;
+  margin: 12px 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style-type: disc;
+}
+
+.section-text li {
+  line-height: 1.7;
 }
 
 .article-cta-box {

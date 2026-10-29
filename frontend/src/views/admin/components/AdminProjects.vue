@@ -222,10 +222,13 @@
             <label style="color: #1e293b; font-weight: 600;">Ảnh đại diện Dự án (Thumbnail URL)</label>
             <div style="display: flex; gap: 8px;">
               <input v-model="form.image" type="text" class="admin-input-style" placeholder="https://... hoặc URL ảnh" style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-              <input type="file" ref="imageFileRef" @change="uploadImage" style="display: none;" accept="image/*" />
+              <input type="file" ref="imageFileRef" @change="onFileSelectForCrop($event, (url) => { form.image = url; }, 'wide', '✂ Cắt Ảnh Đại Diện Dự Án (16:9)')" style="display: none;" accept="image/*" />
               <button type="button" @click="$refs.imageFileRef.click()" class="btn btn-secondary btn-sm">Upload</button>
             </div>
-            <img v-if="form.image" :src="form.image" alt="Preview Image" style="margin-top: 8px; max-height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;" referrerpolicy="no-referrer" />
+            <div v-if="form.image" style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
+            <img :src="form.image" alt="Preview Image" style="max-height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;" referrerpolicy="no-referrer" />
+            <button type="button" class="btn btn-sm btn-secondary" style="font-size: 12px; font-weight: 600; color: #0284c7; border-color: #bae6fd;" @click="openCropper(form.image, (url) => { form.image = url; }, 'wide', '✂ Cắt Ảnh Đại Diện Dự Án (16:9)')">✂ Cắt lại ảnh</button>
+          </div>
           </div>
 
           <div class="form-group">
@@ -532,6 +535,8 @@
         </div>
       </div>
     </div>
+    <!-- Image Cropper Modal -->
+    <ImageCropperModal :isOpen="isCropperOpen" :imageUrl="cropTargetUrl" :aspectRatio="cropAspectRatio" :title="cropModalTitle" @close="isCropperOpen = false" @cropped="handleCroppedImage" />
   </div>
 </template>
 
@@ -540,8 +545,44 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import RichTextEditor from '@/components/RichTextEditor.vue';
 import Pagination from '@/components/Pagination.vue';
+import ImageCropperModal from '@/components/ImageCropperModal.vue';
 
 const courseStore = useCourseStore();
+
+// Cropper States
+const isCropperOpen = ref(false);
+const cropTargetUrl = ref('');
+const cropAspectRatio = ref('wide');
+const cropModalTitle = ref('✂ Cắt Ảnh Dự Án');
+let cropTargetCallback = null;
+
+const openCropper = (url, callback, ratio = 'wide', title = '✂ Cắt Ảnh Dự Án') => {
+  if (!url) return;
+  cropTargetUrl.value = url;
+  cropAspectRatio.value = ratio;
+  cropModalTitle.value = title;
+  cropTargetCallback = callback;
+  isCropperOpen.value = true;
+};
+
+const onFileSelectForCrop = (event, callback, ratio = 'wide', title = '✂ Cắt Ảnh Dự Án') => {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    openCropper(e.target.result, callback, ratio, title);
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+};
+
+const handleCroppedImage = async (newUrl) => {
+  isCropperOpen.value = false;
+  if (cropTargetCallback) {
+    await cropTargetCallback(newUrl);
+  }
+};
+
 
 const subTab = ref('projects'); // 'projects' or 'reviews'
 

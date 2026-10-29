@@ -545,7 +545,7 @@ const drawerItems = computed(() => {
       return [
         { title: '🎓 MBA ANDREW (Thạc sĩ Quản trị Kinh doanh Hoa Kỳ)', link: '/tuyen-sinh#mba' },
         // { title: '⚡ MINI MBA Practical (Quản trị Tinh gọn)', link: '/tuyen-sinh#mini-mba' },
-        { title: '🌐 GEL (Global Executive Leadership)', link: '/tuyen-sinh#gel' }
+        { title: '🌐 GEL (Global Executive Leadership)', link: '/tuyen-sinh#gei' }
       ];
     case 'courses':
       return [

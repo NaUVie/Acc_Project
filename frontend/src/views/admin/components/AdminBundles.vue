@@ -228,14 +228,15 @@
             <input v-model="form.image" type="text" class="admin-input-style" placeholder="/images/default.jpg hoặc URL Cloudinary" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; flex: 1; min-width: 240px;" />
             <label class="btn btn-primary btn-sm" style="padding: 10px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600;">
               <span>Tải ảnh từ máy</span>
-              <input type="file" accept="image/*" @change="uploadBundleImage" style="display: none;" />
+              <input type="file" accept="image/*" @change="onFileSelectForCrop($event, (url) => { form.image = url; }, 'wide', '✂ Cắt Ảnh Gói Combo (16:9)')" style="display: none;" />
             </label>
           </div>
           <div v-if="uploadingImage" style="font-size: 12px; color: #0284c7; margin-top: 4px; font-weight: 600;">
             Đang tải ảnh lên Cloudinary (Thư mục Acc Demo)...
           </div>
-          <div v-if="form.image" class="mt-2">
-            <img :src="form.image" alt="Preview" style="max-height: 100px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: cover;" />
+          <div v-if="form.image" class="mt-2" style="display: flex; align-items: center; gap: 12px;">
+            <img :src="form.image" alt="Preview" style="max-height: 80px; border-radius: 8px; border: 1px solid #cbd5e1; object-fit: cover;" />
+            <button type="button" class="btn btn-sm btn-secondary" style="font-size: 12px; font-weight: 600; color: #0284c7; border-color: #bae6fd;" @click="openCropper(form.image, (url) => { form.image = url; }, 'wide', '✂ Cắt Ảnh Gói Combo (16:9)')">✂ Cắt lại ảnh</button>
           </div>
         </div>
 
@@ -250,15 +251,53 @@
         </div>
       </form>
     </div>
+    <!-- Image Cropper Modal -->
+    <ImageCropperModal :isOpen="isCropperOpen" :imageUrl="cropTargetUrl" :aspectRatio="cropAspectRatio" :title="cropModalTitle" @close="isCropperOpen = false" @cropped="handleCroppedImage" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import ImageCropperModal from '@/components/ImageCropperModal.vue';
 import { slugify } from '@/utils/slugify';
 
 const courseStore = useCourseStore();
+
+// Cropper States
+const isCropperOpen = ref(false);
+const cropTargetUrl = ref('');
+const cropAspectRatio = ref('wide');
+const cropModalTitle = ref('✂ Cắt Ảnh Gói Combo');
+let cropTargetCallback = null;
+
+const openCropper = (url, callback, ratio = 'wide', title = '✂ Cắt Ảnh Gói Combo') => {
+  if (!url) return;
+  cropTargetUrl.value = url;
+  cropAspectRatio.value = ratio;
+  cropModalTitle.value = title;
+  cropTargetCallback = callback;
+  isCropperOpen.value = true;
+};
+
+const onFileSelectForCrop = (event, callback, ratio = 'wide', title = '✂ Cắt Ảnh Gói Combo') => {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    openCropper(e.target.result, callback, ratio, title);
+  };
+  reader.readAsDataURL(file);
+  event.target.value = '';
+};
+
+const handleCroppedImage = async (newUrl) => {
+  isCropperOpen.value = false;
+  if (cropTargetCallback) {
+    await cropTargetCallback(newUrl);
+  }
+};
+
 
 const bundles = computed(() => courseStore.bundles);
 const courses = computed(() => courseStore.courses);
