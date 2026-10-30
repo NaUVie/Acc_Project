@@ -91,40 +91,13 @@
                 id="serviceCategory" 
                 class="form-select" 
                 required
-                @change="onCategoryChange"
+                
               >
                 <option value="">-- Chọn mục dịch vụ bạn quan tâm --</option>
                 <option value="corporate">Đào tạo cho doanh nghiệp</option>
                 <option value="postgraduate">Tuyển sinh các chương trình sau đại học</option>
                 <option value="individual">Đào tạo cho cá nhân</option>
               </select>
-            </div>
-
-            <!-- Dynamic Sub-category Selection Box -->
-            <div v-if="currentSubOptions.length > 0" class="sub-category-box animate-fade-in">
-              <label class="sub-box-title">
-                Lĩnh vực / Chương trình chi tiết quan tâm *
-              </label>
-              <p class="sub-box-desc">Chọn đúng chương trình bạn muốn nhận báo giá & nội dung lộ trình:</p>
-
-              <div class="sub-options-grid">
-                <label 
-                  v-for="(sub, idx) in currentSubOptions" 
-                  :key="idx" 
-                  class="sub-option-item"
-                  :class="{ selected: formData.subCategory === sub }"
-                >
-                  <input 
-                    type="radio" 
-                    name="subCategory" 
-                    :value="sub" 
-                    v-model="formData.subCategory" 
-                    required 
-                  />
-                  <span class="radio-custom"></span>
-                  <span class="sub-option-label">{{ sub }}</span>
-                </label>
-              </div>
             </div>
 
             <!-- Additional Requirement Message -->
@@ -163,40 +136,10 @@ const formData = ref({
   phone: '',
   email: '',
   serviceCategory: '',
-  subCategory: '',
   message: ''
 });
 
-// Map main categories to dynamic sub options
-// const subCategoryMap = {
-//   postgraduate: [
-//     'Thạc sĩ quản trị kinh doanh tổng hợp',
-//     'Thạc sĩ quản trị kinh doanh chuyên ngành tài chính',
-//     'Global Executive Institute',
-//     'Mini MBA'
-//   ],
-//   corporate: [
-//     'Đào tạo AI INHOUSE cho Doanh nghiệp',
-//     'Quản trị & Bảo mật Dữ liệu Doanh nghiệp',
-//     'Xây dựng Khung năng lực & Phát triển Nhân sự',
-//     'Năng lực Lãnh đạo & Kỹ năng mềm Doanh nghiệp'
-//   ],
-//   // individual: [
-//   //   'Khóa học AI dành cho CEO & Lãnh đạo Doanh nghiệp',
-//   //   'AI ứng dụng trong Kế toán - Tài chính - MKT',
-//   //   'Kỹ năng Cốt lõi & Nghiệp vụ Trọng tài viên',
-//   //   'Quản trị & Bảo vệ Dữ liệu Cá nhân'
-//   // ]
-// };
 
-const currentSubOptions = computed(() => {
-  if (!formData.value.serviceCategory) return [];
-  return subCategoryMap[formData.value.serviceCategory] || [];
-});
-
-const onCategoryChange = () => {
-  formData.value.subCategory = '';
-};
 
 const contactInfo = computed(() => {
   const s = courseStore.contactSettings;
@@ -219,7 +162,7 @@ onMounted(() => {
 
   // Handle pre-filled category from URL query if provided
   const categoryQuery = route.query.category;
-  if (categoryQuery && subCategoryMap[categoryQuery]) {
+  if (categoryQuery) {
     formData.value.serviceCategory = categoryQuery;
   }
 });
@@ -227,7 +170,7 @@ onMounted(() => {
 const submitForm = async () => {
   isSubmitting.value = true;
   try {
-    const fullMessage = `Mục dịch vụ: ${formData.value.serviceCategory}\nLĩnh vực chi tiết: ${formData.value.subCategory}\nGhi chú: ${formData.value.message}`;
+    const fullMessage = `Mục dịch vụ: ${formData.value.serviceCategory}\nGhi chú: ${formData.value.message}`;
     
     await courseStore.sendContact(
       formData.value.fullName,
@@ -235,7 +178,7 @@ const submitForm = async () => {
       '',
       formData.value.email,
       formData.value.phone,
-      formData.value.subCategory || formData.value.serviceCategory,
+      formData.value.serviceCategory,
       fullMessage
     );
 
@@ -246,7 +189,6 @@ const submitForm = async () => {
       phone: '',
       email: '',
       serviceCategory: '',
-      subCategory: '',
       message: ''
     };
   } catch (err) {
@@ -256,7 +198,6 @@ const submitForm = async () => {
       phone: '',
       email: '',
       serviceCategory: '',
-      subCategory: '',
       message: ''
     };
   } finally {
