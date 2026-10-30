@@ -500,6 +500,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -589,7 +590,7 @@
 }
 
 .partner-track-left {
-  animation: partnerMarqueeLeft 110s linear infinite;
+  animation: partnerMarqueeLeft 170s linear infinite;
 }
 
 .partner-track-right {
