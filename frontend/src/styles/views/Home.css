@@ -1761,9 +1761,10 @@
 }
 
 .blogs-heading {
-  font-size: 36px;
+  font-size: clamp(26px, 2.4vw, 36px);
   font-weight: 800;
   color: #101828;
+  text-wrap: balance;
 }
 
 @media (max-width: 768px) {

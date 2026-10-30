@@ -2,7 +2,7 @@
   <div class="lecturers-page container">
     <!-- Hero Header -->
     <div class="header-section animate-fade-in">
-      <h1>Đội ngũ <span class="gradient-text">Giảng viên & Chuyên gia Thực chiến</span></h1>
+      <h1>Đội ngũ <span class="gradient-text">Giảng viên & Chuyên gia <span style="white-space: nowrap;">Thực chiến</span></span></h1>
     </div>
 
     <!-- Mega Dropdown-Style Layout Container (Giao diện giống hệt ĐÀO TẠO) -->

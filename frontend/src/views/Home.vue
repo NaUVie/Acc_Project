@@ -366,7 +366,7 @@
       <div class="container">
         <div class="blogs-header-row">
           <div class="blogs-header-left">
-            <h2 class="blogs-heading">Đội ngũ Giảng viên & Chuyên gia Thực chiến</h2>
+            <h2 class="blogs-heading">Đội ngũ Giảng viên & Chuyên gia <span style="white-space: nowrap;">Thực chiến</span></h2>
           </div>
           <router-link to="/doi-ngu-giang-vien" class="header-link-with-arrow" aria-label="Xem tất cả giảng viên">
             <span class="header-link-text">Xem tất cả</span>
