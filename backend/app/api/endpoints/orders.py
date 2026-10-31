@@ -8,7 +8,7 @@ from ...config import VNPAY_TMN_CODE, VNPAY_HASH_SECRET, VNPAY_PAYMENT_URL, VNPA
 
 router = APIRouter()
 
-ALLOW_MOCK_PAYMENT = os.getenv("ALLOW_MOCK_PAYMENT", "true").lower() == "true"
+ALLOW_MOCK_PAYMENT = os.getenv("ALLOW_MOCK_PAYMENT", "false").lower() == "true"
 
 @router.get("", response_model=List[schemas.OrderResponse])
 def read_orders(
@@ -140,6 +140,7 @@ def vnpay_return_handler(
 
     vnp_response_code = params.get("vnp_ResponseCode")
     vnp_txn_ref = params.get("vnp_TxnRef")
+    vnp_amount_raw = params.get("vnp_Amount")
 
     if not vnp_txn_ref:
         return {
@@ -165,6 +166,17 @@ def vnpay_return_handler(
             "rsp_code": "01"
         }
 
+    # Verify transaction amount matches order price (in VND x 100)
+    try:
+        if vnp_amount_raw and int(vnp_amount_raw) != db_order.total_price * 100:
+            return {
+                "success": False,
+                "message": "Số tiền thanh toán không khớp với đơn hàng!",
+                "rsp_code": "04"
+            }
+    except (ValueError, TypeError):
+        pass
+
     if vnp_response_code == "00":
         if db_order.status != "paid":
             crud.pay_order(db, order_id=order_id)
@@ -175,10 +187,64 @@ def vnpay_return_handler(
             "rsp_code": "00"
         }
     else:
+        # If user cancelled or payment failed, rollback pending reservation
+        if db_order.status == "pending":
+            crud.cancel_order(db, order_id=order_id)
         return {
             "success": False,
             "order_id": order_id,
             "message": f"Giao dịch không thành công hoặc đã bị hủy (Mã phản hồi: {vnp_response_code})",
             "rsp_code": vnp_response_code
         }
+
+
+@router.get("/vnpay-ipn")
+def vnpay_ipn_handler(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """
+    VNPay Server-to-Server Webhook (IPN).
+    Reliably captures payment confirmation even if user closes the browser.
+    Returns standard VNPay response format: {"RspCode": "xx", "Message": "..."}
+    """
+    params = dict(request.query_params)
+    is_valid = vnpay.verify_vnpay_response(params, VNPAY_HASH_SECRET)
+    if not is_valid:
+        return {"RspCode": "97", "Message": "Invalid Checksum"}
+
+    vnp_response_code = params.get("vnp_ResponseCode")
+    vnp_txn_ref = params.get("vnp_TxnRef")
+    vnp_amount_raw = params.get("vnp_Amount")
+
+    if not vnp_txn_ref:
+        return {"RspCode": "01", "Message": "Order not found"}
+
+    try:
+        order_id = int(vnp_txn_ref)
+    except ValueError:
+        return {"RspCode": "01", "Message": "Order not found"}
+
+    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not db_order:
+        return {"RspCode": "01", "Message": "Order not found"}
+
+    # Validate amount
+    try:
+        if vnp_amount_raw and int(vnp_amount_raw) != db_order.total_price * 100:
+            return {"RspCode": "04", "Message": "Invalid amount"}
+    except (ValueError, TypeError):
+        return {"RspCode": "04", "Message": "Invalid amount"}
+
+    # Check if order is already paid
+    if db_order.status == "paid":
+        return {"RspCode": "02", "Message": "Order already confirmed"}
+
+    if vnp_response_code == "00":
+        crud.pay_order(db, order_id=order_id)
+        return {"RspCode": "00", "Message": "Confirm Success"}
+    else:
+        if db_order.status == "pending":
+            crud.cancel_order(db, order_id=order_id)
+        return {"RspCode": "00", "Message": "Confirm Success"}
 

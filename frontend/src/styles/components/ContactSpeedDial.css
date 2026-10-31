@@ -1,0 +1,246 @@
+.contact-speeddial-widget {
+  position: fixed;
+  z-index: 2147483646;
+  user-select: none;
+  touch-action: none;
+  /* Padding đệm rộng hơn để chuột không bao giờ bị rơi ra ngoài khi di chuyển */
+  padding: 10px;
+  margin: -10px;
+}
+
+.contact-speeddial-widget:not(.is-dragging) {
+  transition: top 0.25s cubic-bezier(0.2, 0.9, 0.4, 1), left 0.3s cubic-bezier(0.2, 0.9, 0.4, 1);
+}
+
+/* Cầu nối vô hình bao phủ khoảng trống giữa nút bấm và 2 nút Zalo/Phone */
+.hover-bridge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 200px;
+  height: 220px;
+  background: transparent;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.contact-speeddial-widget.is-snapped-left .hover-bridge {
+  right: auto;
+  left: 0;
+}
+
+/* NÚT CHÍNH TRIGGER */
+.speeddial-trigger {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: grab;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.contact-speeddial-widget.is-dragging .speeddial-trigger {
+  cursor: grabbing;
+}
+
+.trigger-inner {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #022b9f 0%, #1e40af 50%, #2563eb 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(2, 43, 159, 0.45);
+  position: relative;
+  z-index: 3;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+
+.speeddial-trigger:hover .trigger-inner,
+.contact-speeddial-widget.is-open .trigger-inner {
+  transform: scale(1.08);
+  box-shadow: 0 8px 26px rgba(2, 43, 159, 0.6);
+}
+
+.trigger-icon {
+  animation: floatBounce 3s infinite ease-in-out;
+}
+
+.contact-speeddial-widget.is-open .trigger-icon {
+  animation: none;
+}
+
+/* Sóng xung kích Pulse */
+.pulse-ring,
+.pulse-ring-2 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background-color: rgba(37, 99, 235, 0.5);
+  z-index: 1;
+  pointer-events: none;
+  animation: speeddialPulse 2.4s infinite cubic-bezier(0.25, 0, 0, 1);
+}
+
+.pulse-ring-2 {
+  animation-delay: 0.8s;
+}
+
+.contact-speeddial-widget.is-open .pulse-ring,
+.contact-speeddial-widget.is-open .pulse-ring-2 {
+  display: none;
+}
+
+/* Tooltip gợi ý trên laptop */
+.trigger-tooltip {
+  position: absolute;
+  right: 68px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(15, 23, 42, 0.9);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.contact-speeddial-widget.is-snapped-left .trigger-tooltip {
+  right: auto;
+  left: 68px;
+}
+
+.speeddial-trigger:hover .trigger-tooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(-4px);
+}
+
+.contact-speeddial-widget.is-snapped-left .speeddial-trigger:hover .trigger-tooltip {
+  transform: translateY(-50%) translateX(4px);
+}
+
+/* DANH SÁCH NÚT CON (ACTIONS) */
+.speeddial-actions {
+  position: absolute;
+  bottom: 74px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(12px) scale(0.92);
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.contact-speeddial-widget.is-snapped-left .speeddial-actions {
+  right: auto;
+  left: 10px;
+}
+
+.speeddial-actions.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  background: #ffffff;
+  padding: 6px 16px 6px 6px;
+  border-radius: 32px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.contact-speeddial-widget.is-snapped-left .action-item {
+  flex-direction: row-reverse;
+  padding: 6px 6px 6px 16px;
+}
+
+.action-item:hover {
+  transform: scale(1.06) translateX(-3px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.26);
+}
+
+.contact-speeddial-widget.is-snapped-left .action-item:hover {
+  transform: scale(1.06) translateX(3px);
+}
+
+.action-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.call-bg {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.45);
+}
+
+.zalo-bg {
+  background: #0068FF;
+  box-shadow: 0 4px 12px rgba(0, 104, 255, 0.45);
+}
+
+.action-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+@keyframes speeddialPulse {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.45);
+    opacity: 0;
+  }
+}
+
+@keyframes floatBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@media (max-width: 768px) {
+  .trigger-tooltip {
+    display: none !important;
+  }
+}

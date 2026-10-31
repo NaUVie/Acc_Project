@@ -22,8 +22,8 @@
           >
             {{ isReorderMode ? '✓ Xong' : '↕ Sắp Xếp' }}
           </button>
-          <button @click="openMajorsModal" class="btn btn-secondary btn-sm" style="font-weight: 600; padding: 6px 12px; fontSize: 13px;">QL Chuyên Ngành</button>
-          <button @click="openAddLecturerModal" class="btn btn-primary btn-sm" style="font-weight: 600; padding: 6px 14px; fontSize: 13px;">+ Thêm</button>
+          <button @click="showMajorsModal = true" class="btn btn-secondary btn-sm" style="font-weight: 600; padding: 6px 12px; font-size: 13px;">QL Chuyên Ngành</button>
+          <button @click="openAddLecturer" class="btn btn-primary btn-sm" style="font-weight: 600; padding: 6px 14px; font-size: 13px;">+ Thêm</button>
         </div>
       </div>
 
@@ -91,7 +91,6 @@
               :key="l.id"
             >
               <td style="text-align: center; width: 80px;">
-                <!-- Khi đang ở chế độ Sắp xếp: hiện nút ▲ ▼ -->
                 <div v-if="isReorderMode" style="display: inline-flex; align-items: center; justify-content: center; gap: 3px; background: #f0f9ff; padding: 2px 6px; border-radius: 6px; border: 1px solid #bae6fd;">
                   <button 
                     type="button"
@@ -123,7 +122,6 @@
                     ▼
                   </button>
                 </div>
-                <!-- Khi bình thường: hiện số thứ tự đơn giản, gọn gàng -->
                 <span v-else style="font-weight: 700; font-size: 13px; color: #64748b;">
                   {{ (currentPage - 1) * pageSize + idx + 1 }}
                 </span>
@@ -201,14 +199,11 @@
               </td>
               <td style="text-align: center;">
                 <div class="action-buttons" style="justify-content: center; gap: 6px;">
-                  <button @click="openCropper(l.avatar || l.avatar_drive_link, async (url) => { await courseStore.updateAdminLecturer(l.id, { ...l, avatar: url, avatar_drive_link: '' }); l.avatar = url; l.avatar_drive_link = ''; courseStore.showToast('Đã cắt và cập nhật ảnh giảng viên!', 'success'); }, 'square', '✂ Cắt Avatar Giảng Viên: ' + l.name)" class="btn-action edit" title="Cắt lại Avatar (1:1)" style="color: #0284c7;">✂️</button>
+                  <button @click="openQuickCropper(l)" class="btn-action edit" title="Cắt lại Avatar (1:1)" style="color: #0284c7;">✂️</button>
                   <button @click="editLecturer(l)" class="btn-action edit" title="Sửa thông tin">✏️</button>
                   <button @click="deleteLecturer(l)" class="btn-action delete" title="Xóa">🗑️</button>
                 </div>
               </td>
-            </tr>
-            <tr v-if="filteredLecturers.length === 0">
-              <td colspan="8" class="text-center py-8 text-muted">Không tìm thấy giảng viên nào.</td>
             </tr>
           </tbody>
         </table>
@@ -223,349 +218,71 @@
       />
     </div>
 
-    <!-- VIEW 2: LECTURER ADD/EDIT FORM -->
-    <div v-else-if="activeView === 'form'" class="admin-page-card" style="background: #ffffff; color: #0f172a; border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
-      <div class="flex-between pb-4 mb-4" style="border-bottom: 1px solid #e2e8f0;">
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <button type="button" @click="activeView = 'list'" class="btn btn-secondary btn-sm" style="padding: 8px 16px; font-weight: 600;">
-            ← Quay lại danh sách
-          </button>
-          <h3 style="margin: 0; color: #0f172a; font-size: 20px; font-weight: 800;">
-            {{ isEditing ? 'Chỉnh sửa thông tin giảng viên' : 'Thêm giảng viên mới' }}
-          </h3>
-        </div>
-        <button type="button" @click="activeView = 'list'" class="btn btn-secondary btn-sm">Hủy</button>
-      </div>
+    <!-- VIEW 2: LECTURER ADD/EDIT FORM (Extracted Component) -->
+    <LecturerFormView 
+      v-else-if="activeView === 'form'"
+      :initialData="editingLecturer"
+      :lecturers="lecturers"
+      @cancel="activeView = 'list'"
+      @saved="onLecturerSaved"
+    />
 
-      <form @submit.prevent="saveLecturer">
-        <div class="grid-2">
-          <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Họ và Tên Giảng viên</label>
-            <input v-model="lecturerForm.name" @input="onNameInput" type="text" required class="admin-input-style" placeholder="ví dụ: Lê Quang Triều" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-          </div>
-          <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Chức danh / Vị trí công tác</label>
-            <input v-model="lecturerForm.title" type="text" required class="admin-input-style" placeholder="ví dụ: Chuyên gia Khai phá Dữ liệu & AI Agent" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-          </div>
-        </div>
+    <!-- MODAL LECTURER MAJORS CRUD (Extracted Component) -->
+    <LecturerMajorsModal 
+      :isOpen="showMajorsModal"
+      :lecturers="lecturers"
+      @close="showMajorsModal = false"
+      @updated="courseStore.fetchLecturers()"
+    />
 
-        <div class="form-group mt-3">
-          <label style="color: #1e293b; font-weight: 600;">Chuyên ngành đào tạo (Có thể tích chọn nhiều chuyên ngành)</label>
-          <div style="display: flex; gap: 12px 20px; flex-wrap: wrap; margin-top: 6px; background: #f8fafc; padding: 14px 18px; border-radius: 10px; border: 1px solid #cbd5e1;">
-            <label 
-              v-for="m in lecturerMajors" 
-              :key="m.id" 
-              style="display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 600; color: #334155; cursor: pointer; user-select: none;"
-            >
-              <input 
-                type="checkbox" 
-                :value="m.id" 
-                v-model="lecturerForm.majorIds" 
-                style="width: 17px; height: 17px; cursor: pointer; accent-color: #0284c7;" 
-              />
-              <span>{{ m.name }}</span>
-            </label>
-          </div>
-        </div>
-
-        <div class="form-group mt-3">
-          <label style="color: #1e293b; font-weight: 600;">Hình ảnh Avatar (Tải từ máy hoặc dán URL)</label>
-          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <input v-model="lecturerForm.avatar" type="text" required class="admin-input-style" placeholder="/images/default-avatar.jpg hoặc URL Cloudinary" style="flex: 1; min-width: 240px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-            <label class="btn btn-primary btn-sm" style="padding: 10px 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600;">
-              <span>Tải ảnh từ máy</span>
-              <input type="file" accept="image/*" @change="onFileSelectForCrop($event, (url) => { lecturerForm.avatar = url; lecturerForm.avatarDriveLink = ''; }, 'square', '✂ Cắt Avatar Giảng Viên (1:1)')" style="display: none;" />
-            </label>
-          </div>
-          <div v-if="uploadingAvatar" style="font-size: 12px; color: #0284c7; margin-top: 4px; font-weight: 600;">
-            Đang tải ảnh lên Cloudinary...
-          </div>
-          <div v-if="lecturerForm.avatar" class="mt-2" style="display: flex; align-items: center; gap: 12px;">
-            <img :src="formatImageUrl(lecturerForm.avatar)" alt="Preview" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7;" />
-            <button type="button" class="btn btn-sm btn-secondary" style="font-size: 12px; font-weight: 600; color: #0284c7; border-color: #bae6fd;" @click="openCropper(lecturerForm.avatar, (url) => { lecturerForm.avatar = url; lecturerForm.avatarDriveLink = ''; }, 'square', '✂ Cắt Avatar Giảng Viên (1:1)')">✂ Cắt lại ảnh</button>
-          </div>
-        </div>
-
-        <div class="form-group mt-3">
-          <label style="color: #1e293b; font-weight: 600;">Tiêu đề ngắn / Tagline</label>
-          <input v-model="lecturerForm.tagline" type="text" class="admin-input-style" placeholder="ví dụ: 10+ năm kinh nghiệm cố vấn Chuyển đổi số doanh nghiệp" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-        </div>
-
-        <div class="form-group mt-3" style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="is_featured_chk" v-model="lecturerForm.is_featured" style="width: 18px; height: 18px; cursor: pointer;" />
-          <label for="is_featured_chk" style="color: #1e293b; font-weight: 600; cursor: pointer; margin: 0;">Hiển thị nổi bật ngoài Trang chủ (Tối đa 4 người)</label>
-        </div>
-
-        <div class="form-group mt-3" style="display: flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="show_detail_btn_chk" v-model="lecturerForm.show_detail_btn" style="width: 18px; height: 18px; cursor: pointer;" />
-          <label for="show_detail_btn_chk" style="color: #1e293b; font-weight: 600; cursor: pointer; margin: 0;">👁️ Hiển thị nút "Xem chi tiết giới thiệu" ở thẻ Giảng viên (Mặc định tắt)</label>
-        </div>
-
-        <div class="form-group mt-3">
-          <label style="color: #1e293b; font-weight: 600;">Giới thiệu tóm tắt (Bio Short)</label>
-          <textarea v-model="lecturerForm.bioShort" rows="3" class="admin-input-style" placeholder="Đoạn mô tả ngắn tóm tắt quá trình công tác, thành tựu..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
-        </div>
-
-        <!-- Detailed Content Editor (Rich Text) -->
-        <div class="form-group mt-4 p-4" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
-            <label style="color: #0f172a; font-weight: 700; font-size: 14.5px; margin: 0;">
-              📝 Nội dung Giới thiệu chi tiết (Soạn thảo văn bản, Chèn ảnh, Xuống hàng, Định dạng)
-            </label>
-            <span style="font-size: 12px; color: #64748b;">Hỗ trợ chèn ảnh, đề mục H2/H3, in đậm, danh sách...</span>
-          </div>
-          <RichTextEditor 
-            v-model="lecturerForm.detailsHtml" 
-            placeholder="Nhập nội dung chi tiết về quá trình công tác, thành tựu, hình ảnh hoạt động đào tạo của giảng viên (nội dung này sẽ hiển thị ở trang Chi tiết Giảng viên)..." 
-          />
-        </div>
-
-        <!-- Position Settings -->
-        <div class="form-group mt-3" style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
-          <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: #0f172a;">
-            🔢 Cài đặt Thứ tự hiển thị
-          </h4>
-          <div class="grid-2">
-            <div class="form-group">
-              <label style="color: #1e293b; font-weight: 600; font-size: 13px;">Thứ tự chung (Trang Tất cả chuyên ngành)</label>
-              <input 
-                v-model.number="lecturerForm.position" 
-                type="number" 
-                min="1" 
-                class="admin-input-style" 
-                placeholder="1, 2, 3..." 
-                style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" 
-              />
-              <small class="text-muted">Vị trí hiển thị tại danh sách Tất cả.</small>
-            </div>
-          </div>
-
-          <div v-if="lecturerForm.majorIds && lecturerForm.majorIds.length > 0" class="mt-3">
-            <label style="color: #1e293b; font-weight: 600; font-size: 13px; margin-bottom: 6px; display: block;">
-              Thứ tự riêng theo từng chuyên ngành đã chọn:
-            </label>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px;">
-              <div 
-                v-for="mId in lecturerForm.majorIds" 
-                :key="mId"
-                style="background: #ffffff; padding: 10px 14px; border-radius: 8px; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: space-between; gap: 10px;"
-              >
-                <span style="font-size: 12.5px; font-weight: 600; color: #334155;">{{ getMajorNameById(mId) }}</span>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                  <span style="font-size: 12px; color: #64748b;">Số:</span>
-                  <input 
-                    type="number" 
-                    min="1" 
-                    :value="lecturerForm.major_positions ? lecturerForm.major_positions[mId] : ''"
-                    @input="updateFormMajorPos(mId, $event.target.value)"
-                    class="admin-input-style" 
-                    placeholder="Mặc định"
-                    style="width: 75px; text-align: center; padding: 4px 8px; font-size: 13px; font-weight: 700; color: #0284c7;"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex-between mt-6 pt-4" style="border-top: 1px solid #e2e8f0;">
-          <button type="button" @click="activeView = 'list'" class="btn btn-secondary btn-sm" style="padding: 10px 24px;">Hủy bỏ</button>
-          <button 
-            type="submit" 
-            class="btn btn-primary btn-sm" 
-            :disabled="uploadingAvatar || savingLecturer" 
-            style="padding: 10px 32px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;"
-          >
-            <span v-if="savingLecturer" style="width: 14px; height: 14px; border: 2px solid #ffffff; border-top-color: transparent; border-radius: 50%; display: inline-block; animation: spin 0.8s linear infinite;"></span>
-            <span>{{ savingLecturer ? 'Đang lưu giảng viên...' : (uploadingAvatar ? 'Đang tải ảnh...' : 'Lưu thông tin giảng viên') }}</span>
-          </button>
-        </div>
-      </form>
-    </div>
-
-    <!-- MODAL LECTURER MAJORS CRUD -->
-    <div v-if="showMajorsModal" class="modal-overlay" @click.self="closeMajorsModal">
-      <div class="modal-content animate-fade-in" style="max-width: 700px;">
-        <div class="modal-header">
-          <h3>Quản lý Chuyên ngành Giảng viên (Database)</h3>
-          <button class="close-btn" @click="closeMajorsModal">&times;</button>
-        </div>
-
-        <div class="modal-body" style="padding: 16px 0;">
-          <!-- Form Create / Edit Major -->
-          <form @submit.prevent="saveMajor" style="background: #f8fafc; padding: 16px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #e2e8f0;">
-            <h4 style="margin-top: 0; margin-bottom: 12px; font-size: 15px; color: #0f172a; font-weight: 700;">
-              {{ isEditingMajor ? 'Chỉnh sửa chuyên ngành' : 'Thêm chuyên ngành mới' }}
-            </h4>
-            
-            <div class="grid-2">
-              <div class="form-group">
-                <label style="font-size: 12px; font-weight: 600; color: #475569;">Mã ID chuyên ngành (Slug)</label>
-                <input 
-                  v-model="majorForm.id" 
-                  :disabled="isEditingMajor" 
-                  type="text" 
-                  required 
-                  class="admin-input-style" 
-                  placeholder="tai-chinh-lanh-dao" 
-                  style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-size: 13px;"
-                />
-              </div>
-              <div class="form-group">
-                <label style="font-size: 12px; font-weight: 600; color: #475569;">Tên chuyên ngành</label>
-                <input 
-                  v-model="majorForm.name" 
-                  @input="onMajorNameInput" 
-                  type="text" 
-                  required 
-                  class="admin-input-style" 
-                  placeholder="QUẢN TRỊ - TÀI CHÍNH" 
-                  style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-size: 13px;"
-                />
-              </div>
-            </div>
-
-            <div class="grid-2 mt-2">
-              <div class="form-group">
-                <label style="font-size: 12px; font-weight: 600; color: #475569;">Nhãn Badge Header</label>
-                <input 
-                  v-model="majorForm.badge" 
-                  type="text" 
-                  class="admin-input-style" 
-                  placeholder="QUẢN TRỊ - TÀI CHÍNH" 
-                  style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-size: 13px;"
-                />
-              </div>
-              <div class="form-group">
-                <label style="font-size: 12px; font-weight: 600; color: #475569;">Mô tả ngắn chuyên ngành</label>
-                <input 
-                  v-model="majorForm.description" 
-                  type="text" 
-                  class="admin-input-style" 
-                  placeholder="Đội ngũ chuyên gia chuyên sâu thuộc..." 
-                  style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-size: 13px;"
-                />
-              </div>
-            </div>
-
-            <div class="mt-3" style="display: flex; gap: 8px; justify-content: flex-end;">
-              <button v-if="isEditingMajor" type="button" class="btn btn-secondary btn-xs" @click="resetMajorForm">Hủy sửa</button>
-              <button type="submit" class="btn btn-primary btn-xs" style="padding: 6px 16px; font-weight: 700;">
-                {{ isEditingMajor ? 'Cập nhật chuyên ngành' : 'Tạo mới' }}
-              </button>
-            </div>
-          </form>
-
-          <!-- Majors List Table -->
-          <div class="table-responsive">
-            <table class="admin-table" style="font-size: 13px;">
-              <thead>
-                <tr>
-                  <th>ID Slug</th>
-                  <th>Tên Chuyên ngành</th>
-                  <th>Số Giảng viên</th>
-                  <th class="text-right">Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="m in lecturerMajors" :key="m.id">
-                  <td><code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #0284c7;">{{ m.id }}</code></td>
-                  <td><strong>{{ m.name }}</strong></td>
-                  <td><span class="badge badge-info">{{ getMajorLecturersCount(m.id) }} người</span></td>
-                  <td class="text-right">
-                    <div class="action-buttons" style="justify-content: flex-end;">
-                      <button @click="editMajor(m)" class="btn-action edit" title="Sửa">✏️</button>
-                      <button @click="deleteMajor(m)" class="btn-action delete" title="Xóa">🗑️</button>
-                    </div>
-                  </td>
-                </tr>
-                <tr v-if="lecturerMajors.length === 0">
-                  <td colspan="5" class="text-center py-4 text-muted">Chưa có chuyên ngành nào trong Database.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="modal-footer" style="display: flex; justify-content: flex-end;">
-          <button type="button" class="btn btn-secondary" @click="closeMajorsModal">Đóng</button>
-        </div>
-      </div>
-    </div>
-    <!-- Image Cropper Modal -->
-    <ImageCropperModal :isOpen="isCropperOpen" :imageUrl="cropTargetUrl" :aspectRatio="cropAspectRatio" :title="cropModalTitle" @close="isCropperOpen = false" @cropped="handleCroppedImage" />
+    <!-- Quick Table Image Cropper Modal -->
+    <ImageCropperModal 
+      :isOpen="isCropperOpen" 
+      :imageUrl="cropTargetUrl" 
+      :aspectRatio="'square'" 
+      :title="cropModalTitle" 
+      @close="isCropperOpen = false" 
+      @cropped="handleQuickCropped" 
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
-import { slugify } from '@/utils/slugify';
 import { formatImageUrl } from '@/utils/imageHelper';
 import Pagination from '@/components/Pagination.vue';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
-import RichTextEditor from '@/components/RichTextEditor.vue';
+import LecturerMajorsModal from '../modals/LecturerMajorsModal.vue';
+import LecturerFormView from '../modals/LecturerFormView.vue';
 
 const courseStore = useCourseStore();
 const isLoadingLecturers = ref(courseStore.lecturers.length === 0);
-const savingLecturer = ref(false);
 
-// Cropper States
+// View navigation
+const activeView = ref('list');
+const editingLecturer = ref(null);
+const showMajorsModal = ref(false);
+
+// Cropper States for quick edit in table
 const isCropperOpen = ref(false);
 const cropTargetUrl = ref('');
-const cropAspectRatio = ref('square');
-const cropModalTitle = ref('✂ Cắt & Căn Chỉnh Avatar Giảng Viên');
-let cropTargetCallback = null;
-const pendingDeleteImages = ref([]);
-
-const openCropper = (url, callback, ratio = 'square', title = '✂ Cắt & Căn Chỉnh Avatar Giảng Viên') => {
-  if (!url) return;
-  cropTargetUrl.value = url;
-  cropAspectRatio.value = ratio;
-  cropModalTitle.value = title;
-  cropTargetCallback = callback;
-  isCropperOpen.value = true;
-};
-
-const onFileSelectForCrop = (event, callback, ratio = 'square', title = '✂ Cắt & Căn Chỉnh Avatar Giảng Viên') => {
-  const file = event.target?.files?.[0];
-  if (!file) return;
-  // Khi đổi ảnh mới hoàn toàn từ máy: đưa ảnh cũ vào hàng đợi chờ lưu thành công mới xóa
-  if (isEditing.value && lecturerForm.value.avatar && lecturerForm.value.avatar.includes('cloudinary.com')) {
-    if (!pendingDeleteImages.value.includes(lecturerForm.value.avatar)) {
-      pendingDeleteImages.value.push(lecturerForm.value.avatar);
-    }
-  }
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    openCropper(e.target.result, callback, ratio, title);
-  };
-  reader.readAsDataURL(file);
-  event.target.value = '';
-};
-
-const handleCroppedImage = async (newUrl) => {
-  isCropperOpen.value = false;
-  if (cropTargetCallback) {
-    await cropTargetCallback(newUrl);
-  }
-};
-
+const cropModalTitle = ref('✂ Cắt Avatar Giảng Viên');
+let quickCropperTargetLecturer = null;
 
 const isReorderMode = ref(false);
+const searchQuery = ref('');
+const selectedMajorFilter = ref('all');
+const currentPage = ref(1);
+const pageSize = ref(8);
 
 const lecturers = computed(() => courseStore.lecturers || []);
 const lecturerMajors = computed(() => courseStore.lecturerMajors || []);
-
 const localLecturers = ref([]);
 
 watch(lecturers, (newList) => {
   localLecturers.value = [...newList];
 }, { immediate: true });
-
-const featuredCount = computed(() => {
-  return lecturers.value.filter(l => l.is_featured).length;
-});
 
 const getMajorNameById = (id) => {
   if (!id) return 'Chuyên gia';
@@ -579,6 +296,35 @@ const getMajorLecturersCount = (majorId) => {
     return ids.includes(majorId);
   }).length;
 };
+
+const filteredLecturers = computed(() => {
+  let list = [...localLecturers.value];
+
+  if (selectedMajorFilter.value !== 'all') {
+    list = list.filter(l => {
+      const ids = l.majorIds && l.majorIds.length > 0 ? l.majorIds : (l.majorId ? [l.majorId] : []);
+      return ids.includes(selectedMajorFilter.value);
+    });
+  }
+
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase().trim();
+    list = list.filter(l => {
+      const nameMatch = (l.name || '').toLowerCase().includes(q);
+      const titleMatch = (l.title || '').toLowerCase().includes(q);
+      const majorMatch = (l.majorIds || []).some(id => getMajorNameById(id).toLowerCase().includes(q));
+      return nameMatch || titleMatch || majorMatch;
+    });
+  }
+
+  return list;
+});
+
+const paginatedLecturers = computed(() => {
+  if (pageSize.value === 999) return filteredLecturers.value;
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredLecturers.value.slice(start, start + pageSize.value);
+});
 
 const isFirstInList = (l) => {
   const list = filteredLecturers.value;
@@ -598,443 +344,88 @@ const moveLecturer = async (l, direction) => {
   const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
   if (targetIndex < 0 || targetIndex >= list.length) return;
 
-  // Swap elements
   const temp = list[currentIndex];
   list[currentIndex] = list[targetIndex];
   list[targetIndex] = temp;
 
-  const majorId = selectedMajorFilter.value;
+  localLecturers.value = list;
 
-  if (majorId !== 'all') {
-    // Map new positions 1..N in this major
-    const posMap = new Map();
-    const updates = [];
-    list.forEach((item, idx) => {
-      const pos = idx + 1;
-      posMap.set(item.id, pos);
-      updates.push({ id: item.id, position: pos });
-    });
-
-    // Instant local UI update
-    localLecturers.value = localLecturers.value.map(item => {
-      if (posMap.has(item.id)) {
-        return {
-          ...item,
-          major_positions: {
-            ...(item.major_positions || {}),
-            [majorId]: posMap.get(item.id)
-          }
-        };
-      }
-      return item;
-    });
-
-    try {
-      await courseStore.reorderLecturers(updates, majorId);
-    } catch (err) {
-      courseStore.showToast('Không thể lưu thứ tự.', 'error');
-    }
-  } else {
-    // Global swap
-    const fullList = [...localLecturers.value];
-    const fromIdx = fullList.findIndex(item => item.id === l.id);
-    const toLecturer = list[currentIndex]; // the one that took l's place
-    const toIdx = fullList.findIndex(item => item.id === toLecturer.id);
-
-    // Swap in full list
-    if (fromIdx !== -1 && toIdx !== -1) {
-      const tempFull = fullList[fromIdx];
-      fullList[fromIdx] = fullList[toIdx];
-      fullList[toIdx] = tempFull;
-    }
-
-    const posMap = new Map();
-    const updates = [];
-    fullList.forEach((item, idx) => {
-      const pos = idx + 1;
-      posMap.set(item.id, pos);
-      updates.push({ id: item.id, position: pos });
-    });
-
-    localLecturers.value = localLecturers.value.map(item => {
-      if (posMap.has(item.id)) {
-        return {
-          ...item,
-          position: posMap.get(item.id)
-        };
-      }
-      return item;
-    });
-
-    try {
-      await courseStore.reorderLecturers(updates, 'all');
-    } catch (err) {
-      courseStore.showToast('Không thể lưu thứ tự.', 'error');
-    }
-  }
-};
-
-const updateFormMajorPos = (mId, val) => {
-  const num = parseInt(val, 10);
-  const current = { ...(lecturerForm.value.major_positions || {}) };
-  if (!isNaN(num) && num > 0) {
-    current[mId] = num;
-  } else {
-    delete current[mId];
-  }
-  lecturerForm.value.major_positions = current;
-};
-
-// Drag and drop state & handlers
-const draggedIndex = ref(null);
-const dragOverIndex = ref(null);
-
-const onDragStart = (e, index) => {
-  const globalIndex = (currentPage.value - 1) * pageSize.value + index;
-  draggedIndex.value = globalIndex;
-  e.dataTransfer.effectAllowed = 'move';
-};
-
-const onDragOver = (e, index) => {
-  const globalIndex = (currentPage.value - 1) * pageSize.value + index;
-  dragOverIndex.value = globalIndex;
-};
-
-const onDrop = async (e, targetIndex) => {
-  const globalTargetIndex = (currentPage.value - 1) * pageSize.value + targetIndex;
-  if (draggedIndex.value === null || draggedIndex.value === globalTargetIndex) {
-    draggedIndex.value = null;
-    dragOverIndex.value = null;
-    return;
-  }
-
-  const currentFiltered = [...filteredLecturers.value];
-  const draggedItem = currentFiltered[draggedIndex.value];
-  const targetItem = currentFiltered[globalTargetIndex];
-
-  draggedIndex.value = null;
-  dragOverIndex.value = null;
-
-  if (selectedMajorFilter.value !== 'all') {
-    // Reorder within the specific major
-    currentFiltered.splice(draggedIndex.value, 1);
-    const newTargetIdx = currentFiltered.findIndex(item => item.id === targetItem.id);
-    currentFiltered.splice(newTargetIdx >= 0 ? newTargetIdx : currentFiltered.length, 0, draggedItem);
-
-    // Update localLecturers' major_positions for immediate reactive UI
-    const majorId = selectedMajorFilter.value;
-    const posMap = new Map();
-    currentFiltered.forEach((item, idx) => {
-      posMap.set(item.id, idx + 1);
-    });
-
-    localLecturers.value = localLecturers.value.map(l => {
-      if (posMap.has(l.id)) {
-        return {
-          ...l,
-          major_positions: {
-            ...(l.major_positions || {}),
-            [majorId]: posMap.get(l.id)
-          }
-        };
-      }
-      return l;
-    });
-
-    try {
-      await courseStore.reorderLecturers(currentFiltered, majorId);
-      courseStore.showToast('Đã cập nhật thứ tự giảng viên theo chuyên ngành!', 'success');
-    } catch (err) {
-      courseStore.showToast('Không thể cập nhật thứ tự.', 'error');
-    }
-  } else {
-    // Reorder in full global list
-    const fullList = [...localLecturers.value];
-    const fromIdx = fullList.findIndex(item => item.id === draggedItem.id);
-    fullList.splice(fromIdx, 1);
-    const toIdx = fullList.findIndex(item => item.id === targetItem.id);
-    fullList.splice(toIdx >= 0 ? toIdx : fullList.length, 0, draggedItem);
-    localLecturers.value = fullList;
-
-    try {
-      await courseStore.reorderLecturers(localLecturers.value, 'all');
-      courseStore.showToast('Đã cập nhật thứ tự hiển thị giảng viên!', 'success');
-    } catch (err) {
-      courseStore.showToast('Không thể cập nhật thứ tự.', 'error');
-    }
-  }
-};
-
-const toggleFeatured = async (l) => {
   try {
-    const updated = await courseStore.toggleLecturerFeatured(l.id);
-    const isNowFeatured = updated ? updated.is_featured : !l.is_featured;
-    courseStore.showToast(isNowFeatured ? `Đã gắn mác Nổi bật Trang chủ cho ${l.name}` : `Đã bỏ Nổi bật đối với ${l.name}`, 'info');
+    const isFiltered = selectedMajorFilter.value !== 'all';
+    const reorderedPayload = list.map((item, index) => {
+      const pos = index + 1;
+      if (isFiltered) {
+        const majorPos = item.major_positions ? { ...item.major_positions } : {};
+        majorPos[selectedMajorFilter.value] = pos;
+        return { id: item.id, major_positions: majorPos };
+      }
+      return { id: item.id, position: pos };
+    });
+
+    await courseStore.reorderAdminLecturers(reorderedPayload);
   } catch (err) {
-    courseStore.showToast(err.message || 'Không thể thay đổi trạng thái nổi bật.', 'error');
+    courseStore.showToast(err.message || 'Lỗi khi lưu vị trí giảng viên.', 'error');
   }
 };
 
-const toggleShowDetail = async (l) => {
-  const currentVal = !!(l.show_detail_btn || l.showDetailBtn);
-  const newVal = !currentVal;
-  try {
-    await courseStore.updateAdminLecturer(l.id, { ...l, show_detail_btn: newVal });
-    l.show_detail_btn = newVal;
-    courseStore.showToast(newVal ? `Đã BẬT nút "Xem chi tiết" cho giảng viên ${l.name}!` : `Đã ẨN nút "Xem chi tiết" của ${l.name}.`, 'info');
-  } catch (err) {
-    courseStore.showToast(err.message || 'Không thể thay đổi trạng thái nút chi tiết.', 'error');
-  }
+const openQuickCropper = (l) => {
+  quickCropperTargetLecturer = l;
+  cropTargetUrl.value = l.avatar || l.avatar_drive_link || '/images/default-avatar.jpg';
+  cropModalTitle.value = `✂ Cắt Avatar Giảng Viên: ${l.name}`;
+  isCropperOpen.value = true;
 };
 
-const searchQuery = ref('');
-const selectedMajorFilter = ref('all');
-const currentPage = ref(1);
-const pageSize = ref(8);
-
-watch([searchQuery, selectedMajorFilter, pageSize], () => {
-  currentPage.value = 1;
-});
-
-const filteredLecturers = computed(() => {
-  const list = localLecturers.value.filter(l => {
-    // Filter by Major
-    if (selectedMajorFilter.value !== 'all') {
-      const ids = l.majorIds && l.majorIds.length > 0 ? l.majorIds : (l.majorId ? [l.majorId] : []);
-      if (!ids.includes(selectedMajorFilter.value)) {
-        return false;
-      }
-    }
-
-    // Filter by search query
-    const q = (searchQuery.value || '').toLowerCase().trim();
-    const lName = (l.name || '').toLowerCase();
-    const lTitle = (l.title || '').toLowerCase();
-    const lId = (l.id || '').toString().toLowerCase();
-    const mNames = (l.majorIds || [l.majorId]).filter(Boolean).map(mId => getMajorNameById(mId).toLowerCase()).join(' ');
-    return !q || 
-           lName.includes(q) || 
-           lTitle.includes(q) ||
-           mNames.includes(q) ||
-           lId.includes(q);
-  });
-
-  if (selectedMajorFilter.value !== 'all') {
-    const majorId = selectedMajorFilter.value;
-    return list.slice().sort((a, b) => {
-      const posA = a.major_positions && a.major_positions[majorId] !== undefined ? a.major_positions[majorId] : (a.position ?? 999);
-      const posB = b.major_positions && b.major_positions[majorId] !== undefined ? b.major_positions[majorId] : (b.position ?? 999);
-      if (posA !== posB) return posA - posB;
-      return (a.name || '').localeCompare(b.name || '', 'vi');
+const handleQuickCropped = async (newUrl) => {
+  isCropperOpen.value = false;
+  if (quickCropperTargetLecturer) {
+    await courseStore.updateAdminLecturer(quickCropperTargetLecturer.id, {
+      ...quickCropperTargetLecturer,
+      avatar: newUrl,
+      avatar_drive_link: ''
     });
-  }
-
-  return list.slice().sort((a, b) => {
-    const posA = a.position ?? 999;
-    const posB = b.position ?? 999;
-    if (posA !== posB) return posA - posB;
-    return (a.name || '').localeCompare(b.name || '', 'vi');
-  });
-});
-
-const paginatedLecturers = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  return filteredLecturers.value.slice(start, start + pageSize.value);
-});
-
-const activeView = ref('list'); // 'list' | 'form'
-const isEditing = ref(false);
-const uploadingAvatar = ref(false);
-
-const lecturerForm = ref({
-  id: '',
-  name: '',
-  title: '',
-  tagline: '',
-  avatar: '',
-  avatarDriveLink: '',
-  driveProfile: '',
-  bioShort: '',
-  detailsHtml: '',
-  majorId: '',
-  majorIds: [],
-  position: 0,
-  major_positions: {},
-  is_featured: false,
-  show_detail_btn: false
-});
-
-const onNameInput = () => {
-  if (!isEditing.value) {
-    lecturerForm.value.id = slugify(lecturerForm.value.name).trim();
+    quickCropperTargetLecturer.avatar = newUrl;
+    quickCropperTargetLecturer.avatar_drive_link = '';
+    courseStore.showToast('Đã cắt và cập nhật ảnh giảng viên!', 'success');
+    quickCropperTargetLecturer = null;
   }
 };
 
-onMounted(async () => {
-  if (courseStore.lecturers.length === 0) {
-    isLoadingLecturers.value = true;
-  }
-  try {
-    await Promise.all([
-      courseStore.fetchLecturerMajors(),
-      courseStore.fetchLecturers()
-    ]);
-  } finally {
-    isLoadingLecturers.value = false;
-  }
-});
-
-const openAddLecturerModal = () => {
-  isEditing.value = false;
-  pendingDeleteImages.value = [];
-  lecturerForm.value = {
-    id: '',
-    name: '',
-    title: '',
-    tagline: '',
-    avatar: '/images/default-avatar.jpg',
-    avatarDriveLink: '',
-    driveProfile: '',
-    bioShort: '',
-    detailsHtml: '',
-    majorId: lecturerMajors.value.length > 0 ? lecturerMajors.value[0].id : '',
-    majorIds: lecturerMajors.value.length > 0 ? [lecturerMajors.value[0].id] : [],
-    position: (lecturers.value.length || 0) + 1,
-    major_positions: {},
-    is_featured: false,
-    show_detail_btn: false
-  };
+const openAddLecturer = () => {
+  editingLecturer.value = null;
   activeView.value = 'form';
 };
 
 const editLecturer = (l) => {
-  isEditing.value = true;
-  pendingDeleteImages.value = [];
-  const initialMajorIds = l.majorIds && l.majorIds.length > 0 ? [...l.majorIds] : (l.majorId ? [l.majorId] : []);
-  lecturerForm.value = {
-    id: l.id,
-    name: l.name,
-    title: l.title,
-    tagline: l.tagline || '',
-    avatar: l.avatar || l.avatar_drive_link || '/images/default-avatar.jpg',
-    avatarDriveLink: l.avatar_drive_link || '',
-    driveProfile: l.drive_profile || '',
-    bioShort: l.bio_short || l.bioShort || '',
-    detailsHtml: l.details_html || l.detailsHtml || '',
-    majorId: l.majorId || '',
-    majorIds: initialMajorIds,
-    position: l.position ?? 1,
-    major_positions: l.major_positions ? { ...l.major_positions } : {},
-    is_featured: l.is_featured || false,
-    show_detail_btn: !!(l.show_detail_btn ?? l.showDetailBtn ?? false)
-  };
+  editingLecturer.value = l;
   activeView.value = 'form';
+};
 
-  // Nạp chi tiết detailsHtml từ API nếu danh sách đã được tối ưu cắt giảm
-  if (!l.details_html && !l.detailsHtml) {
-    courseStore.apiRequest(`/lecturers/${l.id}`).then(full => {
-      if (full && full.details_html && isEditing.value && editingId.value === l.id) {
-        lecturerForm.value.detailsHtml = full.details_html;
-        l.details_html = full.details_html;
-      }
-    }).catch(() => {});
+const onLecturerSaved = () => {
+  activeView.value = 'list';
+  courseStore.fetchLecturers();
+};
+
+const toggleFeatured = async (l) => {
+  try {
+    const newStatus = !l.is_featured;
+    await courseStore.updateAdminLecturer(l.id, { ...l, is_featured: newStatus });
+    l.is_featured = newStatus;
+    courseStore.showToast(`Đã ${newStatus ? 'đặt làm nổi bật' : 'bỏ nổi bật'} giảng viên ${l.name}`, 'success');
+  } catch (err) {
+    courseStore.showToast(err.message || 'Lỗi khi đổi trạng thái nổi bật.', 'error');
   }
 };
 
-const uploadAvatar = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  uploadingAvatar.value = true;
+const toggleShowDetail = async (l) => {
   try {
-    const url = await courseStore.uploadImage(file);
-    // Nếu đổi ảnh mới: đưa ảnh cũ vào hàng đợi xóa
-    if (isEditing.value && lecturerForm.value.avatar && lecturerForm.value.avatar.includes('cloudinary.com')) {
-      if (!pendingDeleteImages.value.includes(lecturerForm.value.avatar)) {
-        pendingDeleteImages.value.push(lecturerForm.value.avatar);
-      }
-    }
-    lecturerForm.value.avatar = url;
-    lecturerForm.value.avatarDriveLink = ''; // Clear old drive link so it doesn't conflict
-    courseStore.showToast('Tải ảnh đại diện thành công!', 'success');
+    const currentStatus = !!(l.show_detail_btn || l.showDetailBtn);
+    const newStatus = !currentStatus;
+    await courseStore.updateAdminLecturer(l.id, { ...l, show_detail_btn: newStatus });
+    l.show_detail_btn = newStatus;
+    l.showDetailBtn = newStatus;
+    courseStore.showToast(`Đã ${newStatus ? 'bật' : 'tắt'} nút xem chi tiết cho ${l.name}`, 'success');
   } catch (err) {
-    courseStore.showToast('Lỗi khi tải ảnh: ' + err.message, 'error');
-  } finally {
-    uploadingAvatar.value = false;
-    if (e.target) e.target.value = '';
-  }
-};
-
-const saveLecturer = async () => {
-  if (uploadingAvatar.value || savingLecturer.value) {
-    if (uploadingAvatar.value) courseStore.showToast('Ảnh đang tải lên, vui lòng đợi trong giây lát...', 'warning');
-    return;
-  }
-  try {
-    if (!lecturerForm.value.name.trim()) {
-      courseStore.showToast('Vui lòng nhập họ và tên giảng viên!', 'warning');
-      return;
-    }
-
-    savingLecturer.value = true;
-
-    // Tự động tạo mã ID slug từ tên giảng viên
-    let baseId = (lecturerForm.value.id || slugify(lecturerForm.value.name)).trim();
-    if (!baseId) {
-      baseId = 'gv-' + Date.now().toString(36);
-    }
-
-    let finalId = baseId;
-    if (!isEditing.value) {
-      // Tự động giải quyết trùng mã ID bằng cách thêm số đuôi -2, -3,...
-      let counter = 2;
-      while (lecturers.value.some(l => l.id === finalId)) {
-        finalId = `${baseId}-${counter}`;
-        counter++;
-      }
-    }
-    lecturerForm.value.id = finalId;
-
-    const cleanAvatar = (lecturerForm.value.avatar || '').trim();
-    let finalAvatar = formatImageUrl(cleanAvatar);
-    let finalDriveLink = lecturerForm.value.avatarDriveLink || '';
-
-    // If the input avatar is a Google Drive link, update avatarDriveLink
-    if (cleanAvatar.includes('drive.google.com')) {
-      finalDriveLink = cleanAvatar;
-    } else if (cleanAvatar.startsWith('http') && !cleanAvatar.includes('drive.google.com')) {
-      // Direct / Cloudinary URL: clear old drive link to prevent stale fallback
-      finalDriveLink = '';
-    }
-
-    const payload = {
-      ...lecturerForm.value,
-      id: finalId,
-      avatar: finalAvatar,
-      avatarDriveLink: finalDriveLink,
-      detailsHtml: lecturerForm.value.detailsHtml || '',
-      show_detail_btn: !!lecturerForm.value.show_detail_btn
-    };
-    if (isEditing.value) {
-      await courseStore.updateAdminLecturer(payload.id, payload);
-      courseStore.showToast('Cập nhật giảng viên thành công!', 'success');
-    } else {
-      await courseStore.addAdminLecturer(payload);
-      courseStore.showToast('Thêm giảng viên mới thành công!', 'success');
-    }
-
-    // Chỉ sau khi lưu DB thành công mới xóa các ảnh cũ trong hàng đợi
-    if (pendingDeleteImages.value.length > 0) {
-      for (const oldImg of pendingDeleteImages.value) {
-        courseStore.deleteImage(oldImg);
-      }
-      pendingDeleteImages.value = [];
-    }
-
-    activeView.value = 'list';
-  } catch (err) {
-    courseStore.showToast(err.message || 'Không thể lưu giảng viên.', 'error');
-  } finally {
-    savingLecturer.value = false;
+    courseStore.showToast(err.message || 'Lỗi khi đổi cài đặt nút chi tiết.', 'error');
   }
 };
 
@@ -1050,7 +441,6 @@ const deleteLecturer = async (l) => {
   if (isConfirmed) {
     try {
       await courseStore.deleteAdminLecturer(l.id);
-      // Xóa ảnh đại diện trên Cloudinary nếu có
       if (l.avatar && l.avatar.includes('cloudinary.com')) {
         courseStore.deleteImage(l.avatar);
       }
@@ -1061,126 +451,14 @@ const deleteLecturer = async (l) => {
   }
 };
 
-// --- LECTURER MAJORS CRUD MODAL STATE & ACTIONS ---
-const showMajorsModal = ref(false);
-const isEditingMajor = ref(false);
-const majorForm = ref({
-  id: '',
-  name: '',
-  icon: '',
-  badge: '',
-  description: '',
-  position: 0
-});
-
-const openMajorsModal = () => {
-  resetMajorForm();
-  showMajorsModal.value = true;
-};
-
-const closeMajorsModal = () => {
-  showMajorsModal.value = false;
-};
-
-const resetMajorForm = () => {
-  isEditingMajor.value = false;
-  majorForm.value = {
-    id: '',
-    name: '',
-    icon: '',
-    badge: '',
-    description: '',
-    position: 0
-  };
-};
-
-const onMajorNameInput = () => {
-  if (!isEditingMajor.value) {
-    majorForm.value.id = slugify(majorForm.value.name);
-    majorForm.value.badge = majorForm.value.name.toUpperCase();
-  }
-};
-
-const editMajor = (m) => {
-  isEditingMajor.value = true;
-  majorForm.value = {
-    id: m.id,
-    name: m.name,
-    icon: m.icon || '',
-    badge: m.badge || m.name.toUpperCase(),
-    description: m.description || '',
-    position: m.position || 0
-  };
-};
-
-const saveMajor = async () => {
+onMounted(async () => {
   try {
-    if (!majorForm.value.id.trim() || !majorForm.value.name.trim()) {
-      courseStore.showToast('Vui lòng nhập tên và mã chuyên ngành!', 'warning');
-      return;
-    }
-    if (isEditingMajor.value) {
-      await courseStore.updateAdminLecturerMajor(majorForm.value.id, majorForm.value);
-      courseStore.showToast('Cập nhật chuyên ngành thành công!', 'success');
-    } else {
-      if (lecturerMajors.value.some(m => m.id === majorForm.value.id)) {
-        courseStore.showToast('Mã ID chuyên ngành này đã tồn tại!', 'warning');
-        return;
-      }
-      await courseStore.addAdminLecturerMajor(majorForm.value);
-      courseStore.showToast('Thêm chuyên ngành mới thành công!', 'success');
-    }
-    resetMajorForm();
-  } catch (err) {
-    courseStore.showToast(err.message || 'Lỗi khi lưu chuyên ngành.', 'error');
+    await Promise.all([
+      courseStore.fetchLecturerMajors(),
+      courseStore.fetchLecturers()
+    ]);
+  } finally {
+    isLoadingLecturers.value = false;
   }
-};
-
-const deleteMajor = async (m) => {
-  const count = getMajorLecturersCount(m.id);
-  let msg = `Bạn có chắc chắn muốn xóa chuyên ngành "${m.name}"?`;
-  if (count > 0) {
-    msg += `\n\nĐang có ${count} giảng viên thuộc chuyên ngành này. Sau khi xóa, các giảng viên sẽ trở về trạng thái chưa thuộc chuyên ngành.`;
-  }
-  const isConfirmed = await courseStore.showConfirm({
-    title: 'Xác nhận xóa chuyên ngành giảng viên',
-    message: msg,
-    confirmText: 'Đồng ý xóa',
-    cancelText: 'Hủy bỏ',
-    type: 'danger'
-  });
-
-  if (isConfirmed) {
-    try {
-      await courseStore.deleteAdminLecturerMajor(m.id);
-      courseStore.showToast(`Đã xóa chuyên ngành "${m.name}".`, 'success');
-    } catch (err) {
-      courseStore.showToast(err.message || 'Lỗi khi xóa chuyên ngành.', 'error');
-    }
-  }
-};
+});
 </script>
-
-<style scoped>
-.btn-arrow {
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  color: #0f172a;
-  border-radius: 6px;
-  width: 26px;
-  height: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  line-height: 1;
-  transition: all 0.15s ease;
-  user-select: none;
-}
-.btn-arrow:hover:not(:disabled) {
-  background: #0284c7;
-  color: #ffffff;
-  border-color: #0284c7;
-  transform: scale(1.08);
-}
-</style>

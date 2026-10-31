@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import List, Optional
 from datetime import datetime
 
@@ -310,10 +310,37 @@ class ContactCreate(BaseModel):
     first_name: str
     middle_name: Optional[str] = ""
     last_name: str
-    email: str
+    email: EmailStr
     phone: str
     course_handle: Optional[str] = ""
     message: str
+
+    @field_validator("first_name", "last_name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        clean = (v or "").strip()
+        if not clean:
+            raise ValueError("Họ và tên không được để trống!")
+        return clean
+
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v: str) -> str:
+        clean = (v or "").strip()
+        digits = [c for c in clean if c.isdigit()]
+        if len(digits) < 9 or len(digits) > 15:
+            raise ValueError("Số điện thoại không hợp lệ (cần từ 9 đến 15 chữ số)!")
+        return clean
+
+    @field_validator("message")
+    @classmethod
+    def validate_message(cls, v: str) -> str:
+        clean = (v or "").strip()
+        if len(clean) < 5:
+            raise ValueError("Nội dung lời nhắn cần tối thiểu 5 ký tự!")
+        if len(clean) > 3000:
+            raise ValueError("Nội dung lời nhắn không được vượt quá 3000 ký tự!")
+        return clean
 
 class ContactResponse(BaseModel):
     id: int
@@ -390,6 +417,8 @@ class OrderResponse(BaseModel):
     id: int
     total_price: int
     discount_applied: int
+    store_credit_used: Optional[int] = 0
+    coupon_code: Optional[str] = None
     status: str
     created_at: datetime
     items: List[OrderItemResponse] = []
@@ -543,6 +572,8 @@ class OrderAdminResponse(BaseModel):
     user_email: str
     total_price: int
     discount_applied: int
+    store_credit_used: Optional[int] = 0
+    coupon_code: Optional[str] = None
     status: str
     created_at: datetime
     items: List[OrderItemAdminResponse] = []

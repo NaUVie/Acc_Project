@@ -3,19 +3,19 @@
     <div class="auth-wrapper">
       <div class="auth-card glass-card">
         <div class="auth-tabs">
-          <button class="tab-btn active">Đăng nhập</button>
-          <router-link to="/register" class="tab-btn">Đăng ký</router-link>
+          <button class="tab-btn active">{{ $t('header.login') }}</button>
+          <router-link to="/register" class="tab-btn">{{ $t('header.register') }}</router-link>
         </div>
 
         <div class="form-container">
           <div class="form-header">
-            <h2>Chào mừng quay trở lại</h2>
-            <p>Đăng nhập để tiếp tục học tập và quản lý ưu đãi giới thiệu.</p>
+            <h2>{{ $t('auth.loginTitle') }}</h2>
+            <p>{{ $t('auth.loginDesc') }}</p>
           </div>
           
           <form @submit.prevent="handleLogin" class="auth-form">
             <div class="form-group">
-              <label for="login-email">Tài khoản Email</label>
+              <label for="login-email">{{ $t('auth.emailLabel') }}</label>
               <input 
                 v-model="loginData.email" 
                 type="email" 
@@ -27,8 +27,8 @@
 
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <label for="login-password" style="margin-bottom: 0;">Mật khẩu</label>
-                <a href="#" @click.prevent="forgotPassword" style="font-size: 13px; color: #0284c7; text-decoration: none; font-weight: 600;">Quên mật khẩu?</a>
+                <label for="login-password" style="margin-bottom: 0;">{{ $t('auth.passwordLabel') }}</label>
+                <a href="#" @click.prevent="forgotPassword" style="font-size: 13px; color: #0284c7; text-decoration: none; font-weight: 600;">{{ $t('auth.forgotPassword') }}</a>
               </div>
               <input 
                 v-model="loginData.password" 

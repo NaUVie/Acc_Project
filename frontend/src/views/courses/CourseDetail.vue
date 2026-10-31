@@ -3,7 +3,7 @@
     <div class="detail-container">
       <!-- Breadcrumb Nav -->
       <nav class="breadcrumb-nav">
-        <router-link to="/" class="breadcrumb-link">Trang chủ</router-link>
+        <router-link to="/" class="breadcrumb-link">{{ $t('nav.home') }}</router-link>
         <span class="breadcrumb-separator">&rsaquo;</span>
         <router-link :to="course ? '/courses/category/' + (course.category || 'dao-tao-ca-nhan') : '/courses'" class="breadcrumb-link">{{ course ? getCategoryName(course.category) : 'Khóa học' }}</router-link>
         <span class="breadcrumb-separator">&rsaquo;</span>
@@ -13,7 +13,7 @@
       <!-- Loading State -->
       <div v-if="loading" class="detail-loading-box">
         <div class="detail-loading-spinner"></div>
-        <p class="detail-loading-text">Đang tải nội dung...</p>
+        <p class="detail-loading-text">{{ $t('common.loading') }}</p>
       </div>
 
       <!-- Error State -->
@@ -98,7 +98,7 @@
 
             <!-- Instructor Info -->
             <div v-if="courseLecturers.length > 0" class="article-section-block">
-              <h3 class="article-sub-heading">Đội ngũ Giảng viên & Chuyên gia</h3>
+              <h3 class="article-sub-heading">{{ $t('course.lecturersHeading') }}</h3>
               <div class="article-lecturers-grid">
                 <div v-for="lec in courseLecturers" :key="lec.id" class="article-lecturer-card">
                   <img :src="lec.avatar || '/images/default-avatar.jpg'" :alt="lec.name" class="lec-avatar" />
@@ -117,7 +117,7 @@
         <aside class="course-article-sidebar">
           <div class="sticky-register-card">
             <div class="sidebar-price-header">
-              <span class="price-label">{{ hasDiscount(course) ? 'Học phí ưu đãi' : 'Học phí' }}</span>
+              <span class="price-label">{{ hasDiscount(course) ? $t('course.discountTuition') : $t('course.tuition') }}</span>
               <div class="price-val-row">
                 <span class="price-current">{{ formatCurrency(course.price) }}</span>
                 <span v-if="hasDiscount(course)" class="price-old">
@@ -127,10 +127,10 @@
             </div>
 
             <div class="sidebar-perks-list">
-              <div class="sidebar-perk-item">✓ Đào tạo thực chiến 100% ứng dụng ngay</div>
-              <div class="sidebar-perk-item">✓ Giảng viên chuyên gia giàu kinh nghiệm</div>
-              <div class="sidebar-perk-item">✓ Cấp chứng nhận hoàn thành khóa học</div>
-              <div class="sidebar-perk-item">✓ Hỗ trợ giải đáp & tài liệu đi kèm</div>
+              <div class="sidebar-perk-item">{{ $t('course.perk1') }}</div>
+              <div class="sidebar-perk-item">{{ $t('course.perk2') }}</div>
+              <div class="sidebar-perk-item">{{ $t('course.perk3') }}</div>
+              <div class="sidebar-perk-item">{{ $t('course.perk4') }}</div>
             </div>
 
             <button type="button" class="sidebar-register-btn" style="width: 100%; box-sizing: border-box; cursor: pointer; border: none; font-family: var(--font-sans);" @click="buyNow">
@@ -144,8 +144,8 @@
             <!-- Sidebar Related Courses Widget (Cùng nằm trong sidebar container, cuộn tự nhiên) -->
             <div v-if="relatedCourses.length > 0" class="sidebar-related-courses-box">
               <div class="sidebar-related-header">
-                <span class="related-badge">GỢI Ý CHO BẠN</span>
-                <h3 class="sidebar-related-title">Khóa học liên quan</h3>
+                <span class="related-badge">{{ $t('course.relatedBadge') }}</span>
+                <h3 class="sidebar-related-title">{{ $t('course.relatedTitle') }}</h3>
               </div>
 
               <div class="sidebar-related-list">
@@ -569,55 +569,6 @@ onMounted(() => {
 
 </script>
 
-<style scoped>
-.rich-course-description {
-  color: #334155;
-  font-size: 15px;
-  line-height: 1.7;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f1f5f9;
-  margin-bottom: 24px;
-}
 
-.rich-course-description :deep(h2) {
-  font-size: 20px;
-  font-weight: 800;
-  color: #0f172a;
-  margin-top: 16px;
-  margin-bottom: 10px;
-}
-
-.rich-course-description :deep(h3) {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1e293b;
-  margin-top: 14px;
-  margin-bottom: 8px;
-}
-
-.rich-course-description :deep(ul),
-.rich-course-description :deep(ol) {
-  padding-left: 24px;
-  margin: 10px 0;
-}
-
-.rich-course-description :deep(li) {
-  margin-bottom: 6px;
-}
-
-.rich-course-description :deep(a) {
-  color: #0284c7;
-  text-decoration: underline;
-  font-weight: 600;
-}
-
-.rich-course-description :deep(img) {
-  max-width: 100%;
-  height: auto;
-  border-radius: 12px;
-  margin: 16px 0;
-  display: block;
-}
-</style>
 
 <style scoped src="@/styles/views/courses/CourseDetail.css"></style>

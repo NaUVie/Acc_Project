@@ -56,7 +56,7 @@ def create_order_admin(order_in: schemas.OrderAdminCreate, db: Session = Depends
         user_id=order_in.user_id,
         total_price=order_in.total_price,
         discount_applied=order_in.discount_applied,
-        status=order_in.status
+        status="pending" if order_in.status == "paid" else order_in.status
     )
     db.add(db_order)
     db.flush()
@@ -73,6 +73,11 @@ def create_order_admin(order_in: schemas.OrderAdminCreate, db: Session = Depends
             
     db.commit()
     db.refresh(db_order)
+
+    # If created as paid, immediately execute full enrollment & reward fulfillment
+    if order_in.status == "paid":
+        crud.pay_order(db, order_id=db_order.id)
+        db.refresh(db_order)
     
     # Return formatted order response
     return {
@@ -96,37 +101,6 @@ def update_order_admin(id: int, order_in: schemas.OrderAdminUpdate, db: Session 
             detail="Đơn hàng không tồn tại"
         )
         
-    if order_in.status is not None:
-        # Handle referral reward when transitioning to paid
-        if order_in.status == "paid" and db_order.status != "paid":
-            user = db_order.user
-            if user and user.referred_by_id:
-                referrer = db.query(models.User).filter(models.User.id == user.referred_by_id).first()
-                if referrer:
-                    total_earned = 0
-                    for item in db_order.items:
-                        comm_pct = crud.get_commission_percent_for_user_course(db, referrer.id, item.course_id)
-                        total_earned += int(item.price * (comm_pct / 100.0))
-
-                    existing_referral = db.query(models.Referral).filter(
-                        models.Referral.referred_id == user.id
-                    ).first()
-
-                    if not existing_referral:
-                        db_referral = models.Referral(
-                            referrer_id=referrer.id,
-                            referred_id=user.id,
-                            commission_amount=total_earned,
-                            status="completed"
-                        )
-                        db.add(db_referral)
-                    else:
-                        existing_referral.commission_amount += total_earned
-
-                    referrer.store_credit_balance += total_earned
-
-        db_order.status = order_in.status
-        
     if order_in.discount_applied is not None:
         db_order.discount_applied = order_in.discount_applied
     if order_in.total_price is not None:
@@ -144,8 +118,19 @@ def update_order_admin(id: int, order_in: schemas.OrderAdminUpdate, db: Session 
                     price=course.price
                 )
                 db.add(db_item)
-                
-    db.commit()
+        db.commit()
+        db.refresh(db_order)
+
+    if order_in.status is not None:
+        # Full enrollment & reward fulfillment when transitioning to paid
+        if order_in.status == "paid" and db_order.status != "paid":
+            crud.pay_order(db, order_id=id)
+        elif order_in.status == "cancelled" and db_order.status == "pending":
+            crud.cancel_order(db, order_id=id)
+        else:
+            db_order.status = order_in.status
+            db.commit()
+
     db.refresh(db_order)
     
     return {

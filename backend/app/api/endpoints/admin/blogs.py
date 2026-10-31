@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ....database import get_db
-from .... import schemas, crud
+from .... import models, schemas, crud
 
 router = APIRouter()
 
@@ -61,6 +61,17 @@ def create_blog_admin(blog_in: schemas.BlogPostCreate, db: Session = Depends(get
 
 @router.put("/blogs/{id}", response_model=schemas.BlogPostResponse)
 def update_blog_admin(id: int, blog_in: schemas.BlogPostUpdate, db: Session = Depends(get_db)):
+    if blog_in.handle:
+        existing_handle = db.query(models.BlogPost).filter(
+            models.BlogPost.handle == blog_in.handle,
+            models.BlogPost.id != id
+        ).first()
+        if existing_handle:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Mã đường dẫn tĩnh (Handle) '{blog_in.handle}' đã được sử dụng bởi bài viết '{existing_handle.title}'. Vui lòng đổi handle khác!"
+            )
+            
     updated = crud.update_blog_post(db, id, blog_in)
     if not updated:
         raise HTTPException(status_code=404, detail="Bài viết không tồn tại")

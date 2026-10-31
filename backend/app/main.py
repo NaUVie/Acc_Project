@@ -71,6 +71,15 @@ def perform_startup_tasks():
                     conn.execute(text("ALTER TABLE courses ADD COLUMN cover_image VARCHAR(255) NULL"))
                     print("Added column cover_image to courses table.")
             
+            if inspector.has_table("orders"):
+                orders_cols = [c["name"] for c in inspector.get_columns("orders")]
+                if "store_credit_used" not in orders_cols:
+                    conn.execute(text("ALTER TABLE orders ADD COLUMN store_credit_used INT DEFAULT 0"))
+                    print("Added column store_credit_used to orders table.")
+                if "coupon_code" not in orders_cols:
+                    conn.execute(text("ALTER TABLE orders ADD COLUMN coupon_code VARCHAR(50) NULL"))
+                    print("Added column coupon_code to orders table.")
+
             if inspector.has_table("enrollments"):
                 enr_cols = [c["name"] for c in inspector.get_columns("enrollments")]
                 if "progress_data" not in enr_cols:

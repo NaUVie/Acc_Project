@@ -12,10 +12,10 @@
           <!-- 1. Header Giỏ hàng -->
           <div class="cart-header">
             <div class="header-title">
-              <h2>Giỏ hàng của bạn</h2>
+              <h2>{{ $t('cart.title') }}</h2>
               <span class="cart-badge">{{ cartCount }}</span>
             </div>
-            <button class="close-btn" @click="closeCart" aria-label="Đóng giỏ hàng">
+            <button class="close-btn" @click="closeCart" :aria-label="$t('cart.close')">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -44,7 +44,7 @@
                     <span v-if="currentSubtotal >= 300000" class="node-icon check">✓</span>
                     <span v-else class="node-icon">🎁</span>
                   </div>
-                  <span class="tier-label">Giảm 10%</span>
+                  <span class="tier-label">{{ $t('cart.tier10') }}</span>
                 </div>
 
                 <!-- Mốc 2: 22% -->
@@ -53,7 +53,7 @@
                     <span v-if="currentSubtotal >= 600000" class="node-icon check">✓</span>
                     <span v-else class="node-icon">%</span>
                   </div>
-                  <span class="tier-label">Giảm 22%</span>
+                  <span class="tier-label">{{ $t('cart.tier22') }}</span>
                 </div>
 
                 <!-- Mốc 3: 25% -->
@@ -62,7 +62,7 @@
                     <span v-if="currentSubtotal >= 1000000" class="node-icon check">✓</span>
                     <span v-else class="node-icon">🎉</span>
                   </div>
-                  <span class="tier-label">Giảm 25%</span>
+                  <span class="tier-label">{{ $t('cart.tier25') }}</span>
                 </div>
               </div>
             </div>
@@ -72,8 +72,8 @@
           <div class="cart-body">
             <div v-if="cartItems.length === 0" class="empty-cart">
               <div class="empty-icon">🛒</div>
-              <p>Giỏ hàng của bạn đang trống</p>
-              <button class="continue-shopping-btn" @click="closeCart">Tiếp tục khám phá khóa học</button>
+              <p>{{ $t('cart.empty') }}</p>
+              <button class="continue-shopping-btn" @click="closeCart">{{ $t('cart.continueShopping') }}</button>
             </div>
 
             <div v-else class="cart-items-list">
@@ -114,7 +114,7 @@
           <!-- 4. Footer Thanh toán -->
           <div class="cart-footer" v-if="cartItems.length > 0">
             <div class="summary-row" v-if="discountRate > 0">
-              <span class="summary-label">Tạm tính</span>
+              <span class="summary-label">{{ $t('cart.subtotal') }}</span>
               <span class="summary-amount-sub">{{ formatCurrency(currentSubtotal) }}</span>
             </div>
             <div class="summary-row" v-if="discountRate > 0">
@@ -122,7 +122,7 @@
               <span class="summary-amount-discount">-{{ formatCurrency(currentSubtotal * discountRate) }}</span>
             </div>
             <div class="summary-row highlight">
-              <span class="summary-label">Tổng thanh toán</span>
+              <span class="summary-label">{{ $t('cart.total') }}</span>
               <span class="summary-amount">{{ formatCurrency(finalTotal) }}</span>
             </div>
 

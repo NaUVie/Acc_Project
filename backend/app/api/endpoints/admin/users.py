@@ -24,6 +24,11 @@ def create_user_admin(user_in: schemas.UserAdminCreate, db: Session = Depends(ge
             detail="Email đã tồn tại trên hệ thống!"
         )
 
+    if user_in.referred_by_id:
+        referrer = db.query(models.User).filter(models.User.id == user_in.referred_by_id).first()
+        if not referrer:
+            raise HTTPException(status_code=400, detail="Người giới thiệu không tồn tại!")
+
     hashed_pwd = auth.get_password_hash(user_in.password)
     unique_ref = f"ACC-{uuid.uuid4().hex[:6].upper()}"
     
@@ -67,12 +72,41 @@ def update_user_admin(id: int, user_in: schemas.UserAdminUpdate, db: Session = D
     if user_in.password:
         db_user.hashed_password = auth.get_password_hash(user_in.password)
         
+    if user_in.referred_by_id is not None:
+        if user_in.referred_by_id == id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Học viên không thể tự giới thiệu chính mình!"
+            )
+        if user_in.referred_by_id > 0:
+            referrer = db.query(models.User).filter(models.User.id == user_in.referred_by_id).first()
+            if not referrer:
+                raise HTTPException(status_code=400, detail="Người giới thiệu không tồn tại!")
+            if referrer.referred_by_id == id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Không thể tạo vòng lặp giới thiệu chéo giữa 2 học viên!"
+                )
+            db_user.referred_by_id = user_in.referred_by_id
+        else:
+            db_user.referred_by_id = None
+        
     db.commit()
     db.refresh(db_user)
     return db_user
 
 @router.delete("/users/{id}", status_code=status.HTTP_200_OK)
-def delete_user_admin(id: int, db: Session = Depends(get_db)):
+def delete_user_admin(
+    id: int, 
+    current_admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(get_db)
+):
+    if id == current_admin.id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Không thể xóa chính tài khoản Admin bạn đang sử dụng!"
+        )
+
     db_user = db.query(models.User).filter(models.User.id == id).first()
     if not db_user:
         raise HTTPException(
@@ -80,14 +114,26 @@ def delete_user_admin(id: int, db: Session = Depends(get_db)):
             detail="Học viên không tồn tại"
         )
     
-    # Check if user has orders or enrollments
+    # Check if user has orders
     order_count = db.query(models.Order).filter(models.Order.user_id == id).count()
     if order_count > 0:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Không thể xóa học viên đã có lịch sử đơn hàng. Hãy vô hiệu hóa tài khoản thay vì xóa."
+            detail="Không thể xóa học viên đã có lịch sử đơn hàng. Hãy khóa/vô hiệu hóa tài khoản thay vì xóa."
         )
-        
+
+    # Detach referred users so foreign key constraint is satisfied
+    db.query(models.User).filter(models.User.referred_by_id == id).update({"referred_by_id": None})
+    
+    # Clean up referrals, commissions, cart, wishlist, notes, reviews
+    db.query(models.Referral).filter((models.Referral.referrer_id == id) | (models.Referral.referred_id == id)).delete()
+    db.query(models.UserCourseCommission).filter(models.UserCourseCommission.user_id == id).delete()
+    db.query(models.CartItem).filter(models.CartItem.user_id == id).delete()
+    db.query(models.Wishlist).filter(models.Wishlist.user_id == id).delete()
+    db.query(models.LessonNote).filter(models.LessonNote.user_id == id).delete()
+    db.query(models.CourseReview).filter(models.CourseReview.user_id == id).delete()
+    db.query(models.Enrollment).filter(models.Enrollment.user_id == id).delete()
+
     db.delete(db_user)
     db.commit()
     return {"message": "Đã xóa học viên thành công"}

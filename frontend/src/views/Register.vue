@@ -3,8 +3,8 @@
     <div class="auth-wrapper">
       <div class="auth-card glass-card">
         <div class="auth-tabs">
-          <router-link to="/login" class="tab-btn">Đăng nhập</router-link>
-          <button class="tab-btn active">Đăng ký</button>
+          <router-link to="/login" class="tab-btn">{{ $t('header.login') }}</router-link>
+          <button class="tab-btn active">{{ $t('header.register') }}</button>
         </div>
 
         <div class="form-container">
@@ -37,7 +37,7 @@
             </div>
 
             <div class="form-group">
-              <label for="reg-password">Mật khẩu</label>
+              <label for="reg-password">{{ $t('auth.passwordLabel') }}</label>
               <input 
                 type="password" 
                 id="reg-password" 

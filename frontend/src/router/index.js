@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import { i18n, setLanguage } from '../i18n';
 
 const routes = [
   {
@@ -27,14 +28,14 @@ const routes = [
     component: () => import('../views/courses/CourseDetail.vue')
   },
   {
-    path: '/tuyen-sinh',
-    alias: ['/post-graduate/mba', '/post-graduate/gei', '/post-graduate/mini-mba'],
+    path: '/admissions',
+    alias: ['/tuyen-sinh', '/post-graduate/mba', '/post-graduate/gei', '/post-graduate/mini-mba'],
     name: 'Admissions',
     component: () => import('../views/tuyen-sinh/AdmissionsView.vue')
   },
   {
-    path: '/tuyen-sinh/detail/:id',
-    alias: ['/tuyen-sinh/:id'],
+    path: '/admissions/detail/:id',
+    alias: ['/admissions/:id', '/tuyen-sinh/detail/:id', '/tuyen-sinh/:id'],
     name: 'AdmissionDetail',
     component: () => import('../views/tuyen-sinh/AdmissionDetailView.vue')
   },
@@ -59,13 +60,14 @@ const routes = [
     component: () => import('../views/corporate/ForTeam.vue')
   },
   {
-    path: '/du-an',
-    alias: ['/corporate/case-studies', '/projects', '/su-kien'],
+    path: '/projects',
+    alias: ['/du-an', '/corporate/case-studies', '/su-kien'],
     name: 'Projects',
     component: () => import('../views/Projects.vue')
   },
   {
-    path: '/du-an/:id',
+    path: '/projects/:id',
+    alias: ['/du-an/:id'],
     name: 'ProjectDetail',
     component: () => import('../views/ProjectDetail.vue')
   },
@@ -87,8 +89,8 @@ const routes = [
     component: () => import('../views/library/Recipes.vue')
   },
   {
-    path: '/gioi-thieu',
-    alias: ['/referral', '/referrals', '/gioi-thieu-nhan-thuong'],
+    path: '/referral',
+    alias: ['/gioi-thieu', '/referrals', '/gioi-thieu-nhan-thuong'],
     name: 'ReferralProgram',
     component: () => import('../views/ReferralProgram.vue')
   },
@@ -103,12 +105,14 @@ const routes = [
     component: () => import('../views/AboutUs.vue')
   },
   {
-    path: '/doi-ngu-giang-vien',
+    path: '/lecturers',
+    alias: ['/doi-ngu-giang-vien', '/giang-vien'],
     name: 'Lecturers',
     component: () => import('../views/Lecturers.vue')
   },
   {
-    path: '/giang-vien/:id',
+    path: '/lecturers/:id',
+    alias: ['/giang-vien/:id'],
     name: 'LecturerDetail',
     component: () => import('../views/LecturerDetail.vue')
   },
@@ -134,7 +138,8 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
-    path: '/chia-se-hoc-vien',
+    path: '/testimonials',
+    alias: ['/chia-se-hoc-vien', '/hoc-vien-chia-se'],
     name: 'Testimonials',
     component: () => import('../views/TestimonialsView.vue')
   },
@@ -204,9 +209,56 @@ const routes = [
   }
 ];
 
+// Functional pages (auth / cart / checkout / learning room ...) stay Vietnamese-only
+// and are NOT duplicated under /en
+const NO_LOCALE_PATHS = [
+  '/login', '/register', '/cart', '/checkout', '/dashboard',
+  '/courses/:handle/study', '/order/:id', '/payment/vnpay-return', '/referral'
+];
+routes.forEach(r => {
+  if (NO_LOCALE_PATHS.includes(r.path)) r.meta = { ...(r.meta || {}), noLocale: true };
+});
+
+// Generate English routes with /en prefix for international SEO
+function generateEnRoutes(baseList) {
+  const enRoutes = [];
+  for (const r of baseList) {
+    if (r.path === '/:pathMatch(.*)*' || r.path.startsWith('/admin') || (r.meta && r.meta.noLocale)) {
+      continue;
+    }
+    const enPath = r.path === '/' ? '/en' : `/en${r.path}`;
+    const enRoute = {
+      ...r,
+      path: enPath,
+      name: r.name ? `En_${r.name}` : undefined
+    };
+    if (r.redirect) {
+      enRoute.redirect = typeof r.redirect === 'string'
+        ? (r.redirect.startsWith('/en') ? r.redirect : `/en${r.redirect}`)
+        : r.redirect;
+    }
+    if (r.alias) {
+      const aliases = Array.isArray(r.alias) ? r.alias : [r.alias];
+      enRoute.alias = aliases.map(a => a === '/' ? '/en' : `/en${a}`);
+    }
+    enRoutes.push(enRoute);
+  }
+  return enRoutes;
+}
+
+const allRoutes = [
+  ...routes.filter(r => r.path !== '/:pathMatch(.*)*'),
+  ...generateEnRoutes(routes),
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('../views/NotFound.vue')
+  }
+];
+
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes: allRoutes,
   scrollBehavior() {
     return { top: 0 };
   }
@@ -215,6 +267,26 @@ const router = createRouter({
 import { useCourseStore } from '../stores/courses';
 
 router.beforeEach(async (to, from, next) => {
+  // 1. Multilingual Route & SEO Guard
+  const isEnRoute = to.path === '/en' || to.path.startsWith('/en/');
+  const currentLocale = i18n.global.locale.value;
+
+  if (isEnRoute) {
+    if (currentLocale !== 'en') {
+      setLanguage('en');
+    }
+  } else if (!to.path.startsWith('/admin') && !to.meta.noLocale) {
+    // If navigating internally while currently in English, preserve /en/ prefix
+    const fromIsEn = from.path === '/en' || (from.path && from.path.startsWith('/en/')) || !!(from.meta && from.meta.noLocale);
+    if (fromIsEn && currentLocale === 'en') {
+      const enTarget = to.fullPath === '/' ? '/en' : `/en${to.fullPath}`;
+      return next(enTarget);
+    }
+    if (currentLocale !== 'vi') {
+      setLanguage('vi');
+    }
+  }
+
   const courseStore = useCourseStore();
   const isProtected = to.meta.requiresAuth || to.meta.requiresAdmin || to.meta.requiresEnrollment;
 
@@ -281,6 +353,54 @@ router.beforeEach(async (to, from, next) => {
   } else {
     // Public routes navigate immediately!
     next();
+  }
+});
+
+router.afterEach((to) => {
+  if (typeof document !== 'undefined') {
+    if (to.meta && to.meta.noLocale) {
+      document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
+      return;
+    }
+    const isEn = to.path === '/en' || to.path.startsWith('/en/');
+    document.documentElement.lang = isEn ? 'en' : 'vi';
+
+    // Inject hreflang canonical alternate links for Google SEO
+    try {
+      const origin = window.location.origin;
+      const cleanPath = isEn ? to.path.replace(/^\/en(\/|$)/, '/') : to.path;
+      const viUrl = `${origin}${cleanPath === '/' ? '' : cleanPath}` || `${origin}/`;
+      const enUrl = `${origin}/en${cleanPath === '/' ? '' : cleanPath}`;
+
+      let viLink = document.head.querySelector('link[hreflang="vi"]');
+      if (!viLink) {
+        viLink = document.createElement('link');
+        viLink.setAttribute('rel', 'alternate');
+        viLink.setAttribute('hreflang', 'vi');
+        document.head.appendChild(viLink);
+      }
+      viLink.setAttribute('href', viUrl);
+
+      let enLink = document.head.querySelector('link[hreflang="en"]');
+      if (!enLink) {
+        enLink = document.createElement('link');
+        enLink.setAttribute('rel', 'alternate');
+        enLink.setAttribute('hreflang', 'en');
+        document.head.appendChild(enLink);
+      }
+      enLink.setAttribute('href', enUrl);
+
+      let xDefaultLink = document.head.querySelector('link[hreflang="x-default"]');
+      if (!xDefaultLink) {
+        xDefaultLink = document.createElement('link');
+        xDefaultLink.setAttribute('rel', 'alternate');
+        xDefaultLink.setAttribute('hreflang', 'x-default');
+        document.head.appendChild(xDefaultLink);
+      }
+      xDefaultLink.setAttribute('href', viUrl);
+    } catch (e) {
+      // Ignore in non-browser context
+    }
   }
 });
 

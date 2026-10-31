@@ -74,7 +74,9 @@ def apply_coupon(
         if coupon.max_discount_amount > 0:
             discount_amount = min(discount_amount, coupon.max_discount_amount)
     else:
-        discount_amount = coupon.discount_value
+        discount_amount = min(coupon.discount_value, req.cart_total)
+
+    discount_amount = max(0, min(discount_amount, req.cart_total))
 
     return schemas.CouponApplyResponse(
         valid=True,

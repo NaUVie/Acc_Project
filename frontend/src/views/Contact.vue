@@ -3,7 +3,7 @@
     <div class="container">
       <!-- Header Section -->
       <div class="contact-hero">
-        <h1 class="hero-title">Liên hệ với <span class="highlight-text"> ACC Academy </span></h1>
+        <h1 class="hero-title">{{ $t('contact.heroTitle') }} <span class="highlight-text"> {{ $t('contact.heroHighlight') }} </span></h1>
         
       </div>
 
@@ -14,7 +14,7 @@
             <!-- Office Address & Location -->
             <div class="info-header-block">
               <div class="info-details">
-                <h3>Văn phòng TP. Hồ Chí Minh</h3>
+                <h3>{{ $t('contact.officeHcm') }}</h3>
                 <p class="address">{{ contactInfo.address }}</p>
                 <a 
                   :href="'https://maps.google.com/?q=' + encodeURIComponent(contactInfo.address)" 
@@ -22,7 +22,7 @@
                   rel="noopener noreferrer" 
                   class="btn-map-link"
                 >
-                  <span>Xem vị trí trên Google Maps &rarr;</span>
+                  <span>{{ $t('contact.viewMap') }} &rarr;</span>
                 </a>
               </div>
             </div>
@@ -31,13 +31,13 @@
             <div class="contact-direct-group">
               <div class="direct-item">
                 <div>
-                  <span class="direct-label">Hotline tư vấn</span>
+                  <span class="direct-label">{{ $t('contact.hotlineLabel') }}</span>
                   <a :href="'tel:' + rawPhone" class="direct-val">{{ contactInfo.hotline }}</a>
                 </div>
               </div>
               <div class="direct-item">
                 <div>
-                  <span class="direct-label">Email hỗ trợ</span>
+                  <span class="direct-label">{{ $t('contact.emailLabel') }}</span>
                   <a :href="'mailto:' + contactInfo.email" class="direct-val">{{ contactInfo.email }}</a>
                 </div>
               </div>
@@ -45,7 +45,7 @@
 
             <!-- Embedded Google Maps -->
             <div class="map-embed-section">
-              <h4 class="map-title">Bản đồ vị trí Văn phòng ACC (TP.HCM)</h4>
+              <h4 class="map-title">{{ $t('contact.mapTitle') }}</h4>
               <div class="map-iframe-wrapper">
                 <iframe 
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.467822986427!2d106.6953043!3d10.7754238!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f385bc19363%3A0x6b3b55c689d0b5e2!2s156%20Nam%20K%E1%BB%B3%20Kh%E1%BB%9Fi%20Ngh%C4%A9a!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn" 
@@ -62,30 +62,30 @@
         <!-- Contact Form -->
         <div class="form-container">
           <form class="contact-form" @submit.prevent="submitForm">
-            <h2 class="form-title">Nhận tư vấn </h2>
-            <p class="form-desc">Vui lòng điền thông tin và lựa chọn dịch vụ quan tâm bên dưới.</p>
+            <h2 class="form-title">{{ $t('contact.formTitle') }}</h2>
+            <p class="form-desc">{{ $t('contact.formDesc') }}</p>
 
             <div class="form-row">
               <div class="form-group">
-                <label for="fullName">Họ và tên *</label>
+                <label for="fullName">{{ $t('contact.fullNameLabel') }}</label>
                 <input v-model="formData.fullName" type="text" id="fullName" placeholder="Nhập họ và tên của bạn" required />
               </div>
             </div>
 
             <div class="form-row two-cols">
               <div class="form-group">
-                <label for="phone">Số điện thoại *</label>
+                <label for="phone">{{ $t('contact.phoneLabel') }}</label>
                 <input v-model="formData.phone" type="tel" id="phone" placeholder="0938..." required />
               </div>
               <div class="form-group">
-                <label for="email">Email liên hệ *</label>
+                <label for="email">{{ $t('contact.emailFormLabel') }}</label>
                 <input v-model="formData.email" type="email" id="email" placeholder="example@gmail.com" required />
               </div>
             </div>
 
             <!-- Main Service Selection -->
             <div class="form-group">
-              <label for="serviceCategory">Mục dịch vụ quan tâm *</label>
+              <label for="serviceCategory">{{ $t('contact.serviceLabel') }}</label>
               <select 
                 v-model="formData.serviceCategory" 
                 id="serviceCategory" 
@@ -93,26 +93,26 @@
                 required
                 
               >
-                <option value="">-- Chọn mục dịch vụ bạn quan tâm --</option>
-                <option value="corporate">Đào tạo cho doanh nghiệp</option>
-                <option value="postgraduate">Tuyển sinh các chương trình sau đại học</option>
-                <option value="individual">Đào tạo cho cá nhân</option>
+                <option value="">{{ $t('contact.selectService') }}</option>
+                <option value="corporate">{{ $t('contact.serviceInhouse') }}</option>
+                <option value="postgraduate">{{ $t('contact.serviceAndrews') }}</option>
+                <option value="individual">{{ $t('contact.serviceAI') }}</option>
               </select>
             </div>
 
             <!-- Additional Requirement Message -->
             <div class="form-group">
-              <label for="message">Nội dung yêu cầu cụ thể</label>
+              <label for="message">{{ $t('contact.messageLabel') }}</label>
               <textarea 
                 v-model="formData.message" 
                 id="message" 
                 rows="4" 
-                placeholder="Ghi chú thêm về quy mô nhân sự, thời gian mong muốn hoặc thắc mắc của bạn..."
+                :placeholder="$t('contact.messagePlaceholder')"
               ></textarea>
             </div>
 
             <button type="submit" class="btn-submit-form" :disabled="isSubmitting">
-              <span>{{ isSubmitting ? 'ĐANG GỬI...' : 'GỬI YÊU CẦU TƯ VẤN' }}</span>
+              <span>{{ isSubmitting ? $t('contact.submittingBtn') : $t('contact.submitBtn') }}</span>
               <span class="arrow">&rarr;</span>
             </button>
           </form>
@@ -124,11 +124,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 
 const route = useRoute();
 const courseStore = useCourseStore();
+const { t } = useI18n();
 const isSubmitting = ref(false);
 
 const formData = ref({
@@ -182,7 +184,7 @@ const submitForm = async () => {
       fullMessage
     );
 
-    courseStore.showToast('Cảm ơn bạn! Thông tin đăng ký tư vấn đã được gửi thành công. Chuyên gia ACC sẽ liên hệ lại ngay.', 'success');
+    courseStore.showToast(t('contact.successToast'), 'success');
     
     formData.value = {
       fullName: '',
@@ -206,387 +208,4 @@ const submitForm = async () => {
 };
 </script>
 
-<style scoped>
-.contact-page {
-  padding-top: 120px;
-  padding-bottom: 100px;
-  background-color: #f8fafc;
-  min-height: 100vh;
-}
-
-.contact-hero {
-  text-align: center;
-  max-width: 860px;
-  margin-inline: auto;
-  margin-bottom: 56px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.hero-tag {
-  background: rgba(2, 43, 159, 0.08);
-  color: #022b9f;
-  font-weight: 800;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-}
-
-.hero-title {
-  font-size: clamp(32px, 4vw, 48px);
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.highlight-text {
-  color: #022b9f;
-}
-
-.hero-subtitle {
-  font-size: 16px;
-  color: #475569;
-  line-height: 1.6;
-  margin: 0;
-}
-
-.contact-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 40px;
-  align-items: stretch;
-}
-
-@media (min-width: 992px) {
-  .contact-grid {
-    grid-template-columns: 1fr 1.15fr;
-    gap: 48px;
-    align-items: stretch;
-  }
-}
-
-.info-section {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.contact-combined-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 20px;
-  padding: 28px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  height: 100%;
-}
-
-.info-header-block {
-  border-bottom: 1px solid #f1f5f9;
-  padding-bottom: 20px;
-}
-
-.info-details h3 {
-  font-size: 20px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 10px 0;
-}
-
-.address {
-  font-size: 15px;
-  color: #334155;
-  line-height: 1.5;
-  margin: 0 0 12px 0;
-}
-
-.btn-map-link {
-  display: inline-block;
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #022b9f;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.btn-map-link:hover {
-  text-decoration: underline;
-}
-
-.contact-direct-group {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 14px;
-  padding: 18px 20px;
-}
-
-@media (max-width: 600px) {
-  .contact-direct-group {
-    grid-template-columns: 1fr;
-  }
-}
-
-.direct-item {
-  display: flex;
-  align-items: center;
-}
-
-.direct-label {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-  margin-bottom: 2px;
-}
-
-.direct-val {
-  font-size: 16px;
-  font-weight: 800;
-  color: #022b9f;
-  text-decoration: none;
-}
-
-.direct-val:hover {
-  text-decoration: underline;
-}
-
-.map-embed-section {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  flex: 1;
-}
-
-.map-title {
-  font-size: 15px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0;
-}
-
-.map-iframe-wrapper {
-  position: relative;
-  width: 100%;
-  flex: 1;
-  min-height: 280px;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid #e2e8f0;
-}
-
-.map-iframe-wrapper iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-/* Form Styles */
-.form-container {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 24px;
-  padding: 36px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.05);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.contact-form {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.form-title {
-  font-size: 26px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 8px 0;
-}
-
-.form-desc {
-  font-size: 14.5px;
-  color: #64748b;
-  margin: 0 0 28px 0;
-}
-
-.form-row {
-  margin-bottom: 20px;
-}
-
-.form-row.two-cols {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
-}
-
-@media (min-width: 640px) {
-  .form-row.two-cols {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  font-size: 13.5px;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-  width: 100%;
-  padding: 12px 16px;
-  background-color: #f8fafc !important;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  font-size: 14.5px;
-  color: #0f172a !important;
-  transition: all 0.2s ease;
-}
-
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  border-color: #022b9f;
-  background-color: #ffffff !important;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(2, 43, 159, 0.1);
-}
-
-.sub-category-box {
-  background: #f0f4ff;
-  border: 1.5px solid #bfdbfe;
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 24px;
-}
-
-.sub-box-title {
-  font-size: 14px;
-  font-weight: 800;
-  color: #022b9f;
-  margin-bottom: 4px;
-  display: block;
-}
-
-.sub-box-desc {
-  font-size: 13px;
-  color: #475569;
-  margin: 0 0 16px 0;
-}
-
-.sub-options-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-
-@media (min-width: 640px) {
-  .sub-options-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.sub-option-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: #ffffff;
-  border: 1px solid #cbd5e1;
-  padding: 12px 14px;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.sub-option-item:hover {
-  border-color: #022b9f;
-  background: #ffffff;
-}
-
-.sub-option-item.selected {
-  border-color: #022b9f;
-  background: #e0e7ff;
-}
-
-.sub-option-item input[type="radio"] {
-  display: none;
-}
-
-.radio-custom {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 2px solid #94a3b8;
-  display: inline-block;
-  flex-shrink: 0;
-  position: relative;
-  transition: all 0.2s ease;
-}
-
-.sub-option-item.selected .radio-custom {
-  border-color: #022b9f;
-  background: #022b9f;
-}
-
-.sub-option-item.selected .radio-custom::after {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ffffff;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
-.sub-option-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #1e293b;
-  line-height: 1.3;
-}
-
-.btn-submit-form {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 14px 24px;
-  background: #022b9f;
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 15px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 14px rgba(2, 43, 159, 0.25);
-}
-
-.btn-submit-form:hover {
-  background: #1e40af;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(2, 43, 159, 0.35);
-}
-</style>
+<style scoped src="@/styles/views/Contact.css"></style>

@@ -155,6 +155,8 @@ class Order(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     total_price = Column(Integer, nullable=False)
     discount_applied = Column(Integer, default=0)
+    store_credit_used = Column(Integer, default=0)
+    coupon_code = Column(String(50), nullable=True)
     status = Column(String(50), default="pending") # pending, paid, cancelled
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 

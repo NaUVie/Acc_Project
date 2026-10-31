@@ -12,8 +12,8 @@
           <!-- 1. Header & Search Input -->
           <div class="search-header">
             <div class="search-title-row">
-              <h2>Tìm kiếm khóa học</h2>
-              <button class="close-btn" @click="closeSearch" aria-label="Đóng tìm kiếm">
+              <h2>{{ $t('search.title') }}</h2>
+              <button class="close-btn" @click="closeSearch" :aria-label="$t('search.close')">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="18" y1="6" x2="6" y2="18"></line>
                   <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -31,7 +31,7 @@
                 ref="searchInputRef"
                 type="text" 
                 v-model="searchQuery" 
-                placeholder="Nhập tên khóa học, từ khóa..." 
+                :placeholder="$t('search.placeholder')" 
                 class="search-input"
                 @keyup.esc="closeSearch"
               />

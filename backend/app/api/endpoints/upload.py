@@ -78,6 +78,7 @@ async def proxy_image(url: str = Query(..., description="URL của ảnh cần t
     """
     Proxy an external image (e.g. from Google Drive) to bypass browser CORS restrictions during cropping.
     Returns the raw image stream with Access-Control-Allow-Origin headers.
+    Protected against SSRF by validating allowed domains and schemes.
     """
     if not url:
         raise HTTPException(status_code=400, detail="URL không hợp lệ")
@@ -91,6 +92,24 @@ async def proxy_image(url: str = Query(..., description="URL của ảnh cần t
         file_id = drive_match.group(1)
         target_url = f"https://drive.google.com/thumbnail?id={file_id}&sz=w1600"
 
+    # Validate scheme and domain to prevent SSRF
+    parsed = urllib.parse.urlparse(target_url)
+    if parsed.scheme not in ("http", "https"):
+        raise HTTPException(status_code=400, detail="Giao thức URL không được hỗ trợ!")
+        
+    hostname = (parsed.hostname or "").lower()
+    allowed_domains = (
+        "drive.google.com",
+        "googleusercontent.com",
+        "cloudinary.com",
+    )
+    is_allowed = any(hostname == d or hostname.endswith("." + d) for d in allowed_domains)
+    if not is_allowed:
+        raise HTTPException(
+            status_code=400, 
+            detail="Chỉ hỗ trợ tải ảnh từ Google Drive hoặc Cloudinary!"
+        )
+
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
@@ -99,7 +118,7 @@ async def proxy_image(url: str = Query(..., description="URL của ảnh cần t
         req = urllib.request.Request(url_to_fetch, headers=headers)
         with urllib.request.urlopen(req, timeout=15) as resp:
             content_type = resp.headers.get_content_type() or "image/jpeg"
-            data = resp.read()
+            data = resp.read(15 * 1024 * 1024) # Cap max read at 15MB
             return data, content_type
 
     try:
@@ -135,7 +154,7 @@ async def proxy_image(url: str = Query(..., description="URL của ảnh cần t
 @router.post("")
 async def upload_image(
     file: UploadFile = File(...),
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_admin)
 ):
     """
     Upload an image or video file directly to Cloudinary into the configured folder.
@@ -200,7 +219,7 @@ class DeleteImageRequest(BaseModel):
 async def delete_image(
     req: DeleteImageRequest,
     background_tasks: BackgroundTasks,
-    current_user: models.User = Depends(auth.get_current_user)
+    current_user: models.User = Depends(auth.get_current_admin)
 ):
     """
     Safely delete old image(s) from Cloudinary in the background.

@@ -7,7 +7,7 @@ from ... import models, schemas, crud, auth
 
 router = APIRouter()
 
-ALLOW_MOCK_PAYMENT = os.getenv("ALLOW_MOCK_PAYMENT", "true").lower() == "true"
+ALLOW_MOCK_PAYMENT = os.getenv("ALLOW_MOCK_PAYMENT", "false").lower() == "true"
 
 @router.get("", response_model=List[schemas.EnrollmentResponse])
 def get_my_enrollments(

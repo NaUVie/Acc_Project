@@ -2,7 +2,7 @@
   <div class="lecturers-page container">
     <!-- Hero Header -->
     <div class="header-section animate-fade-in">
-      <h1>Đội ngũ <span class="gradient-text">Giảng viên & Chuyên gia <span style="white-space: nowrap;">Thực chiến</span></span></h1>
+      <h1>{{ $t('lecturers.pageTitle1') }} <span class="gradient-text">{{ $t('lecturers.pageTitle2') }}</span></h1>
     </div>
 
     <!-- Mega Dropdown-Style Layout Container (Giao diện giống hệt ĐÀO TẠO) -->
@@ -47,14 +47,14 @@
                 </div>
                 <div class="mega-card-info">
                   <div class="card-header-badge-row">
-                    <span class="mega-school-name">{{ l.majorName || 'Chuyên gia Đào tạo' }}</span>
+                    <span class="mega-school-name">{{ l.majorName || $t('lecturers.expertTitle') }}</span>
                   </div>
                   <h4 class="mega-program-title" :title="l.name">{{ l.name }}</h4>
                   <p class="lecturer-sub-title">{{ l.title }}</p>
 
                   <p class="mega-program-desc" style="white-space: pre-line;">{{ l.bioShort }}</p>
                   <div class="mega-card-footer" v-if="l.show_detail_btn || l.showDetailBtn">
-                    <router-link :to="'/giang-vien/' + l.id" class="mega-enroll-btn">Xem chi tiết giới thiệu &rarr;</router-link>
+                    <router-link :to="'/lecturers/' + l.id" class="mega-enroll-btn">{{ $t('lecturers.viewDetailBtn') }} &rarr;</router-link>
                   </div>
                 </div>
               </div>
@@ -72,7 +72,7 @@
         </template>
 
         <div v-else class="empty-state">
-          <p>Chưa tìm thấy giảng viên phù hợp trong chuyên ngành này.</p>
+          <p>{{ $t('lecturers.emptyMajor') }}</p>
         </div>
       </div>
     </div>
@@ -81,11 +81,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useCourseStore } from '@/stores/courses';
 import { formatImageUrl } from '@/utils/imageHelper';
 import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
+const { t } = useI18n();
 const selectedMajor = ref('all');
 const currentPage = ref(1);
 const pageSize = ref(6);
@@ -93,7 +95,7 @@ const pageSize = ref(6);
 const majors = computed(() => {
   const list = courseStore.lecturerMajors || [];
   return [
-    { id: 'all', name: 'Tất cả chuyên ngành' },
+    { id: 'all', name: t('lecturers.allMajors') },
     ...list
   ];
 });

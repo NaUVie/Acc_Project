@@ -11,11 +11,11 @@
             <strong>CÔNG TY CỔ PHẦN KẾT NỐI TRI THỨC ACC</strong>
           </p>
           <p class="custom-footer-slogan">
-            Học viện đào tạo thực chiến về Quản trị, Năng lực số và Ứng dụng AI cho cá nhân &amp; doanh nghiệp.
+            {{ $t('footer.aboutText') }}
           </p>
           <div class="contact-compact-list">
             <div class="compact-row">
-              <span class="compact-label">Địa chỉ:</span>
+              <span class="compact-label">{{ $t('footer.address') }}:</span>
               <span class="compact-text">{{ contactInfo.address }}</span>
             </div>
             <div class="compact-row">
@@ -31,31 +31,31 @@
 
         <!-- Col 2: Về ACC & Đào tạo -->
         <div class="custom-footer-col nav-col">
-          <h4 class="custom-footer-heading">Chương trình Đào tạo</h4>
+          <h4 class="custom-footer-heading">{{ $t('footer.trainingPrograms') }}</h4>
           <ul class="custom-footer-linklist">
             <li v-for="cat in footerCategories" :key="cat.slug">
               <router-link :to="'/courses/category/' + cat.slug">{{ cat.name }}</router-link>
             </li>
-            <li><router-link to="/tuyen-sinh">Chương trình Thạc sĩ MBA Andrews</router-link></li>
-                        <li><router-link to="/doi-ngu-giang-vien">Đội ngũ Giảng viên & Chuyên gia</router-link></li>
+            <li><router-link to="/admissions">{{ $t('footer.andrewsMba') }}</router-link></li>
+                        <li><router-link to="/lecturers">{{ $t('footer.lecturersTeam') }}</router-link></li>
           </ul>
         </div>
 
         <!-- Col 3: Chính sách & Pháp lý (Chuẩn VNPAY) -->
         <div class="custom-footer-col nav-col">
-          <h4 class="custom-footer-heading">Chính sách & Quy định</h4>
+          <h4 class="custom-footer-heading">{{ $t('footer.policies') }}</h4>
           <ul class="custom-footer-linklist">
-            <li><router-link to="/terms-of-service">Điều khoản dịch vụ</router-link></li>
-            <li><router-link to="/privacy-policy">Chính sách bảo mật thông tin</router-link></li>
-            <li><router-link to="/refund-policy">Chính sách hoàn tiền & Đổi khóa</router-link></li>
-            <li><router-link to="/payment-guide">Hướng dẫn thanh toán (VNPAY)</router-link></li>
-            <li><router-link to="/delivery-policy">Truy cập & Giao nhận khóa học</router-link></li>
+            <li><router-link to="/terms-of-service">{{ $t('footer.termsOfService') }}</router-link></li>
+            <li><router-link to="/privacy-policy">{{ $t('footer.privacyPolicy') }}</router-link></li>
+            <li><router-link to="/refund-policy">{{ $t('footer.refundPolicy') }}</router-link></li>
+            <li><router-link to="/payment-guide">{{ $t('footer.paymentGuide') }}</router-link></li>
+            <li><router-link to="/delivery-policy">{{ $t('footer.deliveryPolicy') }}</router-link></li>
           </ul>
         </div>
 
         <!-- Col 4: Kết nối Zalo OA & Hỗ trợ -->
         <div class="custom-footer-col connect-col">
-          <h4 class="custom-footer-heading">Hỗ trợ Học viên</h4>
+          <h4 class="custom-footer-heading">{{ $t('footer.support') }}</h4>
           
           <div class="footer-qr-zalo">
             <div class="qr-zalo-img-wrapper">
@@ -63,8 +63,8 @@
             </div>
             <div class="qr-zalo-info">
               <span class="qr-zalo-title">Zalo Official Account</span>
-              <span class="qr-zalo-desc">Hỗ trợ 24/7 trực tuyến</span>
-              <a :href="contactInfo.zalo" target="_blank" rel="noopener" class="btn-chat-zalo">Chat Zalo ngay &rarr;</a>
+              <span class="qr-zalo-desc">{{ $t('footer.support247') }}</span>
+              <a :href="contactInfo.zalo" target="_blank" rel="noopener" class="btn-chat-zalo">{{ $t('footer.chatZalo') }} &rarr;</a>
             </div>
           </div>
         </div>
@@ -73,14 +73,19 @@
       <!-- Bottom Bar -->
       <div class="custom-footer-bottom">
         <p class="copyright-text">
-          &copy; 2026 <strong>ACC Academy</strong>. Bản quyền thuộc về Công ty Cổ phần Kết nối Tri thức ACC.
+          &copy; 2026 <strong>ACC Academy</strong>. {{ $t('footer.copyright') }}
         </p>
         <div class="footer-bottom-links">
-          <router-link to="/privacy-policy">Bảo mật</router-link>
+          <router-link to="/privacy-policy">{{ $t('footer.privacy') }}</router-link>
           <span class="dot">•</span>
-          <router-link to="/terms-of-service">Điều khoản</router-link>
+          <router-link to="/terms-of-service">{{ $t('footer.terms') }}</router-link>
           <span class="dot">•</span>
-          <router-link to="/contact">Liên hệ</router-link>
+          <router-link to="/contact">{{ $t('nav.contact') }}</router-link>
+          <span class="dot">•</span>
+          <button type="button" class="footer-lang-btn" @click="toggleLang" :title="currentLang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'">
+            <span class="footer-lang-flag">{{ currentLang === 'vi' ? '🇻🇳' : '🇬🇧' }}</span>
+            <span class="footer-lang-name">{{ currentLang === 'vi' ? 'Tiếng Việt' : 'English' }}</span>
+          </button>
         </div>
       </div>
     </div>
@@ -89,7 +94,35 @@
 
 <script setup>
 import { computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { setLanguage } from '@/i18n';
 import { useCourseStore } from '@/stores/courses';
+
+const router = useRouter();
+const { locale } = useI18n();
+const currentLang = computed(() => locale.value);
+
+const toggleLang = () => {
+  const route = router.currentRoute.value;
+  // Functional / admin pages have no /en version: just switch the UI language in place
+  if ((route.meta && route.meta.noLocale) || route.path.startsWith('/admin')) {
+    setLanguage(locale.value === 'vi' ? 'en' : 'vi');
+    return;
+  }
+  const currentPath = route.fullPath;
+  if (locale.value === 'vi') {
+    setLanguage('en');
+    let newPath = '/en' + (currentPath === '/' ? '' : currentPath);
+    if (!newPath) newPath = '/en';
+    router.push(newPath);
+  } else {
+    setLanguage('vi');
+    let newPath = currentPath.replace(/^\/en(\/|$)/, '/');
+    if (!newPath) newPath = '/';
+    router.push(newPath);
+  }
+};
 
 const courseStore = useCourseStore();
 const footerCategories = computed(() => {

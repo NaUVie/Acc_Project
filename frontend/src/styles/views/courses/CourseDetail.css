@@ -784,3 +784,53 @@
   color: #011d6e;
   transform: translateX(2px);
 }
+
+/* Rich course description styles */
+.rich-course-description {
+  color: #334155;
+  font-size: 15px;
+  line-height: 1.7;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 24px;
+}
+
+.rich-course-description :deep(h2) {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-top: 16px;
+  margin-bottom: 10px;
+}
+
+.rich-course-description :deep(h3) {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+.rich-course-description :deep(ul),
+.rich-course-description :deep(ol) {
+  padding-left: 24px;
+  margin: 10px 0;
+}
+
+.rich-course-description :deep(li) {
+  margin-bottom: 6px;
+}
+
+.rich-course-description :deep(a) {
+  color: #0284c7;
+  text-decoration: underline;
+  font-weight: 600;
+}
+
+.rich-course-description :deep(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin: 16px 0;
+  display: block;
+}

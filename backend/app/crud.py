@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from typing import Optional, List
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, selectinload, joinedload, defer
+from sqlalchemy.orm.attributes import flag_modified
 from . import models, schemas, auth
 
 def slugify(text: str) -> str:
@@ -230,7 +231,7 @@ def add_to_cart(db: Session, user_id: int, course_id: int):
 def remove_from_cart(db: Session, user_id: int, course_id: int):
     db_cart = db.query(models.CartItem).filter(
         models.CartItem.user_id == user_id,
-        models.CartItem.course_id == course_id
+        (models.CartItem.course_id == course_id) | (models.CartItem.id == course_id)
     ).first()
     if db_cart:
         db.delete(db_cart)
@@ -387,7 +388,7 @@ def pay_order(db: Session, order_id: int):
     user = get_user_by_id(db, db_order.user_id)
     if user and user.referred_by_id:
         referrer = db.query(models.User).filter(models.User.id == user.referred_by_id).first()
-        if referrer:
+        if referrer and referrer.id != user.id:
             existing_referral = db.query(models.Referral).filter(
                 models.Referral.referred_id == user.id
             ).first()
@@ -670,6 +671,7 @@ def checkout_cart_with_options(db: Session, user_id: int, coupon_code: Optional[
         coupon.times_used += 1
 
     # 3. Store Credit Discount
+    credit_to_use = 0
     if use_store_credit and user.store_credit_balance > 0:
         remaining_payable = max(0, total_price - discount_applied)
         credit_to_use = min(user.store_credit_balance, remaining_payable)
@@ -683,6 +685,8 @@ def checkout_cart_with_options(db: Session, user_id: int, coupon_code: Optional[
         user_id=user_id,
         total_price=final_price,
         discount_applied=discount_applied,
+        store_credit_used=credit_to_use,
+        coupon_code=coupon.code if (coupon_code and 'coupon' in locals() and coupon) else None,
         status="pending"
     )
     db.add(db_order)
@@ -700,6 +704,30 @@ def checkout_cart_with_options(db: Session, user_id: int, coupon_code: Optional[
     db.commit()
     db.refresh(db_order)
     return db_order
+
+def cancel_order(db: Session, order_id: int):
+    """Safely cancels a pending order and refunds store credit & coupon usage."""
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order or order.status != "pending":
+        return order
+
+    # Refund store credit
+    if getattr(order, "store_credit_used", 0) and order.store_credit_used > 0:
+        user = db.query(models.User).filter(models.User.id == order.user_id).first()
+        if user:
+            user.store_credit_balance += order.store_credit_used
+        order.store_credit_used = 0
+
+    # Revert coupon usage
+    if getattr(order, "coupon_code", None):
+        coupon = get_coupon_by_code(db, order.coupon_code)
+        if coupon and coupon.times_used > 0:
+            coupon.times_used -= 1
+
+    order.status = "cancelled"
+    db.commit()
+    db.refresh(order)
+    return order
 
 # --- Review CRUD ---
 def get_course_reviews(db: Session, course_id: int):
@@ -985,7 +1013,6 @@ def reorder_lecturers(db: Session, items: list, major_id: Optional[str] = None):
                 current_positions = dict(db_lec.major_positions or {})
                 current_positions[major_id] = pos
                 db_lec.major_positions = current_positions
-                from sqlalchemy.orm.attributes import flag_modified
                 flag_modified(db_lec, "major_positions")
             else:
                 db_lec.position = pos

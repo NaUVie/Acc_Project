@@ -9,19 +9,19 @@
       <!-- Desktop Nav -->
       <nav class="desktop-nav">
         <!-- 1. VỀ CHÚNG TÔI -->
-        <router-link to="/about-us" class="nav-link">VỀ CHÚNG TÔI</router-link>
+        <router-link to="/about-us" class="nav-link">{{ $t("nav.about").toUpperCase() }}</router-link>
 
         <!-- 2. ĐÀO TẠO -->
         <div class="nav-item dropdown">
           <router-link to="/courses" class="nav-link dropdown-toggle">
-            ĐÀO TẠO
+            {{ $t("nav.courses").toUpperCase() }}
             <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
           </router-link>
           <div class="dropdown-menu">
             <router-link to="/courses" class="dropdown-item">
-              <div class="dropdown-title">TẤT CẢ KHÓA HỌC</div>
+              <div class="dropdown-title">{{ $t("nav.allCourses").toUpperCase() }}</div>
               <div class="dropdown-desc">Khám phá toàn bộ các khóa học & chương trình đào tạo</div>
             </router-link>
             <router-link 
@@ -37,15 +37,15 @@
         </div>
 
         <!-- 3. TUYỂN SINH (Single Link) -->
-        <router-link to="/tuyen-sinh" class="nav-link nav-link-admission">
+        <router-link to="/admissions" class="nav-link nav-link-admission">
           <span class="bell-ringing-icon">🔔</span>
-          TUYỂN SINH
+          {{ $t("nav.admissions").toUpperCase() }}
         </router-link>
 
         <!-- 4. ĐỐI TÁC TIN CẬY -->
         <div class="nav-item dropdown">
           <button class="nav-link dropdown-toggle" @click.prevent="openDrawer('trusted-partners')">
-            ĐỐI TÁC TIN CẬY
+            {{ $t("nav.partners").toUpperCase() }}
             <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
@@ -63,29 +63,29 @@
         </div>
 
         <!-- 5. TIN TỨC -->
-        <router-link to="/library/blog" class="nav-link">TIN TỨC</router-link>
+        <router-link to="/library/blog" class="nav-link">{{ $t("nav.blog").toUpperCase() }}</router-link>
 
         <!-- 6. ĐỘI NGŨ GIẢNG VIÊN -->
-        <router-link to="/doi-ngu-giang-vien" class="nav-link">ĐỘI NGŨ GIẢNG VIÊN</router-link>
+        <router-link to="/lecturers" class="nav-link">{{ $t("nav.lecturers").toUpperCase() }}</router-link>
 
         <!-- 7. DỰ ÁN -->
         <div class="nav-item dropdown">
-          <router-link to="/du-an" class="nav-link dropdown-toggle">
-            DỰ ÁN
+          <router-link to="/projects" class="nav-link dropdown-toggle">
+            {{ $t("nav.projects").toUpperCase() }}
             <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
           </router-link>
           <div class="dropdown-menu">
-            <router-link to="/du-an?cat=du-an-doanh-nghiep" class="dropdown-item">
+            <router-link to="/projects?cat=du-an-doanh-nghiep" class="dropdown-item">
               <div class="dropdown-title">DỰ ÁN DOANH NGHIỆP</div>
               <div class="dropdown-desc">Các dự án đào tạo In-house & chuyển đổi số may đo cho doanh nghiệp</div>
             </router-link>
-            <router-link to="/du-an?cat=du-an-ca-nhan" class="dropdown-item">
+            <router-link to="/projects?cat=du-an-ca-nhan" class="dropdown-item">
               <div class="dropdown-title">DỰ ÁN CÁ NHÂN</div>
               <div class="dropdown-desc">Các chương trình huấn luyện gia tốc năng lực 1:1 cho nhà quản lý</div>
             </router-link>
-            <router-link to="/du-an?cat=du-an-nha-nuoc" class="dropdown-item">
+            <router-link to="/projects?cat=du-an-nha-nuoc" class="dropdown-item">
               <div class="dropdown-title">DỰ ÁN NHÀ NƯỚC</div>
               <div class="dropdown-desc">Bồi dưỡng năng lực số & an toàn thông tin khối cơ quan - nhà nước</div>
             </router-link>
@@ -93,15 +93,15 @@
         </div>
 
         <!-- 8. CHIA SẺ HỌC VIÊN -->
-        <router-link to="/chia-se-hoc-vien" class="nav-link">CHIA SẺ HỌC VIÊN</router-link>
+        <router-link to="/testimonials" class="nav-link">{{ $t("nav.testimonials").toUpperCase() }}</router-link>
 
         <!-- 9. LIÊN HỆ -->
-        <router-link to="/contact" class="nav-link">LIÊN HỆ</router-link>
+        <router-link to="/contact" class="nav-link">{{ $t("nav.contact").toUpperCase() }}</router-link>
       </nav>
 
       <!-- Action buttons -->
       <div class="header-actions">
-        <router-link v-if="!courseStore.token" to="/login" class="login-btn">Đăng nhập</router-link>
+        <router-link v-if="!courseStore.token" to="/login" class="login-btn">{{ $t('header.login') }}</router-link>
         
         <!-- User Profile Dropdown -->
         <div 
@@ -145,7 +145,7 @@
                   </svg>
                 </span>
                 <div class="dropdown-link-text">
-                  <span class="link-title">Trang quản trị hệ thống</span>
+                  <span class="link-title">{{ $t("header.adminPanel") }}</span>
                   <span class="link-desc">Quản lý khóa học, đơn hàng & học viên</span>
                 </div>
               </router-link>
@@ -158,12 +158,12 @@
                   </svg>
                 </span>
                 <div class="dropdown-link-text">
-                  <span class="link-title">Khóa học của tôi</span>
+                  <span class="link-title">{{ $t("header.myCourses") }}</span>
                   <span class="link-desc">Vào học & xem tiến độ</span>
                 </div>
               </router-link>
 
-              <router-link to="/gioi-thieu" class="user-dropdown-link" @click="isUserDropdownOpen = false">
+              <router-link to="/referral" class="user-dropdown-link" @click="isUserDropdownOpen = false">
                 <span class="dropdown-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <polyline points="20 12 20 22 4 22 4 12"></polyline>
@@ -190,7 +190,7 @@
                   <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
               </span>
-              <span>Đăng xuất tài khoản</span>
+              <span>{{ $t("header.logout") }}</span>
             </button>
           </div>
         </div>
@@ -211,6 +211,17 @@
           <span class="cart-badge">{{ courseStore.cart.length }}</span>
         </button>
 
+        <!-- Language Switcher Pill Button -->
+        <button 
+          class="lang-header-btn" 
+          :title="currentLang === 'vi' ? 'Switch to English' : 'Chuyển sang Tiếng Việt'"
+          @click="toggleLang"
+          aria-label="Toggle Language"
+        >
+          <span class="lang-flag">{{ currentLang === 'vi' ? '🇻🇳' : '🇬🇧' }}</span>
+          <span class="lang-code">{{ currentLang.toUpperCase() }}</span>
+        </button>
+
         <!-- Mobile Menu Trigger -->
         <button class="mobile-menu-toggle" @click="toggleMobileMenu" aria-label="Menu">
           <span class="bar" :class="{ 'open': isMobileMenuOpen }"></span>
@@ -224,18 +235,18 @@
     <div class="mobile-nav" :class="{ 'open': isMobileMenuOpen }">
       <div class="mobile-nav-inner">
         <!-- 1. VỀ CHÚNG TÔI -->
-        <router-link to="/about-us" class="mobile-single-link" @click="closeMobileMenu">VỀ CHÚNG TÔI</router-link>
+        <router-link to="/about-us" class="mobile-single-link" @click="closeMobileMenu">{{ $t("nav.about").toUpperCase() }}</router-link>
 
         <!-- 2. ĐÀO TẠO -->
         <div class="mobile-nav-group">
           <div class="mobile-nav-label" @click="toggleMobileSection('courses-menu')">
-            ĐÀO TẠO
+            {{ $t("nav.courses").toUpperCase() }}
             <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'courses-menu' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
           </div>
           <div class="mobile-nav-links" v-show="activeMobileSection === 'courses-menu'">
-            <router-link to="/courses" @click="closeMobileMenu" class="mobile-single-sublink">Tất cả khóa học</router-link>
+            <router-link to="/courses" @click="closeMobileMenu" class="mobile-single-sublink">{{ $t("nav.allCourses") }}</router-link>
             <router-link 
               v-for="cat in navCategories" 
               :key="cat.slug"
@@ -249,12 +260,12 @@
         </div>
 
         <!-- 3. TUYỂN SINH -->
-        <router-link to="/tuyen-sinh" class="mobile-single-link" @click="closeMobileMenu">TUYỂN SINH</router-link>
+        <router-link to="/admissions" class="mobile-single-link" @click="closeMobileMenu">TUYỂN SINH</router-link>
 
         <!-- 4. ĐỐI TÁC TIN CẬY -->
         <div class="mobile-nav-group">
           <div class="mobile-nav-label" @click="toggleMobileSection('trusted-partners')">
-            ĐỐI TÁC TIN CẬY
+            {{ $t("nav.partners").toUpperCase() }}
             <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'trusted-partners' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
@@ -266,33 +277,39 @@
         </div>
 
         <!-- 5. TIN TỨC -->
-        <router-link to="/library/blog" class="mobile-single-link" @click="closeMobileMenu">TIN TỨC</router-link>
+        <router-link to="/library/blog" class="mobile-single-link" @click="closeMobileMenu">{{ $t("nav.blog").toUpperCase() }}</router-link>
 
         <!-- 6. ĐỘI NGŨ GIẢNG VIÊN -->
-        <router-link to="/doi-ngu-giang-vien" class="mobile-single-link" @click="closeMobileMenu">ĐỘI NGŨ GIẢNG VIÊN</router-link>
+        <router-link to="/lecturers" class="mobile-single-link" @click="closeMobileMenu">{{ $t("nav.lecturers").toUpperCase() }}</router-link>
 
         <!-- 7. DỰ ÁN -->
         <div class="mobile-nav-group">
           <div class="mobile-nav-label" @click="toggleMobileSection('projects')">
-            DỰ ÁN
+            {{ $t("nav.projects").toUpperCase() }}
             <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'projects' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
           </div>
           <div class="mobile-nav-links" v-show="activeMobileSection === 'projects'">
-            <router-link to="/du-an?cat=du-an-doanh-nghiep" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN DOANH NGHIỆP</router-link>
-            <router-link to="/du-an?cat=du-an-ca-nhan" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN CÁ NHÂN</router-link>
-            <router-link to="/du-an?cat=du-an-nha-nuoc" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN NHÀ NƯỚC</router-link>
+            <router-link to="/projects?cat=du-an-doanh-nghiep" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN DOANH NGHIỆP</router-link>
+            <router-link to="/projects?cat=du-an-ca-nhan" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN CÁ NHÂN</router-link>
+            <router-link to="/projects?cat=du-an-nha-nuoc" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN NHÀ NƯỚC</router-link>
           </div>
         </div>
 
         <!-- 8. CHIA SẺ HỌC VIÊN -->
-        <router-link to="/chia-se-hoc-vien" class="mobile-single-link" @click="closeMobileMenu">CHIA SẺ HỌC VIÊN</router-link>
+        <router-link to="/testimonials" class="mobile-single-link" @click="closeMobileMenu">{{ $t("nav.testimonials").toUpperCase() }}</router-link>
 
         <!-- 8. LIÊN HỆ -->
-        <router-link to="/contact" class="mobile-single-link" @click="closeMobileMenu">LIÊN HỆ</router-link>
+        <router-link to="/contact" class="mobile-single-link" @click="closeMobileMenu">{{ $t("nav.contact").toUpperCase() }}</router-link>
         
-        <router-link v-if="!courseStore.token" to="/login" class="mobile-login-btn" @click="closeMobileMenu">Đăng nhập</router-link>
+        <div class="mobile-lang-row" style="margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+          <span style="font-size: 13px; color: #475569; font-weight: 600;">{{ $t('header.switchLang') }}:</span>
+          <button type="button" class="lang-switch-btn" @click="toggleLang">
+            <span>{{ currentLang === 'vi' ? '🇻🇳 Tiếng Việt' : '🇬🇧 English' }}</span>
+          </button>
+        </div>
+        <router-link v-if="!courseStore.token" to="/login" class="mobile-login-btn" @click="closeMobileMenu">{{ $t("header.login") }}</router-link>
         <div v-else class="mobile-user-menu" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
           <router-link v-if="courseStore.userMe?.role === 'admin'" to="/admin" class="mobile-login-btn" style="background: var(--primary-gradient); color: white;" @click="closeMobileMenu">👑 Quản trị hệ thống</router-link>
           <router-link to="/dashboard" class="mobile-login-btn" @click="closeMobileMenu">🙋‍♂️ {{ courseStore.userMe?.fullname || 'Học viên' }}</router-link>
@@ -390,6 +407,8 @@
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { setLanguage } from '@/i18n';
 import { useCourseStore } from '@/stores/courses';
 import { slugify } from '@/utils/slugify';
 import SlideOverCart from '@/components/SlideOverCart.vue';
@@ -397,6 +416,29 @@ import SlideOverSearch from '@/components/SlideOverSearch.vue';
 
 const router = useRouter();
 const courseStore = useCourseStore();
+const { locale } = useI18n();
+const currentLang = computed(() => locale.value);
+
+const toggleLang = () => {
+  const route = router.currentRoute.value;
+  // Functional / admin pages have no /en version: just switch the UI language in place
+  if ((route.meta && route.meta.noLocale) || route.path.startsWith('/admin')) {
+    setLanguage(locale.value === 'vi' ? 'en' : 'vi');
+    return;
+  }
+  const currentPath = route.fullPath;
+  if (locale.value === 'vi') {
+    setLanguage('en');
+    let newPath = '/en' + (currentPath === '/' ? '' : currentPath);
+    if (!newPath) newPath = '/en';
+    router.push(newPath);
+  } else {
+    setLanguage('vi');
+    let newPath = currentPath.replace(/^\/en(\/|$)/, '/');
+    if (!newPath) newPath = '/';
+    router.push(newPath);
+  }
+};
 
 // Dynamic categories for Navigation Header
 const navCategories = computed(() => {
@@ -574,9 +616,9 @@ const drawerItems = computed(() => {
       ];
     case 'post-graduate':
       return [
-        { title: '🎓 MBA ANDREW (Thạc sĩ Quản trị Kinh doanh Hoa Kỳ)', link: '/tuyen-sinh#mba' },
-        // { title: '⚡ MINI MBA Practical (Quản trị Tinh gọn)', link: '/tuyen-sinh#mini-mba' },
-        { title: '🌐 GEL (Global Executive Leadership)', link: '/tuyen-sinh#gei' }
+        { title: '🎓 MBA ANDREW (Thạc sĩ Quản trị Kinh doanh Hoa Kỳ)', link: '/admissions#mba' },
+        // { title: '⚡ MINI MBA Practical (Quản trị Tinh gọn)', link: '/admissions#mini-mba' },
+        { title: '🌐 GEL (Global Executive Leadership)', link: '/admissions#gei' }
       ];
     case 'courses':
       return [

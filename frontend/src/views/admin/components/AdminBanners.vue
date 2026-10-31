@@ -597,12 +597,3 @@ const saveHomeIntro = async () => {
   }
 };
 </script>
-
-<style scoped>
-.admin-input-style {
-  width: 100%;
-  padding: 10px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-}
-</style>
