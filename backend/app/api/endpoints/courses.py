@@ -18,7 +18,7 @@ def read_courses(
 
 @router.get("/categories", response_model=List[schemas.CategoryResponse])
 def read_categories(response: Response, db: Session = Depends(get_db)):
-    response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     return crud.get_categories(db)
 
 @router.get("/banners", response_model=List[schemas.BannerResponse])
@@ -31,19 +31,6 @@ def read_partners(response: Response, db: Session = Depends(get_db)):
     response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
     return crud.get_partners(db, active_only=True)
 
-
-@router.get("/programs", response_model=List[schemas.ProgramResponse])
-def read_programs(response: Response, db: Session = Depends(get_db)):
-    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
-    return db.query(models.Program).all()
-
-@router.get("/bundles", response_model=List[schemas.BundleResponse])
-def read_bundles(response: Response, db: Session = Depends(get_db)):
-    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
-    return db.query(models.Bundle).options(
-        selectinload(models.Bundle.courses).selectinload(models.Course.tags),
-        selectinload(models.Bundle.gift_courses).selectinload(models.Course.tags)
-    ).all()
 
 @router.get("/{handle}", response_model=schemas.CoursePublicResponse)
 def read_course(handle: str, response: Response, db: Session = Depends(get_db)):

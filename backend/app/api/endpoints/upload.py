@@ -1,7 +1,8 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException, status, Query, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, status, Query, Depends, BackgroundTasks
 from fastapi.responses import Response
+from starlette.concurrency import run_in_threadpool
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 import urllib.request
 import urllib.parse
 import re
@@ -26,6 +27,52 @@ cloudinary.config(
 
 from ... import auth, models
 
+
+def extract_cloudinary_public_id(url_or_id: str, folder_name: str = CLOUDINARY_FOLDER) -> Optional[str]:
+    """
+    Robustly extract the Cloudinary public_id from a URL or raw ID string.
+    Handles versions (/v12345/), transformations (/c_scale,w_800/), query params (?v=1),
+    and URL encoding (%20 -> space).
+    """
+    if not url_or_id:
+        return None
+    clean = urllib.parse.unquote(url_or_id.strip()).split('?')[0]
+    folder = folder_name.strip() if folder_name else ''
+    
+    if not ('cloudinary.com' in clean or (folder and folder in clean)):
+        return None
+
+    # If already a public_id (e.g. 'Acc Demo/filename')
+    if not clean.startswith('http://') and not clean.startswith('https://'):
+        return re.sub(r'\.[a-zA-Z0-9]+$', '', clean)
+
+    # If folder name is present in URL (e.g. ".../Acc Demo/filename.webp")
+    if folder and f'/{folder}/' in clean:
+        idx = clean.find(f'/{folder}/')
+        rel = clean[idx + 1:]
+        return re.sub(r'\.[a-zA-Z0-9]+$', '', rel)
+
+    # If /v\d+/ version exists
+    m = re.search(r'/v\d+/(.+?)(?:\.[a-zA-Z0-9]+)?$', clean)
+    if m:
+        return m.group(1)
+
+    # Fallback: segment after /upload/
+    m = re.search(r'/upload/(?:[^/]+/)*(?:v\d+/)?(.+?)(?:\.[a-zA-Z0-9]+)?$', clean)
+    if m:
+        return m.group(1)
+
+    return None
+
+
+def _delete_cloudinary_sync(public_id: str):
+    """Synchronous worker function to delete an asset from Cloudinary."""
+    try:
+        cloudinary.uploader.destroy(public_id, resource_type="image", invalidate=True)
+    except Exception as e:
+        print(f"Background Cloudinary delete error for '{public_id}': {e}")
+
+
 @router.get("/proxy-image")
 async def proxy_image(url: str = Query(..., description="URL của ảnh cần tải qua proxy")):
     """
@@ -48,69 +95,89 @@ async def proxy_image(url: str = Query(..., description="URL của ảnh cần t
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
 
-    try:
-        req = urllib.request.Request(target_url, headers=headers)
+    def fetch_proxy_data(url_to_fetch):
+        req = urllib.request.Request(url_to_fetch, headers=headers)
         with urllib.request.urlopen(req, timeout=15) as resp:
             content_type = resp.headers.get_content_type() or "image/jpeg"
             data = resp.read()
-            return Response(
-                content=data,
-                media_type=content_type,
-                headers={
-                    "Access-Control-Allow-Origin": "*",
-                    "Cache-Control": "public, max-age=86400"
-                }
-            )
+            return data, content_type
+
+    try:
+        data, content_type = await run_in_threadpool(fetch_proxy_data, target_url)
+        return Response(
+            content=data,
+            media_type=content_type,
+            headers={
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "public, max-age=86400"
+            }
+        )
     except Exception as e:
         # Fallback: if drive.google.com/thumbnail failed, try lh3 edge link
         if drive_match and drive_match.group(1):
             try:
                 alt_url = f"https://lh3.googleusercontent.com/d/{drive_match.group(1)}=s1600"
-                req = urllib.request.Request(alt_url, headers=headers)
-                with urllib.request.urlopen(req, timeout=15) as resp:
-                    content_type = resp.headers.get_content_type() or "image/jpeg"
-                    return Response(
-                        content=resp.read(),
-                        media_type=content_type,
-                        headers={
-                            "Access-Control-Allow-Origin": "*",
-                            "Cache-Control": "public, max-age=86400"
-                        }
-                    )
+                data, content_type = await run_in_threadpool(fetch_proxy_data, alt_url)
+                return Response(
+                    content=data,
+                    media_type=content_type,
+                    headers={
+                        "Access-Control-Allow-Origin": "*",
+                        "Cache-Control": "public, max-age=86400"
+                    }
+                )
             except Exception:
                 pass
         raise HTTPException(status_code=500, detail=f"Không thể tải ảnh qua proxy: {str(e)}")
 
+
 @router.post("/image")
+@router.post("")
 async def upload_image(
     file: UploadFile = File(...),
     current_user: models.User = Depends(auth.get_current_user)
 ):
     """
-    Upload an image file directly to Cloudinary into the 'Acc Demo' folder.
-    Returns the secure URL of the uploaded image.
+    Upload an image or video file directly to Cloudinary into the configured folder.
+    Returns the secure URL of the uploaded asset.
+    Offloaded to worker threadpool to keep the asyncio event loop completely unblocked.
     """
-    if not file.content_type.startswith("image/"):
+    content_type = file.content_type or ""
+    is_video = content_type.startswith("video/")
+    is_image = content_type.startswith("image/")
+
+    if not is_image and not is_video:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Tệp được tải lên phải là hình ảnh (PNG, JPG, WEBP, GIF, etc.)"
+            detail="Tệp được tải lên phải là hình ảnh (PNG, JPG, WEBP, GIF) hoặc video (MP4, WebM)."
         )
-    
+
     try:
         file_bytes = await file.read()
-        # Upload file directly to Cloudinary folder "Acc Demo"
-        # Auto-convert to WebP and optimize quality (q_auto:good) to keep file sizes lightweight
-        result = cloudinary.uploader.upload(
-            file_bytes,
-            folder=CLOUDINARY_FOLDER,
-            resource_type="image",
-            format="webp",
-            quality="auto:good"
-        )
         
+        upload_kwargs = {
+            "folder": CLOUDINARY_FOLDER,
+            "resource_type": "video" if is_video else "image"
+        }
+        
+        if is_image:
+            # Auto format to webp with good quality and cap max dimension at 1920 to keep storage small
+            upload_kwargs.update({
+                "format": "webp",
+                "quality": "auto:good",
+                "transformation": [{"width": 1920, "height": 1920, "crop": "limit"}]
+            })
+
+        # Offload synchronous Cloudinary API call to worker thread
+        result = await run_in_threadpool(
+            cloudinary.uploader.upload,
+            file_bytes,
+            **upload_kwargs
+        )
+
         secure_url = result.get("secure_url") or result.get("url")
         public_id = result.get("public_id")
-        
+
         return {
             "success": True,
             "url": secure_url,
@@ -119,49 +186,43 @@ async def upload_image(
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Lỗi khi tải ảnh lên Cloudinary: {str(e)}"
+            detail=f"Lỗi khi tải tệp lên Cloudinary: {str(e)}"
         )
 
 
 class DeleteImageRequest(BaseModel):
     url: Optional[str] = None
     public_id: Optional[str] = None
+    urls: Optional[List[str]] = None
 
 
 @router.post("/delete-image")
 async def delete_image(
     req: DeleteImageRequest,
+    background_tasks: BackgroundTasks,
     current_user: models.User = Depends(auth.get_current_user)
 ):
     """
-    Safely delete an old image from Cloudinary.
-    Accepts either full URL or public_id.
-    Validates that the file belongs to Cloudinary before attempting deletion.
+    Safely delete old image(s) from Cloudinary in the background.
+    Responds immediately so the frontend never freezes.
     """
-    public_id = req.public_id
-    
-    if not public_id and req.url:
-        clean_url = req.url.strip()
-        # Only process if it is indeed a Cloudinary URL
-        if "cloudinary.com" in clean_url:
-            # Extract public_id matching /image/upload/(v.../)?(folder/name).(ext)
-            m = re.search(r'/image/upload/(?:v\d+/)?(.+?)(?:\.[a-zA-Z0-9]+)?$', clean_url)
-            if m:
-                public_id = urllib.parse.unquote(m.group(1))
-    
-    if not public_id:
-        # Not a Cloudinary image (e.g. Google Drive link, local asset, or empty)
-        return {"success": True, "message": "Không phải ảnh Cloudinary, bỏ qua.", "deleted": False}
-    
-    try:
-        res = cloudinary.uploader.destroy(public_id, resource_type="image")
-        result_status = res.get("result")
-        return {
-            "success": True,
-            "public_id": public_id,
-            "result": result_status,
-            "deleted": result_status == "ok"
-        }
-    except Exception as e:
-        print(f"Warning: Cloudinary delete failed for {public_id}: {str(e)}")
-        return {"success": False, "error": str(e), "public_id": public_id}
+    targets = []
+    if req.urls:
+        targets.extend(req.urls)
+    if req.url:
+        targets.append(req.url)
+    if req.public_id:
+        targets.append(req.public_id)
+
+    queued_count = 0
+    for target in targets:
+        pid = extract_cloudinary_public_id(target, CLOUDINARY_FOLDER)
+        if pid:
+            background_tasks.add_task(run_in_threadpool, _delete_cloudinary_sync, pid)
+            queued_count += 1
+
+    return {
+        "success": True,
+        "message": f"Đã xếp hàng xóa {queued_count} ảnh Cloudinary.",
+        "queued": queued_count
+    }

@@ -41,8 +41,7 @@ const routes = [
   {
     path: '/bundles',
     alias: ['/pages/bundle-2026', '/pages/bundle'],
-    name: 'Bundles',
-    component: () => import('../views/Bundles.vue')
+    redirect: '/courses'
   },
   {
     path: '/corporate/dao-tao',
@@ -231,6 +230,9 @@ router.beforeEach(async (to, from, next) => {
       // Non-blocking background sync for public routes
       courseStore.fetchUserMe().catch(() => {});
     }
+  } else if (courseStore.token && courseStore.user) {
+    // Non-blocking background refresh to keep session and roles fresh without white screen delay
+    courseStore.fetchUserMe().catch(() => {});
   }
 
   // Load enrollments only when accessing protected enrollment room

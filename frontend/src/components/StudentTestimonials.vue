@@ -13,21 +13,21 @@
         <button 
           class="tab-btn"
           :class="{ active: activeTab === 'all' }"
-          @click="activeTab = 'all'"
+          @click="setTab('all')"
         >
           Tất cả phản hồi ({{ videoTestimonialsData.length + photoTestimonialsData.length }})
         </button>
         <button 
           class="tab-btn"
           :class="{ active: activeTab === 'video' }"
-          @click="activeTab = 'video'"
+          @click="setTab('video')"
         >
           Video Feedback YouTube ({{ videoTestimonialsData.length }})
         </button>
         <button 
           class="tab-btn"
           :class="{ active: activeTab === 'photo' }"
-          @click="activeTab = 'photo'"
+          @click="setTab('photo')"
         >
           Hình ảnh & Cảm nhận ({{ photoTestimonialsData.length }})
         </button>
@@ -37,36 +37,47 @@
       <div v-if="activeTab === 'all' || activeTab === 'video'" class="feedback-sub-section">
         <h3 class="sub-section-title">Video Feedback từ Học viên </h3>
         
-        <div v-if="videoTestimonialsData.length > 0" class="video-grid">
-          <div 
-            v-for="(v, idx) in videoTestimonialsData" 
-            :key="v.id" 
-            class="video-card"
-            @click="openVideo(v.videoUrl)"
-          >
-            <div class="video-thumb-wrapper">
-              <img :src="formatImageUrl(v.thumbnail)" :alt="v.title" class="video-thumb-img" referrerpolicy="no-referrer" />
-              <div class="play-overlay">
-                <div class="play-btn-circle">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                  </svg>
+        <template v-if="videoTestimonialsData.length > 0">
+          <div class="video-grid">
+            <div 
+              v-for="(v, idx) in paginatedVideoData" 
+              :key="v.id" 
+              class="video-card"
+              @click="openVideo(v.videoUrl)"
+            >
+              <div class="video-thumb-wrapper">
+                <img :src="formatImageUrl(v.thumbnail)" :alt="v.title" class="video-thumb-img" referrerpolicy="no-referrer" />
+                <div class="play-overlay">
+                  <div class="play-btn-circle">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div class="video-card-body">
-              <span class="program-tag-badge" v-if="v.courseName"> {{ v.courseName }}</span>
-              <h4 class="video-card-title">{{ v.title }}</h4>
-              <div class="student-profile-info">
-                <span class="s-name"> {{ v.studentName || v.name }}</span>
-                <span class="s-role" v-if="v.role || v.company">{{ v.role }} <span v-if="v.company">• {{ v.company }}</span></span>
+              <div class="video-card-body">
+                <span class="program-tag-badge" v-if="v.courseName"> {{ v.courseName }}</span>
+                <h4 class="video-card-title">{{ v.title }}</h4>
+                <div class="student-profile-info">
+                  <span class="s-name"> {{ v.studentName || v.name }}</span>
+                  <span class="s-role" v-if="v.role || v.company">{{ v.role }} <span v-if="v.company">• {{ v.company }}</span></span>
+                </div>
+                <span class="yt-link-small">
+                  Bấm để xem video ngay ;
+                </span>
               </div>
-              <span class="yt-link-small">
-                Bấm để xem video ngay ;
-              </span>
             </div>
           </div>
-        </div>
+
+          <!-- Video Pagination Component -->
+          <Pagination 
+            v-if="videoTestimonialsData.length > videoPageSize"
+            v-model:currentPage="videoPage"
+            :totalItems="videoTestimonialsData.length"
+            :pageSize="videoPageSize"
+            @page-change="onVideoPageChange"
+          />
+        </template>
 
         <div v-else class="empty-feedback-box">
           <p class="empty-feedback-text">Hiện chưa có video cảm nhận nào từ học viên.</p>
@@ -92,31 +103,42 @@
       <div v-if="activeTab === 'all' || activeTab === 'photo'" class="feedback-sub-section style-mt">
         <h3 class="sub-section-title"> Hình ảnh & Cảm nhận Học viên</h3>
         
-        <div v-if="photoTestimonialsData.length > 0" class="photo-grid">
-          <div 
-            v-for="p in photoTestimonialsData" 
-            :key="p.id" 
-            class="photo-card"
-          >
-            <div class="photo-card-img-wrapper" v-if="p.image">
-              <img :src="formatImageUrl(p.image)" :alt="p.name" class="photo-card-img" referrerpolicy="no-referrer" />
-            </div>
-
-            <div class="photo-card-content">
-              <div class="student-profile">
-                <img :src="formatImageUrl(p.avatar)" :alt="p.name" class="profile-avatar" referrerpolicy="no-referrer" />
-                <div>
-                  <h4 class="profile-name">{{ p.name }}</h4>
-                  <p class="profile-title">{{ p.role }} • {{ p.company }}</p>
-                </div>
+        <template v-if="photoTestimonialsData.length > 0">
+          <div class="photo-grid">
+            <div 
+              v-for="p in paginatedPhotoData" 
+              :key="p.id" 
+              class="photo-card"
+            >
+              <div class="photo-card-img-wrapper" v-if="p.image">
+                <img :src="formatImageUrl(p.image)" :alt="p.name" class="photo-card-img" referrerpolicy="no-referrer" />
               </div>
 
-              <div class="stars">★★★★★</div>
-              <p class="quote-text">"{{ p.quote }}"</p>
-              <span class="course-badge">{{ p.courseName }}</span>
+              <div class="photo-card-content">
+                <div class="student-profile">
+                  <img :src="formatImageUrl(p.avatar)" :alt="p.name" class="profile-avatar" referrerpolicy="no-referrer" />
+                  <div>
+                    <h4 class="profile-name">{{ p.name }}</h4>
+                    <p class="profile-title">{{ p.role }} • {{ p.company }}</p>
+                  </div>
+                </div>
+
+                <div class="stars">★★★★★</div>
+                <p class="quote-text">"{{ p.quote }}"</p>
+                <span class="course-badge">{{ p.courseName }}</span>
+              </div>
             </div>
           </div>
-        </div>
+
+          <!-- Photo Pagination Component -->
+          <Pagination 
+            v-if="photoTestimonialsData.length > photoPageSize"
+            v-model:currentPage="photoPage"
+            :totalItems="photoTestimonialsData.length"
+            :pageSize="photoPageSize"
+            @page-change="onPhotoPageChange"
+          />
+        </template>
 
         <div v-else class="empty-feedback-box">
           <p class="empty-feedback-text">Hiện chưa có hình ảnh & cảm nhận nào từ học viên.</p>
@@ -145,17 +167,48 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { youtubePlaylistUrl } from '@/data/testimonials';
 import { useTestimonialStore } from '@/stores/testimonials';
 import { formatImageUrl } from '@/utils/imageHelper';
+import Pagination from '@/components/Pagination.vue';
 
+const youtubePlaylistUrl = 'https://www.youtube.com/playlist?list=PLB-PopIBDBXk';
 const testimonialStore = useTestimonialStore();
 
 const activeTab = ref('all');
 const activeVideoUrl = ref('');
 
+const videoPage = ref(1);
+const videoPageSize = ref(6);
+
+const photoPage = ref(1);
+const photoPageSize = ref(6);
+
 const videoTestimonialsData = computed(() => testimonialStore.videoTestimonials);
 const photoTestimonialsData = computed(() => testimonialStore.photoTestimonials);
+
+const paginatedVideoData = computed(() => {
+  const start = (videoPage.value - 1) * videoPageSize.value;
+  return videoTestimonialsData.value.slice(start, start + videoPageSize.value);
+});
+
+const paginatedPhotoData = computed(() => {
+  const start = (photoPage.value - 1) * photoPageSize.value;
+  return photoTestimonialsData.value.slice(start, start + photoPageSize.value);
+});
+
+const setTab = (tab) => {
+  activeTab.value = tab;
+  videoPage.value = 1;
+  photoPage.value = 1;
+};
+
+const onVideoPageChange = () => {
+  window.scrollTo({ top: 220, behavior: 'smooth' });
+};
+
+const onPhotoPageChange = () => {
+  window.scrollTo({ top: 450, behavior: 'smooth' });
+};
 
 onMounted(() => {
   testimonialStore.fetchTestimonials();

@@ -545,20 +545,9 @@ const uploadPosterFile = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
 
-  const formData = new FormData();
-  formData.append('file', file);
-
   try {
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${courseStore.token}`
-      },
-      body: formData
-    });
-    if (!res.ok) throw new Error('Upload ảnh thất bại');
-    const data = await res.json();
-    introForm.value.poster_url = data.url;
+    const url = await courseStore.uploadImage(file);
+    introForm.value.poster_url = url;
     courseStore.showToast('Tải ảnh bìa video thành công!', 'success');
   } catch (err) {
     courseStore.showToast('Không thể upload ảnh bìa: ' + err.message, 'error');

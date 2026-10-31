@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from ...database import get_db
 from ... import models, schemas, crud, auth
@@ -150,7 +150,14 @@ def get_custom_commissions_admin(
     current_user: models.User = Depends(auth.get_current_admin_user),
     db: Session = Depends(get_db)
 ):
-    commissions = crud.get_custom_commissions(db)
+    commissions = (
+        db.query(models.UserCourseCommission)
+        .options(
+            joinedload(models.UserCourseCommission.user),
+            joinedload(models.UserCourseCommission.course)
+        )
+        .all()
+    )
     result = []
     for c in commissions:
         result.append(schemas.UserCourseCommissionResponse(

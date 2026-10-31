@@ -175,6 +175,8 @@ const currentDragMode = ref('move');
 const sourceImageUrl = ref('');
 let cropperInstance = null;
 let previewRaf = null;
+let initTimer = null;
+let readyTimer = null;
 
 const ratioBadgeLabel = computed(() => {
   switch (currentRatioMode.value) {
@@ -299,7 +301,8 @@ const initCropper = () => {
     checkCrossOrigin: true,
     ready() {
       loadingImage.value = false;
-      setTimeout(() => {
+      if (readyTimer) clearTimeout(readyTimer);
+      readyTimer = setTimeout(() => {
         if (cropperInstance) {
           cropperInstance.resize();
           schedulePreviewUpdate();
@@ -372,7 +375,7 @@ const applyCropAndUpload = async () => {
     if (!canvas) throw new Error('Không thể tạo canvas từ ảnh cắt!');
 
     const blob = await new Promise(resolve => {
-      canvas.toBlob(resolve, 'image/webp', 0.95);
+      canvas.toBlob(resolve, 'image/webp', 0.85);
     });
 
     if (!blob) throw new Error('Không thể tạo file ảnh từ canvas!');
@@ -393,6 +396,18 @@ const applyCropAndUpload = async () => {
 
 const handleClose = () => {
   if (savingCropped.value) return;
+  if (initTimer) {
+    clearTimeout(initTimer);
+    initTimer = null;
+  }
+  if (readyTimer) {
+    clearTimeout(readyTimer);
+    readyTimer = null;
+  }
+  if (previewRaf) {
+    cancelAnimationFrame(previewRaf);
+    previewRaf = null;
+  }
   if (cropperInstance) {
     cropperInstance.destroy();
     cropperInstance = null;
@@ -410,8 +425,9 @@ watch(() => props.isOpen, async (newVal) => {
     currentRatioMode.value = props.aspectRatio || 'free';
     sourceImageUrl.value = resolveImageUrl(props.imageUrl);
     await nextTick();
-    setTimeout(() => {
-      if (!cropperInstance && cropperImageRef.value) {
+    if (initTimer) clearTimeout(initTimer);
+    initTimer = setTimeout(() => {
+      if (!cropperInstance && cropperImageRef.value && props.isOpen) {
         initCropper();
       }
     }, 200);
@@ -426,7 +442,10 @@ watch(() => props.imageUrl, (newVal) => {
     loadingImage.value = true;
     sourceImageUrl.value = resolveImageUrl(newVal);
     nextTick(() => {
-      setTimeout(() => initCropper(), 120);
+      if (initTimer) clearTimeout(initTimer);
+      initTimer = setTimeout(() => {
+        if (props.isOpen) initCropper();
+      }, 120);
     });
   }
 });
@@ -434,6 +453,18 @@ watch(() => props.imageUrl, (newVal) => {
 onUnmounted(() => {
   if (typeof document !== 'undefined') {
     document.body.style.overflow = '';
+  }
+  if (initTimer) {
+    clearTimeout(initTimer);
+    initTimer = null;
+  }
+  if (readyTimer) {
+    clearTimeout(readyTimer);
+    readyTimer = null;
+  }
+  if (previewRaf) {
+    cancelAnimationFrame(previewRaf);
+    previewRaf = null;
   }
   if (cropperInstance) {
     cropperInstance.destroy();

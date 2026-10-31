@@ -131,11 +131,15 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
+
+onMounted(async () => {
+  await courseStore.fetchAdminUsers().catch(err => console.warn('fetchAdminUsers failed:', err));
+});
 
 const users = computed(() => courseStore.adminUsers);
 

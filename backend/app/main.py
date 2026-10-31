@@ -138,6 +138,22 @@ def perform_startup_tasks():
                 db.add(db_setting)
                 db.commit()
                 print("Seeded default contact settings.")
+
+            # Seed default blog categories if empty
+            blog_cat_count = db.query(models.BlogCategory).count()
+            if blog_cat_count == 0:
+                existing_cats = db.query(models.BlogPost.category).distinct().all()
+                cat_names = set([c[0] for c in existing_cats if c[0]])
+                default_cats = ["AI 2026", "AI Automation", "Công cụ AI", "Làm việc hiệu suất", "Lãnh đạo & Quản lý"]
+                for dc in default_cats:
+                    cat_names.add(dc)
+                
+                for name in sorted(cat_names):
+                    slug = crud.slugify(name)
+                    db_bcat = models.BlogCategory(name=name, slug=slug)
+                    db.add(db_bcat)
+                db.commit()
+                print(f"Seeded {len(cat_names)} initial blog categories.")
         finally:
             db.close()
     except Exception as e:

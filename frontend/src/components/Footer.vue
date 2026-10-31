@@ -33,11 +33,11 @@
         <div class="custom-footer-col nav-col">
           <h4 class="custom-footer-heading">Chương trình Đào tạo</h4>
           <ul class="custom-footer-linklist">
-            <li><router-link to="/courses/category/dao-tao-ca-nhan">Khóa học cá nhân</router-link></li>
-            <li><router-link to="/courses/category/dao-tao-doanh-nghiep">Đào tạo Doanh nghiệp Inhouse</router-link></li>
+            <li v-for="cat in footerCategories" :key="cat.slug">
+              <router-link :to="'/courses/category/' + cat.slug">{{ cat.name }}</router-link>
+            </li>
             <li><router-link to="/tuyen-sinh">Chương trình Thạc sĩ MBA Andrews</router-link></li>
-            <li><router-link to="/bundles">Gói Combo Khóa học Ưu đãi</router-link></li>
-            <li><router-link to="/doi-ngu-giang-vien">Đội ngũ Giảng viên & Chuyên gia</router-link></li>
+                        <li><router-link to="/doi-ngu-giang-vien">Đội ngũ Giảng viên & Chuyên gia</router-link></li>
           </ul>
         </div>
 
@@ -92,6 +92,9 @@ import { computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 
 const courseStore = useCourseStore();
+const footerCategories = computed(() => {
+  return (courseStore.categories || []).filter(c => c.slug !== 'bundles');
+});
 
 onMounted(() => {
   if (!courseStore.contactSettings) {

@@ -8,17 +8,17 @@ router = APIRouter()
 
 @router.get("", response_model=List[schemas.LecturerResponse])
 def read_lecturers(response: Response, featured: bool = False, db: Session = Depends(get_db)):
-    response.headers["Cache-Control"] = "no-cache, must-revalidate"
-    return crud.get_lecturers(db, featured_only=featured)
+    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
+    return crud.get_lecturers(db, featured_only=featured, include_details=False)
 
 @router.get("/majors", response_model=List[schemas.LecturerMajorResponse])
 def read_lecturer_majors(response: Response, db: Session = Depends(get_db)):
-    response.headers["Cache-Control"] = "no-cache, must-revalidate"
+    response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=120"
     return crud.get_lecturer_majors(db)
 
 @router.get("/{id}", response_model=schemas.LecturerResponse)
 def read_lecturer_by_id(id: str, response: Response, db: Session = Depends(get_db)):
-    response.headers["Cache-Control"] = "no-cache, must-revalidate"
+    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
     lecturer = crud.get_lecturer_by_id(db, id)
     if not lecturer:
         raise HTTPException(

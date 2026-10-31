@@ -85,6 +85,7 @@
 
       <!-- MAIN CONTENT PANEL -->
       <main class="admin-main">
+        <div v-if="isTabSwitching" class="admin-loading-bar"></div>
         <component :is="currentTabComponent" />
       </main>
     </div>
@@ -103,8 +104,6 @@ import AdminUsers from './components/AdminUsers.vue';
 import AdminContacts from './components/AdminContacts.vue';
 import AdminCourses from './components/AdminCourses.vue';
 import AdminCategories from './components/AdminCategories.vue';
-import AdminPrograms from './components/AdminPrograms.vue';
-import AdminBundles from './components/AdminBundles.vue';
 import AdminBanners from './components/AdminBanners.vue';
 import AdminCoupons from './components/AdminCoupons.vue';
 import AdminCommissions from './components/AdminCommissions.vue';
@@ -130,9 +129,7 @@ const businessTabs = [
 const educationTabs = [
   { id: 'categories', name: 'Chuyên mục' },
   { id: 'courses', name: 'Khóa học' },
-  { id: 'programs', name: 'Chương trình đào tạo' },
-  { id: 'bundles', name: 'Gói Combo' },
-  { id: 'lecturers', name: 'Giảng viên & Chuyên gia' }
+      { id: 'lecturers', name: 'Giảng viên & Chuyên gia' }
 ];
 
 const marketingTabs = [
@@ -155,14 +152,12 @@ const getInitialTab = () => {
   if (queryTab && tabs.some(t => t.id === queryTab)) {
     return queryTab;
   }
-  const savedTab = localStorage.getItem('acc_admin_active_tab');
-  if (savedTab && tabs.some(t => t.id === savedTab)) {
-    return savedTab;
-  }
   return 'overview';
 };
 
 const activeTab = ref(getInitialTab());
+const isTabSwitching = ref(false);
+let tabSwitchTimer = null;
 
 const openGroups = ref({
   business: businessTabs.some(t => t.id === activeTab.value),
@@ -181,29 +176,21 @@ watch(activeTab, (newTab) => {
 });
 
 watch(activeTab, (newTab) => {
+  isTabSwitching.value = true;
+  if (tabSwitchTimer) clearTimeout(tabSwitchTimer);
+  tabSwitchTimer = setTimeout(() => { isTabSwitching.value = false; }, 380);
+
   localStorage.setItem('acc_admin_active_tab', newTab);
   if (route.query.tab !== newTab) {
     router.replace({ query: { ...route.query, tab: newTab } });
   }
 }, { immediate: true });
 
-onMounted(async () => {
-  await Promise.all([
-    courseStore.fetchAdminUsers().catch(err => console.warn("fetchAdminUsers failed:", err)),
-    courseStore.fetchAdminOrders().catch(err => console.warn("fetchAdminOrders failed:", err)),
-    courseStore.fetchAdminContacts().catch(err => console.warn("fetchAdminContacts failed:", err)),
-    courseStore.fetchCourses().catch(err => console.warn("fetchCourses failed:", err)),
-    courseStore.fetchCategories().catch(err => console.warn("fetchCategories failed:", err)),
-    courseStore.fetchPrograms().catch(err => console.warn("fetchPrograms failed:", err)),
-    courseStore.fetchBundles().catch(err => console.warn("fetchBundles failed:", err)),
-    courseStore.fetchLecturerMajors().catch(err => console.warn("fetchLecturerMajors failed:", err)),
-    courseStore.fetchLecturers().catch(err => console.warn("fetchLecturers failed:", err)),
-    courseStore.fetchAdminBanners().catch(err => console.warn("fetchAdminBanners failed:", err)),
-    courseStore.fetchAdminTestimonials().catch(err => console.warn("fetchAdminTestimonials failed:", err)),
-    courseStore.fetchAdminProjects().catch(err => console.warn("fetchAdminProjects failed:", err)),
-    courseStore.fetchAdminBlogPosts().catch(err => console.warn("fetchAdminBlogPosts failed:", err)),
-    courseStore.fetchAdminPartners().catch(err => console.warn("fetchAdminPartners failed:", err))
-  ]);
+// Preload core metrics for Overview and Business/Customer group on arrival
+onMounted(() => {
+  courseStore.fetchAdminUsers().catch(() => {});
+  courseStore.fetchAdminOrders().catch(() => {});
+  courseStore.fetchAdminContacts().catch(() => {});
 });
 
 const currentTabComponent = computed(() => {
@@ -219,9 +206,7 @@ const currentTabComponent = computed(() => {
     case 'banners': return AdminBanners;
     case 'categories': return AdminCategories;
     case 'courses': return AdminCourses;
-    case 'programs': return AdminPrograms;
-    case 'bundles': return AdminBundles;
-    case 'orders': return AdminOrders;
+            case 'orders': return AdminOrders;
     case 'users': return AdminUsers;
     case 'contacts': return AdminContacts;
     default: return AdminOverview;

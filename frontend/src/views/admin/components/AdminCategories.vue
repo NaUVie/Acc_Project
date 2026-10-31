@@ -111,10 +111,17 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 
 const courseStore = useCourseStore();
+
+onMounted(async () => {
+  await courseStore.fetchCategories().catch(err => console.warn('fetchCategories failed:', err));
+  if (courseStore.courses.length === 0) {
+    courseStore.fetchCourses().catch(err => console.warn('fetchCourses failed:', err));
+  }
+});
 
 const categories = computed(() => courseStore.categories || []);
 const showModal = ref(false);

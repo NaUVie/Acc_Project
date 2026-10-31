@@ -239,13 +239,15 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
+
+let scrollObserver = null;
 
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   // Scroll reveal animation observer
-  const observer = new IntersectionObserver((entries) => {
+  scrollObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('is-revealed');
@@ -253,7 +255,14 @@ onMounted(() => {
     });
   }, { threshold: 0.15 });
 
-  document.querySelectorAll('.reveal-on-scroll').forEach(el => observer.observe(el));
+  document.querySelectorAll('.reveal-on-scroll').forEach(el => scrollObserver.observe(el));
+});
+
+onUnmounted(() => {
+  if (scrollObserver) {
+    scrollObserver.disconnect();
+    scrollObserver = null;
+  }
 });
 
 const boardMembers = [

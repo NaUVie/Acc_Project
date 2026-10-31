@@ -418,9 +418,6 @@ onMounted(async () => {
     if (courseStore.courses.length === 0) {
       tasks.push(courseStore.fetchCourses());
     }
-    if (courseStore.programs.length === 0) {
-      tasks.push(courseStore.fetchPrograms());
-    }
     if (courseStore.token && !courseStore.userMe) {
       tasks.push(courseStore.fetchUserMe());
     }

@@ -65,7 +65,15 @@
                 </div>
               </td>
             </tr>
-            <tr v-if="filteredCourses.length === 0">
+            <tr v-if="isLoadingCourses && filteredCourses.length === 0">
+              <td colspan="7">
+                <div class="admin-center-loader" style="padding: 40px 0; min-height: 160px;">
+                  <div class="admin-spinner"></div>
+                  <p class="admin-loader-text">Đang nạp danh sách khóa học...</p>
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="filteredCourses.length === 0">
               <td colspan="7" class="text-center py-8 text-muted">Không tìm thấy khóa học nào phù hợp.</td>
             </tr>
           </tbody>
@@ -117,14 +125,7 @@
               <input v-model="customCategorySlug" type="text" placeholder="Nhập mã slug chuyên mục mới (ví dụ: marketing-ai)" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
             </div>
           </div>
-          <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Chương trình đào tạo mẹ (Program)</label>
-            <select v-model="courseForm.programId" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
-              <option :value="null">-- Không thuộc chương trình --</option>
-              <option v-for="p in programs" :key="p.id" :value="p.id">{{ p.title }}</option>
-            </select>
           </div>
-        </div>
 
         <div class="grid-2 mt-3">
           <div class="form-group">
@@ -461,16 +462,21 @@ const removeLecturerFromCourse = (id) => {
   courseForm.value.lecturerIds = updated.join(',');
 };
 
-onMounted(() => {
-  courseStore.fetchCourses();
-  if (courseStore.categories.length === 0) {
-    courseStore.fetchCategories();
-  }
-  if (courseStore.programs.length === 0) {
-    courseStore.fetchPrograms();
-  }
-  if (courseStore.lecturers.length === 0) {
-    courseStore.fetchLecturers();
+const isLoadingCourses = ref(courseStore.courses.length === 0);
+
+onMounted(async () => {
+  if (courseStore.courses.length === 0) isLoadingCourses.value = true;
+  try {
+    await courseStore.fetchCourses();
+    if (courseStore.categories.length === 0) {
+      courseStore.fetchCategories().catch(() => {});
+    }
+    
+    if (courseStore.lecturers.length === 0) {
+      courseStore.fetchLecturers().catch(() => {});
+    }
+  } finally {
+    isLoadingCourses.value = false;
   }
 });
 

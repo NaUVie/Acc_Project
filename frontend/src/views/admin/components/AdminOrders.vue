@@ -5,7 +5,12 @@
         <h2>Quản lý Đơn hàng</h2>
         <p>Danh sách các đơn đăng ký học và hóa đơn khóa học.</p>
       </div>
-      <button @click="openAddOrderModal" class="btn btn-primary btn-sm">+ Tạo đơn hàng</button>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button @click="refreshOrders" :disabled="isRefreshing" class="btn btn-secondary btn-sm" title="Tải lại dữ liệu mới nhất">
+          {{ isRefreshing ? "Đang tải..." : "🔄 Làm mới" }}
+        </button>
+        <button @click="openAddOrderModal" class="btn btn-primary btn-sm">+ Tạo đơn hàng</button>
+      </div>
     </div>
 
     <!-- Filters -->
@@ -39,14 +44,27 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="order in paginatedOrders" :key="order.id">
+          <tr v-if="isLoading && paginatedOrders.length === 0">
+            <td colspan="7">
+              <div class="admin-center-loader" style="padding: 40px 0; min-height: 160px;">
+                <div class="admin-spinner"></div>
+                <p class="admin-loader-text">Đang nạp danh sách đơn hàng...</p>
+              </div>
+            </td>
+          </tr>
+          <tr v-else-if="paginatedOrders.length === 0">
+            <td colspan="7" style="text-align: center; padding: 32px; color: #94a3b8;">
+              Không có đơn hàng nào
+            </td>
+          </tr>
+          <tr v-else v-for="order in paginatedOrders" :key="order.id">
             <td class="font-bold">#{{ order.id }}</td>
             <td>
               <div>{{ order.userFullname }}</div>
               <small class="text-muted">{{ order.userEmail }}</small>
             </td>
             <td>
-              <div v-for="item in order.items" :key="item.id">• {{ item.course.title }}</div>
+              <div v-for="item in (order.items || [])" :key="item.id">• {{ item.course?.title || item.title || "Khóa học" }}</div>
             </td>
             <td class="discount-price">-{{ formatPrice(order.discountApplied) }}</td>
             <td class="price-text font-bold">{{ formatPrice(order.totalPrice) }}</td>
@@ -157,15 +175,41 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
 
-const users = computed(() => courseStore.adminUsers);
-const orders = computed(() => courseStore.adminOrders);
-const courses = computed(() => courseStore.courses);
+const users = computed(() => courseStore.adminUsers || []);
+const orders = computed(() => courseStore.adminOrders || []);
+const courses = computed(() => courseStore.courses || []);
+
+const isLoading = ref((courseStore.adminOrders || []).length === 0);
+const isRefreshing = ref(false);
+const refreshOrders = async () => {
+  isRefreshing.value = true;
+  try {
+    await courseStore.fetchAdminOrders();
+  } finally {
+    isRefreshing.value = false;
+  }
+};
+
+onMounted(async () => {
+  if (orders.value.length === 0) isLoading.value = true;
+  try {
+    await courseStore.fetchAdminOrders().catch(err => console.warn("fetchAdminOrders failed:", err));
+    if (courseStore.courses.length === 0) {
+      courseStore.fetchCourses().catch(err => console.warn("fetchCourses failed:", err));
+    }
+    if (courseStore.adminUsers.length === 0) {
+      courseStore.fetchAdminUsers().catch(err => console.warn("fetchAdminUsers failed:", err));
+    }
+  } finally {
+    isLoading.value = false;
+  }
+});
 
 const orderSearch = ref('');
 const orderFilterStatus = ref('all');
@@ -216,8 +260,9 @@ const editOrderDetails = (order) => {
   editingOrderId.value = order.id;
   
   // Find selected courses from the catalog
-  const selected = order.items.map(item => {
-    return courses.value.find(c => c.id === item.course.id);
+  const selected = (order.items || []).map(item => {
+    const courseId = item.course?.id || item.course_id;
+    return courses.value.find(c => c.id === courseId);
   }).filter(Boolean);
 
   orderForm.value = {

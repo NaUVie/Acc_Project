@@ -24,38 +24,43 @@
       <div class="mega-menu-content" v-if="selectedCategory !== 'corporate'">
 
         <!-- Course Cards Grid (Matching Mega Program Card Grid Style) -->
-        <div class="mega-programs-grid" v-if="filteredCourses.length > 0">
-          <div 
-            v-for="course in filteredCourses" 
-            :key="course.id"
-            class="mega-program-card"
-          >
-            <router-link :to="'/course/' + (course.handle || course.id)" class="mega-card-link">
-              <div class="mega-school-logo">
-                <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" @error="handleImageError" />
-              </div>
-              <div class="mega-card-info">
-                <span class="mega-school-name">{{ course.level || 'Khóa học' }}</span>
-                <h4 class="mega-program-title" :title="course.title">{{ course.title }}</h4>
-                <p class="mega-program-desc">{{ stripHtml(course.description) }}</p>
-                <div class="mega-card-footer">
-                  <!-- <div class="mega-course-price">
-                    <span class="current-price">{{ formatPrice(course.price) }}</span>
-                    <span v-if="course.originalPrice && course.originalPrice > course.price" class="original-price">
-                      {{ formatPrice(course.originalPrice) }}
-                    </span>
-                  </div> -->
-                  <div class="btn-link-stretch">
-                    <div class="arrow-stretch-box">
-                      <span class="line-body"></span>
-                      <span class="arrow-tip"></span>
+        <template v-if="filteredCourses.length > 0">
+          <div class="mega-programs-grid">
+            <div 
+              v-for="course in paginatedCourses" 
+              :key="course.id"
+              class="mega-program-card"
+            >
+              <router-link :to="'/course/' + (course.handle || course.id)" class="mega-card-link">
+                <div class="mega-school-logo">
+                  <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" @error="handleImageError" />
+                </div>
+                <div class="mega-card-info">
+                  <span class="mega-school-name">{{ course.level || 'Khóa học' }}</span>
+                  <h4 class="mega-program-title" :title="course.title">{{ course.title }}</h4>
+                  <p class="mega-program-desc">{{ stripHtml(course.description) }}</p>
+                  <div class="mega-card-footer">
+                    <div class="btn-link-stretch">
+                      <div class="arrow-stretch-box">
+                        <span class="line-body"></span>
+                        <span class="arrow-tip"></span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </router-link>
+              </router-link>
+            </div>
           </div>
-        </div>
+
+          <!-- Pagination Component -->
+          <Pagination 
+            v-if="filteredCourses.length > pageSize"
+            v-model:currentPage="currentPage"
+            :totalItems="filteredCourses.length"
+            :pageSize="pageSize"
+            @page-change="onPageChange"
+          />
+        </template>
 
         <div v-else class="empty-state">
           <p>Chưa tìm thấy khóa học phù hợp trong danh mục này.</p>
@@ -146,12 +151,15 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 import { stripHtml } from '@/utils/stripHtml';
+import Pagination from '@/components/Pagination.vue';
 
 const route = useRoute();
 const router = useRouter();
 const courseStore = useCourseStore();
 
 const selectedCategory = ref(route.params.categorySlug || 'all');
+const currentPage = ref(1);
+const pageSize = ref(6);
 
 onMounted(async () => {
   const paramSlug = route.params.categorySlug;
@@ -172,6 +180,7 @@ onMounted(async () => {
 });
 
 watch(() => route.params.categorySlug, (newSlug) => {
+  currentPage.value = 1;
   if (newSlug) {
     selectedCategory.value = newSlug;
   } else {
@@ -180,6 +189,7 @@ watch(() => route.params.categorySlug, (newSlug) => {
 });
 
 const selectCategory = (id) => {
+  currentPage.value = 1;
   selectedCategory.value = id;
   if (id === 'all') {
     router.push('/courses');
@@ -189,15 +199,21 @@ const selectCategory = (id) => {
 };
 
 const selectCategoryHover = (id) => {
+  if (selectedCategory.value !== id) {
+    currentPage.value = 1;
+  }
   selectedCategory.value = id;
 };
 
 const availableCategories = computed(() => {
-  return [
-    { id: 'all', name: 'Tất cả khóa học' },
-    { id: 'dao-tao-doanh-nghiep', name: 'Đào tạo Inhouse' },
-    { id: 'dao-tao-ca-nhan', name: 'Đào tạo cá nhân' }
-  ];
+  const list = [{ id: 'all', name: 'Tất cả khóa học' }];
+  const cats = courseStore.categories || [];
+  cats.forEach(c => {
+    if (c.slug !== 'bundles') {
+      list.push({ id: c.slug, name: c.name });
+    }
+  });
+  return list;
 });
 
 const getCategoryCount = (id) => {
@@ -214,6 +230,15 @@ const filteredCourses = computed(() => {
   }
   return courseStore.getCoursesByCategory(selectedCategory.value);
 });
+
+const paginatedCourses = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value;
+  return filteredCourses.value.slice(start, start + pageSize.value);
+});
+
+const onPageChange = () => {
+  window.scrollTo({ top: 180, behavior: 'smooth' });
+};
 
 const formatPrice = (value) => {
   if (!value) return 'Liên hệ';

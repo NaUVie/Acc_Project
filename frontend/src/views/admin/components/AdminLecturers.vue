@@ -74,7 +74,19 @@
             </tr>
           </thead>
           <tbody>
+            <tr v-if="isLoadingLecturers && filteredLecturers.length === 0">
+              <td colspan="8">
+                <div class="admin-center-loader" style="padding: 40px 0; min-height: 160px;">
+                  <div class="admin-spinner"></div>
+                  <p class="admin-loader-text">Đang nạp danh sách giảng viên...</p>
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="filteredLecturers.length === 0 && !isLoadingLecturers">
+              <td colspan="8" class="text-center py-8 text-muted">Không tìm thấy giảng viên nào phù hợp.</td>
+            </tr>
             <tr 
+              v-else
               v-for="(l, idx) in paginatedLecturers" 
               :key="l.id"
             >
@@ -228,19 +240,13 @@
       <form @submit.prevent="saveLecturer">
         <div class="grid-2">
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Mã định danh (ID Slug)</label>
-            <input v-model="lecturerForm.id" :disabled="isEditing" type="text" required class="admin-input-style" placeholder="ví dụ: le-quang-trieu" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-            <small v-if="!isEditing" class="text-muted">Mã ID duy nhất không dấu, ví dụ: le-van-a</small>
-          </div>
-          <div class="form-group">
             <label style="color: #1e293b; font-weight: 600;">Họ và Tên Giảng viên</label>
             <input v-model="lecturerForm.name" @input="onNameInput" type="text" required class="admin-input-style" placeholder="ví dụ: Lê Quang Triều" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
           </div>
-        </div>
-
-        <div class="form-group mt-3">
-          <label style="color: #1e293b; font-weight: 600;">Chức danh / Vị trí công tác</label>
-          <input v-model="lecturerForm.title" type="text" required class="admin-input-style" placeholder="ví dụ: Chuyên gia Khai phá Dữ liệu & AI Agent" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 600;">Chức danh / Vị trí công tác</label>
+            <input v-model="lecturerForm.title" type="text" required class="admin-input-style" placeholder="ví dụ: Chuyên gia Khai phá Dữ liệu & AI Agent" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+          </div>
         </div>
 
         <div class="form-group mt-3">
@@ -367,10 +373,11 @@
           <button 
             type="submit" 
             class="btn btn-primary btn-sm" 
-            :disabled="uploadingAvatar" 
-            style="padding: 10px 32px; font-weight: 700;"
+            :disabled="uploadingAvatar || savingLecturer" 
+            style="padding: 10px 32px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;"
           >
-            {{ uploadingAvatar ? 'Đang tải ảnh...' : 'Lưu thông tin giảng viên' }}
+            <span v-if="savingLecturer" style="width: 14px; height: 14px; border: 2px solid #ffffff; border-top-color: transparent; border-radius: 50%; display: inline-block; animation: spin 0.8s linear infinite;"></span>
+            <span>{{ savingLecturer ? 'Đang lưu giảng viên...' : (uploadingAvatar ? 'Đang tải ảnh...' : 'Lưu thông tin giảng viên') }}</span>
           </button>
         </div>
       </form>
@@ -500,6 +507,8 @@ import ImageCropperModal from '@/components/ImageCropperModal.vue';
 import RichTextEditor from '@/components/RichTextEditor.vue';
 
 const courseStore = useCourseStore();
+const isLoadingLecturers = ref(courseStore.lecturers.length === 0);
+const savingLecturer = ref(false);
 
 // Cropper States
 const isCropperOpen = ref(false);
@@ -857,15 +866,22 @@ const lecturerForm = ref({
 
 const onNameInput = () => {
   if (!isEditing.value) {
-    lecturerForm.value.id = slugify(lecturerForm.value.name);
+    lecturerForm.value.id = slugify(lecturerForm.value.name).trim();
   }
 };
 
 onMounted(async () => {
-  await Promise.all([
-    courseStore.fetchLecturerMajors(),
-    courseStore.fetchLecturers()
-  ]);
+  if (courseStore.lecturers.length === 0) {
+    isLoadingLecturers.value = true;
+  }
+  try {
+    await Promise.all([
+      courseStore.fetchLecturerMajors(),
+      courseStore.fetchLecturers()
+    ]);
+  } finally {
+    isLoadingLecturers.value = false;
+  }
 });
 
 const openAddLecturerModal = () => {
@@ -913,6 +929,16 @@ const editLecturer = (l) => {
     show_detail_btn: !!(l.show_detail_btn ?? l.showDetailBtn ?? false)
   };
   activeView.value = 'form';
+
+  // Nạp chi tiết detailsHtml từ API nếu danh sách đã được tối ưu cắt giảm
+  if (!l.details_html && !l.detailsHtml) {
+    courseStore.apiRequest(`/lecturers/${l.id}`).then(full => {
+      if (full && full.details_html && isEditing.value && editingId.value === l.id) {
+        lecturerForm.value.detailsHtml = full.details_html;
+        l.details_html = full.details_html;
+      }
+    }).catch(() => {});
+  }
 };
 
 const uploadAvatar = async (e) => {
@@ -939,15 +965,34 @@ const uploadAvatar = async (e) => {
 };
 
 const saveLecturer = async () => {
-  if (uploadingAvatar.value) {
-    courseStore.showToast('Ảnh đang tải lên, vui lòng đợi trong giây lát...', 'warning');
+  if (uploadingAvatar.value || savingLecturer.value) {
+    if (uploadingAvatar.value) courseStore.showToast('Ảnh đang tải lên, vui lòng đợi trong giây lát...', 'warning');
     return;
   }
   try {
-    if (!lecturerForm.value.id.trim()) {
-      courseStore.showToast('Vui lòng nhập mã ID duy nhất!', 'warning');
+    if (!lecturerForm.value.name.trim()) {
+      courseStore.showToast('Vui lòng nhập họ và tên giảng viên!', 'warning');
       return;
     }
+
+    savingLecturer.value = true;
+
+    // Tự động tạo mã ID slug từ tên giảng viên
+    let baseId = (lecturerForm.value.id || slugify(lecturerForm.value.name)).trim();
+    if (!baseId) {
+      baseId = 'gv-' + Date.now().toString(36);
+    }
+
+    let finalId = baseId;
+    if (!isEditing.value) {
+      // Tự động giải quyết trùng mã ID bằng cách thêm số đuôi -2, -3,...
+      let counter = 2;
+      while (lecturers.value.some(l => l.id === finalId)) {
+        finalId = `${baseId}-${counter}`;
+        counter++;
+      }
+    }
+    lecturerForm.value.id = finalId;
 
     const cleanAvatar = (lecturerForm.value.avatar || '').trim();
     let finalAvatar = formatImageUrl(cleanAvatar);
@@ -963,6 +1008,7 @@ const saveLecturer = async () => {
 
     const payload = {
       ...lecturerForm.value,
+      id: finalId,
       avatar: finalAvatar,
       avatarDriveLink: finalDriveLink,
       detailsHtml: lecturerForm.value.detailsHtml || '',
@@ -972,10 +1018,6 @@ const saveLecturer = async () => {
       await courseStore.updateAdminLecturer(payload.id, payload);
       courseStore.showToast('Cập nhật giảng viên thành công!', 'success');
     } else {
-      if (lecturers.value.some(l => l.id === payload.id)) {
-        courseStore.showToast('Mã ID này đã được sử dụng!', 'warning');
-        return;
-      }
       await courseStore.addAdminLecturer(payload);
       courseStore.showToast('Thêm giảng viên mới thành công!', 'success');
     }
@@ -991,6 +1033,8 @@ const saveLecturer = async () => {
     activeView.value = 'list';
   } catch (err) {
     courseStore.showToast(err.message || 'Không thể lưu giảng viên.', 'error');
+  } finally {
+    savingLecturer.value = false;
   }
 };
 

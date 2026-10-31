@@ -246,6 +246,10 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (closeTimer) clearTimeout(closeTimer);
   window.removeEventListener('resize', handleResize);
+  window.removeEventListener('mousemove', onMouseMove);
+  window.removeEventListener('mouseup', onMouseUp);
+  window.removeEventListener('touchmove', onTouchMove);
+  window.removeEventListener('touchend', onTouchEnd);
 });
 </script>
 

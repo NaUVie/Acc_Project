@@ -587,6 +587,9 @@
   gap: 18px;
   width: max-content;
   will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: layout paint;
 }
 
 .partner-track-left {

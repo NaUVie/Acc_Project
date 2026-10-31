@@ -46,8 +46,21 @@
         </span>
       </div>
 
+      <!-- Loading Skeleton Cards -->
+      <div class="blog-grid" v-if="isLoading && posts.length === 0">
+        <article v-for="n in 6" :key="n" class="blog-card skeleton-card">
+          <div class="card-image-wrapper skeleton-img-box"></div>
+          <div class="card-body">
+            <div class="skeleton-shimmer skeleton-date"></div>
+            <div class="skeleton-shimmer skeleton-title"></div>
+            <div class="skeleton-shimmer skeleton-desc"></div>
+            <div class="skeleton-shimmer skeleton-btn"></div>
+          </div>
+        </article>
+      </div>
+
       <!-- Blog Grid -->
-      <div class="blog-grid" v-if="filteredPosts.length > 0" ref="blogGridRef">
+      <div class="blog-grid" v-else-if="filteredPosts.length > 0" ref="blogGridRef">
         <article 
           v-for="post in paginatedPosts" 
           :key="post.id" 
@@ -108,7 +121,7 @@
       />
 
       <!-- Empty State -->
-      <div v-if="filteredPosts.length === 0" class="empty-state">
+      <div v-else-if="!isLoading && filteredPosts.length === 0" class="empty-state">
         <h3 class="empty-title">Không tìm thấy bài viết phù hợp</h3>
         <p class="empty-desc">Thử tìm kiếm với từ khóa khác hoặc chuyển danh mục hiển thị.</p>
         <button @click="resetFilters" class="btn-reset">
@@ -126,20 +139,22 @@ import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
 const blogGridRef = ref(null);
+const isLoading = ref(courseStore.blogPosts.length === 0);
 
-onMounted(() => {
+onMounted(async () => {
+  courseStore.fetchBlogCategories().catch(() => {});
   if (!courseStore.blogPosts || courseStore.blogPosts.length === 0) {
+    isLoading.value = true;
+    try {
+      await courseStore.fetchBlogs();
+    } finally {
+      isLoading.value = false;
+    }
+  } else {
+    isLoading.value = false;
     courseStore.fetchBlogs().catch(() => {});
   }
 });
-
-const defaultCategories = [
-  'All posts',
-  'AI 2026',
-  'Công cụ AI',
-  'Làm việc hiệu suất',
-  'Lãnh đạo & Quản lý'
-];
 
 const selectedCategory = ref('All posts');
 const searchQuery = ref('');
@@ -148,13 +163,20 @@ const pageSize = ref(6); // 6 bài viết mỗi trang (chia đều lưới 2 ho�
 
 const posts = computed(() => courseStore.getBlogPosts || []);
 
-// Tự động thu thập các danh mục bài viết thực tế có trong data
+// Tự động nạp động các danh mục từ DB & danh sách bài viết thực tế
 const availableCategories = computed(() => {
-  const cats = new Set(defaultCategories);
+  const cats = ['All posts'];
+  if (courseStore.blogCategories && courseStore.blogCategories.length > 0) {
+    courseStore.blogCategories.forEach(c => {
+      if (c.name && !cats.includes(c.name)) cats.push(c.name);
+    });
+  }
   posts.value.forEach(p => {
-    if (p.category) cats.add(p.category);
+    if (p.category && !cats.includes(p.category)) {
+      cats.push(p.category);
+    }
   });
-  return Array.from(cats);
+  return cats;
 });
 
 const filteredPosts = computed(() => {

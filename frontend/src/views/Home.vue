@@ -176,7 +176,7 @@
     </div>
 
     <!-- 4. Partner Logos Section -->
-    <section class="partner-logos-section" v-show="partnerLogos.length > 0 && isPartnersReady">
+    <section class="partner-logos-section" v-show="partnerLogos.length > 0">
       <div class="partner-logos-header container">
         <h3 class="partner-logos-title">130+ doanh nghiệp hàng đầu đã hợp tác</h3>
       </div>
@@ -195,7 +195,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="formatImageUrl(logo.src, 's400')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
+              <img :src="formatImageUrl(logo.src, 's320')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
             </component>
           </div>
         </div>
@@ -213,7 +213,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="formatImageUrl(logo.src, 's400')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
+              <img :src="formatImageUrl(logo.src, 's320')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
             </component>
             <component
               :is="logo.link ? 'a' : 'div'"
@@ -225,7 +225,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="formatImageUrl(logo.src, 's400')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
+              <img :src="formatImageUrl(logo.src, 's320')" :alt="logo.name" class="partner-logo-img" loading="lazy" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
             </component>
           </div>
         </div>
@@ -243,7 +243,7 @@
               class="partner-logo-card"
               :title="logo.name"
             >
-              <img :src="formatImageUrl(logo.src, 's400')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
+              <img :src="formatImageUrl(logo.src, 's320')" :alt="logo.name" class="partner-logo-img" loading="eager" decoding="async" referrerpolicy="no-referrer" @load="handleLogoLoad" @error="handleLogoError" />
             </component>
           </div>
         </div>
@@ -303,18 +303,13 @@
               Tất cả
             </button>
             <button 
+              v-for="cat in homeCategories" 
+              :key="cat.slug"
               class="tab-btn" 
-              :class="{ active: currentCourseCategory === 'dao-tao-doanh-nghiep' }"
-              @click="currentCourseCategory = 'dao-tao-doanh-nghiep'"
+              :class="{ active: currentCourseCategory === cat.slug }"
+              @click="currentCourseCategory = cat.slug"
             >
-               Đào tạo Inhouse
-            </button>
-            <button 
-              class="tab-btn" 
-              :class="{ active: currentCourseCategory === 'dao-tao-ca-nhan' }"
-              @click="currentCourseCategory = 'dao-tao-ca-nhan'"
-            >
-               Đào tạo Cá nhân
+               {{ cat.name }}
             </button>
           </div>
         </div>
@@ -380,34 +375,45 @@
         </div>
 
         <div class="home-lecturers-grid">
-          <div 
-            v-for="l in featuredLecturers" 
-            :key="l.id" 
-            class="home-lecturer-card-item"
-          >
-            <router-link :to="'/giang-vien/' + l.id" class="team-card-wrapper group">
-              <div class="team-card-image-box">
-                <img 
-                  :src="formatImageUrl(l.avatar)" 
-                  :alt="l.name" 
-                  class="team-card-img" 
-                  @error="(e) => e.target.src = '/images/1_6.png'"
-                  referrerpolicy="no-referrer" 
-                />
-                <!-- Dark Gradient Overlay -->
-                <div class="team-card-gradient"></div>
-                
-                <!-- Bottom Info Box -->
-                <div class="team-card-info-box">
-                  <h3 class="team-card-name">{{ l.name }}</h3>
-                  <div class="team-card-role-row">
-                    <span class="accent-line"></span>
-                    <span class="team-card-role">{{ l.title }}</span>
+          <!-- Skeleton Loading when fetching real lecturers -->
+          <template v-if="courseStore.lecturersLoading && featuredLecturers.length === 0">
+            <div v-for="n in 4" :key="n" class="home-lecturer-card-item">
+              <div class="team-card-wrapper" style="height: 380px; border-radius: 20px; background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 37%, #f1f5f9 63%); background-size: 400% 100%; animation: skeletonShimmer 1.4s ease infinite;"></div>
+            </div>
+          </template>
+
+          <template v-else>
+            <div 
+              v-for="l in featuredLecturers" 
+              :key="l.id" 
+              class="home-lecturer-card-item"
+            >
+              <router-link :to="'/giang-vien/' + l.id" class="team-card-wrapper group">
+                <div class="team-card-image-box">
+                  <img 
+                    :src="formatImageUrl(l.avatar, 's500')" 
+                    :alt="l.name" 
+                    class="team-card-img" 
+                    loading="lazy"
+                    decoding="async"
+                    @error="(e) => e.target.src = '/images/1_6.png'"
+                    referrerpolicy="no-referrer" 
+                  />
+                  <!-- Dark Gradient Overlay -->
+                  <div class="team-card-gradient"></div>
+                  
+                  <!-- Bottom Info Box -->
+                  <div class="team-card-info-box">
+                    <h3 class="team-card-name">{{ l.name }}</h3>
+                    <div class="team-card-role-row">
+                      <span class="accent-line"></span>
+                      <span class="team-card-role">{{ l.title }}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </router-link>
-          </div>
+              </router-link>
+            </div>
+          </template>
         </div>
       </div>
     </section>
@@ -633,8 +639,8 @@ const heroSlides = computed(() => {
       const link = (b.link || '/').trim();
       const isHttp = /^https?:\/\//i.test(link) || link.startsWith('//');
       return {
-        desktopImage: formatImageUrl(b.desktop_image),
-        mobileImage: formatImageUrl(b.mobile_image || b.desktop_image),
+        desktopImage: formatImageUrl(b.desktop_image, 's1920'),
+        mobileImage: formatImageUrl(b.mobile_image || b.desktop_image, 's1080'),
         link: link || '/',
         title: b.title,
         isExternal: Boolean(b.is_external || isHttp)
@@ -692,18 +698,26 @@ const ecoTitleWords = computed(() => {
 });
 const ecoTitleAnimated = ref(false);
 
+let ecoObserver = null;
+let countersObserver = null;
+let partnerObserver = null;
+let animRafIds = [];
+
 const setupEcoTitleObserver = () => {
-  const observer = new IntersectionObserver((entries) => {
+  if (ecoObserver) {
+    ecoObserver.disconnect();
+  }
+  ecoObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         ecoTitleAnimated.value = true;
-        observer.unobserve(entry.target);
+        ecoObserver.unobserve(entry.target);
       }
     });
   }, { threshold: 0.15 });
 
   const target = document.querySelector('.eco-main-title');
-  if (target) observer.observe(target);
+  if (target) ecoObserver.observe(target);
 };
 
 const ecoCount = ref(0);
@@ -715,21 +729,27 @@ const countersAnimated = ref(false);
 
 const animateNumber = (refVar, target, duration = 1500) => {
   let start = null;
+  let rafId = null;
   const step = (timestamp) => {
     if (!start) start = timestamp;
     const progress = Math.min((timestamp - start) / duration, 1);
     refVar.value = Math.floor(progress * target);
     if (progress < 1) {
-      window.requestAnimationFrame(step);
+      rafId = window.requestAnimationFrame(step);
+      animRafIds.push(rafId);
     } else {
       refVar.value = target;
     }
   };
-  window.requestAnimationFrame(step);
+  rafId = window.requestAnimationFrame(step);
+  animRafIds.push(rafId);
 };
 
 const setupCountersObserver = () => {
-  const observer = new IntersectionObserver((entries) => {
+  if (countersObserver) {
+    countersObserver.disconnect();
+  }
+  countersObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting && !countersAnimated.value) {
         countersAnimated.value = true;
@@ -739,13 +759,13 @@ const setupCountersObserver = () => {
         animateNumber(businessesCount, 70, 1500);
         animateNumber(marketsCount, 7, 1000);
         animateNumber(npsCount, 85, 1200);
-        observer.unobserve(entry.target);
+        countersObserver.unobserve(entry.target);
       }
     });
   }, { threshold: 0.1 });
 
   const target = document.querySelector('.stats-trigger-zone');
-  if (target) observer.observe(target);
+  if (target) countersObserver.observe(target);
 };
 
 const formatNumber = (value) => {
@@ -777,7 +797,7 @@ const partnerMarqueeList = computed(() => {
   return partnerLogos.value.filter(p => !p.row_type || p.row_type === 'marquee');
 });
 
-const isPartnersReady = ref(false);
+const isPartnersReady = ref(true);
 
 const handleLogoError = (e) => {
   const img = e.target;
@@ -787,9 +807,9 @@ const handleLogoError = (e) => {
   if (m && m[1]) {
     const fileId = m[1];
     if (img.src.includes('lh3.googleusercontent.com')) {
-      img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+      img.src = `https://drive.google.com/thumbnail?id=${fileId}&sz=w320`;
     } else {
-      img.src = `https://lh3.googleusercontent.com/d/${fileId}=s400`;
+      img.src = `https://lh3.googleusercontent.com/d/${fileId}=s320`;
     }
   }
 };
@@ -808,52 +828,24 @@ const handleLogoLoad = (e) => {
   }
 };
 
-const preloadImage = (src) => {
-  return new Promise((resolve) => {
-    if (!src) return resolve();
-    const img = new Image();
-    img.referrerPolicy = 'no-referrer';
-    img.onload = () => resolve();
-    img.onerror = () => resolve();
-    img.src = formatImageUrl(src, 's400');
-  });
-};
+const preloadPartnerLogos = (partners) => {
+  if (!partners || partners.length === 0) return;
 
-const preloadPartnerLogos = async (partners) => {
-  if (!partners || partners.length === 0) {
-    isPartnersReady.value = true;
-    return;
-  }
-
-  // Preload priority images first (top fixed, bottom fixed, and first 10 marquee images)
+  // Non-blocking background image warm-up
   const topImages = partners.filter(p => p.row_type === 'top_fixed').slice(0, 6).map(p => p.src);
   const marqueeFirstImages = partners.filter(p => !p.row_type || p.row_type === 'marquee').slice(0, 10).map(p => p.src);
   const bottomImages = partners.filter(p => p.row_type === 'bottom_fixed').slice(0, 6).map(p => p.src);
 
   const initialImagesToLoad = [...new Set([...topImages, ...marqueeFirstImages, ...bottomImages])].filter(Boolean);
-
-  if (initialImagesToLoad.length === 0) {
-    isPartnersReady.value = true;
-    return;
-  }
-
-  // Wait for initial images to load (with a max timeout of 1200ms so slow networks don't get stuck)
-  const preloadPromise = Promise.all(initialImagesToLoad.map(preloadImage));
-  const timeoutPromise = new Promise(resolve => setTimeout(resolve, 1200));
-
-  await Promise.race([preloadPromise, timeoutPromise]);
-  isPartnersReady.value = true;
-
-  // Background preload the remaining marquee images so they are ready before they scroll in
-  const remainingImages = partners.map(p => p.src).filter(src => src && !initialImagesToLoad.includes(src));
-  remainingImages.forEach(src => {
+  initialImagesToLoad.forEach(src => {
     const img = new Image();
-    img.src = src;
+    img.referrerPolicy = 'no-referrer';
+    img.src = formatImageUrl(src, 's320');
   });
 };
 
 watch(partnerLogos, (newPartners) => {
-  if (newPartners && newPartners.length > 0 && !isPartnersReady.value) {
+  if (newPartners && newPartners.length > 0) {
     preloadPartnerLogos(newPartners);
   }
 }, { immediate: true });
@@ -861,17 +853,20 @@ watch(partnerLogos, (newPartners) => {
 // Partner Logo Reveal Observer
 const partnerRevealActive = ref(false);
 const setupPartnerObserver = () => {
-  const observer = new IntersectionObserver((entries) => {
+  if (partnerObserver) {
+    partnerObserver.disconnect();
+  }
+  partnerObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         partnerRevealActive.value = true;
-        observer.unobserve(entry.target);
+        partnerObserver.unobserve(entry.target);
       }
     });
   }, { threshold: 0.05 });
 
   const target = document.querySelector('.partner-logos-section');
-  if (target) observer.observe(target);
+  if (target) partnerObserver.observe(target);
 };
 
 // Bento Grid Cards Data with F5 Rotation
@@ -984,6 +979,9 @@ const nextTestimonial = () => {
 };
 
 // 8. Dynamic Courses Data from courseStore
+const homeCategories = computed(() => {
+  return (courseStore.categories || []).filter(c => c.slug !== 'bundles');
+});
 const currentCourseCategory = ref('all');
 
 const homeCourses = computed(() => {
@@ -1011,14 +1009,12 @@ const loadMoreCourses = () => {
 
 // 9. Featured Lecturers (Dynamically fetched, max 4 featured or fallback to top 4)
 const featuredLecturers = computed(() => {
-  if (courseStore.lecturers && courseStore.lecturers.length > 0) {
-    const featured = courseStore.lecturers.filter(l => l.is_featured);
-    if (featured.length > 0) {
-      return featured.slice(0, 4);
-    }
-    return courseStore.lecturers.slice(0, 4);
+  const list = courseStore.lecturers || [];
+  const featured = list.filter(l => l.is_featured);
+  if (featured.length > 0) {
+    return featured.slice(0, 4);
   }
-  return [];
+  return list.slice(0, 4);
 });
 
 // 10. Student Shared Feedbacks photos for Home from API
@@ -1123,9 +1119,7 @@ onMounted(() => {
   if (courseStore.courses.length === 0) {
     courseStore.fetchCourses();
   }
-  if (courseStore.lecturers.length === 0) {
-    courseStore.fetchLecturers();
-  }
+  courseStore.fetchLecturers();
   courseStore.fetchHomeIntroSettings();
   courseStore.fetchPartners();
   testimonialStore.fetchTestimonials();
@@ -1135,7 +1129,22 @@ onUnmounted(() => {
   stopHeroAutoplay();
   if (modalTimer) {
     clearTimeout(modalTimer);
+    modalTimer = null;
   }
+  if (ecoObserver) {
+    ecoObserver.disconnect();
+    ecoObserver = null;
+  }
+  if (countersObserver) {
+    countersObserver.disconnect();
+    countersObserver = null;
+  }
+  if (partnerObserver) {
+    partnerObserver.disconnect();
+    partnerObserver = null;
+  }
+  animRafIds.forEach(id => cancelAnimationFrame(id));
+  animRafIds = [];
 });
 </script>
 

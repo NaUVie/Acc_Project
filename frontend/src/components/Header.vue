@@ -24,13 +24,14 @@
               <div class="dropdown-title">TẤT CẢ KHÓA HỌC</div>
               <div class="dropdown-desc">Khám phá toàn bộ các khóa học & chương trình đào tạo</div>
             </router-link>
-            <router-link to="/courses/category/dao-tao-doanh-nghiep" class="dropdown-item">
-              <div class="dropdown-title">ĐÀO TẠO INHOUSE</div>
-              <div class="dropdown-desc">Các giải pháp đào tạo Inhouse & chuyển đổi số cho doanh nghiệp</div>
-            </router-link>
-            <router-link to="/courses/category/dao-tao-ca-nhan" class="dropdown-item">
-              <div class="dropdown-title">ĐÀO TẠO CÁ NHÂN</div>
-              <div class="dropdown-desc">Kỹ năng ứng dụng AI, chuyên môn & kỹ năng mềm cho cá nhân</div>
+            <router-link 
+              v-for="cat in navCategories" 
+              :key="cat.slug"
+              :to="getCategoryLink(cat)" 
+              class="dropdown-item"
+            >
+              <div class="dropdown-title">{{ (cat.name || '').toUpperCase() }}</div>
+              <div class="dropdown-desc">{{ getCategoryDesc(cat) }}</div>
             </router-link>
           </div>
         </div>
@@ -235,8 +236,15 @@
           </div>
           <div class="mobile-nav-links" v-show="activeMobileSection === 'courses-menu'">
             <router-link to="/courses" @click="closeMobileMenu" class="mobile-single-sublink">Tất cả khóa học</router-link>
-            <router-link to="/courses/category/dao-tao-doanh-nghiep" @click="closeMobileMenu" class="mobile-single-sublink">Đào tạo Inhouse</router-link>
-            <router-link to="/courses/category/dao-tao-ca-nhan" @click="closeMobileMenu" class="mobile-single-sublink">Đào tạo cá nhân</router-link>
+            <router-link 
+              v-for="cat in navCategories" 
+              :key="cat.slug"
+              :to="getCategoryLink(cat)" 
+              @click="closeMobileMenu" 
+              class="mobile-single-sublink"
+            >
+              {{ cat.name }}
+            </router-link>
           </div>
         </div>
 
@@ -390,6 +398,31 @@ import SlideOverSearch from '@/components/SlideOverSearch.vue';
 const router = useRouter();
 const courseStore = useCourseStore();
 
+// Dynamic categories for Navigation Header
+const navCategories = computed(() => {
+  const cats = courseStore.categories || [];
+  return cats.filter(c => c.slug !== 'bundles');
+});
+
+const getCategoryLink = (cat) => {
+  return '/courses/category/' + cat.slug;
+};
+
+const getCategoryDesc = (cat) => {
+  if (cat.description) return cat.description;
+  const s = (cat.slug || '').toLowerCase();
+  if (s.includes('inhouse') || s.includes('doanh-nghiep')) {
+    return 'Các giải pháp đào tạo Inhouse & chuyển đổi số cho doanh nghiệp';
+  }
+  if (s.includes('ca-nhan')) {
+    return 'Kỹ năng ứng dụng AI, chuyên môn & kỹ năng mềm cho cá nhân';
+  }
+  if (s.includes('nha-nuoc')) {
+    return 'Bồi dưỡng năng lực số cho khối cơ quan - nhà nước';
+  }
+  return 'Khám phá các khóa học thuộc chuyên mục ' + cat.name;
+};
+
 const isCartOpen = ref(false);
 const isSearchOpen = ref(false);
 const isUserDropdownOpen = ref(false);
@@ -526,8 +559,6 @@ const drawerTitle = computed(() => {
     case 'trusted-partners': return 'Đối tác tin cậy';
     case 'post-graduate': return 'Tuyển sinh Sau Đại học';
     case 'courses': return 'Khóa học';
-    case 'programs': return 'Chương trình đào tạo';
-    case 'bundles': return 'Gói Combo chương trình';
     case 'corporate': return 'Giải pháp Doanh nghiệp';
     case 'library': return 'Thư viện & Tài liệu';
     default: return '';
@@ -566,15 +597,6 @@ const drawerItems = computed(() => {
         { title: 'Quản trị & Bảo vệ Dữ liệu Cá nhân', link: '/courses/chuyen-mon' },
         { title: 'Digital Marketing & Phát triển Thương hiệu Số', link: '/courses/mem' },
         { title: 'Xây dựng & Phát triển Thương hiệu Cá nhân', link: '/courses/mem' }
-      ];
-    case 'programs':
-      return courseStore.programs.map(p => ({
-        title: p.title,
-        link: '/courses/chuyen-mon'
-      }));
-    case 'bundles':
-      return [
-        { title: 'Combo khóa học', link: '/bundles' }
       ];
     case 'corporate':
       return [
@@ -707,11 +729,9 @@ onMounted(async () => {
   window.addEventListener('scroll', handleScroll, { capture: true, passive: true });
   try {
     const tasks = [];
+    tasks.push(courseStore.fetchCategories(true));
     if (courseStore.courses.length === 0) {
       tasks.push(courseStore.fetchCourses());
-    }
-    if (courseStore.programs.length === 0) {
-      tasks.push(courseStore.fetchPrograms());
     }
     if (tasks.length > 0) {
       await Promise.all(tasks);

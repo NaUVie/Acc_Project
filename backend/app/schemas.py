@@ -124,6 +124,30 @@ class BundleResponse(BaseModel):
     class Config:
         from_attributes = True
 
+# Blog Category Schemas
+class BlogCategoryBase(BaseModel):
+    name: str
+    slug: Optional[str] = None
+    description: Optional[str] = None
+
+class BlogCategoryCreate(BlogCategoryBase):
+    pass
+
+class BlogCategoryUpdate(BaseModel):
+    name: Optional[str] = None
+    slug: Optional[str] = None
+    description: Optional[str] = None
+
+class BlogCategoryResponse(BaseModel):
+    id: int
+    name: str
+    slug: str
+    description: Optional[str] = None
+    post_count: Optional[int] = 0
+
+    class Config:
+        from_attributes = True
+
 # Blog Schemas
 class BlogPostBase(BaseModel):
     id: int
@@ -494,6 +518,24 @@ class OrderAdminUpdate(BaseModel):
     total_price: Optional[int] = None
     course_ids: Optional[List[int]] = None
 
+class OrderCourseAdminResponse(BaseModel):
+    id: int
+    title: str
+    handle: Optional[str] = None
+    price: Optional[int] = 0
+    image: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+class OrderItemAdminResponse(BaseModel):
+    id: int
+    course: Optional[OrderCourseAdminResponse] = None
+    price: int
+
+    class Config:
+        from_attributes = True
+
 class OrderAdminResponse(BaseModel):
     id: int
     user_id: int
@@ -503,7 +545,7 @@ class OrderAdminResponse(BaseModel):
     discount_applied: int
     status: str
     created_at: datetime
-    items: List[OrderItemResponse] = []
+    items: List[OrderItemAdminResponse] = []
 
     class Config:
         from_attributes = True

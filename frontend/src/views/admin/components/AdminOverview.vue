@@ -29,28 +29,40 @@
       <div class="admin-stat-card">
         <div class="stat-info">
           <h3>Doanh thu</h3>
-          <div class="stat-number">{{ formatPrice(totalRevenue) }}</div>
+          <div class="stat-number">
+            <span v-if="isLoading && orders.length === 0" class="stat-skeleton-pulse"></span>
+            <span v-else>{{ formatPrice(totalRevenue) }}</span>
+          </div>
           <p class="stat-helper">Đã đối soát thanh toán</p>
         </div>
       </div>
       <div class="admin-stat-card">
         <div class="stat-info">
           <h3>Học viên</h3>
-          <div class="stat-number">{{ users.length }}</div>
+          <div class="stat-number">
+            <span v-if="isLoading && users.length === 0" class="stat-skeleton-pulse"></span>
+            <span v-else>{{ users.length }}</span>
+          </div>
           <p class="stat-helper">Tài khoản trên hệ thống</p>
         </div>
       </div>
       <div class="admin-stat-card">
         <div class="stat-info">
           <h3>Đơn hàng</h3>
-          <div class="stat-number">{{ orders.length }}</div>
+          <div class="stat-number">
+            <span v-if="isLoading && orders.length === 0" style="font-size: 18px; color: #94a3b8; font-weight: 600;">Đang nạp...</span>
+            <span v-else>{{ orders.length }}</span>
+          </div>
           <p class="stat-helper">{{ orders.filter(o => o.status === 'pending').length }} đơn chờ thanh toán</p>
         </div>
       </div>
       <div class="admin-stat-card">
         <div class="stat-info">
           <h3>Yêu cầu tư vấn</h3>
-          <div class="stat-number">{{ contacts.filter(c => !c.isResolved).length }}</div>
+          <div class="stat-number">
+            <span v-if="isLoading && contacts.length === 0" class="stat-skeleton-pulse"></span>
+            <span v-else>{{ contacts.filter(c => !c.isResolved).length }}</span>
+          </div>
           <p class="stat-helper">Chưa phản hồi hỗ trợ</p>
         </div>
       </div>
@@ -71,7 +83,20 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="order in orders.slice(-3).reverse()" :key="order.id">
+              <tr v-if="isLoading && orders.length === 0">
+                <td colspan="4">
+                  <div class="admin-center-loader" style="padding: 28px 0; min-height: 120px;">
+                    <div class="admin-spinner" style="width: 28px; height: 28px; border-width: 2.5px;"></div>
+                    <p class="admin-loader-text" style="font-size: 13px;">Đang nạp danh sách đơn hàng...</p>
+                  </div>
+                </td>
+              </tr>
+              <tr v-else-if="orders.length === 0">
+                <td colspan="4" style="text-align: center; padding: 24px; color: #94a3b8;">
+                  Chưa có đơn hàng nào
+                </td>
+              </tr>
+              <tr v-else v-for="order in orders.slice(-3).reverse()" :key="order.id">
                 <td class="font-bold">#{{ order.id }}</td>
                 <td>{{ order.userFullname }}</td>
                 <td class="price-text">{{ formatPrice(order.totalPrice) }}</td>
@@ -98,7 +123,20 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="user in users.slice(-3).reverse()" :key="user.id">
+              <tr v-if="isLoading && users.length === 0">
+                <td colspan="3">
+                  <div class="admin-center-loader" style="padding: 28px 0; min-height: 120px;">
+                    <div class="admin-spinner" style="width: 28px; height: 28px; border-width: 2.5px;"></div>
+                    <p class="admin-loader-text" style="font-size: 13px;">Đang nạp danh sách học viên...</p>
+                  </div>
+                </td>
+              </tr>
+              <tr v-else-if="users.length === 0">
+                <td colspan="3" style="text-align: center; padding: 24px; color: #94a3b8;">
+                  Chưa có học viên nào
+                </td>
+              </tr>
+              <tr v-else v-for="user in users.slice(-3).reverse()" :key="user.id">
                 <td class="font-bold">{{ user.fullname }}</td>
                 <td>{{ user.email }}</td>
                 <td>{{ formatDateShort(user.createdAt) }}</td>
@@ -112,15 +150,32 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 
 const courseStore = useCourseStore();
 const exportPeriod = ref('all');
 
-const users = computed(() => courseStore.adminUsers);
-const orders = computed(() => courseStore.adminOrders);
-const contacts = computed(() => courseStore.adminContacts);
+const users = computed(() => courseStore.adminUsers || []);
+const orders = computed(() => courseStore.adminOrders || []);
+const contacts = computed(() => courseStore.adminContacts || []);
+
+const isLoading = ref(orders.value.length === 0 && users.value.length === 0);
+
+onMounted(async () => {
+  if (orders.value.length === 0 && users.value.length === 0) {
+    isLoading.value = true;
+  }
+  try {
+    await Promise.all([
+      courseStore.fetchAdminUsers().catch(err => console.warn('fetchAdminUsers failed:', err)),
+      courseStore.fetchAdminOrders().catch(err => console.warn('fetchAdminOrders failed:', err)),
+      courseStore.fetchAdminContacts().catch(err => console.warn('fetchAdminContacts failed:', err))
+    ]);
+  } finally {
+    isLoading.value = false;
+  }
+});
 
 // Calculate total revenue from paid orders
 const totalRevenue = computed(() => {

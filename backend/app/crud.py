@@ -1,14 +1,32 @@
-﻿import uuid
+import uuid
 import json
+import re
+import unicodedata
 from datetime import datetime, timezone
 from typing import Optional, List
-from sqlalchemy import func
-from sqlalchemy.orm import Session, selectinload, joinedload
+from sqlalchemy import func, or_
+from sqlalchemy.orm import Session, selectinload, joinedload, defer
 from . import models, schemas, auth
 
+def slugify(text: str) -> str:
+    if not text:
+        return ""
+    text = text.replace('đ', 'd').replace('Đ', 'd')
+    text = unicodedata.normalize('NFKD', text)
+    text = ''.join(c for c in text if not unicodedata.combining(c))
+    text = re.sub(r'[^\w\s-]', '', text).strip().lower()
+    return re.sub(r'[-\s]+', '-', text)
+
 # --- Category & Course CRUD ---
-def get_courses(db: Session, category_slug: str = None):
+def get_courses(db: Session, category_slug: str = None, include_details: bool = False):
     query = db.query(models.Course).options(selectinload(models.Course.tags))
+    if not include_details:
+        query = query.options(
+            defer(models.Course.curriculum_data),
+            defer(models.Course.custom_roadmap),
+            defer(models.Course.outcomes),
+            defer(models.Course.requirements)
+        )
     if category_slug:
         clean_slug = category_slug.strip().lower()
         query = query.filter(func.lower(models.Course.category_slug) == clean_slug)
@@ -21,8 +39,120 @@ def get_categories(db: Session):
     return db.query(models.Category).all()
 
 # --- Blog CRUD ---
-def get_blog_posts(db: Session):
-    return db.query(models.BlogPost).all()
+def get_blog_posts(db: Session, include_content: bool = False, category: Optional[str] = None):
+    query = db.query(models.BlogPost)
+    if category:
+        query = query.filter(models.BlogPost.category == category)
+    if not include_content:
+        query = query.options(defer(models.BlogPost.content))
+    return query.order_by(models.BlogPost.id.desc()).all()
+
+# --- Blog Category CRUD ---
+def get_blog_categories(db: Session):
+    cats = db.query(models.BlogCategory).order_by(models.BlogCategory.id.asc()).all()
+    result = []
+    for c in cats:
+        count = db.query(models.BlogPost).filter(models.BlogPost.category == c.name).count()
+        result.append({
+            "id": c.id,
+            "name": c.name,
+            "slug": c.slug,
+            "description": c.description,
+            "post_count": count
+        })
+    return result
+
+def get_blog_category_by_id(db: Session, cat_id: int):
+    return db.query(models.BlogCategory).filter(models.BlogCategory.id == cat_id).first()
+
+def get_blog_category_by_slug_or_name(db: Session, identifier: str):
+    return db.query(models.BlogCategory).filter(
+        or_(models.BlogCategory.slug == identifier, models.BlogCategory.name == identifier)
+    ).first()
+
+def create_blog_category(db: Session, cat_in: schemas.BlogCategoryCreate):
+    name = cat_in.name.strip()
+    slug = cat_in.slug.strip() if cat_in.slug else slugify(name)
+    existing = db.query(models.BlogCategory).filter(
+        or_(models.BlogCategory.slug == slug, models.BlogCategory.name == name)
+    ).first()
+    if existing:
+        raise ValueError(f"Chuyên mục '{name}' hoặc slug '{slug}' đã tồn tại!")
+    
+    db_cat = models.BlogCategory(
+        name=name,
+        slug=slug,
+        description=cat_in.description
+    )
+    db.add(db_cat)
+    db.commit()
+    db.refresh(db_cat)
+    return {
+        "id": db_cat.id,
+        "name": db_cat.name,
+        "slug": db_cat.slug,
+        "description": db_cat.description,
+        "post_count": 0
+    }
+
+def update_blog_category(db: Session, cat_id: int, cat_in: schemas.BlogCategoryUpdate):
+    db_cat = db.query(models.BlogCategory).filter(models.BlogCategory.id == cat_id).first()
+    if not db_cat:
+        return None
+    
+    old_name = db_cat.name
+    update_data = cat_in.model_dump(exclude_unset=True)
+    if "name" in update_data and update_data["name"]:
+        new_name = update_data["name"].strip()
+        dup = db.query(models.BlogCategory).filter(
+            models.BlogCategory.name == new_name,
+            models.BlogCategory.id != cat_id
+        ).first()
+        if dup:
+            raise ValueError(f"Tên chuyên mục '{new_name}' đã tồn tại!")
+        
+        # Đồng bộ đổi tên ở tất cả bài viết đang thuộc category cũ
+        if old_name != new_name:
+            db.query(models.BlogPost).filter(models.BlogPost.category == old_name).update({"category": new_name})
+        db_cat.name = new_name
+
+    if "slug" in update_data and update_data["slug"]:
+        new_slug = update_data["slug"].strip()
+        dup = db.query(models.BlogCategory).filter(
+            models.BlogCategory.slug == new_slug,
+            models.BlogCategory.id != cat_id
+        ).first()
+        if dup:
+            raise ValueError(f"Mã slug '{new_slug}' đã tồn tại!")
+        db_cat.slug = new_slug
+    elif "name" in update_data and not update_data.get("slug"):
+        db_cat.slug = slugify(db_cat.name)
+
+    if "description" in update_data:
+        db_cat.description = update_data["description"]
+        
+    db.commit()
+    db.refresh(db_cat)
+    count = db.query(models.BlogPost).filter(models.BlogPost.category == db_cat.name).count()
+    return {
+        "id": db_cat.id,
+        "name": db_cat.name,
+        "slug": db_cat.slug,
+        "description": db_cat.description,
+        "post_count": count
+    }
+
+def delete_blog_category(db: Session, cat_id: int):
+    db_cat = db.query(models.BlogCategory).filter(models.BlogCategory.id == cat_id).first()
+    if not db_cat:
+        return False
+    post_count = db.query(models.BlogPost).filter(models.BlogPost.category == db_cat.name).count()
+    if post_count > 0:
+        raise ValueError(f"Không thể xóa chuyên mục '{db_cat.name}' vì đang có {post_count} bài viết liên kết. Vui lòng chuyển các bài viết sang chuyên mục khác trước!")
+    
+    db.delete(db_cat)
+    db.commit()
+    return True
 
 # --- Contact CRUD ---
 def create_contact(db: Session, contact_in: schemas.ContactCreate):
@@ -799,8 +929,10 @@ def delete_lecturer_major(db: Session, major_id: str):
     return False
 
 # --- Lecturer CRUD ---
-def get_lecturers(db: Session, featured_only: bool = False):
+def get_lecturers(db: Session, featured_only: bool = False, include_details: bool = False):
     query = db.query(models.Lecturer)
+    if not include_details:
+        query = query.options(defer(models.Lecturer.details_html))
     if featured_only:
         query = query.filter(models.Lecturer.is_featured == True)
     return query.order_by(models.Lecturer.position.asc(), models.Lecturer.name.asc()).all()

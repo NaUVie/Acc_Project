@@ -96,6 +96,14 @@ class CourseTag(Base):
 
     course = relationship("Course", back_populates="tags")
 
+class BlogCategory(Base):
+    __tablename__ = "blog_categories"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), unique=True, nullable=False, index=True)
+    slug = Column(String(100), unique=True, nullable=False, index=True)
+    description = Column(String(255), nullable=True)
+
 class BlogPost(Base):
     __tablename__ = "blog_posts"
 

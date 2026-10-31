@@ -7,20 +7,33 @@
           <h2>Quản lý Tin tức & Bài viết</h2>
           <p>Tạo, chỉnh sửa và đăng tải tin tức, kiến thức AI, chuyển đổi số và xu hướng công nghệ.</p>
         </div>
-        <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Bài viết mới</button>
+        <div style="display: flex; gap: 10px;">
+          <button @click="openCategoryModal" class="btn btn-secondary btn-sm" type="button" style="display: inline-flex; align-items: center; gap: 6px;">
+            🏷️ Quản lý Chuyên mục
+          </button>
+          <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Bài viết mới</button>
+        </div>
       </div>
 
       <!-- Filters & Search -->
       <div class="flex-between mt-4 mb-4 gap-4" style="flex-wrap: wrap;">
         <div class="filter-tabs" style="display: flex; gap: 8px; margin: 0; flex-wrap: wrap;">
           <button 
-            v-for="cat in categories" 
-            :key="cat"
-            @click="filterCategory = cat" 
+            @click="filterCategory = 'all'" 
             class="btn btn-sm"
-            :class="filterCategory === cat ? 'btn-primary' : 'btn-secondary'"
+            :class="filterCategory === 'all' ? 'btn-primary' : 'btn-secondary'"
           >
-            {{ cat === 'all' ? 'Tất cả (' + blogPosts.length + ')' : cat }}
+            Tất cả ({{ blogPosts.length }})
+          </button>
+          <button 
+            v-for="cat in availableCategories" 
+            :key="cat.id || cat.name"
+            @click="filterCategory = cat.name" 
+            class="btn btn-sm"
+            :class="filterCategory === cat.name ? 'btn-primary' : 'btn-secondary'"
+          >
+            {{ cat.name }}
+            <span v-if="cat.post_count !== undefined" style="opacity: 0.7; font-size: 11px; margin-left: 2px;">({{ cat.post_count }})</span>
           </button>
         </div>
 
@@ -49,7 +62,20 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="b in paginatedBlogs" :key="b.id">
+            <tr v-if="isLoadingBlogs && filteredBlogs.length === 0">
+              <td colspan="6">
+                <div class="admin-center-loader" style="padding: 40px 0; min-height: 160px;">
+                  <div class="admin-spinner"></div>
+                  <p class="admin-loader-text">Đang nạp danh sách bài viết...</p>
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="filteredBlogs.length === 0 && !isLoadingBlogs">
+              <td colspan="6" class="text-center py-8 text-muted">
+                Không tìm thấy bài viết nào.
+              </td>
+            </tr>
+            <tr v-else v-for="b in paginatedBlogs" :key="b.id">
               <td>
                 <img 
                   :src="b.image || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop'" 
@@ -83,11 +109,7 @@
                 </div>
               </td>
             </tr>
-            <tr v-if="filteredBlogs.length === 0">
-              <td colspan="6" class="text-center py-8 text-muted">
-                Không tìm thấy bài viết nào.
-              </td>
-            </tr>
+
           </tbody>
         </table>
       </div>
@@ -144,14 +166,65 @@
           </div>
 
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Chuyên mục Bài viết <span style="color: #e11d48;">*</span></label>
-            <select v-model="form.category" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
-              <option value="AI 2026">AI 2026</option>
-              <option value="AI Automation">AI Automation</option>
-              <option value="Công cụ AI">Công cụ AI</option>
-              <option value="Làm việc hiệu suất">Làm việc hiệu suất</option>
-              <option value="Lãnh đạo & Quản lý">Lãnh đạo & Quản lý</option>
-            </select>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label style="color: #1e293b; font-weight: 600; margin: 0;">Chuyên mục Bài viết <span style="color: #e11d48;">*</span></label>
+              <button 
+                type="button" 
+                @click="openCategoryModal" 
+                style="font-size: 12px; color: #0284c7; background: none; border: none; cursor: pointer; font-weight: 600; padding: 0; text-decoration: underline;"
+              >
+                ⚙️ Quản lý Chuyên mục
+              </button>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <select 
+                v-model="form.category" 
+                class="admin-input-style" 
+                required
+                style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"
+              >
+                <option value="" disabled>-- Chọn chuyên mục bài viết --</option>
+                <option v-for="cat in availableCategories" :key="cat.id || cat.name" :value="cat.name">
+                  {{ cat.name }}
+                </option>
+              </select>
+              <button 
+                type="button" 
+                class="btn btn-secondary btn-sm" 
+                @click="showQuickAddCat = !showQuickAddCat"
+                title="Tạo nhanh một chuyên mục mới ngay tại đây"
+                style="white-space: nowrap; font-weight: 600;"
+              >
+                {{ showQuickAddCat ? 'Đóng' : '+ Thêm mới' }}
+              </button>
+            </div>
+
+            <!-- Quick Add Category inline box -->
+            <div v-if="showQuickAddCat" class="quick-add-cat-box mt-2" style="display: flex; gap: 8px; background: #f0fdf4; padding: 10px; border-radius: 8px; border: 1px solid #bbf7d0; align-items: center;">
+              <input 
+                v-model="quickCatName" 
+                type="text" 
+                placeholder="Nhập tên chuyên mục mới (VD: Case Study AI)..." 
+                class="admin-input-style"
+                style="flex: 1; background: #ffffff; border: 1px solid #86efac; font-size: 13px; padding: 8px 12px;"
+                @keydown.enter.prevent="handleQuickAddCategory"
+              />
+              <button 
+                type="button" 
+                @click="handleQuickAddCategory" 
+                class="btn btn-primary btn-sm"
+                :disabled="!quickCatName.trim() || isSubmittingCat"
+              >
+                {{ isSubmittingCat ? 'Đang tạo...' : 'Tạo & Chọn' }}
+              </button>
+              <button 
+                type="button" 
+                @click="showQuickAddCat = false; quickCatName = ''" 
+                class="btn btn-secondary btn-sm"
+              >
+                Hủy
+              </button>
+            </div>
           </div>
         </div>
 
@@ -204,6 +277,98 @@
         </div>
       </form>
     </div>
+
+    <!-- Blog Categories Manager Modal -->
+    <div v-if="showCatManagerModal" class="modal-overlay" @click.self="showCatManagerModal = false" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1050; padding: 20px;">
+      <div class="modal-content animate-fade-in" style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); border: 1px solid #e2e8f0; overflow: hidden;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+          <div>
+            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a;">🏷️ Quản lý Chuyên mục Bài viết</h3>
+            <p style="margin: 4px 0 0; font-size: 13px; color: #64748b;">Chủ động thêm mới, đổi tên hoặc xóa các chuyên mục bài viết</p>
+          </div>
+          <button class="close-btn" @click="showCatManagerModal = false" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #94a3b8;">&times;</button>
+        </div>
+
+        <div class="modal-body" style="padding: 20px 24px; overflow-y: auto;">
+          <!-- Form Thêm / Sửa Chuyên mục -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+            <h4 style="margin: 0 0 12px 0; font-size: 14px; font-weight: 700; color: #022b9f;">
+              {{ editingCatId ? '✏️ Cập nhật tên Chuyên mục' : '➕ Thêm Chuyên mục Mới' }}
+            </h4>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <input 
+                v-model="catForm.name" 
+                type="text" 
+                placeholder="Tên chuyên mục (VD: Trí tuệ nhân tạo, Tự động hóa...)" 
+                class="admin-input-style"
+                style="flex: 2; min-width: 200px; background: #ffffff;"
+                @keydown.enter.prevent="handleSaveCategory"
+              />
+              <button 
+                type="button" 
+                @click="handleSaveCategory" 
+                class="btn btn-primary btn-sm"
+                :disabled="!catForm.name.trim() || isSubmittingCat"
+                style="white-space: nowrap; font-weight: 600;"
+              >
+                {{ isSubmittingCat ? 'Đang lưu...' : (editingCatId ? 'Cập nhật' : 'Thêm mới') }}
+              </button>
+              <button 
+                v-if="editingCatId" 
+                type="button" 
+                @click="cancelEditCat" 
+                class="btn btn-secondary btn-sm"
+              >
+                Hủy
+              </button>
+            </div>
+            <small v-if="editingCatId" style="display: block; margin-top: 6px; color: #0284c7; font-size: 12px;">
+              💡 Lưu ý: Khi đổi tên, toàn bộ bài viết đang thuộc chuyên mục này sẽ được tự động đồng bộ sang tên mới!
+            </small>
+          </div>
+
+          <!-- Danh sách chuyên mục hiện có -->
+          <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+            <table class="admin-table" style="margin: 0; width: 100%;">
+              <thead>
+                <tr style="background: #f1f5f9;">
+                  <th>Tên chuyên mục</th>
+                  <th style="width: 120px; text-align: center;">Số bài viết</th>
+                  <th style="width: 100px; text-align: right;">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="availableCategories.length === 0">
+                  <td colspan="3" class="text-center py-4 text-muted">Chưa có chuyên mục nào.</td>
+                </tr>
+                <tr v-for="cat in availableCategories" :key="cat.id || cat.name">
+                  <td>
+                    <div style="font-weight: 700; color: #0f172a; font-size: 14px;">{{ cat.name }}</div>
+                    <code style="font-size: 11px; color: #64748b;">{{ cat.slug }}</code>
+                  </td>
+                  <td style="text-align: center;">
+                    <span class="badge" style="background: rgba(2, 43, 159, 0.08); color: #022b9f; font-weight: 700; padding: 4px 10px; border-radius: 9999px;">
+                      {{ cat.post_count || 0 }} bài
+                    </span>
+                  </td>
+                  <td style="text-align: right;">
+                    <div class="action-buttons" style="justify-content: flex-end;">
+                      <button @click="startEditCat(cat)" class="btn-action edit" title="Sửa tên chuyên mục">✏️</button>
+                      <button @click="handleDeleteCat(cat)" class="btn-action delete" title="Xóa chuyên mục">🗑️</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; background: #f8fafc;">
+          <button type="button" @click="showCatManagerModal = false" class="btn btn-secondary">Đóng</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Image Cropper Modal -->
     <ImageCropperModal :isOpen="isCropperOpen" :imageUrl="cropTargetUrl" :aspectRatio="cropAspectRatio" :title="cropModalTitle" @close="isCropperOpen = false" @cropped="handleCroppedImage" />
   </div>
@@ -263,20 +428,108 @@ const currentPage = ref(1);
 const pageSize = ref(8);
 const imageFileRef = ref(null);
 const uploadingImage = ref(false);
+const savingBlog = ref(false);
+const isLoadingBlogs = ref(courseStore.adminBlogPosts.length === 0 && courseStore.blogPosts.length === 0);
 
-const categories = [
-  'all',
-  'AI 2026',
-  'AI Automation',
-  'Công cụ AI',
-  'Làm việc hiệu suất',
-  'Lãnh đạo & Quản lý'
-];
+// Blog Categories Management
+const showCatManagerModal = ref(false);
+const showQuickAddCat = ref(false);
+const quickCatName = ref('');
+const isSubmittingCat = ref(false);
+const editingCatId = ref(null);
+const catForm = ref({ name: '', slug: '', description: '' });
+
+// Dynamically compute available categories combining store + existing posts
+const availableCategories = computed(() => {
+  const storeCats = courseStore.blogCategories || [];
+  if (storeCats.length > 0) return storeCats;
+  
+  // Fallback to distinct categories in blog posts if store hasn't populated yet
+  const distinctNames = new Set();
+  blogPosts.value.forEach(b => {
+    if (b.category) distinctNames.add(b.category);
+  });
+  if (distinctNames.size === 0) {
+    ['AI 2026', 'AI Automation', 'Công cụ AI', 'Làm việc hiệu suất', 'Lãnh đạo & Quản lý'].forEach(n => distinctNames.add(n));
+  }
+  return Array.from(distinctNames).map((name, idx) => ({ id: idx + 1, name, slug: name.toLowerCase().replace(/\s+/g, '-'), post_count: 0 }));
+});
+
+const openCategoryModal = () => {
+  editingCatId.value = null;
+  catForm.value = { name: '', slug: '', description: '' };
+  showCatManagerModal.value = true;
+};
+
+const startEditCat = (cat) => {
+  editingCatId.value = cat.id;
+  catForm.value = { name: cat.name, slug: cat.slug, description: cat.description || '' };
+};
+
+const cancelEditCat = () => {
+  editingCatId.value = null;
+  catForm.value = { name: '', slug: '', description: '' };
+};
+
+const handleSaveCategory = async () => {
+  const name = catForm.value.name.trim();
+  if (!name) return;
+  isSubmittingCat.value = true;
+  try {
+    if (editingCatId.value) {
+      await courseStore.updateBlogCategory(editingCatId.value, { name });
+    } else {
+      await courseStore.addBlogCategory({ name });
+    }
+    cancelEditCat();
+    await courseStore.fetchBlogCategories(true);
+  } catch (err) {
+    // Toast handled in store
+  } finally {
+    isSubmittingCat.value = false;
+  }
+};
+
+const handleQuickAddCategory = async () => {
+  const name = quickCatName.value.trim();
+  if (!name) return;
+  isSubmittingCat.value = true;
+  try {
+    const created = await courseStore.addBlogCategory({ name });
+    if (created) {
+      form.value.category = created.name;
+      quickCatName.value = '';
+      showQuickAddCat.value = false;
+      await courseStore.fetchBlogCategories(true);
+    }
+  } catch (err) {
+    // Toast handled in store
+  } finally {
+    isSubmittingCat.value = false;
+  }
+};
+
+const handleDeleteCat = async (cat) => {
+  if (cat.post_count > 0) {
+    courseStore.showToast?.(`Không thể xóa chuyên mục "${cat.name}" vì đang có ${cat.post_count} bài viết! Hãy chuyển hoặc sửa bài viết trước.`, 'warning');
+    return;
+  }
+  const confirmed = await courseStore.showConfirm?.({
+    title: 'Xóa chuyên mục bài viết',
+    message: `Bạn có chắc muốn xóa chuyên mục "${cat.name}" không?`,
+    confirmText: 'Xóa chuyên mục',
+    cancelText: 'Hủy'
+  });
+  if (confirmed) {
+    await courseStore.deleteBlogCategory(cat.id);
+    await courseStore.fetchBlogCategories(true);
+  }
+};
 
 const form = ref({
   title: '',
   handle: '',
-  category: 'AI 2026',
+  category: '',
   image: '',
   excerpt: '',
   date: '',
@@ -307,17 +560,28 @@ watch([filterCategory, searchQuery], () => {
 });
 
 onMounted(async () => {
-  await courseStore.fetchAdminBlogPosts().catch(() => {});
+  if (blogPosts.value.length === 0) {
+    isLoadingBlogs.value = true;
+  }
+  try {
+    await Promise.allSettled([
+      courseStore.fetchAdminBlogPosts(),
+      courseStore.fetchBlogCategories()
+    ]);
+  } finally {
+    isLoadingBlogs.value = false;
+  }
 });
 
 const openAddModal = () => {
   isEditing.value = false;
   editingId.value = null;
   const todayStr = new Date().toLocaleDateString('vi-VN');
+  const defaultCat = availableCategories.value[0]?.name || 'AI 2026';
   form.value = {
     title: '',
     handle: '',
-    category: 'AI 2026',
+    category: defaultCat,
     image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=400&auto=format&fit=crop',
     excerpt: '',
     date: todayStr,
@@ -327,7 +591,7 @@ const openAddModal = () => {
   activeView.value = 'form';
 };
 
-const editBlog = (b) => {
+const editBlog = async (b) => {
   isEditing.value = true;
   editingId.value = b.id;
   form.value = {
@@ -341,6 +605,18 @@ const editBlog = (b) => {
     content: b.content || ''
   };
   activeView.value = 'form';
+  // Nếu content chưa có (do API list tối ưu không trả full text), kéo nội dung chi tiết
+  if (!b.content) {
+    try {
+      const full = await courseStore.apiRequest(`/blogs/${b.id}`);
+      if (full && full.content) {
+        form.value.content = full.content;
+        b.content = full.content;
+      }
+    } catch (e) {
+      console.warn("Could not fetch full blog content:", e);
+    }
+  }
 };
 
 const generateSlug = () => {
@@ -387,6 +663,7 @@ const uploadImage = async (e) => {
 };
 
 const saveBlog = async () => {
+  if (savingBlog.value) return;
   if (!form.value.title || !form.value.handle) {
     courseStore.showToast('Vui lòng điền đầy đủ tiêu đề và slug đường dẫn tĩnh!', 'error');
     return;
@@ -396,6 +673,7 @@ const saveBlog = async () => {
     form.value.link = `/blog/${form.value.handle}`;
   }
 
+  savingBlog.value = true;
   try {
     if (isEditing.value) {
       await courseStore.updateAdminBlogPost(editingId.value, form.value);
@@ -405,6 +683,8 @@ const saveBlog = async () => {
     activeView.value = 'list';
   } catch (err) {
     console.error("Save blog post error:", err);
+  } finally {
+    savingBlog.value = false;
   }
 };
 

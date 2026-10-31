@@ -168,7 +168,6 @@
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
-import { lecturersData } from '@/data/lecturers';
 import { formatImageUrl } from '@/utils/imageHelper';
 
 const route = useRoute();
@@ -231,12 +230,35 @@ const nextSlide = () => {
   }
 };
 
+const loadLecturerDetail = async () => {
+  const id = route.params.id;
+  if (!id) return;
+  try {
+    const data = await courseStore.apiRequest(`/lecturers/${id}`);
+    if (data) {
+      const idx = courseStore.lecturers.findIndex(l => l.id === id);
+      const mapped = {
+        ...data,
+        bioShort: data.bio_short || '',
+        detailsHtml: data.details_html || '',
+        majorName: data.major_name || 'AI & Công nghệ Số'
+      };
+      if (idx !== -1) {
+        courseStore.lecturers[idx] = { ...courseStore.lecturers[idx], ...mapped };
+      } else {
+        courseStore.lecturers.push(mapped);
+      }
+    }
+  } catch (err) {
+    console.warn("Could not fetch lecturer detail from API:", err);
+  }
+};
+
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   window.addEventListener('resize', handleResize);
-  if (courseStore.lecturers.length === 0) {
-    courseStore.fetchLecturers();
-  }
+  courseStore.fetchLecturers();
+  loadLecturerDetail();
 });
 
 onUnmounted(() => {
@@ -246,6 +268,7 @@ onUnmounted(() => {
 watch(() => route.params.id, () => {
   currentIndex.value = 0;
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  loadLecturerDetail();
 });
 </script>
 
