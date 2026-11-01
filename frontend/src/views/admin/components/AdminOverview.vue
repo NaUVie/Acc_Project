@@ -1,25 +1,25 @@
 <template>
   <div class="tab-content animate-fade-in">
-    <div class="content-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="content-header admin-overview-header">
       <div>
         <h2>Bảng điều khiển Tổng quan</h2>
         <p>Thống kê số liệu vận hành của nền tảng ACC Academy.</p>
       </div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <select v-model="exportPeriod" style="padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #334155; background: white;">
+      <div class="admin-export-actions">
+        <select v-model="exportPeriod" class="admin-select export-period-select">
           <option value="all">Tất cả thời gian</option>
           <option value="month">30 ngày qua (Tháng)</option>
           <option value="quarter">90 ngày qua (Quý)</option>
           <option value="year">365 ngày qua (Năm)</option>
         </select>
-        <button @click="courseStore.exportAdminReport('orders', exportPeriod)" style="background: #0284c7; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-          Xuất CSV Đơn hàng
+        <button @click="courseStore.exportAdminReport('orders', exportPeriod)" class="btn-export-action btn-blue">
+          📊 CSV Đơn hàng
         </button>
-        <button @click="courseStore.exportAdminReport('users', exportPeriod)" style="background: #0d9488; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-          Xuất CSV Học viên
+        <button @click="courseStore.exportAdminReport('users', exportPeriod)" class="btn-export-action btn-teal">
+          👥 CSV Học viên
         </button>
-        <button @click="courseStore.exportAdminReport('revenue', exportPeriod)" style="background: #16a34a; color: white; border: none; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-          Báo cáo Doanh thu
+        <button @click="courseStore.exportAdminReport('revenue', exportPeriod)" class="btn-export-action btn-green">
+          💰 Báo cáo Doanh thu
         </button>
       </div>
     </div>
@@ -97,10 +97,10 @@
                 </td>
               </tr>
               <tr v-else v-for="order in orders.slice(-3).reverse()" :key="order.id">
-                <td class="font-bold">#{{ order.id }}</td>
-                <td>{{ order.userFullname }}</td>
-                <td class="price-text">{{ formatPrice(order.totalPrice) }}</td>
-                <td>
+                <td class="font-bold" data-label="Mã đơn">#{{ order.id }}</td>
+                <td data-label="Khách hàng">{{ order.userFullname }}</td>
+                <td class="price-text" data-label="Tổng tiền">{{ formatPrice(order.totalPrice) }}</td>
+                <td data-label="Trạng thái">
                   <span class="status-badge" :class="order.status">
                     {{ translateOrderStatus(order.status) }}
                   </span>

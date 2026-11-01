@@ -46,24 +46,24 @@
           </thead>
           <tbody>
             <tr v-for="c in paginatedCourses" :key="c.id">
-              <td>
+              <td data-label="Ảnh">
                 <img :src="c.image || '/images/default.jpg'" :alt="c.title" style="width: 48px; height: 36px; border-radius: 4px; object-fit: cover;" />
               </td>
-              <td>
+              <td data-label="Tên khóa học">
                 <div class="font-bold" style="color: #0f172a;">{{ c.title }}</div>
                 <div class="text-xs text-muted">/khoa-hoc/{{ c.handle }}</div>
               </td>
-              <td>
+              <td data-label="Chuyên mục">
                 <span class="badge badge-info">{{ getCategoryName(c.category) }}</span>
               </td>
-              <td>{{ c.duration || 'N/A' }}</td>
-              <td>
+              <td data-label="Thời lượng">{{ c.duration || 'N/A' }}</td>
+              <td data-label="Giá bán">
                 <span class="font-bold text-success">{{ formatCurrency(c.price) }}</span>
                 <span v-if="c.originalPrice > c.price" class="text-xs text-muted" style="text-decoration: line-through; margin-left: 6px;">
                   {{ formatCurrency(c.originalPrice) }}
                 </span>
               </td>
-              <td>
+              <td data-label="Hành động">
                 <div class="action-buttons">
                   <button @click="openCurriculum(c)" class="btn-action edit" title="Quản lý giáo trình & bài giảng">📚</button>
                   <button @click="editCourse(c)" class="btn-action edit" title="Sửa thông tin">✏️</button>

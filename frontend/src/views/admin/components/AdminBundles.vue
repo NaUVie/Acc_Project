@@ -26,26 +26,26 @@
           </thead>
           <tbody>
             <tr v-for="b in bundles" :key="b.id">
-              <td>
+              <td data-label="Hình ảnh">
                 <img :src="b.image || '/images/default.jpg'" :alt="b.title" class="admin-course-thumb" />
               </td>
-              <td class="font-bold">
+              <td class="font-bold" data-label="Tên gói Bundle">
                 <div>{{ b.title }}</div>
                 <small class="text-muted">Handle: {{ b.handle }}</small>
               </td>
-              <td style="max-width: 200px;">
+              <td style="max-width: 200px;" data-label="Mô tả">
                 <div class="line-clamp-2 text-sm text-secondary" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" :title="b.description">
                   {{ b.description }}
                 </div>
               </td>
-              <td>
+              <td data-label="Giá bán / Giá gốc">
                 <div class="price-text font-bold text-primary">{{ formatPrice(b.price) }}</div>
                 <del class="text-muted text-xs" v-if="b.original_price > b.price">{{ formatPrice(b.original_price) }}</del>
                 <div v-if="b.original_price > b.price" class="badge badge-danger text-xs mt-1">
                   Giảm {{ Math.round((1 - b.price / b.original_price) * 100) }}%
                 </div>
               </td>
-              <td style="max-width: 240px;">
+              <td style="max-width: 240px;" data-label="Khóa học thuộc Bundle">
                 <div class="bundle-courses-tags">
                   <template v-if="b.courses && b.courses.length > 0">
                     <span 
@@ -70,7 +70,7 @@
                   </span>
                 </div>
               </td>
-              <td style="max-width: 220px;">
+              <td style="max-width: 220px;" data-label="Quà tặng kèm (Bonus Gifts)">
                 <div class="bundle-gift-tags">
                   <template v-if="(b.gift_courses || b.giftCourses || []).length > 0">
                     <span 
@@ -95,7 +95,7 @@
                   </span>
                 </div>
               </td>
-              <td>
+              <td data-label="Hành động">
                 <div class="action-buttons">
                   <button @click="editBundle(b)" class="btn-action edit" title="Sửa gói Bundle">✏️</button>
                   <button @click="deleteBundle(b.id)" class="btn-action delete" title="Xóa gói Bundle">🗑️</button>

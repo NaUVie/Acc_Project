@@ -7,7 +7,7 @@
           <h2>Quản lý Cảm nhận & Video Feedback Học viên</h2>
           <p>Quản lý các lời nhận xét, hình ảnh thực tế và video phỏng vấn học viên trên YouTube.</p>
         </div>
-        <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Cảm nhận mới</button>
+        <button @click="openAddModal" class="btn btn-primary btn-sm" style="white-space: nowrap; flex-shrink: 0;">+ Thêm Cảm nhận mới</button>
       </div>
 
       <!-- Filters & Search -->
@@ -63,8 +63,8 @@
           </thead>
           <tbody>
             <tr v-for="t in paginatedTestimonials" :key="t.id">
-              <td class="font-bold text-center">#{{ t.id }}</td>
-              <td>
+              <td class="font-bold text-center" data-label="ID">#{{ t.id }}</td>
+              <td data-label="Loại">
                 <span 
                   class="badge" 
                   :style="t.testimonial_type === 'video' ? 'background: #ffe4e6; color: #be123c;' : (t.testimonial_type === 'photo' ? 'background: #e0f2fe; color: #0369a1;' : 'background: #f1f5f9; color: #475569;')"
@@ -72,7 +72,7 @@
                   {{ t.testimonial_type === 'video' ? 'Video' : (t.testimonial_type === 'photo' ? 'Ảnh' : 'Trích dẫn') }}
                 </span>
               </td>
-              <td>
+              <td data-label="Preview">
                 <div style="position: relative; width: 80px; height: 50px; border-radius: 8px; overflow: hidden; background: #0f172a; border: 1px solid #cbd5e1;">
                   <img 
                     :src="formatImageUrl(t.thumbnail || t.image) || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'" 
@@ -85,19 +85,19 @@
                   </div>
                 </div>
               </td>
-              <td>
+              <td class="wrap-cell" data-label="Học viên & Chức danh">
                 <div class="font-bold" style="color: #0f172a; font-size: 15px;">{{ t.name }}</div>
                 <small class="text-muted" style="display: block; margin-top: 2px; color: #475569;">
                   {{ t.role || 'Học viên' }} <span v-if="t.company">• {{ t.company }}</span>
                 </small>
               </td>
-              <td>
+              <td class="wrap-cell" data-label="Khóa học">
                 <span v-if="t.course_name" class="badge" style="background: rgba(2, 43, 159, 0.08); color: #022b9f; font-weight: 700;">
                   {{ t.course_name }}
                 </span>
                 <span v-else class="text-muted" style="font-size: 12px;">(Tất cả)</span>
               </td>
-              <td>
+              <td class="wrap-cell" data-label="Nội dung / Trích dẫn">
                 <div style="max-width: 280px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; font-size: 13.5px; color: #334155;">
                   "{{ t.quote || t.text || '...' }}"
                 </div>
@@ -105,7 +105,7 @@
                   {{ '★'.repeat(t.rating || 5) }}
                 </div>
               </td>
-              <td>
+              <td data-label="Hành động">
                 <div class="action-buttons">
                   <button @click="editTestimonial(t)" class="btn-action edit" title="Sửa đánh giá">✏️</button>
                   <button @click="deleteItem(t.id)" class="btn-action delete" title="Xóa đánh giá">🗑️</button>

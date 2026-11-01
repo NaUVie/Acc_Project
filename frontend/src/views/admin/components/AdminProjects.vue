@@ -39,7 +39,7 @@
             <h2>Quản lý Dự án & Case Study Thực tế</h2>
             <p>Danh sách các dự án AI tiêu biểu cho khối Doanh nghiệp, Cá nhân và Cơ quan Nhà nước.</p>
           </div>
-          <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Dự án mới</button>
+          <button @click="openAddModal" class="btn btn-primary btn-sm" style="white-space: nowrap; flex-shrink: 0;">+ Thêm Dự án mới</button>
         </div>
 
         <!-- Filter Bar -->
@@ -100,7 +100,7 @@
             </thead>
             <tbody>
               <tr v-for="p in paginatedProjects" :key="p.id">
-                <td>
+                <td data-label="Ảnh">
                   <img 
                     :src="p.image || '/images/default.png'" 
                     alt="thumb" 
@@ -108,7 +108,7 @@
                     referrerpolicy="no-referrer"
                   />
                 </td>
-                <td>
+                <td class="wrap-cell" data-label="Tiêu đề & Chuyên mục" style="max-width: 380px;">
                   <div class="font-bold" style="color: #0f172a; font-size: 14px;">{{ p.title }}</div>
                   <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
                     <span class="badge badge-info" style="font-size: 11.5px;">{{ p.category_name || p.category }}</span>
@@ -118,13 +118,13 @@
                     </router-link>
                   </div>
                 </td>
-                <td>
+                <td data-label="Khách hàng / Tác giả">
                   <div style="font-size: 13.5px; color: #334155;">{{ p.client || 'Chưa cập nhật' }}</div>
                 </td>
-                <td>
+                <td data-label="Thời gian">
                   <div style="font-size: 13.5px; color: #64748b;">{{ p.date || '--' }}</div>
                 </td>
-                <td style="text-align: right;">
+                <td style="text-align: right;" data-label="Hành động">
                   <div class="action-buttons" style="justify-content: flex-end;">
                     <button @click="editProject(p)" class="btn-action edit" title="Sửa">✏️</button>
                     <button @click="deleteItem(p.id)" class="btn-action delete" title="Xóa">🗑️</button>

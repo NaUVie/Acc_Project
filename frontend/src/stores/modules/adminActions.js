@@ -184,6 +184,9 @@ export const adminActions = {
         is_active: updatedData.isActive,
         referred_by_id: updatedData.referredById !== undefined ? (updatedData.referredById ? Number(updatedData.referredById) : 0) : undefined
       };
+      if (updatedData.password && updatedData.password.trim()) {
+        payload.password = updatedData.password.trim();
+      }
       await this.apiRequest(`/admin/users/${userId}`, {
         method: 'PUT',
         body: JSON.stringify(payload)

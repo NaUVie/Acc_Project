@@ -103,21 +103,21 @@
           </thead>
           <tbody>
             <tr v-for="p in paginatedPartners" :key="p.id">
-              <td class="font-bold text-center">
+              <td class="font-bold text-center" data-label="Thứ tự">
                 <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700; padding: 4px 10px; border-radius: 6px;">
                   #{{ p.position }}
                 </span>
               </td>
-              <td>
+              <td data-label="Logo">
                 <div style="width: 110px; height: 50px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; display: flex; align-items: center; justify-content: center; padding: 4px;">
                   <img :src="formatImageUrl(p.src)" :alt="p.name" @error="handleLogoError" style="max-width: 100%; max-height: 100%; object-fit: contain;" referrerpolicy="no-referrer" />
                 </div>
               </td>
-              <td>
+              <td data-label="Tên doanh nghiệp / Đối tác">
                 <div class="font-bold" style="color: #0f172a; font-size: 15px;">{{ p.name }}</div>
                 <small class="text-muted" style="font-size: 12px;">ID: #{{ p.id }}</small>
               </td>
-              <td>
+              <td data-label="Vị trí hàng">
                 <span 
                   class="badge" 
                   :style="getRowBadgeStyle(p.row_type)"
@@ -126,13 +126,13 @@
                   {{ getRowLabel(p.row_type) }}
                 </span>
               </td>
-              <td>
+              <td data-label="Liên kết (Link website)">
                 <a v-if="p.link" :href="p.link" target="_blank" rel="noopener" style="color: #0284c7; word-break: break-all; font-size: 13.5px; text-decoration: underline;">
                   {{ p.link }}
                 </a>
                 <span v-else class="text-muted" style="font-size: 13px;">(Chưa có link)</span>
               </td>
-              <td>
+              <td data-label="Trạng thái">
                 <button 
                   @click="toggleActive(p)" 
                   class="badge" 
@@ -142,7 +142,7 @@
                   {{ p.is_active ? 'Đang hiển thị' : 'Đã ẩn' }}
                 </button>
               </td>
-              <td>
+              <td data-label="Hành động">
                 <div class="action-buttons">
                   <button @click="openCropper(p.src, async (url) => { await courseStore.updatePartner(p.id, { src: url }); p.src = url; courseStore.showToast('Đã cắt và cập nhật logo đối tác!', 'success'); }, 'partner', '✂ Cắt Logo Đối Tác: ' + p.name)" class="btn-action edit" title="Cắt lại logo" style="color: #0284c7;">✂️</button>
                   <button @click="editPartner(p)" class="btn-action edit" title="Sửa Đối tác">✏️</button>

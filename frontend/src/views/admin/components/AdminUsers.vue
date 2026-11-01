@@ -40,12 +40,12 @@
         </thead>
         <tbody>
           <tr v-for="u in paginatedUsers" :key="u.id">
-            <td class="font-bold">#{{ u.id }}</td>
-            <td class="font-bold">{{ u.fullname }}</td>
-            <td>{{ u.email }}</td>
-            <td><span class="code-tag">{{ u.referralCode }}</span></td>
-            <td>{{ getReferrerName(u.referredById) }}</td>
-            <td>
+            <td class="font-bold" data-label="ID">#{{ u.id }}</td>
+            <td class="font-bold" data-label="Họ và tên">{{ u.fullname }}</td>
+            <td data-label="Email">{{ u.email }}</td>
+            <td data-label="Mã giới thiệu"><span class="code-tag">{{ u.referralCode }}</span></td>
+            <td data-label="Được giới thiệu bởi">{{ getReferrerName(u.referredById) }}</td>
+            <td data-label="Vai trò">
               <select 
                 :value="u.role" 
                 @change="changeUserRole(u.id, $event.target.value)"
@@ -55,7 +55,7 @@
                 <option value="admin">Admin</option>
               </select>
             </td>
-            <td>
+            <td data-label="Trạng thái">
               <button 
                 @click="toggleUserStatus(u)"
                 class="status-toggle-btn"
@@ -64,7 +64,7 @@
                 {{ u.isActive ? 'Đang hoạt động' : 'Đã khóa' }}
               </button>
             </td>
-            <td>
+            <td data-label="Hành động">
               <div class="action-buttons">
                 <button @click="editUserDetails(u)" class="btn-action edit" title="Chỉnh sửa">✏️</button>
                 <button @click="deleteUser(u.id)" class="btn-action delete" title="Xóa">🗑️</button>
@@ -102,6 +102,10 @@
           <div class="form-group mt-3" v-if="!isEditingUser">
             <label>Mật khẩu khởi tạo</label>
             <input v-model="userForm.password" type="password" required class="admin-input-style" placeholder="******" />
+          </div>
+          <div class="form-group mt-3" v-else>
+            <label>Đặt lại mật khẩu mới (Để trống nếu không đổi)</label>
+            <input v-model="userForm.password" type="password" class="admin-input-style" placeholder="Nhập mật khẩu mới cho học viên (tối thiểu 6 ký tự)..." />
           </div>
           <div class="form-group mt-3">
             <label>Vai trò</label>
@@ -194,7 +198,8 @@ const editUserDetails = (u) => {
     fullname: u.fullname, 
     email: u.email, 
     role: u.role, 
-    referredById: u.referredById 
+    referredById: u.referredById,
+    password: ''
   };
   userModalOpen.value = true;
 };
@@ -202,6 +207,10 @@ const editUserDetails = (u) => {
 const saveUser = async () => {
   try {
     if (isEditingUser.value) {
+      if (userForm.value.password && userForm.value.password.trim() && userForm.value.password.trim().length < 6) {
+        courseStore.showToast('Mật khẩu mới phải có tối thiểu 6 ký tự!', 'warning');
+        return;
+      }
       await courseStore.updateAdminUser(editingUserId.value, userForm.value);
       courseStore.showToast('Cập nhật thông tin học viên thành công!', 'success');
     } else {

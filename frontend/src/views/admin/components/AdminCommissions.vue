@@ -42,8 +42,8 @@
     </div>
 
     <!-- Commissions Table -->
-    <div style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <table style="width: 100%; border-collapse: collapse; font-size: 14px; text-align: left;">
+    <div class="table-responsive mt-6" style="background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <table class="admin-table" style="min-width: 600px; border-collapse: collapse; font-size: 14px; text-align: left;">
         <thead style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 700;">
           <tr>
             <th style="padding: 12px 16px;">Học viên / CTV</th>

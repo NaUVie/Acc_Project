@@ -618,6 +618,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .login-btn {
@@ -912,18 +913,66 @@
   text-decoration: none;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
+/* Responsive: Switch to mobile drawer at <= 1200px to prevent 9-link overflow */
+@media (max-width: 1200px) {
   .desktop-nav {
-    display: none;
+    display: none !important;
   }
 
   .login-btn {
-    display: none;
+    display: none !important;
   }
 
   .mobile-menu-toggle {
-    display: flex;
+    display: flex !important;
+  }
+}
+
+/* Laptop & Medium Desktop screens (1201px - 1440px): High-density compact desktop nav */
+@media (min-width: 1201px) and (max-width: 1440px) {
+  .header-container {
+    padding: 0 16px;
+  }
+
+  .logo-image {
+    height: 38px;
+    max-width: 130px;
+  }
+
+  .desktop-nav {
+    gap: 1px;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .nav-link,
+  .dropdown-toggle {
+    padding: 5px 6px;
+    font-size: 11px;
+    letter-spacing: 0;
+    gap: 2px;
+  }
+
+  .bell-ringing-icon {
+    font-size: 12px;
+    margin-right: 1px;
+  }
+
+  .header-actions {
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .user-btn-trigger {
+    padding: 4px 8px 4px 6px;
+    font-size: 12px;
+  }
+
+  .user-name-text {
+    max-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 
@@ -1183,5 +1232,98 @@
 @media (max-width: 640px) {
   .lang-header-btn {
     display: none;
+  }
+}
+
+
+/* ============================================================
+   MOBILE RESPONSIVE FIXES (Zero Overflow & No Clipping)
+   ============================================================ */
+@media (max-width: 768px) {
+  .main-header {
+    height: 64px;
+  }
+  .main-header.scrolled {
+    height: 60px;
+  }
+  .header-container {
+    padding: 0 12px;
+  }
+  .logo-image {
+    height: 32px;
+    max-width: 110px;
+  }
+  .header-actions {
+    gap: 6px;
+  }
+  .user-btn-trigger {
+    padding: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .user-avatar-badge {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 13px !important;
+  }
+  .user-name-text,
+  .user-btn-trigger .chevron-icon {
+    display: none !important;
+  }
+  .icon-btn {
+    width: 32px;
+    height: 32px;
+  }
+  .icon-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  .cart-badge {
+    top: 2px;
+    right: 2px;
+    width: 15px;
+    height: 15px;
+    font-size: 9px;
+  }
+  .login-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .user-dropdown-menu {
+    right: -4px;
+    width: calc(100vw - 20px);
+    max-width: 290px;
+    top: calc(100% + 6px);
+  }
+  .mobile-nav {
+    top: 64px;
+    height: calc(100vh - 64px);
+    padding: 16px 14px 40px;
+    box-sizing: border-box;
+    z-index: 1050;
+  }
+  .main-header.scrolled + .main-content .mobile-nav,
+  .main-header.scrolled .mobile-nav {
+    top: 60px;
+    height: calc(100vh - 60px);
+  }
+}
+
+@media (max-width: 380px) {
+  .header-container {
+    padding: 0 8px;
+  }
+  .header-actions {
+    gap: 4px;
+  }
+  .logo-image {
+    height: 28px;
+    max-width: 95px;
   }
 }

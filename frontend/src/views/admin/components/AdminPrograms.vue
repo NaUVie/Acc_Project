@@ -24,19 +24,19 @@
           </thead>
           <tbody>
             <tr v-for="p in programs" :key="p.id">
-              <td>
+              <td data-label="Hình ảnh">
                 <img :src="p.image || '/images/default.jpg'" :alt="p.title" class="admin-course-thumb" />
               </td>
-              <td class="font-bold">
+              <td class="font-bold" data-label="Tên chương trình">
                 <div>{{ p.title }}</div>
                 <small class="text-muted">Slug: {{ p.slug }}</small>
               </td>
-              <td style="max-width: 240px;">
+              <td style="max-width: 240px;" data-label="Mô tả">
                 <div class="line-clamp-2 text-sm text-secondary" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" :title="p.description">
                   {{ p.description }}
                 </div>
               </td>
-              <td style="max-width: 260px;">
+              <td style="max-width: 260px;" data-label="Khóa học con (Child Courses)">
                 <div class="child-courses-tags">
                   <template v-if="getChildCourses(p.id).length > 0">
                     <span 
@@ -61,7 +61,7 @@
                   </span>
                 </div>
               </td>
-              <td>
+              <td data-label="Hành động">
                 <div class="action-buttons">
                   <button @click="openCropper(p.image, async (url) => { await courseStore.updateProgram(p.id, { image: url }); p.image = url; courseStore.showToast('Đã cắt và cập nhật ảnh chương trình!', 'success'); }, 'wide', '✂ Cắt Ảnh: ' + p.title)" class="btn-action edit" title="Cắt lại ảnh bìa" style="color: #0284c7;">✂️</button>
                   <button @click="editProgram(p)" class="btn-action edit" title="Sửa chương trình">✏️</button>

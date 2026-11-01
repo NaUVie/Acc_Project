@@ -62,8 +62,27 @@ def update_current_user_profile(
 ):
     if user_update.fullname is not None and user_update.fullname.strip():
         current_user.fullname = user_update.fullname.strip()
+
     if user_update.password is not None and user_update.password.strip():
-        current_user.hashed_password = auth.get_password_hash(user_update.password)
+        # Require old password to change password
+        if not user_update.old_password or not user_update.old_password.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Vui lòng nhập mật khẩu hiện tại (mật khẩu cũ) để đổi mật khẩu mới!"
+            )
+        if not auth.verify_password(user_update.old_password.strip(), current_user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mật khẩu hiện tại (mật khẩu cũ) không chính xác!"
+            )
+        new_pwd = user_update.password.strip()
+        if len(new_pwd) < 6:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mật khẩu mới phải có tối thiểu 6 ký tự!"
+            )
+        current_user.hashed_password = auth.get_password_hash(new_pwd)
+
     db.commit()
     db.refresh(current_user)
     return current_user

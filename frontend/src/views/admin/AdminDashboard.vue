@@ -1,9 +1,25 @@
 <template>
   <div class="admin-view container">
-    <div class="admin-layout glass-card animate-fade-in">
-      
+    <!-- MOBILE ADMIN HEADER (Visible on screens <= 992px) -->
+      <div class="admin-mobile-top-bar">
+        <div class="admin-mobile-title-box">
+          <span class="admin-mobile-logo">ACC ADMIN</span>
+          <span class="admin-mobile-active-tag">
+            <span class="tab-dot"></span>
+            {{ currentTabName }}
+          </span>
+        </div>
+        <button 
+          class="admin-mobile-toggle-btn" 
+          @click="isMobileMenuOpen = !isMobileMenuOpen"
+        >
+          <span>{{ isMobileMenuOpen ? '✕ Đóng menu' : '☰ Danh mục quản trị' }}</span>
+        </button>
+      </div>
+
       <!-- SIDEBAR NAV -->
-      <aside class="admin-sidebar">
+    <div class="admin-layout glass-card animate-fade-in">
+      <aside class="admin-sidebar" :class="{ 'mobile-open': isMobileMenuOpen }">
         <div class="sidebar-header">
           <span class="admin-logo-badge">ACC ADMIN</span>
           <p class="admin-subtitle">Hệ thống quản trị vận hành</p>
@@ -13,7 +29,7 @@
             <button 
               class="sidebar-menu-item"
               :class="{ active: activeTab === 'overview' }"
-              @click="activeTab = 'overview'"
+              @click="selectTab('overview')"
             >
               <span class="menu-label">Tổng quan</span>
             </button>
@@ -22,7 +38,7 @@
           <!-- Nhóm 1: Kinh doanh & Khách hàng -->
           <div class="accordion-group">
             <button class="accordion-header" :class="{ 'has-active': businessTabs.some(t => t.id === activeTab) }" @click="toggleGroup('business')">
-              <span class="accordion-title">Kinh doanh & Khách</span>
+              <span class="accordion-title">Kinh doanh & Khách hàng</span>
               <span class="accordion-arrow" :class="{ open: openGroups.business }">▾</span>
             </button>
             <div v-show="openGroups.business" class="accordion-body">
@@ -31,12 +47,15 @@
                 :key="tab.id"
                 class="sidebar-menu-item sub-item"
                 :class="{ active: activeTab === tab.id }"
-                @click="activeTab = tab.id"
+                @click="selectTab(tab.id)"
               >
                 <span class="menu-label">{{ tab.name }}</span>
               </button>
             </div>
           </div>
+
+      
+      
 
           <!-- Nhóm 2: Đào tạo & Học thuật -->
           <div class="accordion-group">
@@ -50,7 +69,7 @@
                 :key="tab.id"
                 class="sidebar-menu-item sub-item"
                 :class="{ active: activeTab === tab.id }"
-                @click="activeTab = tab.id"
+                @click="selectTab(tab.id)"
               >
                 <span class="menu-label">{{ tab.name }}</span>
               </button>
@@ -69,7 +88,7 @@
                 :key="tab.id"
                 class="sidebar-menu-item sub-item"
                 :class="{ active: activeTab === tab.id }"
-                @click="activeTab = tab.id"
+                @click="selectTab(tab.id)"
               >
                 <span class="menu-label">{{ tab.name }}</span>
               </button>
@@ -77,7 +96,7 @@
           </div>
         </nav>
         <div class="sidebar-footer">
-          <router-link to="/" class="btn btn-outline btn-sm w-full text-center">
+          <router-link to="/" class="btn btn-outline btn-sm w-full text-center" @click="isMobileMenuOpen = false">
             &larr; Về Trang chủ
           </router-link>
         </div>
@@ -156,6 +175,18 @@ const getInitialTab = () => {
 };
 
 const activeTab = ref(getInitialTab());
+const isMobileMenuOpen = ref(false);
+
+const currentTabName = computed(() => {
+  const found = tabs.find(t => t.id === activeTab.value);
+  return found ? found.name : 'Tổng quan';
+});
+
+const selectTab = (tabId) => {
+  activeTab.value = tabId;
+  isMobileMenuOpen.value = false;
+};
+
 const isTabSwitching = ref(false);
 let tabSwitchTimer = null;
 

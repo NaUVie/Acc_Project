@@ -7,11 +7,11 @@
           <h2>Quản lý Tin tức & Bài viết</h2>
           <p>Danh sách các bài viết chia sẻ, kiến thức AI và cập nhật xu hướng công nghệ trên toàn hệ thống.</p>
         </div>
-        <div style="display: flex; gap: 8px;">
+        <div style="display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap;">
           <button @click="showCatManagerModal = true" class="btn btn-secondary btn-sm" type="button" style="display: inline-flex; align-items: center; gap: 6px;">
             <span>🏷️ Quản lý Chuyên mục</span>
           </button>
-          <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Bài viết mới</button>
+          <button @click="openAddModal" class="btn btn-primary btn-sm" style="white-space: nowrap;">+ Thêm Bài viết mới</button>
         </div>
       </div>
 
@@ -52,7 +52,7 @@
           </thead>
           <tbody>
             <tr v-for="b in paginatedBlogs" :key="b.id">
-              <td>
+              <td data-label="Ảnh">
                 <img 
                   :src="b.image || '/images/default.jpg'" 
                   alt="thumb" 
@@ -60,7 +60,7 @@
                   referrerpolicy="no-referrer"
                 />
               </td>
-              <td>
+              <td class="wrap-cell" data-label="Tiêu đề Bài viết" style="max-width: 380px;">
                 <div class="font-bold" style="color: #0f172a; font-size: 14px;">{{ b.title }}</div>
                 <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px;">
                   <span class="text-xs text-muted" style="font-size: 11.5px;">Slug: /blog/{{ b.handle || b.id }}</span>
@@ -69,13 +69,13 @@
                   </router-link>
                 </div>
               </td>
-              <td>
+              <td data-label="Chuyên mục">
                 <span class="badge badge-info" style="font-size: 11.5px;">{{ b.category || 'Chung' }}</span>
               </td>
-              <td>
+              <td data-label="Ngày đăng">
                 <div style="font-size: 13.5px; color: #64748b;">{{ b.date || '--' }}</div>
               </td>
-              <td style="text-align: right;">
+              <td style="text-align: right;" data-label="Hành động">
                 <div class="action-buttons" style="justify-content: flex-end;">
                   <button @click="openQuickCropper(b)" class="btn-action edit" title="Cắt lại ảnh đại diện" style="color: #0284c7;">✂️</button>
                   <button @click="editBlog(b)" class="btn-action edit" title="Sửa">✏️</button>

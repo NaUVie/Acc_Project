@@ -368,6 +368,7 @@ class UserCreate(UserBase):
 
 class UserUpdateProfile(BaseModel):
     fullname: Optional[str] = None
+    old_password: Optional[str] = None
     password: Optional[str] = None
 
 class UserResponse(UserBase):
@@ -518,6 +519,7 @@ class UserAdminUpdate(BaseModel):
     email: Optional[EmailStr] = None
     role: Optional[str] = None
     is_active: Optional[bool] = None
+    password: Optional[str] = None
     referred_by_id: Optional[int] = None
 
 class UserAdminResponse(BaseModel):

@@ -58,17 +58,17 @@
             </td>
           </tr>
           <tr v-else v-for="order in paginatedOrders" :key="order.id">
-            <td class="font-bold">#{{ order.id }}</td>
-            <td>
+            <td class="font-bold" data-label="Mã đơn">#{{ order.id }}</td>
+            <td data-label="Học viên">
               <div>{{ order.userFullname }}</div>
               <small class="text-muted">{{ order.userEmail }}</small>
             </td>
-            <td>
+            <td data-label="Sản phẩm khóa học">
               <div v-for="item in (order.items || [])" :key="item.id">• {{ item.course?.title || item.title || "Khóa học" }}</div>
             </td>
-            <td class="discount-price">-{{ formatPrice(order.discountApplied) }}</td>
-            <td class="price-text font-bold">{{ formatPrice(order.totalPrice) }}</td>
-            <td>
+            <td class="discount-price" data-label="Khấu trừ giảm giá">-{{ formatPrice(order.discountApplied) }}</td>
+            <td class="price-text font-bold" data-label="Thành tiền">{{ formatPrice(order.totalPrice) }}</td>
+            <td data-label="Trạng thái">
               <select 
                 :value="order.status" 
                 @change="changeOrderStatus(order.id, $event.target.value)"
@@ -80,7 +80,7 @@
                 <option value="cancelled">Đã hủy</option>
               </select>
             </td>
-            <td>
+            <td data-label="Hành động">
               <div class="action-buttons">
                 <button @click="editOrderDetails(order)" class="btn-action edit" title="Sửa chi tiết">✏️</button>
                 <button @click="deleteOrder(order.id)" class="btn-action delete" title="Xóa đơn">🗑️</button>

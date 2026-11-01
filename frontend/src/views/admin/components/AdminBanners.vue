@@ -49,29 +49,29 @@
           </thead>
           <tbody>
             <tr v-for="b in banners" :key="b.id">
-              <td class="font-bold text-center">
+              <td class="font-bold text-center" data-label="Vị trí">
                 <span class="badge" style="background: #e0f2fe; color: #0369a1; font-weight: 700; padding: 4px 10px; border-radius: 6px;">
                   #{{ b.position }}
                 </span>
               </td>
-              <td>
+              <td data-label="Preview Banner">
                 <div style="display: flex; gap: 8px; align-items: center;">
                   <img :src="b.desktop_image" :alt="b.title" class="admin-course-thumb" style="width: 120px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;" />
                   <img v-if="b.mobile_image" :src="b.mobile_image" alt="Mobile" class="admin-course-thumb" style="width: 35px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1;" title="Mobile Image" />
                 </div>
               </td>
-              <td>
+              <td data-label="Tiêu đề & Link">
                 <div class="font-bold" style="color: #0f172a; font-size: 15px;">{{ b.title }}</div>
                 <small class="text-muted" style="word-break: break-all; display: block; margin-top: 2px;">
                   {{ b.link || '(Không có)' }}
                 </small>
               </td>
-              <td>
+              <td data-label="Loại Link">
                 <span class="badge" :style="b.is_external ? 'background: #fef3c7; color: #b45309;' : 'background: #f1f5f9; color: #475569;'">
                   {{ b.is_external ? 'Ngoại bộ' : 'Nội bộ' }}
                 </span>
               </td>
-              <td>
+              <td data-label="Trạng thái">
                 <button 
                   @click="toggleActive(b)" 
                   class="badge" 
@@ -81,7 +81,7 @@
                   {{ b.is_active ? 'Đang hiển thị' : 'Đã ẩn' }}
                 </button>
               </td>
-              <td>
+              <td data-label="Hành động">
                 <div class="action-buttons">
                   <button @click="openCropper(b.desktop_image, async (url) => { await courseStore.updateBanner(b.id, { desktop_image: url }); b.desktop_image = url; courseStore.showToast('Đã cắt và cập nhật banner!', 'success'); }, 'wide', '✂ Cắt Banner: ' + b.title)" class="btn-action edit" title="Cắt lại ảnh Banner" style="color: #0284c7;">✂️</button>
                   <button @click="editBanner(b)" class="btn-action edit" title="Sửa Banner">✏️</button>

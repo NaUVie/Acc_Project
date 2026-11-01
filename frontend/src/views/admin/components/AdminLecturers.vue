@@ -7,7 +7,7 @@
           <h2>Quản lý Đội ngũ Giảng viên</h2>
           <p>Danh sách các chuyên gia, giảng viên, cố vấn và quản lý các chuyên ngành đào tạo.</p>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
+        <div style="display: flex; gap: 8px; align-items: center; flex-shrink: 0; flex-wrap: wrap;">
           <button 
             @click="isReorderMode = !isReorderMode" 
             class="btn btn-sm"
@@ -90,7 +90,7 @@
               v-for="(l, idx) in paginatedLecturers" 
               :key="l.id"
             >
-              <td style="text-align: center; width: 80px;">
+              <td style="text-align: center; width: 80px;" data-label="STT">
                 <div v-if="isReorderMode" style="display: inline-flex; align-items: center; justify-content: center; gap: 3px; background: #f0f9ff; padding: 2px 6px; border-radius: 6px; border: 1px solid #bae6fd;">
                   <button 
                     type="button"
@@ -126,14 +126,14 @@
                   {{ (currentPage - 1) * pageSize + idx + 1 }}
                 </span>
               </td>
-              <td>
+              <td data-label="Avatar">
                 <img :src="formatImageUrl(l.avatar || l.avatar_drive_link || '/images/default-avatar.jpg')" :alt="l.name" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #0284c7;" />
               </td>
-              <td>
+              <td class="wrap-cell" data-label="Họ & Tên">
                 <div class="font-bold" style="color: #0f172a; font-size: 14px;">{{ l.name }}</div>
                 <div class="text-xs" style="color: #94a3b8; font-size: 11px;">ID: {{ l.id }}</div>
               </td>
-              <td style="max-width: 200px;">
+              <td class="wrap-cell" style="max-width: 200px;" data-label="Chức danh / Vị trí">
                 <span 
                   class="badge badge-primary truncate-text" 
                   :title="l.title"
@@ -142,7 +142,7 @@
                   {{ l.title }}
                 </span>
               </td>
-              <td style="max-width: 220px;">
+              <td class="wrap-cell" style="max-width: 220px;" data-label="Chuyên ngành">
                 <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                   <span 
                     v-for="mId in (l.majorIds && l.majorIds.length > 0 ? l.majorIds : (l.majorId ? [l.majorId] : []))" 
@@ -156,7 +156,7 @@
                   <span v-if="!l.majorIds || l.majorIds.length === 0" style="color: #94a3b8; font-size: 12px;">-- Chưa chọn --</span>
                 </div>
               </td>
-              <td style="text-align: center;">
+              <td style="text-align: center;" data-label="Trang chủ">
                 <button 
                   type="button" 
                   @click="toggleFeatured(l)" 
@@ -176,7 +176,7 @@
                   {{ l.is_featured ? '⭐ Nổi bật' : '☆ Thường' }}
                 </button>
               </td>
-              <td style="text-align: center;">
+              <td style="text-align: center;" data-label="Nút chi tiết">
                 <button 
                   type="button" 
                   @click="toggleShowDetail(l)" 
@@ -197,7 +197,7 @@
                   {{ (l.show_detail_btn || l.showDetailBtn) ? '👁️ Hiện nút' : '🚫 Ẩn nút' }}
                 </button>
               </td>
-              <td style="text-align: center;">
+              <td style="text-align: center;" data-label="Hành động">
                 <div class="action-buttons" style="justify-content: center; gap: 6px;">
                   <button @click="openQuickCropper(l)" class="btn-action edit" title="Cắt lại Avatar (1:1)" style="color: #0284c7;">✂️</button>
                   <button @click="editLecturer(l)" class="btn-action edit" title="Sửa thông tin">✏️</button>

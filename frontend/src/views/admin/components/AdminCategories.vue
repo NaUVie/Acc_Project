@@ -38,16 +38,16 @@
             </td>
           </tr>
           <tr v-for="cat in categories" :key="cat.slug">
-            <td>
+            <td data-label="Mã Slug">
               <span class="badge badge-secondary" style="font-family: monospace; font-size: 13px;">{{ cat.slug }}</span>
             </td>
-            <td>
+            <td data-label="Tên Chuyên mục">
               <strong style="color: #0f172a; font-size: 15px;">{{ cat.name }}</strong>
             </td>
-            <td>
+            <td data-label="Số khóa học đang có">
               <span class="badge badge-info">{{ getCourseCount(cat.slug) }} khóa học</span>
             </td>
-            <td class="text-right">
+            <td class="text-right" data-label="Hành động">
               <div class="admin-actions-cell" style="justify-content: flex-end;">
                 <button class="btn-action edit" title="Sửa tên chuyên mục" @click="editCategory(cat)">
                   ✏️

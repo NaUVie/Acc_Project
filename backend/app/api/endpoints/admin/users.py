@@ -69,8 +69,14 @@ def update_user_admin(id: int, user_in: schemas.UserAdminUpdate, db: Session = D
         db_user.role = user_in.role
     if user_in.is_active is not None:
         db_user.is_active = user_in.is_active
-    if user_in.password:
-        db_user.hashed_password = auth.get_password_hash(user_in.password)
+    if user_in.password and user_in.password.strip():
+        new_pwd = user_in.password.strip()
+        if len(new_pwd) < 6:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mật khẩu mới phải có tối thiểu 6 ký tự!"
+            )
+        db_user.hashed_password = auth.get_password_hash(new_pwd)
         
     if user_in.referred_by_id is not None:
         if user_in.referred_by_id == id:
