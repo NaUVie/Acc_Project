@@ -20,7 +20,7 @@ def slugify(text: str) -> str:
 
 # --- Category & Course CRUD ---
 def get_courses(db: Session, category_slug: str = None, include_details: bool = False):
-    query = db.query(models.Course).options(joinedload(models.Course.tags))
+    query = db.query(models.Course).options(selectinload(models.Course.tags))
     if not include_details:
         query = query.options(
             defer(models.Course.curriculum_data),
@@ -31,7 +31,7 @@ def get_courses(db: Session, category_slug: str = None, include_details: bool = 
     if category_slug:
         clean_slug = category_slug.strip().lower()
         query = query.filter(func.lower(models.Course.category_slug) == clean_slug)
-    return query.unique().all()
+    return query.all()
 
 def get_course_by_handle(db: Session, handle: str):
     return db.query(models.Course).options(selectinload(models.Course.tags)).filter(models.Course.handle == handle).first()
