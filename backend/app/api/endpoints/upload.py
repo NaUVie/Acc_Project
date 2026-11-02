@@ -26,6 +26,12 @@ cloudinary.config(
 )
 
 from ... import auth, models
+from ...rate_limit import rate_limit
+
+ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/jpg", "image/webp", "image/gif"}
+ALLOWED_VIDEO_TYPES = {"video/mp4", "video/webm"}
+MAX_IMAGE_SIZE = 15 * 1024 * 1024  # 15 MB
+MAX_VIDEO_SIZE = 50 * 1024 * 1024  # 50 MB
 
 
 def extract_cloudinary_public_id(url_or_id: str, folder_name: str = CLOUDINARY_FOLDER) -> Optional[str]:
@@ -73,7 +79,10 @@ def _delete_cloudinary_sync(public_id: str):
         print(f"Background Cloudinary delete error for '{public_id}': {e}")
 
 
-@router.get("/proxy-image")
+@router.get(
+    "/proxy-image",
+    dependencies=[Depends(rate_limit(max_requests=30, window_seconds=60, scope="proxy_image"))]
+)
 async def proxy_image(url: str = Query(..., description="URL của ảnh cần tải qua proxy")):
     """
     Proxy an external image (e.g. from Google Drive) to bypass browser CORS restrictions during cropping.
@@ -161,18 +170,25 @@ async def upload_image(
     Returns the secure URL of the uploaded asset.
     Offloaded to worker threadpool to keep the asyncio event loop completely unblocked.
     """
-    content_type = file.content_type or ""
-    is_video = content_type.startswith("video/")
-    is_image = content_type.startswith("image/")
+    content_type = (file.content_type or "").lower().strip()
+    is_video = content_type in ALLOWED_VIDEO_TYPES
+    is_image = content_type in ALLOWED_IMAGE_TYPES
 
     if not is_image and not is_video:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Tệp được tải lên phải là hình ảnh (PNG, JPG, WEBP, GIF) hoặc video (MP4, WebM)."
+            detail="Tệp được tải lên phải là hình ảnh (PNG, JPG, WEBP, GIF - không hỗ trợ SVG) hoặc video (MP4, WebM)."
         )
 
     try:
-        file_bytes = await file.read()
+        max_allowed = MAX_VIDEO_SIZE if is_video else MAX_IMAGE_SIZE
+        file_bytes = await file.read(max_allowed + 1)
+        if len(file_bytes) > max_allowed:
+            max_mb = max_allowed // (1024 * 1024)
+            raise HTTPException(
+                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                detail=f"Tệp tải lên vượt quá dung lượng tối đa cho phép ({max_mb}MB)!"
+            )
         
         upload_kwargs = {
             "folder": CLOUDINARY_FOLDER,
@@ -180,11 +196,11 @@ async def upload_image(
         }
         
         if is_image:
-            # Auto format to webp with good quality and cap max dimension at 1920 to keep storage small
+            # Auto format to webp with high visual quality (auto:best) and cap max dimension at 2560 for crisp 2K banners
             upload_kwargs.update({
                 "format": "webp",
-                "quality": "auto:good",
-                "transformation": [{"width": 1920, "height": 1920, "crop": "limit"}]
+                "quality": "auto:best",
+                "transformation": [{"width": 2560, "height": 2560, "crop": "limit"}]
             })
 
         # Offload synchronous Cloudinary API call to worker thread
@@ -202,6 +218,8 @@ async def upload_image(
             "url": secure_url,
             "public_id": public_id
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

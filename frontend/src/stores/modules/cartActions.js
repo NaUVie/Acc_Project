@@ -1,18 +1,28 @@
 import { mapCourse } from './helpers';
 
+let fetchCartPromise = null;
+let fetchOrdersPromise = null;
+
 export const cartActions = {
   async fetchCart() {
     if (!this.token) return;
-    try {
-      const data = await this.apiRequest('/cart');
-      this.cart = data.map(item => ({
-        id: item.id,
-        course: mapCourse(item.course),
-        createdAt: item.created_at
-      }));
-    } catch (err) {
-      console.error("Failed to load cart:", err);
-    }
+    if (fetchCartPromise) return fetchCartPromise;
+    fetchCartPromise = (async () => {
+      try {
+        const data = await this.apiRequest('/cart');
+        this.cart = data.map(item => ({
+          id: item.id,
+          course: mapCourse(item.course),
+          createdAt: item.created_at
+        }));
+        return this.cart;
+      } catch (err) {
+        console.error("Failed to load cart:", err);
+      } finally {
+        fetchCartPromise = null;
+      }
+    })();
+    return fetchCartPromise;
   },
 
   async addToCart(courseIdOrObject) {
@@ -28,6 +38,10 @@ export const cartActions = {
     const courseId = Number(rawId);
     if (!courseId || isNaN(courseId)) {
       throw new Error("Mã khóa học không hợp lệ");
+    }
+
+    if (this.isEnrolled(courseId)) {
+      throw new Error("Bạn đã sở hữu khóa học này rồi!");
     }
 
     try {
@@ -87,6 +101,9 @@ export const cartActions = {
       rawId = courseIdOrObject.id || courseIdOrObject.course_id;
     }
     const courseId = Number(rawId);
+    if (this.isEnrolled(courseId)) {
+      throw new Error("Bạn đã sở hữu khóa học này rồi!");
+    }
     const alreadyInCart = this.cart.some(item => item.course?.id === courseId);
     if (!alreadyInCart && courseId) {
       await this.addToCart(courseId);
@@ -96,23 +113,30 @@ export const cartActions = {
 
   async fetchOrders() {
     if (!this.token) return;
-    try {
-      const data = await this.apiRequest('/orders');
-      this.orders = data.map(order => ({
-        id: order.id,
-        totalPrice: order.total_price,
-        discountApplied: order.discount_applied,
-        status: order.status,
-        createdAt: order.created_at,
-        items: (order.items || []).map(item => ({
-          id: item.id,
-          price: item.price,
-          course: mapCourse(item.course)
-        }))
-      }));
-    } catch (err) {
-      console.error("Failed to fetch orders:", err);
-    }
+    if (fetchOrdersPromise) return fetchOrdersPromise;
+    fetchOrdersPromise = (async () => {
+      try {
+        const data = await this.apiRequest('/orders');
+        this.orders = data.map(order => ({
+          id: order.id,
+          totalPrice: order.total_price,
+          discountApplied: order.discount_applied,
+          status: order.status,
+          createdAt: order.created_at,
+          items: (order.items || []).map(item => ({
+            id: item.id,
+            price: item.price,
+            course: mapCourse(item.course)
+          }))
+        }));
+        return this.orders;
+      } catch (err) {
+        console.error("Failed to fetch orders:", err);
+      } finally {
+        fetchOrdersPromise = null;
+      }
+    })();
+    return fetchOrdersPromise;
   },
 
   async checkout() {

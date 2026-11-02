@@ -62,12 +62,20 @@ export const marketingActions = {
     const data = await this.apiRequest(`/admin/banners/${bannerId}`, {
       method: 'DELETE'
     });
-    await Promise.all([this.fetchAdminBanners().catch(() => {}), this.fetchBanners(true).catch(() => {})]);
+    if (this.adminBanners) {
+      this.adminBanners = this.adminBanners.filter(b => b.id !== bannerId);
+    }
+    if (this.banners) {
+      this.banners = this.banners.filter(b => b.id !== bannerId);
+    }
     return data;
   },
 
   async fetchPartners(force = false) {
-    if (!force && this.partners && this.partners.length > 0 && fetchPartnersPromise) {
+    if (!force && this.partners && this.partners.length > 0) {
+      return this.partners;
+    }
+    if (fetchPartnersPromise) {
       return fetchPartnersPromise;
     }
     fetchPartnersPromise = (async () => {
@@ -125,12 +133,18 @@ export const marketingActions = {
     const data = await this.apiRequest(`/admin/partners/${partnerId}`, {
       method: 'DELETE'
     });
-    await Promise.all([this.fetchAdminPartners().catch(() => {}), this.fetchPartners().catch(() => {})]);
+    if (this.adminPartners) {
+      this.adminPartners = this.adminPartners.filter(p => p.id !== partnerId);
+    }
+    if (this.partners) {
+      this.partners = this.partners.filter(p => p.id !== partnerId);
+    }
     this.showToast('Xóa đối tác thành công!', 'success');
     return data;
   },
 
-  async fetchContactSettings() {
+  async fetchContactSettings(force = false) {
+    if (!force && this.contactSettings) return this.contactSettings;
     try {
       const data = await this.apiRequest('/contacts/settings');
       this.contactSettings = data;
@@ -171,7 +185,8 @@ export const marketingActions = {
     }
   },
 
-  async fetchHomeIntroSettings() {
+  async fetchHomeIntroSettings(force = false) {
+    if (!force && this.homeIntroSettings) return this.homeIntroSettings;
     try {
       const data = await this.apiRequest('/contacts/home-intro');
       this.homeIntroSettings = data;
@@ -273,7 +288,9 @@ export const marketingActions = {
       await this.apiRequest(`/admin/testimonials/${id}`, {
         method: 'DELETE'
       });
-      await this.fetchAdminTestimonials();
+      if (this.adminTestimonials) {
+        this.adminTestimonials = this.adminTestimonials.filter(t => t.id !== id);
+      }
       this.showToast('Đã xóa cảm nhận học viên thành công!', 'success');
     } catch (err) {
       console.error("Failed to delete admin testimonial:", err);

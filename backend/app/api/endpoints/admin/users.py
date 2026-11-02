@@ -1,7 +1,7 @@
 import uuid
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ....database import get_db
 from .... import models, schemas, auth
@@ -35,6 +35,7 @@ def create_user_admin(user_in: schemas.UserAdminCreate, db: Session = Depends(ge
     db_user = models.User(
         fullname=user_in.fullname,
         email=user_in.email,
+        phone=user_in.phone.strip() if user_in.phone and user_in.phone.strip() else None,
         hashed_password=hashed_pwd,
         referral_code=unique_ref,
         referred_by_id=user_in.referred_by_id,
@@ -47,16 +48,48 @@ def create_user_admin(user_in: schemas.UserAdminCreate, db: Session = Depends(ge
     return db_user
 
 @router.put("/users/{id}", response_model=schemas.UserAdminResponse)
-def update_user_admin(id: int, user_in: schemas.UserAdminUpdate, db: Session = Depends(get_db)):
+def update_user_admin(
+    id: int, 
+    user_in: schemas.UserAdminUpdate, 
+    current_admin: models.User = Depends(auth.get_current_admin),
+    db: Session = Depends(get_db)
+):
+    if id == current_admin.id:
+        if user_in.is_active is False:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Bạn không thể tự khóa tài khoản Admin đang đăng nhập của chính mình!"
+            )
+        if user_in.role is not None and user_in.role != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Bạn không thể tự giáng cấp vai trò Admin của chính mình!"
+            )
+
     db_user = db.query(models.User).filter(models.User.id == id).first()
     if not db_user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Học viên không tồn tại"
         )
+
+    # Protect Admin accounts: cannot lock or demote any Admin account
+    if db_user.role == "admin":
+        if user_in.is_active is False:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Không thể khóa tài khoản Quản trị viên (Admin)!"
+            )
+        if user_in.role is not None and user_in.role != "admin":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Không thể thay đổi vai trò hoặc giáng cấp tài khoản Quản trị viên (Admin)!"
+            )
     
     if user_in.fullname is not None:
         db_user.fullname = user_in.fullname
+    if user_in.phone is not None:
+        db_user.phone = user_in.phone.strip() if user_in.phone.strip() else None
     if user_in.email is not None and user_in.email != db_user.email:
         existing_user = db.query(models.User).filter(models.User.email == user_in.email).first()
         if existing_user:
@@ -71,10 +104,15 @@ def update_user_admin(id: int, user_in: schemas.UserAdminUpdate, db: Session = D
         db_user.is_active = user_in.is_active
     if user_in.password and user_in.password.strip():
         new_pwd = user_in.password.strip()
-        if len(new_pwd) < 6:
+        if len(new_pwd) < 8:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Mật khẩu mới phải có tối thiểu 6 ký tự!"
+                detail="Mật khẩu mới phải có tối thiểu 8 ký tự!"
+            )
+        if len(new_pwd.encode("utf-8")) > 72:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Mật khẩu mới tối đa 72 byte!"
             )
         db_user.hashed_password = auth.get_password_hash(new_pwd)
         
@@ -119,6 +157,13 @@ def delete_user_admin(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Học viên không tồn tại"
         )
+
+    # Protect Admin accounts: cannot delete any Admin account
+    if db_user.role == "admin":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Không thể xóa tài khoản Quản trị viên (Admin)!"
+        )
     
     # Check if user has orders
     order_count = db.query(models.Order).filter(models.Order.user_id == id).count()
@@ -144,3 +189,64 @@ def delete_user_admin(
     db.commit()
     return {"message": "Đã xóa học viên thành công"}
 
+
+
+# ==================== STUDENT COURSE ACCESS MANAGEMENT ====================
+
+@router.get("/users/{id}/courses", response_model=List[schemas.EnrollmentResponse])
+def get_user_enrolled_courses_admin(id: int, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Học viên không tồn tại")
+    
+    enrollments = (
+        db.query(models.Enrollment)
+        .options(joinedload(models.Enrollment.course))
+        .filter(models.Enrollment.user_id == id)
+        .order_by(models.Enrollment.enrolled_at.desc())
+        .all()
+    )
+    return enrollments
+
+@router.post("/users/{id}/courses", response_model=schemas.EnrollmentResponse, status_code=status.HTTP_201_CREATED)
+def grant_user_course_access_admin(id: int, enroll_in: schemas.AdminEnrollmentCreate, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Học viên không tồn tại")
+    
+    course = db.query(models.Course).filter(models.Course.id == enroll_in.course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Khóa học không tồn tại")
+    
+    existing = db.query(models.Enrollment).filter(
+        models.Enrollment.user_id == id,
+        models.Enrollment.course_id == enroll_in.course_id
+    ).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Học viên này đã được cấp quyền truy cập khóa học này từ trước!")
+    
+    new_enr = models.Enrollment(
+        user_id=id,
+        course_id=enroll_in.course_id
+    )
+    db.add(new_enr)
+    db.commit()
+    db.refresh(new_enr)
+    return new_enr
+
+@router.delete("/users/{id}/courses/{course_id}", status_code=status.HTTP_200_OK)
+def revoke_user_course_access_admin(id: int, course_id: int, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Học viên không tồn tại")
+    
+    enr = db.query(models.Enrollment).filter(
+        models.Enrollment.user_id == id,
+        models.Enrollment.course_id == course_id
+    ).first()
+    if not enr:
+        raise HTTPException(status_code=404, detail="Học viên chưa từng được cấp quyền vào khóa học này")
+    
+    db.delete(enr)
+    db.commit()
+    return {"message": "Đã thu hồi quyền truy cập khóa học thành công"}

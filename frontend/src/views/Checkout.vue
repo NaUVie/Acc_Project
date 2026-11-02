@@ -45,24 +45,14 @@
             </h2>
 
             <div class="payment-methods">
-              <label class="payment-option" :class="{ active: paymentMethod === 'vnpay' }">
-                <input type="radio" v-model="paymentMethod" value="vnpay" />
+              <label class="payment-option active">
+                <input type="radio" v-model="paymentMethod" value="vnpay" checked />
                 <div class="option-content">
                   <div class="option-header">
                     <span class="option-title">Cổng thanh toán VNPAY (Thẻ ATM, QR VNPAY, Thẻ Quốc Tế)</span>
                     <span class="badge-recommended">Thanh toán trực tiếp - Tự động</span>
                   </div>
-                  <p class="option-desc">Chuyển hướng trực tiếp sang cổng VNPAY (môi trường Demo Sandbox) để thanh toán an toàn và kích hoạt ngay tức thì.</p>
-                </div>
-              </label>
-
-              <label class="payment-option" :class="{ active: paymentMethod === 'qr' }">
-                <input type="radio" v-model="paymentMethod" value="qr" />
-                <div class="option-content">
-                  <div class="option-header">
-                    <span class="option-title">Chuyển khoản Ngân hàng qua VietQR</span>
-                  </div>
-                  <p class="option-desc">Nhận thông tin số tài khoản và mã QR để chuyển khoản thủ công sau khi tạo đơn.</p>
+                  <p class="option-desc">Chuyển hướng trực tiếp sang cổng VNPAY để thanh toán an toàn và kích hoạt khóa học ngay tức thì.</p>
                 </div>
               </label>
             </div>
@@ -212,6 +202,14 @@ onMounted(async () => {
   if (courseStore.userMe) {
     if (!form.value.fullname) form.value.fullname = courseStore.userMe.fullname || '';
     if (!form.value.email) form.value.email = courseStore.userMe.email || '';
+    if (!form.value.phone && courseStore.userMe.phone) form.value.phone = courseStore.userMe.phone;
+  }
+  if (courseStore.appliedCoupon) {
+    couponCode.value = courseStore.appliedCoupon.code || '';
+    couponDiscount.value = courseStore.appliedCoupon.discount_amount || 0;
+    couponCodeApplied.value = courseStore.appliedCoupon.code || '';
+    couponSuccess.value = true;
+    couponMessage.value = courseStore.appliedCoupon.message || 'Mã giảm giá đã được áp dụng';
   }
 })
 
@@ -260,19 +258,32 @@ const applyCouponCode = async () => {
   if (!couponCode.value.trim()) {
     couponMessage.value = 'Vui lòng nhập mã coupon';
     couponSuccess.value = false;
+    couponDiscount.value = 0;
+    couponCodeApplied.value = '';
+    courseStore.appliedCoupon = null;
     return;
   }
   applyingCoupon.value = true;
   couponMessage.value = '';
   try {
     const res = await courseStore.applyCoupon(couponCode.value.trim(), currentSubtotal.value);
+    if (!res.valid) {
+      couponDiscount.value = 0;
+      couponCodeApplied.value = '';
+      courseStore.appliedCoupon = null;
+      couponMessage.value = res.message || 'Mã giảm giá không hợp lệ';
+      couponSuccess.value = false;
+      return;
+    }
     couponDiscount.value = res.discount_amount;
     couponCodeApplied.value = res.code;
+    courseStore.appliedCoupon = res;
     couponMessage.value = res.message;
     couponSuccess.value = true;
   } catch (err) {
     couponDiscount.value = 0;
     couponCodeApplied.value = '';
+    courseStore.appliedCoupon = null;
     couponMessage.value = err.message || 'Mã giảm giá không hợp lệ';
     couponSuccess.value = false;
   } finally {
@@ -300,6 +311,7 @@ const handlePlaceOrder = async () => {
   try {
     const order = await courseStore.checkoutWithOptions(couponCodeApplied.value || null, useStoreCredit.value)
     if (order && order.id) {
+      courseStore.appliedCoupon = null;
       if (paymentMethod.value === 'vnpay' && order.status !== 'paid' && order.total_price > 0) {
         // Generate VNPay URL & redirect
         try {
@@ -318,7 +330,7 @@ const handlePlaceOrder = async () => {
       router.push('/dashboard')
     }
   } catch (e) {
-    console.log("Order submission error", e)
+    console.error("Order submission error", e)
     courseStore.showToast(e.message || "Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại!", 'error')
   } finally {
     loading.value = false

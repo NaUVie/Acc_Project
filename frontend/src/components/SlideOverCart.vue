@@ -23,51 +23,6 @@
             </button>
           </div>
 
-          <!-- 2. Thanh Tiến Trình Ưu Đãi (Discount Progress Bar) -->
-          <div class="discount-banner" v-if="cartItems.length > 0">
-            <p class="discount-subtitle" v-if="amountToNextTier > 0">
-              Mua thêm <strong>{{ formatCurrency(amountToNextTier) }}</strong> để được <strong>{{ nextDiscountLabel }}</strong>!
-            </p>
-            <p class="discount-subtitle achieve-text" v-else>
-              🎉 Bạn đã đạt mức ưu đãi cao nhất <strong>Giảm 25%</strong>!
-            </p>
-
-            <div class="progress-bar-wrapper">
-              <div class="progress-track">
-                <div class="progress-fill" :style="{ width: progressPercentage + '%' }"></div>
-              </div>
-
-              <div class="progress-tiers">
-                <!-- Mốc 1: 10% -->
-                <div class="tier-item" :class="{ active: currentSubtotal >= 300000 }">
-                  <div class="tier-node">
-                    <span v-if="currentSubtotal >= 300000" class="node-icon check">✓</span>
-                    <span v-else class="node-icon">🎁</span>
-                  </div>
-                  <span class="tier-label">{{ $t('cart.tier10') }}</span>
-                </div>
-
-                <!-- Mốc 2: 22% -->
-                <div class="tier-item" :class="{ active: currentSubtotal >= 600000 }">
-                  <div class="tier-node">
-                    <span v-if="currentSubtotal >= 600000" class="node-icon check">✓</span>
-                    <span v-else class="node-icon">%</span>
-                  </div>
-                  <span class="tier-label">{{ $t('cart.tier22') }}</span>
-                </div>
-
-                <!-- Mốc 3: 25% -->
-                <div class="tier-item" :class="{ active: currentSubtotal >= 1000000 }">
-                  <div class="tier-node">
-                    <span v-if="currentSubtotal >= 1000000" class="node-icon check">✓</span>
-                    <span v-else class="node-icon">🎉</span>
-                  </div>
-                  <span class="tier-label">{{ $t('cart.tier25') }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- 3. Danh sách sản phẩm thực từ Store -->
           <div class="cart-body">
             <div v-if="cartItems.length === 0" class="empty-cart">
@@ -113,14 +68,7 @@
 
           <!-- 4. Footer Thanh toán -->
           <div class="cart-footer" v-if="cartItems.length > 0">
-            <div class="summary-row" v-if="discountRate > 0">
-              <span class="summary-label">{{ $t('cart.subtotal') }}</span>
-              <span class="summary-amount-sub">{{ formatCurrency(currentSubtotal) }}</span>
-            </div>
-            <div class="summary-row" v-if="discountRate > 0">
-              <span class="summary-label">Ưu đãi giảm giá ({{ Math.round(discountRate * 100) }}%)</span>
-              <span class="summary-amount-discount">-{{ formatCurrency(currentSubtotal * discountRate) }}</span>
-            </div>
+            
             <div class="summary-row highlight">
               <span class="summary-label">{{ $t('cart.total') }}</span>
               <span class="summary-amount">{{ formatCurrency(finalTotal) }}</span>
@@ -195,41 +143,8 @@ const currentSubtotal = computed(() => {
   return cartItems.value.reduce((total, item) => total + item.price, 0)
 })
 
-// Tier discounts: 300k (10%), 600k (22%), 1 triệu (25%)
-const discountRate = computed(() => {
-  const subtotal = currentSubtotal.value
-  if (subtotal >= 1000000) return 0.25
-  if (subtotal >= 600000) return 0.22
-  if (subtotal >= 300000) return 0.10
-  return 0
-})
-
-const amountToNextTier = computed(() => {
-  const subtotal = currentSubtotal.value
-  if (subtotal < 300000) return 300000 - subtotal
-  if (subtotal < 600000) return 600000 - subtotal
-  if (subtotal < 1000000) return 1000000 - subtotal
-  return 0
-})
-
-const nextDiscountLabel = computed(() => {
-  const subtotal = currentSubtotal.value
-  if (subtotal < 300000) return 'Giảm 10%'
-  if (subtotal < 600000) return 'Giảm 22%'
-  if (subtotal < 1000000) return 'Giảm 25%'
-  return ''
-})
-
-const progressPercentage = computed(() => {
-  const subtotal = currentSubtotal.value
-  if (subtotal >= 1000000) return 100
-  if (subtotal >= 600000) return 66 + ((subtotal - 600000) / 400000) * 34
-  if (subtotal >= 300000) return 33 + ((subtotal - 300000) / 300000) * 33
-  return (subtotal / 300000) * 33
-})
-
 const finalTotal = computed(() => {
-  return currentSubtotal.value * (1 - discountRate.value)
+  return currentSubtotal.value
 })
 
 const formatCurrency = (val) => {

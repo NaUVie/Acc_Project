@@ -1,9 +1,10 @@
 import os
+import asyncio
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from .database import engine, Base, get_db
-from . import models
+from . import models, crud
 from .api.api import api_router
 from .seed import seed_database
 
@@ -11,23 +12,11 @@ from contextlib import asynccontextmanager
 
 def perform_startup_tasks():
     try:
-        from sqlalchemy import inspect, text
-        inspector = inspect(engine)
-        if inspector.has_table("contacts"):
-            columns = [c["name"] for c in inspector.get_columns("contacts")]
-            if "phone" not in columns:
-                with engine.begin() as conn:
-                    conn.execute(text("DROP TABLE contacts"))
-                print("Dropped old contacts table to migrate to new layout.")
-    except Exception as e:
-        print(f"Migration check error: {e}")
-
-    try:
         Base.metadata.create_all(bind=engine)
     except Exception as e:
         print(f"Error creating DB tables on startup: {e}")
 
-    # Ensure columns exist for upgraded schemas
+    # Ensure columns exist for upgraded schemas (safe non-destructive migrations, no DROP TABLE)
     try:
         from sqlalchemy import inspect, text
         inspector = inspect(engine)
@@ -37,12 +26,24 @@ def perform_startup_tasks():
                 if "store_credit_balance" not in users_cols:
                     conn.execute(text("ALTER TABLE users ADD COLUMN store_credit_balance INT DEFAULT 0"))
                     print("Added column store_credit_balance to users table.")
+                if "phone" not in users_cols:
+                    conn.execute(text("ALTER TABLE users ADD COLUMN phone VARCHAR(50) NULL"))
+                    print("Added column phone to users table.")
 
             if inspector.has_table("contacts"):
                 contacts_cols = [c["name"] for c in inspector.get_columns("contacts")]
-                if "is_resolved" not in contacts_cols:
-                    conn.execute(text("ALTER TABLE contacts ADD COLUMN is_resolved BOOLEAN DEFAULT FALSE"))
-                    print("Added column is_resolved to contacts table.")
+                contact_migrations = [
+                    ("first_name", "VARCHAR(100) DEFAULT ''"),
+                    ("middle_name", "VARCHAR(100) NULL"),
+                    ("last_name", "VARCHAR(100) DEFAULT ''"),
+                    ("phone", "VARCHAR(50) DEFAULT ''"),
+                    ("course_handle", "VARCHAR(255) NULL"),
+                    ("is_resolved", "BOOLEAN DEFAULT FALSE"),
+                ]
+                for col_name, col_def in contact_migrations:
+                    if col_name not in contacts_cols:
+                        conn.execute(text(f"ALTER TABLE contacts ADD COLUMN {col_name} {col_def}"))
+                        print(f"Added column {col_name} to contacts table.")
             
             if inspector.has_table("courses"):
                 courses_cols = [c["name"] for c in inspector.get_columns("courses")]
@@ -163,15 +164,37 @@ def perform_startup_tasks():
                     db.add(db_bcat)
                 db.commit()
                 print(f"Seeded {len(cat_names)} initial blog categories.")
+
+            # Clean up any expired pending orders on startup
+            crud.cleanup_expired_pending_orders(db, timeout_minutes=30)
         finally:
             db.close()
     except Exception as e:
         print(f"Error during startup DB check/seed: {e}")
 
+
+async def _periodic_pending_order_cleanup():
+    """Background task to automatically cancel expired pending orders every 5 minutes."""
+    while True:
+        await asyncio.sleep(300)
+        try:
+            db = next(get_db())
+            try:
+                crud.cleanup_expired_pending_orders(db, timeout_minutes=30)
+            finally:
+                db.close()
+        except Exception as e:
+            print(f"Periodic pending order cleanup error: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     perform_startup_tasks()
-    yield
+    cleanup_task = asyncio.create_task(_periodic_pending_order_cleanup())
+    try:
+        yield
+    finally:
+        cleanup_task.cancel()
 
 # Create FastAPI app
 app = FastAPI(
@@ -182,6 +205,7 @@ app = FastAPI(
 )
 
 # CORS configuration
+is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
 cors_origins_raw = os.getenv("CORS_ORIGINS", "")
 custom_origins = [o.strip() for o in cors_origins_raw.split(",") if o.strip()]
 default_origins = [
@@ -199,10 +223,10 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins if os.getenv("ENVIRONMENT") == "production" else ["*"],
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origins=origins,
+    allow_origin_regex=None if is_production else r"https://acc-academy.*\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -230,8 +254,9 @@ def health_check(db = Depends(get_db)):
     try:
         db.execute(text("SELECT 1"))
     except Exception as e:
+        print(f"Healthcheck DB error: {e}")
         db_status = "error"
-        db_error = str(e)
+        db_error = "Database connection error"
     db_latency_ms = round((time.perf_counter() - start_time) * 1000, 2)
     
     return {

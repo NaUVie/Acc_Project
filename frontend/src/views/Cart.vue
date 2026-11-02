@@ -41,7 +41,7 @@
                   <div class="product-details">
                     <h4 class="product-name">
                       {{ item.name }}
-                      <span v-if="item.isGift" class="gift-badge">🎁 QUÀ TẶNG 0đ</span>
+                      <span v-if="item.price === 0" class="gift-badge" style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1;">Miễn phí</span>
                     </h4>
                     <span class="product-cat" v-if="item.category">{{ item.category }}</span>
                   </div>
@@ -89,15 +89,15 @@
               <span class="val">{{ formatCurrency(currentSubtotal) }}</span>
             </div>
 
-            <div class="summary-line discount-line" v-if="discountAmount > 0">
-              <span>Ưu đãi giảm giá ({{ discountRate * 100 }}%)</span>
-              <span class="val-discount">-{{ formatCurrency(discountAmount) }}</span>
+            <div class="summary-line discount-line" v-if="appliedCouponDiscount > 0" style="display: flex; justify-content: space-between; color: #16a34a; font-weight: 600; margin: 8px 0;">
+              <span>Mã giảm giá ({{ courseStore.appliedCoupon?.code }})</span>
+              <span class="val-discount">-{{ formatCurrency(appliedCouponDiscount) }}</span>
             </div>
 
             <!-- Promotion code input -->
             <div class="promo-box">
-              <input type="text" v-model="promoCode" placeholder="Mã giảm giá (nếu có)" class="promo-input" />
-              <button class="promo-btn" @click="applyPromo">Áp dụng</button>
+              <input type="text" v-model="promoCode" placeholder="Mã giảm giá (nếu có)" class="promo-input" style="text-transform: uppercase;" />
+              <button class="promo-btn" @click="applyPromo" :disabled="applyingPromo">{{ applyingPromo ? '...' : 'Áp dụng' }}</button>
             </div>
 
             <div class="divider"></div>
@@ -128,7 +128,13 @@ import { useCourseStore } from '@/stores/courses'
 
 const router = useRouter()
 const courseStore = useCourseStore()
-const promoCode = ref('')
+const promoCode = ref(courseStore.appliedCoupon?.code || '')
+const applyingPromo = ref(false)
+
+const appliedCouponDiscount = computed(() => {
+  if (!courseStore.appliedCoupon) return 0
+  return courseStore.appliedCoupon.discount_amount || 0
+})
 
 const cartItems = computed(() => {
   if (!courseStore.token) return [];
@@ -149,20 +155,8 @@ const currentSubtotal = computed(() => {
   return cartItems.value.reduce((total, item) => total + (item.price * item.quantity), 0)
 })
 
-const discountRate = computed(() => {
-  const subtotal = currentSubtotal.value
-  if (subtotal >= 1000000) return 0.25
-  if (subtotal >= 600000) return 0.22
-  if (subtotal >= 300000) return 0.10
-  return 0
-})
-
-const discountAmount = computed(() => {
-  return currentSubtotal.value * discountRate.value
-})
-
 const finalTotal = computed(() => {
-  return currentSubtotal.value - discountAmount.value
+  return Math.max(0, currentSubtotal.value - appliedCouponDiscount.value)
 })
 
 const formatCurrency = (val) => {
@@ -178,9 +172,27 @@ const removeItem = async (id) => {
   }
 }
 
-const applyPromo = () => {
-  if (!promoCode.value.trim()) return
-  courseStore.showToast(`Mã giảm giá "${promoCode.value}" đã được áp dụng thành công!`, 'success')
+const applyPromo = async () => {
+  if (!promoCode.value.trim()) {
+    courseStore.appliedCoupon = null
+    return
+  }
+  applyingPromo.value = true
+  try {
+    const res = await courseStore.applyCoupon(promoCode.value.trim(), currentSubtotal.value)
+    if (!res.valid) {
+      courseStore.appliedCoupon = null
+      courseStore.showToast(res.message || 'Mã giảm giá không hợp lệ!', 'error')
+      return
+    }
+    courseStore.appliedCoupon = res
+    courseStore.showToast(`Áp dụng thành công mã "${res.code}"! Giảm ${formatCurrency(res.discount_amount)}`, 'success')
+  } catch (err) {
+    courseStore.appliedCoupon = null
+    courseStore.showToast(err.message || 'Lỗi khi kiểm tra mã giảm giá', 'error')
+  } finally {
+    applyingPromo.value = false
+  }
 }
 
 const goToCheckout = () => {

@@ -14,9 +14,9 @@ export function formatImageUrl(url, size = 's1920') {
   if (cleanUrl.includes('res.cloudinary.com') && cleanUrl.includes('/upload/') && !cleanUrl.includes('f_auto')) {
     const widthNum = size.replace(/[^\d]/g, '');
     if (widthNum && parseInt(widthNum, 10) < 1600) {
-      return cleanUrl.replace('/upload/', `/upload/f_auto,q_auto,w_${widthNum},c_limit/`);
+      return cleanUrl.replace('/upload/', `/upload/f_auto,q_auto:good,w_${widthNum},c_limit/`);
     }
-    return cleanUrl.replace('/upload/', '/upload/f_auto,q_auto/');
+    return cleanUrl.replace('/upload/', '/upload/f_auto,q_auto:best/');
   }
 
   // Check if it's any Google Drive link (file/d, open?id=, uc?id=, thumbnail?id=) or lh3 link
@@ -49,15 +49,15 @@ export async function compressImageBeforeUpload(file, options = {}) {
   if (file.type === 'image/svg+xml' || file.type === 'image/gif') {
     return file;
   }
-  // If already lightweight (< 120KB) and webp/jpeg, skip re-compression
-  if (file.size <= 120 * 1024 && (file.type === 'image/webp' || file.type === 'image/jpeg')) {
+  // If already processed by cropper or lightweight (< 500KB) webp/jpeg, skip re-compression to prevent blurring
+  if ((file.name && file.name.startsWith('cropped-')) || (file.size <= 500 * 1024 && (file.type === 'image/webp' || file.type === 'image/jpeg'))) {
     return file;
   }
 
   const {
-    maxWidth = 1920,
-    maxHeight = 1920,
-    quality = 0.82
+    maxWidth = 2560,
+    maxHeight = 2560,
+    quality = 0.92
   } = options;
 
   return new Promise((resolve) => {

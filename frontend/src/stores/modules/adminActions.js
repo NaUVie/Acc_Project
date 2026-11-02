@@ -15,9 +15,11 @@ export const adminActions = {
           id: u.id,
           fullname: u.fullname,
           email: u.email,
+          phone: u.phone,
           role: u.role,
           referralCode: u.referral_code,
           referredById: u.referred_by_id,
+          storeCreditBalance: u.store_credit_balance || 0,
           isActive: u.is_active,
           createdAt: u.created_at
         }));
@@ -133,7 +135,13 @@ export const adminActions = {
         method: 'PUT',
         body: JSON.stringify(payload)
       });
-      await this.fetchAdminOrders();
+      // Update in-place without heavy remote re-fetch
+      if (order) {
+        order.status = status;
+        try {
+          localStorage.setItem('acc_admin_orders_cache', JSON.stringify(this.adminOrders));
+        } catch (e) {}
+      }
     } catch (err) {
       console.error("Failed to update admin order status:", err);
       throw err;
@@ -146,7 +154,13 @@ export const adminActions = {
       await this.apiRequest(`/admin/orders/${orderId}`, {
         method: 'DELETE'
       });
-      await this.fetchAdminOrders();
+      // Remove in-place without heavy remote re-fetch
+      if (this.adminOrders) {
+        this.adminOrders = this.adminOrders.filter(o => o.id !== orderId);
+        try {
+          localStorage.setItem('acc_admin_orders_cache', JSON.stringify(this.adminOrders));
+        } catch (e) {}
+      }
     } catch (err) {
       console.error("Failed to delete admin order:", err);
       throw err;
@@ -180,6 +194,7 @@ export const adminActions = {
       const payload = {
         fullname: updatedData.fullname,
         email: updatedData.email,
+        phone: updatedData.phone,
         role: updatedData.role,
         is_active: updatedData.isActive,
         referred_by_id: updatedData.referredById !== undefined ? (updatedData.referredById ? Number(updatedData.referredById) : 0) : undefined
@@ -187,11 +202,32 @@ export const adminActions = {
       if (updatedData.password && updatedData.password.trim()) {
         payload.password = updatedData.password.trim();
       }
-      await this.apiRequest(`/admin/users/${userId}`, {
+      const updatedUser = await this.apiRequest(`/admin/users/${userId}`, {
         method: 'PUT',
         body: JSON.stringify(payload)
       });
-      await this.fetchAdminUsers();
+
+      // Update in-place in local state instantly without redundant re-fetch
+      if (updatedUser && this.adminUsers) {
+        const idx = this.adminUsers.findIndex(u => u.id === userId);
+        if (idx !== -1) {
+          this.adminUsers[idx] = {
+            ...this.adminUsers[idx],
+            fullname: updatedUser.fullname,
+            email: updatedUser.email,
+            phone: updatedUser.phone,
+            role: updatedUser.role,
+            isActive: updatedUser.is_active,
+            referralCode: updatedUser.referral_code,
+            referredById: updatedUser.referred_by_id,
+            storeCreditBalance: updatedUser.store_credit_balance || 0
+          };
+          try {
+            localStorage.setItem('acc_admin_users_cache', JSON.stringify(this.adminUsers));
+          } catch (e) {}
+        }
+      }
+      return updatedUser;
     } catch (err) {
       console.error("Failed to update admin user:", err);
       throw err;
@@ -204,7 +240,12 @@ export const adminActions = {
       await this.apiRequest(`/admin/users/${userId}`, {
         method: 'DELETE'
       });
-      await this.fetchAdminUsers();
+      if (this.adminUsers) {
+        this.adminUsers = this.adminUsers.filter(u => u.id !== userId);
+        try {
+          localStorage.setItem('acc_admin_users_cache', JSON.stringify(this.adminUsers));
+        } catch (e) {}
+      }
     } catch (err) {
       console.error("Failed to delete admin user:", err);
       throw err;
@@ -217,7 +258,14 @@ export const adminActions = {
       await this.apiRequest(`/admin/contacts/${contactId}/resolve`, {
         method: 'PUT'
       });
-      await this.fetchAdminContacts();
+      // Update in-place
+      const contact = (this.adminContacts || []).find(c => c.id === contactId);
+      if (contact) {
+        contact.is_resolved = !contact.is_resolved;
+        try {
+          localStorage.setItem('acc_admin_contacts_cache', JSON.stringify(this.adminContacts));
+        } catch (e) {}
+      }
     } catch (err) {
       console.error("Failed to toggle contact resolved status:", err);
       throw err;
@@ -230,7 +278,13 @@ export const adminActions = {
       await this.apiRequest(`/admin/contacts/${contactId}`, {
         method: 'DELETE'
       });
-      await this.fetchAdminContacts();
+      // Remove in-place
+      if (this.adminContacts) {
+        this.adminContacts = this.adminContacts.filter(c => c.id !== contactId);
+        try {
+          localStorage.setItem('acc_admin_contacts_cache', JSON.stringify(this.adminContacts));
+        } catch (e) {}
+      }
     } catch (err) {
       console.error("Failed to delete admin contact:", err);
       throw err;
@@ -254,7 +308,9 @@ export const adminActions = {
         method: 'POST',
         body: JSON.stringify(couponData)
       });
-      await this.fetchAdminCoupons();
+      if (data && this.adminCoupons) {
+        this.adminCoupons.unshift(data);
+      }
       this.showToast('Tạo mã giảm giá thành công!', 'success');
       return data;
     } catch (err) {
@@ -268,7 +324,9 @@ export const adminActions = {
       await this.apiRequest(`/marketing/admin/coupons/${couponId}`, {
         method: 'DELETE'
       });
-      await this.fetchAdminCoupons();
+      if (this.adminCoupons) {
+        this.adminCoupons = this.adminCoupons.filter(c => c.id !== couponId);
+      }
       this.showToast('Đã xóa mã giảm giá', 'success');
     } catch (err) {
       this.showToast(err.message || 'Lỗi khi xóa mã', 'error');
@@ -329,6 +387,44 @@ export const adminActions = {
     } catch (err) {
       this.showToast(err.message || 'Lỗi xuất file dữ liệu', 'error');
     }
-  }
-};
+  },
 
+  async fetchAdminUserCourses(userId) {
+    if (!this.token) return [];
+    try {
+      return await this.apiRequest(`/admin/users/${userId}/courses`);
+    } catch (err) {
+      console.error("Failed to fetch user courses:", err);
+      return [];
+    }
+  },
+
+  async grantAdminUserCourse(userId, courseId) {
+    if (!this.token) return null;
+    try {
+      const res = await this.apiRequest(`/admin/users/${userId}/courses`, {
+        method: 'POST',
+        body: JSON.stringify({ course_id: Number(courseId) })
+      });
+      this.showToast('Cấp quyền truy cập khóa học thành công!', 'success');
+      return res;
+    } catch (err) {
+      this.showToast(err.message || 'Lỗi khi cấp quyền khóa học', 'error');
+      throw err;
+    }
+  },
+
+  async revokeAdminUserCourse(userId, courseId) {
+    if (!this.token) return false;
+    try {
+      await this.apiRequest(`/admin/users/${userId}/courses/${courseId}`, {
+        method: 'DELETE'
+      });
+      this.showToast('Đã thu hồi quyền truy cập khóa học', 'success');
+      return true;
+    } catch (err) {
+      this.showToast(err.message || 'Lỗi khi thu hồi quyền khóa học', 'error');
+      throw err;
+    }
+  },
+};

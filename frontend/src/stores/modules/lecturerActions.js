@@ -112,7 +112,8 @@ export const lecturerActions = {
     this.lecturersLoading = true;
     fetchLecturersPromise = (async () => {
       try {
-        const endpoint = this.token ? '/admin/lecturers' : '/lecturers';
+        const isAdmin = this.user?.role === 'admin' && typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+        const endpoint = isAdmin ? '/admin/lecturers' : '/lecturers';
         const url = force ? `${endpoint}?_t=${Date.now()}` : endpoint;
         const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
         if (Array.isArray(data) && data.length > 0) {

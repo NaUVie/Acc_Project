@@ -1292,6 +1292,37 @@
   border-color: rgba(2, 43, 159, 0.2);
 }
 
+/* Course Skeleton Loading */
+.course-skeleton-card {
+  pointer-events: none;
+  background: #ffffff;
+}
+
+.course-skeleton-img {
+  background: #eef2f6;
+  position: relative;
+  overflow: hidden;
+}
+
+.course-skeleton-title {
+  width: 85%;
+  height: 20px;
+  background: #eef2f6;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.course-skeleton-sub {
+  width: 55%;
+  height: 16px;
+  background: #eef2f6;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+}
+
 .home-course-img-link {
   display: block;
   width: 100%;

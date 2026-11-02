@@ -361,15 +361,61 @@ class ContactResponse(BaseModel):
 class UserBase(BaseModel):
     fullname: str
     email: EmailStr
+    phone: Optional[str] = None
+
+    @field_validator("phone")
+    @classmethod
+    def validate_user_phone(cls, v: Optional[str]) -> Optional[str]:
+        if not v or not v.strip():
+            return None
+        clean = v.strip()
+        digits = [c for c in clean if c.isdigit()]
+        if len(digits) < 9 or len(digits) > 15:
+            raise ValueError("Số điện thoại không hợp lệ (cần từ 9 đến 15 chữ số)!")
+        return clean
 
 class UserCreate(UserBase):
     password: str
     referral_code_used: Optional[str] = None # The code of the friend who referred them
 
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        clean = (v or "").strip()
+        if len(clean) < 8:
+            raise ValueError("Mật khẩu phải có ít nhất 8 ký tự!")
+        if len(clean.encode("utf-8")) > 72:
+            raise ValueError("Mật khẩu tối đa 72 byte!")
+        return clean
+
 class UserUpdateProfile(BaseModel):
     fullname: Optional[str] = None
+    phone: Optional[str] = None
     old_password: Optional[str] = None
     password: Optional[str] = None
+
+    @field_validator("phone")
+    @classmethod
+    def validate_update_phone(cls, v: Optional[str]) -> Optional[str]:
+        if not v or not v.strip():
+            return None
+        clean = v.strip()
+        digits = [c for c in clean if c.isdigit()]
+        if len(digits) < 9 or len(digits) > 15:
+            raise ValueError("Số điện thoại không hợp lệ (cần từ 9 đến 15 chữ số)!")
+        return clean
+
+    @field_validator("password")
+    @classmethod
+    def validate_optional_password(cls, v: Optional[str]) -> Optional[str]:
+        if v is None or not v.strip():
+            return v
+        clean = v.strip()
+        if len(clean) < 8:
+            raise ValueError("Mật khẩu mới phải có ít nhất 8 ký tự!")
+        if len(clean.encode("utf-8")) > 72:
+            raise ValueError("Mật khẩu tối đa 72 byte!")
+        return clean
 
 class UserResponse(UserBase):
     id: int
@@ -381,6 +427,11 @@ class UserResponse(UserBase):
 
     class Config:
         from_attributes = True
+
+class PasswordResetRequestCreate(BaseModel):
+    email: EmailStr
+    phone: Optional[str] = None
+    note: Optional[str] = None
 
 class UserLogin(BaseModel):
     username: str # OAuth2 password form standard requires 'username' (which is the email)
@@ -435,6 +486,9 @@ class EnrollmentResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class AdminEnrollmentCreate(BaseModel):
+    course_id: int
 
 class EnrollmentCheckResponse(BaseModel):
     enrolled: bool
@@ -510,22 +564,69 @@ class TestimonialResponse(BaseModel):
 class UserAdminCreate(BaseModel):
     fullname: str
     email: EmailStr
+    phone: Optional[str] = None
     password: str
     role: str = "student"
     referred_by_id: Optional[int] = None
 
+    @field_validator("phone")
+    @classmethod
+    def validate_admin_create_phone(cls, v: Optional[str]) -> Optional[str]:
+        if not v or not v.strip():
+            return None
+        clean = v.strip()
+        digits = [c for c in clean if c.isdigit()]
+        if len(digits) < 9 or len(digits) > 15:
+            raise ValueError("Số điện thoại không hợp lệ (cần từ 9 đến 15 chữ số)!")
+        return clean
+
+    @field_validator("password")
+    @classmethod
+    def validate_admin_create_password(cls, v: str) -> str:
+        clean = (v or "").strip()
+        if len(clean) < 8:
+            raise ValueError("Mật khẩu phải có ít nhất 8 ký tự!")
+        if len(clean.encode("utf-8")) > 72:
+            raise ValueError("Mật khẩu tối đa 72 byte!")
+        return clean
+
 class UserAdminUpdate(BaseModel):
     fullname: Optional[str] = None
     email: Optional[EmailStr] = None
+    phone: Optional[str] = None
     role: Optional[str] = None
     is_active: Optional[bool] = None
     password: Optional[str] = None
     referred_by_id: Optional[int] = None
 
+    @field_validator("phone")
+    @classmethod
+    def validate_admin_update_phone(cls, v: Optional[str]) -> Optional[str]:
+        if not v or not v.strip():
+            return None
+        clean = v.strip()
+        digits = [c for c in clean if c.isdigit()]
+        if len(digits) < 9 or len(digits) > 15:
+            raise ValueError("Số điện thoại không hợp lệ (cần từ 9 đến 15 chữ số)!")
+        return clean
+
+    @field_validator("password")
+    @classmethod
+    def validate_admin_update_password(cls, v: Optional[str]) -> Optional[str]:
+        if v is None or not v.strip():
+            return v
+        clean = v.strip()
+        if len(clean) < 8:
+            raise ValueError("Mật khẩu mới phải có ít nhất 8 ký tự!")
+        if len(clean.encode("utf-8")) > 72:
+            raise ValueError("Mật khẩu tối đa 72 byte!")
+        return clean
+
 class UserAdminResponse(BaseModel):
     id: int
     fullname: str
     email: EmailStr
+    phone: Optional[str] = None
     role: str
     referral_code: str
     referred_by_id: Optional[int] = None

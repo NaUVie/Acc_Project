@@ -108,6 +108,7 @@
                   :poster="formatImageUrl(homeIntroData.poster_url)"
                   controls
                   playsinline
+                  preload="none"
                   :src="homeIntroData.video_url"
                   @play="isVideoPlaying = true"
                   @pause="isVideoPlaying = false"
@@ -314,7 +315,24 @@
           </div>
         </div>
 
-        <div class="home-courses-grid">
+        <!-- Skeleton Loading State when loading without cached courses -->
+        <div class="home-courses-grid" v-if="courseStore.loading && displayedCourses.length === 0">
+          <div v-for="n in 4" :key="'skeleton-course-' + n" class="home-course-card course-skeleton-card">
+            <div class="home-course-img-link course-skeleton-img">
+              <div class="skeleton-shimmer"></div>
+            </div>
+            <div class="home-course-body">
+              <div class="course-skeleton-title">
+                <div class="skeleton-shimmer"></div>
+              </div>
+              <div class="course-skeleton-sub">
+                <div class="skeleton-shimmer"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="home-courses-grid" v-else>
           <div 
             v-for="course in displayedCourses" 
             :key="course.id"
@@ -641,7 +659,7 @@ const videoEmbedUrl = computed(() => {
 const handlePlayVideo = () => {
   isVideoPlaying.value = true;
   if (!videoEmbedUrl.value && ecoVideoRef.value) {
-    ecoVideoRef.value.play().catch(e => console.log('Autoplay blocked or aborted:', e));
+    ecoVideoRef.value.play().catch(() => {});
   }
 };
 
@@ -1131,9 +1149,7 @@ onMounted(() => {
   // Auto pop-up consultation modal (at most once per day)
   checkAndShowContactModal();
 
-  if (courseStore.courses.length === 0) {
-    courseStore.fetchCourses();
-  }
+  courseStore.fetchCourses();
   courseStore.fetchLecturers();
   courseStore.fetchHomeIntroSettings();
   courseStore.fetchPartners();

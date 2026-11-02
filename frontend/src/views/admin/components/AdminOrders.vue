@@ -199,7 +199,9 @@ const refreshOrders = async () => {
 onMounted(async () => {
   if (orders.value.length === 0) isLoading.value = true;
   try {
-    await courseStore.fetchAdminOrders().catch(err => console.warn("fetchAdminOrders failed:", err));
+    if (orders.value.length === 0) {
+      await courseStore.fetchAdminOrders().catch(err => console.warn("fetchAdminOrders failed:", err));
+    }
     if (courseStore.courses.length === 0) {
       courseStore.fetchCourses().catch(err => console.warn("fetchCourses failed:", err));
     }

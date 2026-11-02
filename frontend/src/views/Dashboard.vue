@@ -554,6 +554,10 @@
                     </span>
                   </div>
                   <div class="detail-row">
+                    <span class="detail-label">Số điện thoại</span>
+                    <span class="detail-value font-mono">{{ courseStore.userMe?.phone || 'Chưa cập nhật' }}</span>
+                  </div>
+                  <div class="detail-row">
                     <span class="detail-label">Mã học viên (ID)</span>
                     <span class="detail-value font-mono">#ACC-{{ String(courseStore.userMe?.id || 1).padStart(5, '0') }}</span>
                   </div>
@@ -915,6 +919,26 @@
             </div>
           </div>
 
+                    <!-- Phone Section -->
+          <div class="modal-form-section">
+            <label class="modal-input-label">
+              <span>Số điện thoại liên hệ</span>
+            </label>
+            <div class="modal-input-wrapper">
+              <span class="modal-input-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                </svg>
+              </span>
+              <input 
+                type="tel" 
+                v-model="editPhone" 
+                class="modal-form-input" 
+                placeholder="Nhập số điện thoại (ví dụ: 0901234567)..." 
+              />
+            </div>
+          </div>
+
           <!-- Password Security Section -->
           <div class="modal-password-card">
             <div class="password-card-header">
@@ -1081,6 +1105,7 @@ const copied = ref(false);
 // Edit profile reactive state
 const showEditModal = ref(false);
 const editFullname = ref('');
+const editPhone = ref('');
 const editOldPassword = ref('');
 const editPassword = ref('');
 const editConfirmPassword = ref('');
@@ -1091,6 +1116,7 @@ const savingProfile = ref(false);
 
 const openEditModal = () => {
   editFullname.value = courseStore.userMe?.fullname || '';
+  editPhone.value = courseStore.userMe?.phone || '';
   editOldPassword.value = '';
   editPassword.value = '';
   editConfirmPassword.value = '';
@@ -1128,7 +1154,7 @@ const handleSaveProfile = async () => {
   }
   savingProfile.value = true;
   try {
-    const payload = { fullname: editFullname.value.trim() };
+    const payload = { fullname: editFullname.value.trim(), phone: editPhone.value.trim() || null };
     if (hasNewPass) {
       payload.old_password = editOldPassword.value.trim();
       payload.password = editPassword.value.trim();

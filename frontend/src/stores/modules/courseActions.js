@@ -5,7 +5,10 @@ let fetchCategoriesPromise = null;
 
 export const courseActions = {
   async fetchCategories(force = false) {
-    if (!force && this.categories && this.categories.length > 0 && fetchCategoriesPromise) {
+    if (!force && this.categories && this.categories.length > 0) {
+      return this.categories;
+    }
+    if (fetchCategoriesPromise) {
       return fetchCategoriesPromise;
     }
     fetchCategoriesPromise = (async () => {
@@ -80,15 +83,22 @@ export const courseActions = {
       return fetchCoursesPromise;
     }
 
-    this.loading = true;
+    if (this.courses.length === 0) {
+      this.loading = true;
+    }
     fetchCoursesPromise = (async () => {
       try {
-        const [coursesData] = await Promise.all([
-          this.apiRequest('/courses'),
-          this.fetchCategories().catch(() => {}),
-          this.fetchBanners().catch(() => {})
-        ]);
-        this.courses = coursesData.map(mapCourse);
+        // Trigger categories and banners concurrently without blocking course mapping
+        this.fetchCategories().catch(() => {});
+        this.fetchBanners().catch(() => {});
+
+        const coursesData = await this.apiRequest('/courses');
+        if (Array.isArray(coursesData) && coursesData.length > 0) {
+          this.courses = coursesData.map(mapCourse);
+          try {
+            localStorage.setItem('acc_courses_cache_v1', JSON.stringify(coursesData));
+          } catch (e) {}
+        }
         this.coursesLoaded = true;
         return this.courses;
       } catch (err) {

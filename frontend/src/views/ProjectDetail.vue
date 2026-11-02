@@ -34,14 +34,14 @@
 
           <!-- Article Content -->
           <div class="article-body">
-            <div v-if="typeof project.content === 'string'" class="content-html-wrapper" v-html="project.content"></div>
+            <div v-if="typeof project.content === 'string'" class="content-html-wrapper" v-html="sanitizeHtml(project.content)"></div>
             <template v-else-if="Array.isArray(project.content)">
               <div 
                 v-for="(block, idx) in project.content" 
                 :key="idx"
                 class="content-block"
               >
-                <div v-if="block.type === 'html'" class="content-html-wrapper" v-html="block.text"></div>
+                <div v-if="block.type === 'html'" class="content-html-wrapper" v-html="sanitizeHtml(block.text)"></div>
                 <h2 v-else-if="block.type === 'heading'" class="block-heading">{{ block.text }}</h2>
                 <p v-else-if="block.type === 'paragraph'" class="block-paragraph">{{ block.text }}</p>
                 <ul v-else-if="block.type === 'bullets'" class="block-bullets">
@@ -307,6 +307,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 import Pagination from '@/components/Pagination.vue';
+import { sanitizeHtml } from '@/utils/sanitize';
 
 const route = useRoute();
 const courseStore = useCourseStore();

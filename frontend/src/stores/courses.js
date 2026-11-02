@@ -13,7 +13,14 @@ import { adminActions } from './modules/adminActions';
 export const useCourseStore = defineStore('courses', {
   state: () => ({
     // Catalog states
-    courses: [],
+    courses: (() => {
+      try {
+        const cached = localStorage.getItem('acc_courses_cache_v1');
+        return cached ? JSON.parse(cached).map(mapCourse) : [];
+      } catch {
+        return [];
+      }
+    })(),
     categories: (() => {
       try {
         const cached = localStorage.getItem('acc_categories_cache');
@@ -102,6 +109,7 @@ export const useCourseStore = defineStore('courses', {
 
     // Engagement & Marketing states
     wishlist: [], // list of wishlist items
+    appliedCoupon: null,
     adminCoupons: [],
     adminCommissions: [],
 
@@ -195,8 +203,8 @@ export const useCourseStore = defineStore('courses', {
     enrolledCourseIds: (state) => state.enrollments.map(e => e.course?.id),
     isEnrolled: (state) => (courseIdOrHandle) => {
       if (!state.token) return false;
-      if (state.user?.role === 'admin') return true;
 
+      // 1. Check actual enrolled courses
       if (state.enrollments && state.enrollments.length > 0) {
         const match = state.enrollments.some(e => {
           if (!e.course) return false;
@@ -205,6 +213,7 @@ export const useCourseStore = defineStore('courses', {
         if (match) return true;
       }
 
+      // 2. Check completed paid orders
       if (state.orders && state.orders.length > 0) {
         const match = state.orders.some(order => {
           if (order.status !== 'paid') return false;

@@ -83,7 +83,7 @@
               </td>
               <td data-label="Hành động">
                 <div class="action-buttons">
-                  <button @click="openCropper(b.desktop_image, async (url) => { await courseStore.updateBanner(b.id, { desktop_image: url }); b.desktop_image = url; courseStore.showToast('Đã cắt và cập nhật banner!', 'success'); }, 'wide', '✂ Cắt Banner: ' + b.title)" class="btn-action edit" title="Cắt lại ảnh Banner" style="color: #0284c7;">✂️</button>
+                  <button @click="openCropper(b.desktop_image, async (url) => { await courseStore.updateBanner(b.id, { desktop_image: url }); b.desktop_image = url; courseStore.showToast('Đã cắt và cập nhật banner!', 'success'); }, 'banner', '✂ Cắt Banner: ' + b.title)" class="btn-action edit" title="Cắt lại ảnh Banner" style="color: #0284c7;">✂️</button>
                   <button @click="editBanner(b)" class="btn-action edit" title="Sửa Banner">✏️</button>
                   <button @click="deleteBannerItem(b.id)" class="btn-action delete" title="Xóa Banner">🗑️</button>
                 </div>
@@ -122,12 +122,12 @@
             <label style="color: #1e293b; font-weight: 600;">Ảnh Desktop (Yêu cầu)</label>
             <div style="display: flex; gap: 8px; margin-top: 4px;">
               <input v-model="form.desktop_image" type="text" required class="admin-input-style" placeholder="/images/CoE-Web.png hoặc URL" style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-              <input type="file" ref="desktopFileRef" @change="onFileSelectForCrop($event, (url) => { form.desktop_image = url; }, 'wide', '✂ Cắt Banner Desktop (16:9)')" style="display: none;" accept="image/*" />
+              <input type="file" ref="desktopFileRef" @change="onFileSelectForCrop($event, (url) => { form.desktop_image = url; }, 'banner', '✂ Cắt Banner Desktop (1920x720)')" style="display: none;" accept="image/*" />
               <button type="button" @click="$refs.desktopFileRef.click()" class="btn btn-secondary btn-sm">Upload</button>
             </div>
             <div v-if="form.desktop_image" style="display: flex; align-items: center; gap: 12px; margin-top: 8px;">
               <img :src="form.desktop_image" alt="Preview Desktop" style="max-height: 80px; border-radius: 8px; border: 1px solid #e2e8f0; object-fit: cover;" />
-              <button type="button" class="btn btn-sm btn-secondary" style="font-size: 12px; font-weight: 600; color: #0284c7; border-color: #bae6fd;" @click="openCropper(form.desktop_image, (url) => { form.desktop_image = url; }, 'wide', '✂ Cắt Banner Desktop (16:9)')">✂ Cắt lại ảnh</button>
+              <button type="button" class="btn btn-sm btn-secondary" style="font-size: 12px; font-weight: 600; color: #0284c7; border-color: #bae6fd;" @click="openCropper(form.desktop_image, (url) => { form.desktop_image = url; }, 'banner', '✂ Cắt Banner Desktop (1920x720)')">✂ Cắt lại ảnh</button>
             </div>
           </div>
 

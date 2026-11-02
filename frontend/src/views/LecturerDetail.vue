@@ -59,7 +59,7 @@
         <div 
           v-if="lecturer.detailsHtml" 
           class="content-rich" 
-          v-html="formatLecturerDetails(lecturer.detailsHtml)"
+          v-html="sanitizeHtml(formatLecturerDetails(lecturer.detailsHtml))"
         ></div>
         <div v-else-if="!lecturer.bioShort" class="content-rich" style="color: #94a3b8; font-style: italic;">
           Nội dung giới thiệu chi tiết của giảng viên đang được cập nhật...
@@ -169,6 +169,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 import { formatImageUrl } from '@/utils/imageHelper';
+import { sanitizeHtml } from '@/utils/sanitize';
 
 const route = useRoute();
 const courseStore = useCourseStore();

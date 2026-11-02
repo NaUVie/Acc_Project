@@ -771,7 +771,9 @@ onMounted(async () => {
   window.addEventListener('scroll', handleScroll, { capture: true, passive: true });
   try {
     const tasks = [];
-    tasks.push(courseStore.fetchCategories(true));
+    if (!courseStore.categories || courseStore.categories.length === 0) {
+      tasks.push(courseStore.fetchCategories(false));
+    }
     if (courseStore.courses.length === 0) {
       tasks.push(courseStore.fetchCourses());
     }

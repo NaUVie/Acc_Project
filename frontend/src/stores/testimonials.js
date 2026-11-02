@@ -16,6 +16,8 @@ const getApiBase = () => {
 
 const API_BASE = getApiBase();
 
+let fetchTestimonialsPromise = null;
+
 export const useTestimonialStore = defineStore('testimonials', {
   state: () => ({
     testimonials: [],
@@ -32,38 +34,51 @@ export const useTestimonialStore = defineStore('testimonials', {
   },
 
   actions: {
-    async fetchTestimonials() {
-      this.loading = true;
-      try {
-        const response = await fetch(`${API_BASE}/testimonials`);
-        if (response.ok) {
-          const data = await response.json();
-          if (Array.isArray(data)) {
-            this.testimonials = data.map(item => ({
-              id: item.id,
-              name: item.name,
-              studentName: item.name,
-              role: item.role || '',
-              company: item.company || '',
-              text: item.text || '',
-              quote: item.quote || item.text || '',
-              rating: item.rating || 5,
-              image: item.image || '',
-              avatar: item.thumbnail || item.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
-              courseName: item.course_name || '',
-              testimonialType: item.testimonial_type || 'text',
-              youtubeId: item.youtube_id || '',
-              thumbnail: item.thumbnail || (item.youtube_id ? `https://img.youtube.com/vi/${item.youtube_id}/hqdefault.jpg` : ''),
-              videoUrl: item.video_url || (item.youtube_id ? `https://www.youtube.com/embed/${item.youtube_id}?autoplay=1` : ''),
-              title: item.text || item.quote || `Chia sẻ từ học viên ${item.name}`
-            }));
-          }
-        }
-      } catch (err) {
-        console.warn("Backend server connection failed for testimonials:", err);
-      } finally {
-        this.loading = false;
+    async fetchTestimonials(force = false) {
+      if (!force && this.testimonials && this.testimonials.length > 0) {
+        return this.testimonials;
       }
+      if (fetchTestimonialsPromise) {
+        return fetchTestimonialsPromise;
+      }
+
+      this.loading = true;
+      fetchTestimonialsPromise = (async () => {
+        try {
+          const response = await fetch(`${API_BASE}/testimonials`);
+          if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) {
+              this.testimonials = data.map(item => ({
+                id: item.id,
+                name: item.name,
+                studentName: item.name,
+                role: item.role || '',
+                company: item.company || '',
+                text: item.text || '',
+                quote: item.quote || item.text || '',
+                rating: item.rating || 5,
+                image: item.image || '',
+                avatar: item.thumbnail || item.image || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+                courseName: item.course_name || '',
+                testimonialType: item.testimonial_type || 'text',
+                youtubeId: item.youtube_id || '',
+                thumbnail: item.thumbnail || (item.youtube_id ? `https://img.youtube.com/vi/${item.youtube_id}/hqdefault.jpg` : ''),
+                videoUrl: item.video_url || (item.youtube_id ? `https://www.youtube.com/embed/${item.youtube_id}?autoplay=1` : ''),
+                title: item.text || item.quote || `Chia sẻ từ học viên ${item.name}`
+              }));
+            }
+          }
+          return this.testimonials;
+        } catch (err) {
+          console.warn("Backend server connection failed for testimonials:", err);
+          return this.testimonials;
+        } finally {
+          this.loading = false;
+          fetchTestimonialsPromise = null;
+        }
+      })();
+      return fetchTestimonialsPromise;
     }
   }
 });

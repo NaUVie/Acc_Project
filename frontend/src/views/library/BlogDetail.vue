@@ -94,7 +94,7 @@
 
             <!-- Article Body (Rich HTML text) -->
             <div class="article-body">
-              <div v-if="post.content" class="content-html-wrapper" v-html="post.content"></div>
+              <div v-if="post.content" class="content-html-wrapper" v-html="sanitizeHtml(post.content)"></div>
               <div v-else-if="isFetchingContent" class="content-loading-shimmer">
                 <div class="skeleton-block" style="width: 100%; height: 16px; margin-bottom: 12px; border-radius: 4px;"></div>
                 <div class="skeleton-block" style="width: 96%; height: 16px; margin-bottom: 12px; border-radius: 4px;"></div>
@@ -152,6 +152,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import { sanitizeHtml } from '@/utils/sanitize';
 
 const route = useRoute();
 const courseStore = useCourseStore();

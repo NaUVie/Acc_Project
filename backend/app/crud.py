@@ -2,7 +2,7 @@ import uuid
 import json
 import re
 import unicodedata
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional, List
 from sqlalchemy import func, or_
 from sqlalchemy.orm import Session, selectinload, joinedload, defer
@@ -20,7 +20,7 @@ def slugify(text: str) -> str:
 
 # --- Category & Course CRUD ---
 def get_courses(db: Session, category_slug: str = None, include_details: bool = False):
-    query = db.query(models.Course).options(selectinload(models.Course.tags))
+    query = db.query(models.Course).options(joinedload(models.Course.tags))
     if not include_details:
         query = query.options(
             defer(models.Course.curriculum_data),
@@ -31,7 +31,7 @@ def get_courses(db: Session, category_slug: str = None, include_details: bool = 
     if category_slug:
         clean_slug = category_slug.strip().lower()
         query = query.filter(func.lower(models.Course.category_slug) == clean_slug)
-    return query.all()
+    return query.unique().all()
 
 def get_course_by_handle(db: Session, handle: str):
     return db.query(models.Course).options(selectinload(models.Course.tags)).filter(models.Course.handle == handle).first()
@@ -180,22 +180,25 @@ def get_user_by_id(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
 def create_user(db: Session, user_in: schemas.UserCreate):
+    clean_user_email = user_in.email.strip().lower()
     # Check if a referral code was used
     referred_by_id = None
     if user_in.referral_code_used:
         clean_code = user_in.referral_code_used.strip().upper()
         if clean_code:
             referrer = db.query(models.User).filter(func.upper(models.User.referral_code) == clean_code).first()
-            if referrer:
+            if referrer and referrer.email.strip().lower() != clean_user_email:
                 referred_by_id = referrer.id
 
     # Generate a unique referral code for the new user (e.g. ACC-XXXXXX)
     unique_ref = f"ACC-{uuid.uuid4().hex[:6].upper()}"
     
     hashed_pwd = auth.get_password_hash(user_in.password)
+    clean_phone = user_in.phone.strip() if user_in.phone and user_in.phone.strip() else None
     db_user = models.User(
         fullname=user_in.fullname,
-        email=user_in.email.strip().lower(),
+        email=clean_user_email,
+        phone=clean_phone,
         hashed_password=hashed_pwd,
         referral_code=unique_ref,
         referred_by_id=referred_by_id,
@@ -252,6 +255,9 @@ def get_user_orders(db: Session, user_id: int):
     ).filter(models.Order.user_id == user_id).all()
 
 def checkout_cart(db: Session, user_id: int):
+    # Clean up expired pending orders and any abandoned pending order of this user
+    cleanup_expired_pending_orders(db, timeout_minutes=30, cancel_user_pending_id=user_id)
+
     cart_items = get_cart_items(db, user_id=user_id)
     if not cart_items:
         return None
@@ -338,12 +344,23 @@ def get_commission_percent_for_user_course(db: Session, user_id: int, course_id:
     return 10
 
 def pay_order(db: Session, order_id: int):
-    db_order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    db_order = (
+        db.query(models.Order)
+        .filter(models.Order.id == order_id)
+        .with_for_update()
+        .first()
+    )
     if not db_order or db_order.status != "pending":
         return db_order
 
     # Transition order status to paid
     db_order.status = "paid"
+    
+    # Track coupon usage upon real payment
+    if getattr(db_order, "coupon_code", None):
+        coupon_obj = get_coupon_by_code(db, db_order.coupon_code)
+        if coupon_obj:
+            coupon_obj.times_used += 1
     
     # Xóa các khóa học đã thanh toán thành công khỏi giỏ hàng của user
     paid_course_ids = [item.course_id for item in db_order.items if item.course_id]
@@ -384,34 +401,42 @@ def pay_order(db: Session, order_id: int):
                             order_id=order_id
                         ))
     
-    # Check for referral reward
-    user = get_user_by_id(db, db_order.user_id)
-    if user and user.referred_by_id:
-        referrer = db.query(models.User).filter(models.User.id == user.referred_by_id).first()
-        if referrer and referrer.id != user.id:
-            existing_referral = db.query(models.Referral).filter(
-                models.Referral.referred_id == user.id
-            ).first()
-            
-            # Calculate total custom/default commission for each item in the order
-            total_earned = 0
-            for item in db_order.items:
-                comm_pct = get_commission_percent_for_user_course(db, referrer.id, item.course_id)
-                total_earned += int(item.price * (comm_pct / 100.0))
-                
-            if not existing_referral:
-                db_referral = models.Referral(
-                    referrer_id=referrer.id,
-                    referred_id=user.id,
-                    commission_amount=total_earned,
-                    status="completed"
-                )
-                db.add(db_referral)
-            else:
-                existing_referral.commission_amount += total_earned
-                
-            # Accumulate store credit balance to referrer for discount on future purchases
-            referrer.store_credit_balance += total_earned
+    # Check for referral reward (only when actual cash paid > 0, proportional to amount paid)
+    if db_order.total_price > 0:
+        user = get_user_by_id(db, db_order.user_id)
+        if user and user.referred_by_id:
+            referrer = (
+                db.query(models.User)
+                .filter(models.User.id == user.referred_by_id)
+                .with_for_update()
+                .first()
+            )
+            if referrer and referrer.id != user.id and referrer.email.strip().lower() != user.email.strip().lower():
+                gross_total = sum(item.price for item in db_order.items if item.price and item.price > 0)
+                paid_ratio = min(1.0, db_order.total_price / gross_total) if gross_total > 0 else 0.0
+
+                total_earned = 0
+                for item in db_order.items:
+                    comm_pct = get_commission_percent_for_user_course(db, referrer.id, item.course_id)
+                    total_earned += int(item.price * paid_ratio * (comm_pct / 100.0))
+
+                if total_earned > 0:
+                    existing_referral = db.query(models.Referral).filter(
+                        models.Referral.referred_id == user.id
+                    ).first()
+                    if not existing_referral:
+                        db_referral = models.Referral(
+                            referrer_id=referrer.id,
+                            referred_id=user.id,
+                            commission_amount=total_earned,
+                            status="completed"
+                        )
+                        db.add(db_referral)
+                    else:
+                        existing_referral.commission_amount += total_earned
+
+                    # Accumulate store credit balance to referrer for discount on future purchases
+                    referrer.store_credit_balance += total_earned
 
     db.commit()
     db.refresh(db_order)
@@ -603,7 +628,38 @@ def update_user_course_progress(db: Session, user_id: int, course_id: int, compl
     return completed_lessons
 
 # --- Checkout with Coupon & Store Credit CRUD ---
+def cleanup_expired_pending_orders(
+    db: Session,
+    timeout_minutes: int = 30,
+    cancel_user_pending_id: Optional[int] = None
+) -> int:
+    """
+    Cancels pending orders that have exceeded timeout_minutes, and optionally cancels
+    any existing pending orders of cancel_user_pending_id so store credit & coupon usage
+    are refunded before a new checkout.
+    """
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=timeout_minutes)
+    pending_orders = db.query(models.Order).filter(models.Order.status == "pending").all()
+    cancelled_count = 0
+
+    for o in pending_orders:
+        is_user_recheckout = cancel_user_pending_id is not None and o.user_id == cancel_user_pending_id
+        order_time = o.created_at
+        if order_time is not None and order_time.tzinfo is None:
+            order_time = order_time.replace(tzinfo=timezone.utc)
+        is_expired = order_time is not None and order_time < cutoff
+
+        if is_user_recheckout or is_expired:
+            cancel_order(db, o.id)
+            cancelled_count += 1
+
+    return cancelled_count
+
+
 def checkout_cart_with_options(db: Session, user_id: int, coupon_code: Optional[str] = None, use_store_credit: bool = False):
+    # Clean up expired pending orders and refund any previous abandoned pending order of this user
+    cleanup_expired_pending_orders(db, timeout_minutes=30, cancel_user_pending_id=user_id)
+
     cart_items = get_cart_items(db, user_id=user_id)
     if not cart_items:
         return None
@@ -630,15 +686,15 @@ def checkout_cart_with_options(db: Session, user_id: int, coupon_code: Optional[
     total_price = sum(item.course.price for item in valid_cart_items)
     discount_applied = 0
 
-    # 1. Referral discount for first purchase if referred
-    user = get_user_by_id(db, user_id)
-    if user.referred_by_id:
+    # 1. Referral discount for first purchase if referred (capped at 14,500,000 VND)
+    user = db.query(models.User).filter(models.User.id == user_id).with_for_update().first()
+    if user and user.referred_by_id:
         previous_paid_orders = db.query(models.Order).filter(
             models.Order.user_id == user_id,
             models.Order.status == "paid"
         ).count()
         if previous_paid_orders == 0:
-            discount_applied += int(total_price * 0.10)
+            discount_applied += min(int(total_price * 0.10), 14500000)
 
     # 2. Coupon Discount
     if coupon_code:
@@ -668,11 +724,10 @@ def checkout_cart_with_options(db: Session, user_id: int, coupon_code: Optional[
         
         c_disc = min(c_disc, max(0, total_price - discount_applied))
         discount_applied += c_disc
-        coupon.times_used += 1
 
     # 3. Store Credit Discount
     credit_to_use = 0
-    if use_store_credit and user.store_credit_balance > 0:
+    if use_store_credit and user and user.store_credit_balance > 0:
         remaining_payable = max(0, total_price - discount_applied)
         credit_to_use = min(user.store_credit_balance, remaining_payable)
         discount_applied += credit_to_use
@@ -707,13 +762,23 @@ def checkout_cart_with_options(db: Session, user_id: int, coupon_code: Optional[
 
 def cancel_order(db: Session, order_id: int):
     """Safely cancels a pending order and refunds store credit & coupon usage."""
-    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    order = (
+        db.query(models.Order)
+        .filter(models.Order.id == order_id)
+        .with_for_update()
+        .first()
+    )
     if not order or order.status != "pending":
         return order
 
     # Refund store credit
     if getattr(order, "store_credit_used", 0) and order.store_credit_used > 0:
-        user = db.query(models.User).filter(models.User.id == order.user_id).first()
+        user = (
+            db.query(models.User)
+            .filter(models.User.id == order.user_id)
+            .with_for_update()
+            .first()
+        )
         if user:
             user.store_credit_balance += order.store_credit_used
         order.store_credit_used = 0

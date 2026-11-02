@@ -3,15 +3,23 @@ from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional
 from ...database import get_db
 from ... import models, schemas, crud, auth
+from ...rate_limit import rate_limit
 
 router = APIRouter()
 
 # --- COUPONS ---
-@router.post("/coupons/apply", response_model=schemas.CouponApplyResponse)
+@router.post(
+    "/coupons/apply",
+    response_model=schemas.CouponApplyResponse,
+    dependencies=[Depends(rate_limit(max_requests=15, window_seconds=60, scope="coupon_apply"))]
+)
 def apply_coupon(
     req: schemas.CouponApplyRequest,
+    current_user: Optional[models.User] = Depends(auth.get_optional_current_user),
     db: Session = Depends(get_db)
 ):
+    user_id = current_user.id if current_user else None
+    crud.cleanup_expired_pending_orders(db, timeout_minutes=30, cancel_user_pending_id=user_id)
     coupon = crud.get_coupon_by_code(db, req.code)
     if not coupon:
         return schemas.CouponApplyResponse(
@@ -122,12 +130,15 @@ def checkout_with_options(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
-    order = crud.checkout_cart_with_options(
-        db,
-        user_id=current_user.id,
-        coupon_code=coupon_code,
-        use_store_credit=use_store_credit
-    )
+    try:
+        order = crud.checkout_cart_with_options(
+            db,
+            user_id=current_user.id,
+            coupon_code=coupon_code,
+            use_store_credit=use_store_credit
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     if not order:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Giỏ hàng của bạn đang trống!")
     return order

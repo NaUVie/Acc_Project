@@ -54,10 +54,10 @@
                   <button 
                     type="button"
                     class="ratio-btn"
-                    :class="{ active: currentRatioMode === 'square' }"
-                    @click="setRatioMode('square')"
+                    :class="{ active: currentRatioMode === 'banner' }"
+                    @click="setRatioMode('banner')"
                   >
-                    Vuông (1:1)
+                    Banner (8:3)
                   </button>
                   <button 
                     type="button"
@@ -66,6 +66,14 @@
                     @click="setRatioMode('wide')"
                   >
                     Ngang (16:9)
+                  </button>
+                  <button 
+                    type="button"
+                    class="ratio-btn"
+                    :class="{ active: currentRatioMode === 'square' }"
+                    @click="setRatioMode('square')"
+                  >
+                    Vuông (1:1)
                   </button>
                   <button 
                     type="button"
@@ -180,8 +188,9 @@ let readyTimer = null;
 
 const ratioBadgeLabel = computed(() => {
   switch (currentRatioMode.value) {
-    case 'square': return 'Vuông 1:1';
+    case 'banner': return 'Banner Web 1920:720 (8:3)';
     case 'wide': return 'Ngang 16:9';
+    case 'square': return 'Vuông 1:1';
     case 'partner': return 'Logo 26:11';
     default: return 'Tự do';
   }
@@ -205,9 +214,10 @@ const getApiBase = () => {
 
 const getNumericRatio = (mode) => {
   switch (mode) {
-    case 'partner': return 260 / 110;
-    case 'square': return 1;
+    case 'banner': return 1920 / 720;
     case 'wide': return 16 / 9;
+    case 'square': return 1;
+    case 'partner': return 260 / 110;
     default: return NaN;
   }
 };
@@ -236,12 +246,15 @@ const updatePreviewCanvas = () => {
       imageSmoothingQuality: 'medium'
     };
 
-    if (currentRatioMode.value === 'square') {
-      previewOpts.width = 300;
-      previewOpts.height = 300;
+    if (currentRatioMode.value === 'banner') {
+      previewOpts.width = 320;
+      previewOpts.height = 120;
     } else if (currentRatioMode.value === 'wide') {
       previewOpts.width = 320;
       previewOpts.height = 180;
+    } else if (currentRatioMode.value === 'square') {
+      previewOpts.width = 300;
+      previewOpts.height = 300;
     } else if (currentRatioMode.value === 'partner') {
       previewOpts.width = 320;
       previewOpts.height = 135;
@@ -354,19 +367,28 @@ const applyCropAndUpload = async () => {
       imageSmoothingQuality: 'high',
     };
 
-    if (currentRatioMode.value === 'square') {
-      canvasOptions.width = 800;
-      canvasOptions.height = 800;
+    if (currentRatioMode.value === 'banner') {
+      // High-res Banner export (1920 to 2560 width, aspect ratio 1920/720 = 8:3)
+      const targetWidth = Math.max(1920, Math.min(2560, Math.round(cropData.width || 1920)));
+      canvasOptions.width = targetWidth;
+      canvasOptions.height = Math.round(targetWidth * 720 / 1920);
     } else if (currentRatioMode.value === 'wide') {
-      canvasOptions.width = 1280;
-      canvasOptions.height = 720;
+      // High-res 16:9 export (1920 to 2560 width)
+      const targetWidth = Math.max(1920, Math.min(2560, Math.round(cropData.width || 1920)));
+      canvasOptions.width = targetWidth;
+      canvasOptions.height = Math.round(targetWidth * 9 / 16);
+    } else if (currentRatioMode.value === 'square') {
+      const targetSize = Math.max(800, Math.min(1600, Math.round(cropData.width || 800)));
+      canvasOptions.width = targetSize;
+      canvasOptions.height = targetSize;
     } else if (currentRatioMode.value === 'partner') {
-      canvasOptions.width = 800;
-      canvasOptions.height = 338;
+      const targetWidth = Math.max(800, Math.min(1600, Math.round(cropData.width || 800)));
+      canvasOptions.width = targetWidth;
+      canvasOptions.height = Math.round(targetWidth * 110 / 260);
     } else {
-      if (cropData.width > 1920 || cropData.height > 1920) {
-        canvasOptions.maxWidth = 1920;
-        canvasOptions.maxHeight = 1920;
+      if (cropData.width > 2560 || cropData.height > 2560) {
+        canvasOptions.maxWidth = 2560;
+        canvasOptions.maxHeight = 2560;
       }
     }
 
@@ -375,7 +397,7 @@ const applyCropAndUpload = async () => {
     if (!canvas) throw new Error('Không thể tạo canvas từ ảnh cắt!');
 
     const blob = await new Promise(resolve => {
-      canvas.toBlob(resolve, 'image/webp', 0.85);
+      canvas.toBlob(resolve, 'image/webp', 0.95);
     });
 
     if (!blob) throw new Error('Không thể tạo file ảnh từ canvas!');

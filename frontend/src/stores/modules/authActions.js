@@ -1,13 +1,18 @@
 import { mapCourse } from './helpers';
 
+let fetchUserMePromise = null;
+let fetchReferralsPromise = null;
+let fetchEnrollmentsPromise = null;
+
 export const authActions = {
-  async register(fullname, email, password, referralCodeUsed = null) {
+  async register(fullname, email, password, referralCodeUsed = null, phone = null) {
     try {
       const result = await this.apiRequest('/auth/register', {
         method: 'POST',
         body: JSON.stringify({
           fullname,
           email,
+          phone: phone || null,
           password,
           referral_code_used: referralCodeUsed || null
         })
@@ -49,6 +54,22 @@ export const authActions = {
     }
   },
 
+  async requestPasswordReset(email, phone = null, note = null) {
+    try {
+      const result = await this.apiRequest('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({
+          email,
+          phone: phone || null,
+          note: note || null
+        })
+      });
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  },
+
   async logout() {
     this.token = null;
     this.user = null;
@@ -62,24 +83,31 @@ export const authActions = {
 
   async fetchUserMe() {
     if (!this.token) return;
-    try {
-      const data = await this.apiRequest('/auth/me');
-      this.user = {
-        id: data.id,
-        fullname: data.fullname,
-        email: data.email,
-        role: data.role,
-        referralCode: data.referral_code,
-        referredById: data.referred_by_id,
-        createdAt: data.created_at
-      };
+    if (fetchUserMePromise) return fetchUserMePromise;
+    fetchUserMePromise = (async () => {
       try {
-        localStorage.setItem('user', JSON.stringify(this.user));
-      } catch (e) {}
-      return this.user;
-    } catch (err) {
-      console.error("Failed to fetch user me profile:", err);
-    }
+        const data = await this.apiRequest('/auth/me');
+        this.user = {
+          id: data.id,
+          fullname: data.fullname,
+          email: data.email,
+          phone: data.phone || '',
+          role: data.role,
+          referralCode: data.referral_code,
+          referredById: data.referred_by_id,
+          createdAt: data.created_at
+        };
+        try {
+          localStorage.setItem('user', JSON.stringify(this.user));
+        } catch (e) {}
+        return this.user;
+      } catch (err) {
+        console.error("Failed to fetch user me profile:", err);
+      } finally {
+        fetchUserMePromise = null;
+      }
+    })();
+    return fetchUserMePromise;
   },
 
   async updateProfile(payload) {
@@ -102,40 +130,54 @@ export const authActions = {
 
   async fetchReferrals() {
     if (!this.token) return;
-    try {
-      const data = await this.apiRequest('/auth/referrals');
-      this.referralSummary = {
-        totalReferrals: data.total_referrals,
-        totalCommissionEarned: data.total_commission_earned,
-        referralCode: data.referral_code,
-        referralsList: data.referrals_list ? data.referrals_list.map(ref => ({
-          id: ref.id,
-          referredFullname: ref.referred_fullname,
-          commissionAmount: ref.commission_amount,
-          status: ref.status,
-          createdAt: ref.created_at
-        })) : []
-      };
-    } catch (err) {
-      console.error("Failed to load referrals:", err);
-    }
+    if (fetchReferralsPromise) return fetchReferralsPromise;
+    fetchReferralsPromise = (async () => {
+      try {
+        const data = await this.apiRequest('/auth/referrals');
+        this.referralSummary = {
+          totalReferrals: data.total_referrals,
+          totalCommissionEarned: data.total_commission_earned,
+          referralCode: data.referral_code,
+          referralsList: data.referrals_list ? data.referrals_list.map(ref => ({
+            id: ref.id,
+            referredFullname: ref.referred_fullname,
+            commissionAmount: ref.commission_amount,
+            status: ref.status,
+            createdAt: ref.created_at
+          })) : []
+        };
+        return this.referralSummary;
+      } catch (err) {
+        console.error("Failed to load referrals:", err);
+      } finally {
+        fetchReferralsPromise = null;
+      }
+    })();
+    return fetchReferralsPromise;
   },
 
   async fetchEnrollments() {
     if (!this.token) return;
-    try {
-      const data = await this.apiRequest('/enrollments');
-      this.enrollments = data.map(item => ({
-        id: item.id,
-        courseId: item.course_id,
-        orderId: item.order_id,
-        enrolledAt: item.enrolled_at,
-        createdAt: item.created_at || item.enrolled_at,
-        course: item.course ? mapCourse(item.course) : null
-      }));
-    } catch (err) {
-      console.error("Failed to load enrollments:", err);
-    }
+    if (fetchEnrollmentsPromise) return fetchEnrollmentsPromise;
+    fetchEnrollmentsPromise = (async () => {
+      try {
+        const data = await this.apiRequest('/enrollments');
+        this.enrollments = data.map(item => ({
+          id: item.id,
+          courseId: item.course_id,
+          orderId: item.order_id,
+          enrolledAt: item.enrolled_at,
+          createdAt: item.created_at || item.enrolled_at,
+          course: item.course ? mapCourse(item.course) : null
+        }));
+        return this.enrollments;
+      } catch (err) {
+        console.error("Failed to load enrollments:", err);
+      } finally {
+        fetchEnrollmentsPromise = null;
+      }
+    })();
+    return fetchEnrollmentsPromise;
   },
 
   async fetchMyReferralSummary() {

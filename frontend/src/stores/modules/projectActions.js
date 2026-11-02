@@ -119,8 +119,12 @@ export const projectActions = {
       await this.apiRequest(`/admin/projects/${id}`, {
         method: 'DELETE'
       });
-      await this.fetchAdminProjects();
-      await this.fetchProjects(true);
+      if (this.adminProjects) {
+        this.adminProjects = this.adminProjects.filter(p => p.id !== id);
+      }
+      if (this.projects) {
+        this.projects = this.projects.filter(p => p.id !== id);
+      }
       this.showToast('Đã xóa dự án thành công!', 'success');
     } catch (err) {
       console.error("Failed to delete admin project:", err);

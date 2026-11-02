@@ -5,10 +5,24 @@ from typing import List, Optional
 from ...database import get_db
 from ... import models, schemas, crud, auth, vnpay
 from ...config import VNPAY_TMN_CODE, VNPAY_HASH_SECRET, VNPAY_PAYMENT_URL, VNPAY_RETURN_URL
+from ...rate_limit import get_client_ip
 
 router = APIRouter()
 
 ALLOW_MOCK_PAYMENT = os.getenv("ALLOW_MOCK_PAYMENT", "false").lower() == "true"
+
+def _get_allowed_client_origins() -> set[str]:
+    cors_origins_raw = os.getenv("CORS_ORIGINS", "")
+    custom = {o.strip().rstrip("/") for o in cors_origins_raw.split(",") if o.strip()}
+    defaults = {
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "http://localhost:8000",
+        "https://acc-academy-demo.vercel.app",
+    }
+    return defaults | custom
 
 @router.get("", response_model=List[schemas.OrderResponse])
 def read_orders(
@@ -36,7 +50,8 @@ def mock_payment(
     current_user: models.User = Depends(auth.get_current_user),
     db: Session = Depends(get_db)
 ):
-    if not ALLOW_MOCK_PAYMENT and current_user.role != "admin":
+    is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
+    if is_production or (not ALLOW_MOCK_PAYMENT and current_user.role != "admin"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Tính năng giả lập thanh toán đã bị tắt trong môi trường Production."
@@ -88,25 +103,24 @@ def create_vnpay_url(
         crud.pay_order(db, order_id=id)
         return {"payment_url": None, "status": "paid", "message": "Đơn hàng 0đ đã được kích hoạt trực tiếp"}
 
-    # Get client IP
-    client_ip = request.client.host if request.client else "127.0.0.1"
-    forwarded_for = request.headers.get("x-forwarded-for")
-    if forwarded_for:
-        client_ip = forwarded_for.split(",")[0].strip()
+    # Get validated client IP
+    client_ip = get_client_ip(request)
 
-    # Determine dynamic return_url based on Origin/Referer of client, fallback to config
+    # Determine dynamic return_url based on trusted Origin/Referer of client, fallback to config
     origin = request.headers.get("origin")
     referer = request.headers.get("referer")
-    base_client_url = None
+    candidate_url = None
     if origin:
-        base_client_url = origin.rstrip("/")
+        candidate_url = origin.strip().rstrip("/")
     elif referer:
         import urllib.parse
-        parsed = urllib.parse.urlparse(referer)
-        base_client_url = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
-        
-    if base_client_url:
-        actual_return_url = f"{base_client_url}/payment/vnpay-return"
+        parsed = urllib.parse.urlparse(referer.strip())
+        if parsed.scheme in ("http", "https") and parsed.netloc:
+            candidate_url = f"{parsed.scheme}://{parsed.netloc}".rstrip("/")
+
+    allowed_origins = _get_allowed_client_origins()
+    if candidate_url and candidate_url in allowed_origins:
+        actual_return_url = f"{candidate_url}/payment/vnpay-return"
     else:
         actual_return_url = VNPAY_RETURN_URL
 

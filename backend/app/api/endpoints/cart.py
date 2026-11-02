@@ -28,7 +28,7 @@ def add_item_to_cart(
         )
     # Prevent adding already owned course to cart
     already_enrolled = crud.check_enrollment(db, user_id=current_user.id, course_id=cart_in.course_id)
-    if already_enrolled and current_user.role != "admin":
+    if already_enrolled:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Bạn đã sở hữu khóa học này rồi!"

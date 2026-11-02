@@ -137,6 +137,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     fullname = Column(String(150), nullable=False)
     email = Column(String(150), unique=True, index=True, nullable=False)
+    phone = Column(String(50), nullable=True)
     hashed_password = Column(String(255), nullable=False)
     referral_code = Column(String(50), unique=True, index=True, nullable=False)
     referred_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)

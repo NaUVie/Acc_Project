@@ -18,7 +18,7 @@ def read_courses(
 
 @router.get("/categories", response_model=List[schemas.CategoryResponse])
 def read_categories(response: Response, db: Session = Depends(get_db)):
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
     return crud.get_categories(db)
 
 @router.get("/banners", response_model=List[schemas.BannerResponse])

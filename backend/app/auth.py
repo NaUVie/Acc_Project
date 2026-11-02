@@ -12,9 +12,11 @@ from . import models
 
 # JWT configuration
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", os.getenv("SECRET_KEY", "ACC_ACADEMY_ULTRA_SECRET_KEY_FOR_JWT_TOKEN_123456789"))
-if os.getenv("ENVIRONMENT") == "production" and "ULTRA_SECRET_KEY" in SECRET_KEY:
-    import warnings
-    warnings.warn("CRITICAL SECURITY WARNING: Production environment is using default JWT SECRET_KEY. Please set JWT_SECRET_KEY in environment variables!")
+if os.getenv("ENVIRONMENT", "development").lower() == "production":
+    if not SECRET_KEY or "ULTRA_SECRET_KEY" in SECRET_KEY or len(SECRET_KEY) < 32:
+        raise RuntimeError(
+            "CRITICAL SECURITY ERROR: Production environment must configure a secure JWT_SECRET_KEY (at least 32 characters)!"
+        )
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440 # 24 hours
@@ -23,16 +25,20 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     try:
+        pwd_bytes = plain_password.encode("utf-8")[:72]
         return bcrypt.checkpw(
-            plain_password.encode("utf-8"),
+            pwd_bytes,
             hashed_password.encode("utf-8")
         )
     except Exception:
         return False
 
 def get_password_hash(password: str) -> str:
+    pwd_bytes = password.encode("utf-8")
+    if len(pwd_bytes) > 72:
+        raise ValueError("Mật khẩu không được vượt quá 72 byte!")
     return bcrypt.hashpw(
-        password.encode("utf-8"),
+        pwd_bytes,
         bcrypt.gensalt()
     ).decode("utf-8")
 
@@ -83,8 +89,11 @@ def get_optional_current_user(token: Optional[str] = Depends(oauth2_scheme_optio
         user = db.query(models.User).filter(models.User.email == email).first()
         if user and user.is_active:
             return user
+        return None
     except Exception:
         return None
+
+
 def get_current_admin(current_user: models.User = Depends(get_current_user)) -> models.User:
     if current_user.role != "admin":
         raise HTTPException(

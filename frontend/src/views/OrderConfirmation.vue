@@ -89,60 +89,24 @@
               </div>
             </div>
 
-            <!-- QR Payment Section (only for pending orders) -->
+            <!-- VNPAY Payment Section (only for pending orders) -->
             <div v-if="order.status === 'pending'" class="oc-card payment-card">
-              <h2 class="oc-card-title">💳 Hoàn tất thanh toán</h2>
-              <div class="qr-section">
-                <div class="qr-box">
-                  <img
-                    :src="`https://api.vietqr.io/image/MB-999988886666-compact2.jpg?amount=${order.totalPrice}&addInfo=ACC${String(order.id).padStart(6,'0')}&accountName=ACC%20ACADEMY`"
-                    alt="QR Thanh Toán"
-                    class="qr-img"
-                    @error="handleQrError"
-                  />
-                  <p class="qr-hint">Mở app Ngân hàng, quét mã QR để thanh toán</p>
+              <h2 class="oc-card-title">💳 Hoàn tất thanh toán qua VNPAY</h2>
+              <div class="bank-info-box" style="width: 100%;">
+                <div class="bank-info-row highlight">
+                  <span class="bank-label">Mã đơn hàng</span>
+                  <span class="bank-value code">#ACC-{{ String(order.id).padStart(6, '0') }}</span>
                 </div>
-                <div class="bank-info-box">
-                  <div class="bank-info-row">
-                    <span class="bank-label">Ngân hàng</span>
-                    <span class="bank-value">MB Bank (Quân Đội)</span>
-                  </div>
-                  <div class="bank-info-row">
-                    <span class="bank-label">Số tài khoản</span>
-                    <span class="bank-value code">999988886666</span>
-                  </div>
-                  <div class="bank-info-row">
-                    <span class="bank-label">Chủ tài khoản</span>
-                    <span class="bank-value">ACC ACADEMY CO. LTD</span>
-                  </div>
-                  <div class="bank-info-row highlight">
-                    <span class="bank-label">Nội dung CK</span>
-                    <span class="bank-value code">ACC{{ String(order.id).padStart(6, '0') }}</span>
-                  </div>
-                  <div class="bank-info-row highlight">
-                    <span class="bank-label">Số tiền</span>
-                    <span class="bank-value price">{{ formatCurrency(order.totalPrice) }}</span>
-                  </div>
-
-                  <!-- VNPay Sandbox Pay Button -->
-                  <button @click="payWithVnpay" :disabled="paying" class="btn-primary-solid w-full mb-3" style="width: 100%; padding: 12px; font-weight: 700; border-radius: 8px; font-size: 14px; background: #0284c7; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                    <span>💳 Thanh toán qua cổng VNPAY</span>
-                  </button>
-
-                  <div style="font-size: 12px; color: #64748b; margin-bottom: 12px; line-height: 1.4; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1;">
-                    <strong style="color: #0f172a;">Thông tin thẻ test VNPAY Sandbox:</strong><br/>
-                    • Ngân hàng: <strong>NCB</strong><br/>
-                    • Số thẻ: <strong>9704198526191432198</strong><br/>
-                    • Tên: <strong>NGUYEN VAN A</strong> | Ngày: <strong>07/15</strong><br/>
-                    • OTP: <strong>123456</strong>
-                  </div>
-
-                  <!-- Mock Pay Button for Testing -->
-                  <button @click="mockConfirmPayment" :disabled="paying" class="btn-mock-pay">
-                    <span v-if="paying">⏳ Đang xử lý...</span>
-                    <span v-else>✅ Xác nhận đã chuyển khoản (Thủ công)</span>
-                  </button>
+                <div class="bank-info-row highlight" style="margin-bottom: 16px;">
+                  <span class="bank-label">Số tiền thanh toán</span>
+                  <span class="bank-value price">{{ formatCurrency(order.totalPrice) }}</span>
                 </div>
+
+                <!-- VNPay Pay Button -->
+                <button @click="payWithVnpay" :disabled="paying" class="btn-primary-solid w-full" style="width: 100%; padding: 14px; font-weight: 700; border-radius: 8px; font-size: 15px; background: #0284c7; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                  <span v-if="paying">⏳ Đang khởi tạo cổng VNPAY...</span>
+                  <span v-else>💳 Thanh toán ngay qua cổng VNPAY</span>
+                </button>
               </div>
             </div>
           </div>
@@ -168,15 +132,15 @@
               <div v-else class="next-steps">
                 <div class="step-item">
                   <span class="step-num">1</span>
-                  <span>Chuyển khoản theo thông tin bên cạnh</span>
+                  <span>Nhấn nút <strong>Thanh toán ngay qua cổng VNPAY</strong></span>
                 </div>
                 <div class="step-item">
                   <span class="step-num">2</span>
-                  <span>Hệ thống xác nhận trong <strong>5-15 phút</strong></span>
+                  <span>Hoàn tất giao dịch trực tuyến trên <strong>VNPAY</strong></span>
                 </div>
                 <div class="step-item">
                   <span class="step-num">3</span>
-                  <span>Khóa học sẽ tự động kích hoạt trong tài khoản</span>
+                  <span>Khóa học sẽ tự động kích hoạt ngay tức thì</span>
                 </div>
               </div>
 
@@ -229,10 +193,6 @@ const translateCategory = (cat) => ({
   'bundles': 'Combo',
 }[cat] || cat);
 
-const handleQrError = (e) => {
-  e.target.src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=ACC-ACADEMY-ORDER-${orderId.value}`;
-};
-
 onMounted(async () => {
   // Check store cache first for instant 0ms rendering
   const existingOrder = courseStore.orders.find(o => o.id === parseInt(orderId.value));
@@ -265,21 +225,6 @@ const payWithVnpay = async () => {
     }
   } catch (err) {
     courseStore.showToast(err.message || 'Không thể tạo cổng thanh toán VNPAY', 'error');
-  } finally {
-    paying.value = false;
-  }
-};
-
-const mockConfirmPayment = async () => {
-  paying.value = true;
-  try {
-    const updated = await courseStore.payOrder(parseInt(orderId.value));
-    if (updated) {
-      order.value = courseStore.orders.find(o => o.id === parseInt(orderId.value));
-      courseStore.showToast('Xác nhận thanh toán thành công! Khóa học đã được kích hoạt.', 'success');
-    }
-  } catch (e) {
-    courseStore.showToast('Không thể xác nhận thanh toán: ' + e.message, 'error');
   } finally {
     paying.value = false;
   }

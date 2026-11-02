@@ -37,7 +37,7 @@
         <div class="content-sections">
           <div v-for="(sec, idx) in program.sections" :key="idx" class="section-block">
             <h2 class="section-heading">{{ sec.heading }}</h2>
-            <div class="section-text" v-html="sec.content"></div>
+            <div class="section-text" v-html="sanitizeHtml(sec.content)"></div>
           </div>
         </div>
 
@@ -109,6 +109,7 @@
 <script setup>
 import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { sanitizeHtml } from '@/utils/sanitize';
 
 const route = useRoute();
 

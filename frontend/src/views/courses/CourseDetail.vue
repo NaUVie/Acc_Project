@@ -56,7 +56,7 @@
           <!-- Main Article Content Body -->
           <div class="article-content-body">
             <!-- Full Description / Content -->
-            <div v-if="course.description" class="rich-article-html" v-html="course.description"></div>
+            <div v-if="course.description" class="rich-article-html" v-html="sanitizeHtml(course.description)"></div>
 
             <!-- Outcomes / Highlights -->
             <div v-if="courseOutcomes.length > 0" class="article-section-block">
@@ -72,7 +72,7 @@
             <!-- Detailed Roadmap / Curriculum if exists -->
             <div v-if="course.customRoadmap" class="article-section-block">
               <h3 class="article-sub-heading">Lộ trình đào tạo chi tiết</h3>
-              <div class="rich-article-html" v-html="course.customRoadmap"></div>
+              <div class="rich-article-html" v-html="sanitizeHtml(course.customRoadmap)"></div>
             </div>
 
             <div v-else-if="parsedCurriculum.length > 0" class="article-section-block">
@@ -133,8 +133,28 @@
               <div class="sidebar-perk-item">{{ $t('course.perk4') }}</div>
             </div>
 
-            <button type="button" class="sidebar-register-btn" style="width: 100%; box-sizing: border-box; cursor: pointer; border: none; font-family: var(--font-sans);" @click="buyNow">
-              Đăng Ký 
+            <!-- Nếu đã sở hữu: Hiển thị nút Vào học ngay -->
+            <router-link 
+              v-if="isAlreadyEnrolled"
+              :to="'/courses/' + (course.handle || course.id) + '/study'"
+              class="sidebar-register-btn enrolled-study-btn" 
+              style="width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 700;"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+              </svg>
+              <span>Vào Học Ngay</span>
+            </router-link>
+
+            <!-- Nếu chưa sở hữu: Hiển thị nút Đăng ký -->
+            <button 
+              v-else
+              type="button" 
+              class="sidebar-register-btn" 
+              style="width: 100%; box-sizing: border-box; cursor: pointer; border: none; font-family: var(--font-sans);" 
+              @click="buyNow"
+            >
+              Đăng Ký
             </button>
 
             <a href="tel:0938566700" class="sidebar-hotline-btn">
@@ -196,6 +216,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 import { stripHtml } from '@/utils/stripHtml';
+import { sanitizeHtml } from '@/utils/sanitize';
 
 const route = useRoute();
 const router = useRouter();
@@ -506,6 +527,11 @@ const buyNow = () => {
     router.push('/login');
     return;
   }
+  if (isAlreadyEnrolled.value) {
+    courseStore.showToast('Bạn đã sở hữu khóa học này rồi! Đang chuyển đến phòng học...', 'info');
+    router.push('/courses/' + (course.value.handle || course.value.id) + '/study');
+    return;
+  }
   courseStore.buyNow(course.value)
     .then(() => {
       router.push('/checkout');
@@ -558,6 +584,9 @@ onMounted(() => {
   }
   if (courseStore.token) {
     courseStore.fetchWishlist();
+    if (!courseStore.enrollments || courseStore.enrollments.length === 0) {
+      courseStore.fetchEnrollments().catch(() => {});
+    }
   }
   if (courseStore.programs.length === 0) {
     courseStore.fetchPrograms();
