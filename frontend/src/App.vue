@@ -3,9 +3,9 @@
     <Header />
     <main class="main-content">
       <router-view v-slot="{ Component }">
-        <transition name="fade">
+        <keep-alive include="Home">
           <component :is="Component" />
-        </transition>
+        </keep-alive>
       </router-view>
     </main>
     <Footer />

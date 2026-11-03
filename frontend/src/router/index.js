@@ -261,10 +261,35 @@ const allRoutes = [
   }
 ];
 
+if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
+
 const router = createRouter({
   history: createWebHistory(),
   routes: allRoutes,
-  scrollBehavior() {
+  scrollBehavior(to, from, savedPosition) {
+    if (to.name === 'Home' || to.path === '/') {
+      const savedY = Number(sessionStorage.getItem('home_scroll_y') || 0);
+      const targetY = (savedPosition && savedPosition.top > 100) ? savedPosition.top : savedY;
+      if (targetY > 100) {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({ top: targetY, behavior: 'instant' });
+          }, 50);
+        });
+      }
+    }
+    if (savedPosition) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(savedPosition);
+        }, 50);
+      });
+    }
+    if (to.hash) {
+      return { el: to.hash, behavior: 'smooth' };
+    }
     return { top: 0 };
   }
 });
@@ -272,6 +297,13 @@ const router = createRouter({
 import { useCourseStore } from '../stores/courses';
 
 router.beforeEach(async (to, from, next) => {
+  // Save scroll position when leaving Home
+  if (typeof window !== 'undefined' && (from.name === 'Home' || from.path === '/')) {
+    try {
+      sessionStorage.setItem('home_scroll_y', String(window.scrollY));
+    } catch (e) {}
+  }
+
   // 1. Multilingual Route & SEO Guard
   const isEnRoute = to.path === '/en' || to.path.startsWith('/en/');
   const currentLocale = i18n.global.locale.value;

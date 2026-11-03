@@ -511,10 +511,9 @@
         </div>
       </div>
     </section> -->
-  </div>
 
-  <!-- Auto Pop-up Consultation Modal (Horizontal Name Card Style) -->
-  <Transition name="modal-fade">
+    <!-- Auto Pop-up Consultation Modal (Horizontal Name Card Style) -->
+    <Transition name="modal-fade">
     <div v-if="isContactModalOpen" class="consult-modal-overlay" @click.self="closeContactModal">
       <div class="consult-card-visit-horizontal" role="dialog" aria-modal="true" aria-labelledby="consult-modal-title">
         <button class="consult-modal-close" @click="closeContactModal" :aria-label="$t('home.popupClose')">
@@ -581,10 +580,16 @@
       </div>
     </div>
   </Transition>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, onActivated, onDeactivated } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
+
+defineOptions({
+  name: 'Home'
+});
 import { useI18n } from 'vue-i18n';
 import { useCourseStore } from '@/stores/courses';
 import { useTestimonialStore } from '@/stores/testimonials';
@@ -1139,7 +1144,20 @@ const submitContactModal = async () => {
   }
 };
 
+let lastHomeScrollY = 0;
+let isNavigatingAway = false;
+
+const onWindowScroll = () => {
+  if (!isNavigatingAway && typeof window !== 'undefined') {
+    const y = window.scrollY;
+    if (y > 100) {
+      lastHomeScrollY = y;
+    }
+  }
+};
+
 onMounted(() => {
+  window.addEventListener('scroll', onWindowScroll, { passive: true });
   bentoCardsOffset.value = getBentoRotationOffset();
   startHeroAutoplay();
   setupEcoTitleObserver();
@@ -1156,7 +1174,39 @@ onMounted(() => {
   testimonialStore.fetchTestimonials();
 });
 
+onBeforeRouteLeave((to, from) => {
+  isNavigatingAway = true;
+  const currentY = window.scrollY > 100 ? window.scrollY : lastHomeScrollY;
+  if (currentY > 100) {
+    lastHomeScrollY = currentY;
+    try {
+      sessionStorage.setItem('home_scroll_y', String(currentY));
+    } catch (e) {}
+  }
+});
+
+onDeactivated(() => {
+  stopHeroAutoplay();
+});
+
+onActivated(() => {
+  isNavigatingAway = false;
+  startHeroAutoplay();
+  const targetY = lastHomeScrollY || Number(sessionStorage.getItem('home_scroll_y') || 0);
+  if (targetY > 100) {
+    const doScroll = () => {
+      window.scrollTo({ top: targetY, behavior: 'instant' });
+    };
+    doScroll();
+    requestAnimationFrame(doScroll);
+    setTimeout(doScroll, 50);
+    setTimeout(doScroll, 150);
+    setTimeout(doScroll, 300);
+  }
+});
+
 onUnmounted(() => {
+  window.removeEventListener('scroll', onWindowScroll);
   stopHeroAutoplay();
   if (modalTimer) {
     clearTimeout(modalTimer);

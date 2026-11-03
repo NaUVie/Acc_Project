@@ -2,7 +2,17 @@
   <div class="course-detail-view">
     <div class="detail-container">
       <!-- Breadcrumb Nav -->
-      <nav class="breadcrumb-nav">
+      <nav class="breadcrumb-nav" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <button 
+          type="button" 
+          @click="goBack" 
+          class="btn-detail-back" 
+          style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px 10px; font-size: 13px; font-weight: 600; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;"
+          title="Quay lại vị trí trước"
+        >
+          <span>← Quay lại</span>
+        </button>
+        <span class="breadcrumb-separator" style="color: #cbd5e1;">|</span>
         <router-link to="/" class="breadcrumb-link">{{ $t('nav.home') }}</router-link>
         <span class="breadcrumb-separator">&rsaquo;</span>
         <router-link :to="course ? '/courses/category/' + (course.category || 'dao-tao-ca-nhan') : '/courses'" class="breadcrumb-link">{{ course ? getCategoryName(course.category) : 'Khóa học' }}</router-link>
@@ -224,6 +234,14 @@ import { formatImageUrl } from '@/utils/imageHelper';
 
 const route = useRoute();
 const router = useRouter();
+
+const goBack = () => {
+  if (window.history.length > 1) {
+    router.back();
+  } else {
+    router.push('/');
+  }
+};
 const courseStore = useCourseStore();
 
 const course = ref(null);
