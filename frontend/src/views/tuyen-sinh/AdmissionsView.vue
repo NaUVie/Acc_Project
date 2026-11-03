@@ -6,7 +6,7 @@
 
         <h1 class="hero-title animate-fade-in">
           {{ $t('admissions.heroTitle1') }} <br />
-          &amp; <span class="gradient-text">{{ $t('admissions.heroTitle2') }}</span>
+          <span class="gradient-text">{{ $t('admissions.heroTitle2') }}</span>
         </h1>
         <p class="hero-subtitle animate-fade-in">
           {{ $t('admissions.heroSubtitle') }}
