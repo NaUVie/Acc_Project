@@ -83,16 +83,23 @@ export const courseActions = {
       return fetchCoursesPromise;
     }
 
+    if (force) {
+      try {
+        localStorage.removeItem('acc_courses_cache_v1');
+      } catch (e) {}
+    }
+
     if (this.courses.length === 0) {
       this.loading = true;
     }
     fetchCoursesPromise = (async () => {
       try {
         // Trigger categories and banners concurrently without blocking course mapping
-        this.fetchCategories().catch(() => {});
+        this.fetchCategories(force).catch(() => {});
         this.fetchBanners().catch(() => {});
 
-        const coursesData = await this.apiRequest('/courses');
+        const url = force ? `/courses?_t=${Date.now()}` : '/courses';
+        const coursesData = await this.apiRequest(url);
         if (Array.isArray(coursesData) && coursesData.length > 0) {
           this.courses = coursesData.map(mapCourse);
           try {
@@ -183,11 +190,20 @@ export const courseActions = {
         custom_roadmap: course.customRoadmap || '',
         lecturer_ids: course.lecturerIds || ''
       };
-      await this.apiRequest('/admin/courses', {
+      const created = await this.apiRequest('/admin/courses', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
-      await this.fetchCourses(true);
+      if (created) {
+        const mapped = mapCourse(created);
+        this.courses = [mapped, ...(this.courses || [])];
+        try {
+          localStorage.setItem('acc_courses_cache_v1', JSON.stringify(this.courses));
+        } catch (e) {}
+      }
+      // Re-sync in background without blocking UI
+      this.fetchCourses(true).catch(() => {});
+      return created;
     } catch (err) {
       console.error("Failed to add admin course:", err);
       throw err;
@@ -215,11 +231,23 @@ export const courseActions = {
         custom_roadmap: updatedData.customRoadmap,
         lecturer_ids: updatedData.lecturerIds
       };
-      await this.apiRequest(`/admin/courses/${courseId}`, {
+      const updated = await this.apiRequest(`/admin/courses/${courseId}`, {
         method: 'PUT',
         body: JSON.stringify(payload)
       });
-      await this.fetchCourses(true);
+      if (updated && this.courses) {
+        const mapped = mapCourse(updated);
+        const idx = this.courses.findIndex(c => String(c.id) === String(courseId));
+        if (idx !== -1) {
+          this.courses[idx] = { ...this.courses[idx], ...mapped };
+        }
+        try {
+          localStorage.setItem('acc_courses_cache_v1', JSON.stringify(this.courses));
+        } catch (e) {}
+      }
+      // Re-sync in background without blocking UI
+      this.fetchCourses(true).catch(() => {});
+      return updated;
     } catch (err) {
       console.error("Failed to update admin course:", err);
       throw err;

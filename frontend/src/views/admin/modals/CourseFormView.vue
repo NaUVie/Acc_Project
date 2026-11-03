@@ -1,18 +1,32 @@
 <template>
-  <div class="admin-page-card" style="background: #ffffff; color: #0f172a; border-radius: 16px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;">
-    <div class="flex-between pb-4 mb-4" style="border-bottom: 1px solid #e2e8f0;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <button type="button" @click="$emit('cancel')" class="btn btn-secondary btn-sm" style="padding: 8px 16px; font-weight: 600;">
+  <div class="admin-course-form-card">
+    <!-- STICKY TOP HEADER PINNED ON SCROLL -->
+    <div class="sticky-form-header">
+      <div class="sticky-header-left">
+        <button type="button" @click="$emit('cancel')" :disabled="isSaving" class="btn btn-secondary btn-sm btn-back-nav">
           ← Quay lại danh sách
         </button>
-        <h3 style="margin: 0; color: #0f172a; font-size: 20px; font-weight: 800;">
+        <h3 class="sticky-title">
           {{ isEditingCourse ? 'Chỉnh sửa thông tin khóa học' : 'Thêm khóa học mới' }}
         </h3>
       </div>
-      <button type="button" @click="$emit('cancel')" class="btn btn-secondary btn-sm">Hủy</button>
+      <div class="sticky-header-right">
+        <button type="button" @click="$emit('cancel')" :disabled="isSaving" class="btn btn-secondary btn-sm">Hủy</button>
+        <button 
+          type="button" 
+          @click="saveCourse" 
+          :disabled="isSaving || uploadingCourseImage || uploadingCoverImage" 
+          class="btn btn-primary btn-sm btn-save-fixed"
+        >
+          <span v-if="isSaving" class="btn-spinner"></span>
+          <span>{{ isSaving ? 'Đang lưu...' : (isEditingCourse ? 'Lưu thay đổi' : 'Tạo khóa học') }}</span>
+        </button>
+      </div>
     </div>
 
-    <form @submit.prevent="saveCourse">
+    <!-- SCROLLABLE FORM CONTENT -->
+    <div class="course-form-content">
+      <form @submit.prevent="saveCourse">
       <div class="form-group">
         <label style="color: #1e293b; font-weight: 600;">Tên khóa học</label>
         <input v-model="courseForm.title" @input="onTitleInput" type="text" required class="admin-input-style" placeholder="Ví dụ: ChatGPT thực chiến nâng cao" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
@@ -135,11 +149,16 @@
         <small class="text-muted" style="display: block; margin-top: 4px;">Nhập từng yêu cầu hoặc đối tượng trên một dòng riêng biệt.</small>
       </div>
 
-      <div class="flex-between mt-6 pt-4" style="border-top: 1px solid #e2e8f0;">
-        <button type="button" @click="$emit('cancel')" class="btn btn-secondary btn-sm" style="padding: 10px 24px;">Hủy bỏ</button>
-        <button type="submit" class="btn btn-primary btn-sm" style="padding: 10px 32px; font-weight: 700;">Lưu thông tin khóa học</button>
+      <div class="form-bottom-hint flex-between mt-8 pt-4">
+        <span class="text-muted" style="font-size: 13px;">
+          💡 Sau khi điền thông tin, bạn có thể nhấn nút <strong>{{ isEditingCourse ? 'Lưu thay đổi' : 'Tạo khóa học' }}</strong> luôn hiển thị cố định ở thanh trên cùng.
+        </span>
+        <button type="button" @click="$emit('cancel')" :disabled="isSaving" class="btn btn-secondary btn-sm" style="padding: 8px 20px;">
+          Hủy bỏ
+        </button>
       </div>
     </form>
+    </div>
 
     <!-- Image Cropper Modal -->
     <ImageCropperModal 
@@ -188,6 +207,7 @@ const customCategorySlug = ref('');
 const selectedLecturerToAdd = ref('');
 const uploadingCourseImage = ref(false);
 const uploadingCoverImage = ref(false);
+const isSaving = ref(false);
 
 // Cropper States
 const isCropperOpen = ref(false);
@@ -333,6 +353,8 @@ const handleCroppedImage = async (newUrl) => {
 };
 
 const saveCourse = async () => {
+  if (isSaving.value) return;
+  isSaving.value = true;
   try {
     const payload = { 
       ...courseForm.value,
@@ -360,7 +382,122 @@ const saveCourse = async () => {
     emit('saved');
   } catch (err) {
     courseStore.showToast(err.message || 'Không thể lưu khóa học.', 'error');
+  } finally {
+    isSaving.value = false;
   }
 };
 </script>
 
+
+<style scoped>
+.admin-course-form-card {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 145px);
+  min-height: 540px;
+  background: #ffffff;
+  color: #0f172a;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e2e8f0;
+  overflow: hidden; /* Cố định header trên đỉnh, chỉ scroll nội dung bên dưới */
+}
+
+.sticky-form-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 28px;
+  background: #ffffff;
+  border-bottom: 2px solid #e2e8f0;
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+  z-index: 20;
+}
+
+.sticky-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.sticky-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 19px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-back-nav {
+  padding: 8px 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sticky-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-save-fixed {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  padding: 9px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  min-width: 140px;
+  box-shadow: 0 2px 8px rgba(2, 43, 159, 0.2);
+}
+
+.course-form-content {
+  flex: 1;
+  overflow-y: auto; /* CHỈ SCROLL THÔNG TIN FORM */
+  padding: 24px 28px 40px;
+  scroll-behavior: smooth;
+}
+
+.form-bottom-hint {
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spinBtn 0.7s linear infinite;
+}
+
+@keyframes spinBtn {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .sticky-form-header {
+    top: 60px;
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .sticky-title {
+    font-size: 16px;
+  }
+  .course-form-content {
+    padding: 16px;
+  }
+}
+</style>

@@ -5,9 +5,15 @@
         <h2 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Quản lý Mã giảm giá (Coupons)</h2>
         <p style="font-size: 13px; color: #64748b; margin: 4px 0 0 0;">Tạo mã voucher khuyến mãi giảm theo % hoặc số tiền cố định cho học viên khi checkout.</p>
       </div>
-      <button @click="showModal = true" class="btn btn-primary btn-sm" style="border-radius: 8px; padding: 8px 16px; font-weight: 700;">
-        + Tạo Mã Coupon Mới
-      </button>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button @click="refreshCoupons" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách mã giảm giá mới nhất">
+          <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+          <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
+        </button>
+        <button @click="showModal = true" class="btn btn-primary btn-sm" style="border-radius: 8px; padding: 8px 16px; font-weight: 700;">
+          + Tạo Mã Coupon Mới
+        </button>
+      </div>
     </div>
 
     <!-- Coupons Table -->
@@ -118,6 +124,19 @@ import { useCourseStore } from '@/stores/courses';
 const courseStore = useCourseStore();
 const showModal = ref(false);
 const submitting = ref(false);
+const isRefreshing = ref(false);
+
+const refreshCoupons = async () => {
+  isRefreshing.value = true;
+  try {
+    await courseStore.fetchAdminCoupons(true);
+    courseStore.showToast('Đã làm mới danh sách mã giảm giá!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 const form = ref({
   code: '',

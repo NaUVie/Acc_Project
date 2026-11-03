@@ -22,6 +22,10 @@
           >
             {{ isReorderMode ? '✓ Xong' : '↕ Sắp Xếp' }}
           </button>
+          <button @click="refreshLecturers" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600; padding: 6px 12px; font-size: 13px;" title="Tải lại danh sách giảng viên mới nhất từ máy chủ">
+            <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+            <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới' }}</span>
+          </button>
           <button @click="showMajorsModal = true" class="btn btn-secondary btn-sm" style="font-weight: 600; padding: 6px 12px; font-size: 13px;">QL Chuyên Ngành</button>
           <button @click="openAddLecturer" class="btn btn-primary btn-sm" style="font-weight: 600; padding: 6px 14px; font-size: 13px;">+ Thêm</button>
         </div>
@@ -258,6 +262,22 @@ import LecturerFormView from '../modals/LecturerFormView.vue';
 
 const courseStore = useCourseStore();
 const isLoadingLecturers = ref(courseStore.lecturers.length === 0);
+const isRefreshing = ref(false);
+
+const refreshLecturers = async () => {
+  isRefreshing.value = true;
+  try {
+    await Promise.all([
+      courseStore.fetchLecturers(true),
+      courseStore.fetchLecturerMajors(true)
+    ]);
+    courseStore.showToast('Đã làm mới danh sách giảng viên mới nhất!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 // View navigation
 const activeView = ref('list');

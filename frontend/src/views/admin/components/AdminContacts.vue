@@ -1,8 +1,16 @@
 <template>
   <div class="tab-content animate-fade-in">
-    <div class="content-header">
-      <h2>Quản lý Lời nhắn Liên hệ</h2>
-      <p>Danh sách các yêu cầu hỗ trợ và tư vấn lộ trình học của học viên tiềm năng.</p>
+    <div class="content-header flex-between">
+      <div>
+        <h2>Quản lý Lời nhắn Liên hệ</h2>
+        <p>Danh sách các yêu cầu hỗ trợ và tư vấn lộ trình học của học viên tiềm năng.</p>
+      </div>
+      <div>
+        <button @click="refreshContacts" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách liên hệ mới nhất từ máy chủ">
+          <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+          <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
+        </button>
+      </div>
     </div>
 
     <!-- Contact Info Settings Panel -->
@@ -113,6 +121,22 @@ const settingsData = ref({
 });
 
 const savingSettings = ref(false);
+const isRefreshing = ref(false);
+
+const refreshContacts = async () => {
+  isRefreshing.value = true;
+  try {
+    await Promise.all([
+      courseStore.fetchAdminContacts(true),
+      courseStore.fetchContactSettings(true)
+    ]);
+    courseStore.showToast('Đã làm mới dữ liệu liên hệ mới nhất!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 onMounted(async () => {
   await courseStore.fetchContactSettings();

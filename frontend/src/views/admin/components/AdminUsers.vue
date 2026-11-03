@@ -5,7 +5,13 @@
         <h2>Quản lý Học viên</h2>
         <p>Danh sách học viên và tài khoản người dùng trên hệ thống.</p>
       </div>
-      <button @click="openAddUserModal" class="btn btn-primary btn-sm">+ Thêm học viên</button>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button @click="refreshUsers" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách học viên mới nhất từ máy chủ">
+          <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+          <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
+        </button>
+        <button @click="openAddUserModal" class="btn btn-primary btn-sm">+ Thêm học viên</button>
+      </div>
     </div>
 
     <!-- Filters & Search -->
@@ -410,6 +416,19 @@ import { useCourseStore } from '@/stores/courses';
 import Pagination from '@/components/Pagination.vue';
 
 const courseStore = useCourseStore();
+
+const isRefreshing = ref(false);
+const refreshUsers = async () => {
+  isRefreshing.value = true;
+  try {
+    await courseStore.fetchAdminUsers(true);
+    courseStore.showToast('Đã làm mới danh sách học viên mới nhất!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 const users = computed(() => courseStore.adminUsers);
 

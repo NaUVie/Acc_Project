@@ -5,9 +5,15 @@
         <h2 class="admin-title">Quản lý Chuyên mục Khóa học</h2>
         <p class="admin-subtitle">Thêm, sửa, xóa các chuyên mục phân loại khóa học (Kỹ năng AI, Kỹ năng mềm, Marketing, etc.)</p>
       </div>
-      <button class="btn btn-primary" @click="openAddModal">
-        <span>+ Thêm chuyên mục mới</span>
-      </button>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button @click="refreshCategories" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách chuyên mục mới nhất">
+          <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+          <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
+        </button>
+        <button class="btn btn-primary btn-sm" @click="openAddModal">
+          <span>+ Thêm chuyên mục mới</span>
+        </button>
+      </div>
     </div>
 
     <!-- SUMMARY CARDS -->
@@ -124,6 +130,23 @@ onMounted(async () => {
 });
 
 const categories = computed(() => courseStore.categories || []);
+const isRefreshing = ref(false);
+
+const refreshCategories = async () => {
+  isRefreshing.value = true;
+  try {
+    await Promise.all([
+      courseStore.fetchCategories(true),
+      courseStore.fetchCourses(true)
+    ]);
+    courseStore.showToast('Đã làm mới danh sách chuyên mục mới nhất!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
+
 const showModal = ref(false);
 const isEditing = ref(false);
 const submitting = ref(false);

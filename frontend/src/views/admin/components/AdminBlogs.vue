@@ -7,7 +7,11 @@
           <h2>Quản lý Tin tức & Bài viết</h2>
           <p>Danh sách các bài viết chia sẻ, kiến thức AI và cập nhật xu hướng công nghệ trên toàn hệ thống.</p>
         </div>
-        <div style="display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap;">
+        <div style="display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; align-items: center;">
+          <button @click="refreshBlogs" :disabled="isRefreshing" class="btn btn-secondary btn-sm" type="button" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách bài viết mới nhất">
+            <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+            <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
+          </button>
           <button @click="showCatManagerModal = true" class="btn btn-secondary btn-sm" type="button" style="display: inline-flex; align-items: center; gap: 6px;">
             <span>🏷️ Quản lý Chuyên mục</span>
           </button>
@@ -150,6 +154,22 @@ const courseStore = useCourseStore();
 const activeView = ref('list');
 const editingBlog = ref(null);
 const showCatManagerModal = ref(false);
+const isRefreshing = ref(false);
+
+const refreshBlogs = async () => {
+  isRefreshing.value = true;
+  try {
+    await Promise.all([
+      courseStore.fetchAdminBlogPosts(true),
+      courseStore.fetchBlogCategories(true)
+    ]);
+    courseStore.showToast('Đã làm mới danh sách bài viết mới nhất!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 const filterCategory = ref('all');
 const searchQuery = ref('');

@@ -49,7 +49,11 @@
             Trang chủ hiển thị 3 hàng: <strong>Hàng trên</strong> (cố định 6 đối tác), <strong>Hàng giữa</strong> (chạy vô tận Marquee), và <strong>Hàng dưới</strong> (cố định 6 đối tác).
           </p>
         </div>
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button @click="refreshPartners" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách đối tác mới nhất">
+            <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+            <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
+          </button>
           <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Đối tác mới</button>
         </div>
       </div>
@@ -319,6 +323,22 @@ import { formatImageUrl } from '@/utils/imageHelper';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
 
 const courseStore = useCourseStore();
+
+const isRefreshing = ref(false);
+const refreshPartners = async () => {
+  isRefreshing.value = true;
+  try {
+    await Promise.all([
+      courseStore.fetchAdminPartners(true),
+      courseStore.fetchPartners(true)
+    ]);
+    courseStore.showToast('Đã làm mới danh sách đối tác mới nhất!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 const handleLogoError = (e) => {
   const img = e.target;

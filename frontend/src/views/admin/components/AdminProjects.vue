@@ -39,7 +39,13 @@
             <h2>Quản lý Dự án & Case Study Thực tế</h2>
             <p>Danh sách các dự án AI tiêu biểu cho khối Doanh nghiệp, Cá nhân và Cơ quan Nhà nước.</p>
           </div>
-          <button @click="openAddModal" class="btn btn-primary btn-sm" style="white-space: nowrap; flex-shrink: 0;">+ Thêm Dự án mới</button>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button @click="refreshProjects" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách dự án mới nhất">
+              <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+              <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
+            </button>
+            <button @click="openAddModal" class="btn btn-primary btn-sm" style="white-space: nowrap; flex-shrink: 0;">+ Thêm Dự án mới</button>
+          </div>
         </div>
 
         <!-- Filter Bar -->
@@ -174,6 +180,22 @@ import ProjectFormView from '../modals/ProjectFormView.vue';
 import ProjectReviewsSection from '../modals/ProjectReviewsSection.vue';
 
 const courseStore = useCourseStore();
+
+const isRefreshing = ref(false);
+const refreshProjects = async () => {
+  isRefreshing.value = true;
+  try {
+    await Promise.all([
+      courseStore.fetchAdminProjects(true),
+      courseStore.fetchProjects(true)
+    ]);
+    courseStore.showToast('Đã làm mới danh sách dự án mới nhất!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 const subTab = ref('projects');
 const activeView = ref('list');

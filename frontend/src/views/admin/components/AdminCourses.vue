@@ -7,7 +7,13 @@
           <h2>Quản lý Khóa học & Giáo trình</h2>
           <p>Danh sách các khóa học đào tạo, bài giảng và giáo trình trên toàn hệ thống.</p>
         </div>
-        <button @click="openAddCourse" class="btn btn-primary btn-sm">+ Thêm khóa học mới</button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button @click="refreshCourses" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách mới nhất từ máy chủ">
+            <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+            <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
+          </button>
+          <button @click="openAddCourse" class="btn btn-primary btn-sm">+ Thêm khóa học mới</button>
+        </div>
       </div>
 
       <!-- Search & Category Filter Bar -->
@@ -125,6 +131,20 @@ import CourseCurriculumView from '../modals/CourseCurriculumView.vue';
 
 const courseStore = useCourseStore();
 const isLoadingCourses = ref(courseStore.courses.length === 0);
+const isRefreshing = ref(false);
+
+const refreshCourses = async () => {
+  isRefreshing.value = true;
+  try {
+    await courseStore.fetchCourses(true);
+    await courseStore.fetchCategories(true);
+    courseStore.showToast('Đã làm mới và đồng bộ dữ liệu khóa học mới nhất từ máy chủ!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới dữ liệu: ' + err.message, 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 const activeView = ref('list');
 const editingCourse = ref(null);
@@ -194,7 +214,6 @@ const openCurriculum = (c) => {
 
 const onCourseSaved = () => {
   activeView.value = 'list';
-  courseStore.fetchCourses();
 };
 
 const deleteCourse = async (courseId) => {
@@ -231,3 +250,14 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped>
+.spin-icon {
+  display: inline-block;
+  animation: spinCourse 0.8s linear infinite;
+}
+@keyframes spinCourse {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+</style>

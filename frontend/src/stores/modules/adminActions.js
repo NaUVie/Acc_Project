@@ -5,12 +5,16 @@ let fetchAdminOrdersPromise = null;
 let fetchAdminContactsPromise = null;
 
 export const adminActions = {
-  async fetchAdminUsers() {
+  async fetchAdminUsers(force = false) {
     if (!this.token) return;
-    if (fetchAdminUsersPromise) return fetchAdminUsersPromise;
+    if (!force && fetchAdminUsersPromise) return fetchAdminUsersPromise;
+    if (force) {
+      try { localStorage.removeItem('acc_admin_users_cache'); } catch (e) {}
+    }
     fetchAdminUsersPromise = (async () => {
       try {
-        const data = await this.apiRequest('/admin/users');
+        const url = force ? `/admin/users?_t=${Date.now()}` : '/admin/users';
+        const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
         this.adminUsers = (data || []).map(u => ({
           id: u.id,
           fullname: u.fullname,
@@ -36,12 +40,16 @@ export const adminActions = {
     return fetchAdminUsersPromise;
   },
 
-  async fetchAdminOrders() {
+  async fetchAdminOrders(force = false) {
     if (!this.token) return;
-    if (fetchAdminOrdersPromise) return fetchAdminOrdersPromise;
+    if (!force && fetchAdminOrdersPromise) return fetchAdminOrdersPromise;
+    if (force) {
+      try { localStorage.removeItem('acc_admin_orders_cache'); } catch (e) {}
+    }
     fetchAdminOrdersPromise = (async () => {
       try {
-        const data = await this.apiRequest('/admin/orders');
+        const url = force ? `/admin/orders?_t=${Date.now()}` : '/admin/orders';
+        const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
         this.adminOrders = (data || []).map(o => ({
           id: o.id,
           userId: o.user_id,
@@ -70,12 +78,16 @@ export const adminActions = {
     return fetchAdminOrdersPromise;
   },
 
-  async fetchAdminContacts() {
+  async fetchAdminContacts(force = false) {
     if (!this.token) return;
-    if (fetchAdminContactsPromise) return fetchAdminContactsPromise;
+    if (!force && fetchAdminContactsPromise) return fetchAdminContactsPromise;
+    if (force) {
+      try { localStorage.removeItem('acc_admin_contacts_cache'); } catch (e) {}
+    }
     fetchAdminContactsPromise = (async () => {
       try {
-        const data = await this.apiRequest('/admin/contacts');
+        const url = force ? `/admin/contacts?_t=${Date.now()}` : '/admin/contacts';
+        const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
         this.adminContacts = (data || []).map(c => ({
           id: c.id,
           firstName: c.first_name,
@@ -291,10 +303,11 @@ export const adminActions = {
     }
   },
 
-  async fetchAdminCoupons() {
+  async fetchAdminCoupons(force = false) {
     if (!this.token) return;
     try {
-      const data = await this.apiRequest('/marketing/admin/coupons');
+      const url = force ? `/marketing/admin/coupons?_t=${Date.now()}` : '/marketing/admin/coupons';
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       this.adminCoupons = data;
       return data;
     } catch (err) {
@@ -334,10 +347,11 @@ export const adminActions = {
     }
   },
 
-  async fetchAdminCommissions() {
+  async fetchAdminCommissions(force = false) {
     if (!this.token) return;
     try {
-      const data = await this.apiRequest('/marketing/admin/commissions');
+      const url = force ? `/marketing/admin/commissions?_t=${Date.now()}` : '/marketing/admin/commissions';
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       this.adminCommissions = data;
       return data;
     } catch (err) {

@@ -10,9 +10,13 @@ router = APIRouter()
 def read_courses(
     response: Response,
     category: Optional[str] = Query(None, description="Filter courses by category slug"),
+    _t: Optional[str] = Query(None, description="Cache buster timestamp"),
     db: Session = Depends(get_db)
 ):
-    response.headers["Cache-Control"] = "public, max-age=120, stale-while-revalidate=60"
+    if _t:
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    else:
+        response.headers["Cache-Control"] = "public, max-age=30, stale-while-revalidate=15"
     courses = crud.get_courses(db, category_slug=category)
     return courses
 

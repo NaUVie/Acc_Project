@@ -34,7 +34,8 @@ export const blogActions = {
       return this.adminBlogPosts;
     }
     try {
-      const data = await this.apiRequest('/admin/blogs');
+      const url = force ? `/admin/blogs?_t=${Date.now()}` : '/admin/blogs';
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       if (Array.isArray(data)) {
         this.adminBlogPosts = data;
         this.blogPosts = data;
@@ -132,7 +133,8 @@ export const blogActions = {
     }
     try {
       const endpoint = this.token ? '/admin/blogs/categories' : '/blogs/categories';
-      const data = await this.apiRequest(endpoint);
+      const url = force ? `${endpoint}?_t=${Date.now()}` : endpoint;
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       if (Array.isArray(data)) {
         this.blogCategories = data;
       }

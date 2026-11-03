@@ -31,7 +31,13 @@
             <h2>Quản lý Banner (Hero Carousel)</h2>
             <p>Tùy chỉnh các banner quảng cáo và hình ảnh trình chiếu trên trang chủ.</p>
           </div>
-          <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Banner mới</button>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <button @click="refreshBanners" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách banner mới nhất từ máy chủ">
+              <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+              <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
+            </button>
+            <button @click="openAddModal" class="btn btn-primary btn-sm">+ Thêm Banner mới</button>
+          </div>
         </div>
 
         <!-- Banners Table -->
@@ -377,6 +383,23 @@ const handleCroppedImage = async (newUrl) => {
 
 
 const subTab = ref('banners'); // 'banners' or 'home_intro'
+const isRefreshing = ref(false);
+
+const refreshBanners = async () => {
+  isRefreshing.value = true;
+  try {
+    await Promise.all([
+      courseStore.fetchAdminBanners(true),
+      courseStore.fetchBanners(true),
+      courseStore.fetchHomeIntroSettings(true)
+    ]);
+    courseStore.showToast('Đã làm mới danh sách banner mới nhất!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 const activeView = ref('list');
 const isEditing = ref(false);

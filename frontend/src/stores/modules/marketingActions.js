@@ -29,9 +29,10 @@ export const marketingActions = {
     return fetchBannersPromise;
   },
 
-  async fetchAdminBanners() {
+  async fetchAdminBanners(force = false) {
     try {
-      const data = await this.apiRequest('/admin/banners');
+      const url = force ? `/admin/banners?_t=${Date.now()}` : '/admin/banners';
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       this.adminBanners = data;
       return data;
     } catch (err) {
@@ -98,9 +99,10 @@ export const marketingActions = {
     return fetchPartnersPromise;
   },
 
-  async fetchAdminPartners() {
+  async fetchAdminPartners(force = false) {
     try {
-      const data = await this.apiRequest('/admin/partners');
+      const url = force ? `/admin/partners?_t=${Date.now()}` : '/admin/partners';
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       this.adminPartners = data;
       return data;
     } catch (err) {
@@ -211,10 +213,11 @@ export const marketingActions = {
     }
   },
 
-  async fetchAdminTestimonials() {
+  async fetchAdminTestimonials(force = false) {
     if (!this.token) return;
     try {
-      const data = await this.apiRequest('/admin/testimonials');
+      const url = force ? `/admin/testimonials?_t=${Date.now()}` : '/admin/testimonials';
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       this.adminTestimonials = data;
       return data;
     } catch (err) {

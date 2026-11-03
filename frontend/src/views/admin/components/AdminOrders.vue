@@ -5,9 +5,10 @@
         <h2>Quản lý Đơn hàng</h2>
         <p>Danh sách các đơn đăng ký học và hóa đơn khóa học.</p>
       </div>
-      <div style="display: flex; gap: 8px; align-items: center;">
-        <button @click="refreshOrders" :disabled="isRefreshing" class="btn btn-secondary btn-sm" title="Tải lại dữ liệu mới nhất">
-          {{ isRefreshing ? "Đang tải..." : "🔄 Làm mới" }}
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button @click="refreshOrders" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách đơn hàng mới nhất từ máy chủ">
+          <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+          <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
         </button>
         <button @click="openAddOrderModal" class="btn btn-primary btn-sm">+ Tạo đơn hàng</button>
       </div>
@@ -190,7 +191,10 @@ const isRefreshing = ref(false);
 const refreshOrders = async () => {
   isRefreshing.value = true;
   try {
-    await courseStore.fetchAdminOrders();
+    await courseStore.fetchAdminOrders(true);
+    courseStore.showToast('Đã làm mới danh sách đơn hàng mới nhất!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
   } finally {
     isRefreshing.value = false;
   }

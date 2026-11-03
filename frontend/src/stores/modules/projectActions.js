@@ -45,10 +45,11 @@ export const projectActions = {
     return fetchProjectsPromise;
   },
 
-  async fetchAdminProjects() {
+  async fetchAdminProjects(force = false) {
     if (!this.token) return;
     try {
-      const data = await this.apiRequest('/admin/projects');
+      const url = force ? `/admin/projects?_t=${Date.now()}` : '/admin/projects';
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       this.adminProjects = data;
       return data;
     } catch (err) {

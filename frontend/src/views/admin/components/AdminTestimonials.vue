@@ -7,7 +7,13 @@
           <h2>Quản lý Cảm nhận & Video Feedback Học viên</h2>
           <p>Quản lý các lời nhận xét, hình ảnh thực tế và video phỏng vấn học viên trên YouTube.</p>
         </div>
-        <button @click="openAddModal" class="btn btn-primary btn-sm" style="white-space: nowrap; flex-shrink: 0;">+ Thêm Cảm nhận mới</button>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button @click="refreshTestimonials" :disabled="isRefreshing" class="btn btn-secondary btn-sm" style="display: flex; align-items: center; gap: 6px; font-weight: 600;" title="Tải lại danh sách cảm nhận mới nhất">
+            <span :class="{ 'spin-icon': isRefreshing }">🔄</span>
+            <span>{{ isRefreshing ? 'Đang đồng bộ...' : 'Làm mới dữ liệu' }}</span>
+          </button>
+          <button @click="openAddModal" class="btn btn-primary btn-sm" style="white-space: nowrap; flex-shrink: 0;">+ Thêm Cảm nhận mới</button>
+        </div>
       </div>
 
       <!-- Filters & Search -->
@@ -281,6 +287,19 @@ import { formatImageUrl } from '@/utils/imageHelper';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
 
 const courseStore = useCourseStore();
+
+const isRefreshing = ref(false);
+const refreshTestimonials = async () => {
+  isRefreshing.value = true;
+  try {
+    await courseStore.fetchAdminTestimonials(true);
+    courseStore.showToast('Đã làm mới danh sách cảm nhận học viên!', 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi làm mới: ' + (err.message || err), 'error');
+  } finally {
+    isRefreshing.value = false;
+  }
+};
 
 // Cropper States
 const isCropperOpen = ref(false);

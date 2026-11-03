@@ -13,7 +13,8 @@ export const lecturerActions = {
     fetchLecturerMajorsPromise = (async () => {
       try {
         const endpoint = this.token ? '/admin/lecturer-majors' : '/lecturers/majors';
-        const data = await this.apiRequest(endpoint);
+        const url = force ? `${endpoint}?_t=${Date.now()}` : endpoint;
+        const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
         if (Array.isArray(data)) {
           this.lecturerMajors = data.map(m => ({
             id: m.id,
