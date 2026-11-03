@@ -10,7 +10,7 @@
     <div class="courses-grid">
       <div v-for="course in aiCourses" :key="course.id" class="course-card glass-card animate-slide-up">
         <router-link :to="'/course/' + course.handle" class="card-image-container">
-          <img :src="course.image" :alt="course.title" class="course-image" @error="handleImageError" />
+          <img :src="formatImageUrl(course.image, 'w800')" loading="lazy" decoding="async" :alt="course.title" class="course-image" @error="handleImageError" />
           <div class="card-image-overlay">
             <span v-for="tag in course.tags.slice(0, 2)" :key="tag" class="image-tag">{{ tag }}</span>
           </div>

@@ -699,3 +699,45 @@
     font-size: 15px;
   }
 }
+
+/* Terms Opt-in Checkbox */
+.auth-terms-checkbox-wrap {
+  margin: 16px 0 20px 0;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.auth-terms-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.auth-terms-checkbox {
+  margin-top: 3px;
+  width: 17px;
+  height: 17px;
+  accent-color: #022B9F;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.auth-terms-text {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.auth-terms-link {
+  color: #022B9F;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-terms-link:hover {
+  color: #0369a1;
+}

@@ -7,16 +7,24 @@ export function formatImageUrl(url, size = 's1920') {
   if (!url || typeof url !== 'string') return '';
   const cleanUrl = url.trim();
 
-  // Normalize size parameter (e.g. 'w400' -> 's400', 'w1600' -> 's1600', 's1920' -> 's1920')
+  // Normalize size parameter (e.g. 'w800' -> 's800', 'w1600' -> 's1600', 's1920' -> 's1920')
   const normSize = (size.startsWith('w') || size.startsWith('h')) ? `s${size.slice(1)}` : size;
 
-  // If Cloudinary URL, inject auto format and quality while respecting size
-  if (cleanUrl.includes('res.cloudinary.com') && cleanUrl.includes('/upload/') && !cleanUrl.includes('f_auto')) {
+  // If Cloudinary URL: intelligently inject responsive size, webp format & auto quality
+  if (cleanUrl.includes('res.cloudinary.com') && cleanUrl.includes('/upload/')) {
     const widthNum = size.replace(/[^\d]/g, '');
-    if (widthNum && parseInt(widthNum, 10) < 1600) {
-      return cleanUrl.replace('/upload/', `/upload/f_auto,q_auto:good,w_${widthNum},c_limit/`);
+    const targetTransformation = (widthNum && parseInt(widthNum, 10) < 1920)
+      ? `f_auto,q_auto:good,w_${widthNum},c_limit`
+      : 'f_auto,q_auto:best';
+
+    const uploadIdx = cleanUrl.indexOf('/upload/');
+    if (uploadIdx !== -1) {
+      const base = cleanUrl.substring(0, uploadIdx + 8);
+      let rest = cleanUrl.substring(uploadIdx + 8);
+      // Strip any existing transformation segment before version/public_id
+      rest = rest.replace(/^(?:[a-z0-9_]+:[a-z0-9_]+|[a-z]_[a-z0-9_]+|,)+\//i, '');
+      return `${base}${targetTransformation}/${rest}`;
     }
-    return cleanUrl.replace('/upload/', '/upload/f_auto,q_auto:best/');
   }
 
   // Check if it's any Google Drive link (file/d, open?id=, uc?id=, thumbnail?id=) or lh3 link

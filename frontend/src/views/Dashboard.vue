@@ -217,7 +217,7 @@
                 <!-- If user has courses -->
                 <div v-if="purchasedCourses.length > 0" class="in-progress-courses-list">
                   <div v-for="course in purchasedCourses.slice(0, 3)" :key="course.id" class="in-progress-course-item">
-                    <img :src="course.image" :alt="course.title" class="in-progress-img" />
+                    <img :src="formatImageUrl(course.image, 'w800')" :alt="course.title" class="in-progress-img" />
                     <div class="in-progress-info">
                       <span class="in-progress-category">{{ course.category_slug || course.category || 'Khóa học' }}</span>
                       <h4 class="in-progress-title">{{ course.title }}</h4>
@@ -249,7 +249,7 @@
                   <div class="suggested-courses-title">Gợi ý khóa học tiêu biểu dành cho bạn:</div>
                   <div class="suggested-courses-grid">
                     <div v-for="course in recommendedCourses" :key="course.id" class="suggested-course-card">
-                      <img :src="course.image" :alt="course.title" class="suggested-img" />
+                      <img :src="formatImageUrl(course.image, 'w800')" :alt="course.title" class="suggested-img" />
                       <div class="suggested-body">
                         <span class="suggested-cat">{{ course.category || 'Khóa học' }}</span>
                         <h5 class="suggested-name">{{ course.title }}</h5>
@@ -440,7 +440,7 @@
                 <div class="suggested-courses-title">Gợi ý khóa học tiêu biểu:</div>
                 <div class="suggested-courses-grid">
                   <div v-for="course in recommendedCourses" :key="course.id" class="suggested-course-card">
-                    <img :src="course.image" :alt="course.title" class="suggested-img" />
+                    <img :src="formatImageUrl(course.image, 'w800')" :alt="course.title" class="suggested-img" />
                     <div class="suggested-body">
                       <span class="suggested-cat">{{ course.category || 'Khóa học' }}</span>
                       <h5 class="suggested-name">{{ course.title }}</h5>
@@ -467,7 +467,7 @@
             <div v-else>
               <div class="purchased-courses-grid">
                 <div v-for="course in paginatedPurchasedCourses" :key="course.id" class="purchased-course-card glass-card">
-                  <img :src="course.image" :alt="course.title" class="purchased-card-img" />
+                  <img :src="formatImageUrl(course.image, 'w800')" :alt="course.title" class="purchased-card-img" />
                   <div class="purchased-card-body">
                     <h4>{{ course.title }}</h4>
                     <p class="course-meta">Thời lượng: {{ course.duration || '12 tuần' }} • Trình độ: {{ course.level || 'Trung cấp' }}</p>
@@ -783,7 +783,7 @@
             <div v-else class="cart-tab-wrapper">
               <div class="cart-items-list">
                 <div v-for="item in courseStore.cart" :key="item.id" class="cart-item-row">
-                  <img :src="item.course.image" :alt="item.course.title" class="cart-item-img" />
+                  <img :src="formatImageUrl(item.course.image, 'w800')" :alt="item.course.title" class="cart-item-img" />
                   <div class="cart-item-info">
                     <h4>{{ item.course.title }}</h4>
                     <div class="price">{{ formatPrice(item.course.price) }}</div>
@@ -1083,6 +1083,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import { formatImageUrl } from '@/utils/imageHelper';
 
 // Import separated stylesheet
 import '@/styles/dashboard.css';

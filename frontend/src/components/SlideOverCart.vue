@@ -70,7 +70,10 @@
           <div class="cart-footer" v-if="cartItems.length > 0">
             
             <div class="summary-row highlight">
-              <span class="summary-label">{{ $t('cart.total') }}</span>
+              <div>
+                <span class="summary-label">{{ $t('cart.total') }}</span>
+                <div style="font-size: 11px; font-weight: 500; color: #16a34a; margin-top: 2px;">(Đã bao gồm VAT)</div>
+              </div>
               <span class="summary-amount">{{ formatCurrency(finalTotal) }}</span>
             </div>
 
@@ -79,7 +82,7 @@
                 <input type="checkbox" v-model="agreeTerms" />
                 <span class="checkmark"></span>
                 <span class="text">
-                  Tôi đồng ý với <a href="#" @click.prevent>Điều khoản sử dụng</a> & <a href="#" @click.prevent>Chính sách quyền riêng tư</a>
+                  Tôi đồng ý với <router-link to="/terms-of-service" @click="emit('close')" style="color: #022B9F; text-decoration: underline;">Điều khoản dịch vụ</router-link> &amp; <router-link to="/privacy-policy" @click="emit('close')" style="color: #022B9F; text-decoration: underline;">Chính sách bảo mật</router-link>
                 </span>
               </label>
             </div>

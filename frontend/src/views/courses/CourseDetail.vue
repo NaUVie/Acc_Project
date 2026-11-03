@@ -50,7 +50,7 @@
 
           <!-- Featured Cover Image -->
           <div class="article-cover-box" v-if="course.coverImage || course.image">
-            <img :src="course.coverImage || course.image" :alt="course.title" class="article-cover-img" />
+            <img :src="formatImageUrl(course.coverImage || course.image, 'w1600')" :alt="course.title" class="article-cover-img" />
           </div>
 
           <!-- Main Article Content Body -->
@@ -123,6 +123,9 @@
                 <span v-if="hasDiscount(course)" class="price-old">
                   {{ formatCurrency(course.originalPrice || course.original_price) }}
                 </span>
+              </div>
+              <div class="vat-badge-text" style="font-size: 11.5px; color: #16a34a; font-weight: 600; margin-top: 4px;">
+                ✓ Đã bao gồm thuế GTGT (VAT)
               </div>
             </div>
 
@@ -217,6 +220,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 import { stripHtml } from '@/utils/stripHtml';
 import { sanitizeHtml } from '@/utils/sanitize';
+import { formatImageUrl } from '@/utils/imageHelper';
 
 const route = useRoute();
 const router = useRouter();

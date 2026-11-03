@@ -103,7 +103,10 @@
             <div class="divider"></div>
 
             <div class="summary-line total-line">
-              <span>Tổng cộng</span>
+              <div>
+                <span>Tổng cộng</span>
+                <div style="font-size: 11px; font-weight: 500; color: #16a34a; margin-top: 2px;">(Đã bao gồm thuế GTGT / VAT)</div>
+              </div>
               <span class="total-amount">{{ formatCurrency(finalTotal) }}</span>
             </div>
 

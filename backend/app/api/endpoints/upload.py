@@ -199,7 +199,7 @@ async def upload_image(
             # Auto format to webp with high visual quality (auto:best) and cap max dimension at 2560 for crisp 2K banners
             upload_kwargs.update({
                 "format": "webp",
-                "quality": "auto:best",
+                "quality": "auto:good",
                 "transformation": [{"width": 2560, "height": 2560, "crop": "limit"}]
             })
 

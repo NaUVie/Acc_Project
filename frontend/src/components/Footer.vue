@@ -14,6 +14,10 @@
             {{ $t('footer.aboutText') }}
           </p>
           <div class="contact-compact-list">
+            <div class="compact-row" v-if="contactInfo.taxCode">
+              <span class="compact-label">MST:</span>
+              <span class="compact-text">{{ contactInfo.taxCode }}</span>
+            </div>
             <div class="compact-row">
               <span class="compact-label">{{ $t('footer.address') }}:</span>
               <span class="compact-text">{{ contactInfo.address }}</span>
@@ -67,6 +71,8 @@
               <a :href="contactInfo.zalo" target="_blank" rel="noopener" class="btn-chat-zalo">{{ $t('footer.chatZalo') }} &rarr;</a>
             </div>
           </div>
+
+
         </div>
       </div>
 
@@ -138,6 +144,7 @@ onMounted(() => {
 const contactInfo = computed(() => {
   const s = courseStore.contactSettings;
   return {
+    taxCode: s?.taxCode || '0317696611',
     address: s?.address || '156 Nam Kỳ Khởi Nghĩa, Phường Bến Nghé, Quận 1, TP. HCM',
     hotline: s?.hotline || '0938 566 700',
     email: s?.email || 'info@acc-edu.vn',

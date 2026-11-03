@@ -17,7 +17,7 @@
             class="cca-card"
           >
             <span class="cca-badge">Khóa học mới</span>
-            <img :src="course.image" :alt="course.title" class="cca-card-image" />
+            <img :src="formatImageUrl(course.image, 'w800')" loading="lazy" decoding="async" :alt="course.title" class="cca-card-image" />
             <div class="cca-card-content">
               <h3 class="cca-card-title">{{ course.title }}</h3>
               <div class="cca-card-prices">

@@ -33,7 +33,7 @@
             >
               <router-link :to="'/course/' + (course.handle || course.id)" class="mega-card-link">
                 <div class="mega-school-logo">
-                  <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" @error="handleImageError" />
+                  <img :src="formatImageUrl(course.image, 'w800') || '/images/Square-Cover-_1.webp'" :alt="course.title" loading="lazy" decoding="async" @error="handleImageError" />
                 </div>
                 <div class="mega-card-info">
                   <span class="mega-school-name">{{ course.level || 'Khóa học' }}</span>
@@ -151,6 +151,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 import { stripHtml } from '@/utils/stripHtml';
+import { formatImageUrl } from '@/utils/imageHelper';
 import Pagination from '@/components/Pagination.vue';
 
 const route = useRoute();

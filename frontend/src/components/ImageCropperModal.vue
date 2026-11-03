@@ -373,22 +373,23 @@ const applyCropAndUpload = async () => {
       canvasOptions.width = targetWidth;
       canvasOptions.height = Math.round(targetWidth * 720 / 1920);
     } else if (currentRatioMode.value === 'wide') {
-      // High-res 16:9 export (1920 to 2560 width)
-      const targetWidth = Math.max(1920, Math.min(2560, Math.round(cropData.width || 1920)));
+      // High-res 16:9 export (1280 to 1920 width)
+      const targetWidth = Math.max(1280, Math.min(1920, Math.round(cropData.width || 1280)));
       canvasOptions.width = targetWidth;
       canvasOptions.height = Math.round(targetWidth * 9 / 16);
     } else if (currentRatioMode.value === 'square') {
-      const targetSize = Math.max(800, Math.min(1600, Math.round(cropData.width || 800)));
+      // Crisp Retina 1:1 export (800 to 1200 size)
+      const targetSize = Math.max(800, Math.min(1200, Math.round(cropData.width || 800)));
       canvasOptions.width = targetSize;
       canvasOptions.height = targetSize;
     } else if (currentRatioMode.value === 'partner') {
-      const targetWidth = Math.max(800, Math.min(1600, Math.round(cropData.width || 800)));
+      const targetWidth = Math.max(600, Math.min(1000, Math.round(cropData.width || 600)));
       canvasOptions.width = targetWidth;
       canvasOptions.height = Math.round(targetWidth * 110 / 260);
     } else {
-      if (cropData.width > 2560 || cropData.height > 2560) {
-        canvasOptions.maxWidth = 2560;
-        canvasOptions.maxHeight = 2560;
+      if (cropData.width > 2000 || cropData.height > 2000) {
+        canvasOptions.maxWidth = 2000;
+        canvasOptions.maxHeight = 2000;
       }
     }
 
@@ -397,7 +398,7 @@ const applyCropAndUpload = async () => {
     if (!canvas) throw new Error('Không thể tạo canvas từ ảnh cắt!');
 
     const blob = await new Promise(resolve => {
-      canvas.toBlob(resolve, 'image/webp', 0.95);
+      canvas.toBlob(resolve, 'image/webp', 0.88);
     });
 
     if (!blob) throw new Error('Không thể tạo file ảnh từ canvas!');

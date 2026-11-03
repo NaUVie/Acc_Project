@@ -136,7 +136,10 @@
             <div class="summary-divider"></div>
 
             <div class="summary-row total">
-              <span>Tổng thanh toán</span>
+              <div>
+                <span>Tổng thanh toán</span>
+                <div style="font-size: 11px; font-weight: 500; color: #16a34a; margin-top: 2px;">(Đã bao gồm thuế GTGT / VAT)</div>
+              </div>
               <span class="total-price">{{ formatCurrency(finalTotal) }}</span>
             </div>
 
@@ -146,7 +149,7 @@
             </button>
 
             <p class="terms-notice">
-              Bằng cách nhấn "Xác nhận & Thanh toán", bạn đồng ý với <a href="#" @click.prevent>Điều khoản dịch vụ</a> của ACC Academy.
+              Bằng cách nhấn "Xác nhận & Thanh toán", bạn đồng ý với <router-link to="/terms-of-service" target="_blank" style="color: #022B9F; text-decoration: underline;">Điều khoản dịch vụ</router-link> &amp; <router-link to="/refund-policy" target="_blank" style="color: #022B9F; text-decoration: underline;">Chính sách hoàn tiền</router-link> của ACC Academy.
             </p>
           </div>
         </div>

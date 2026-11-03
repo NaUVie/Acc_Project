@@ -246,15 +246,22 @@
             </span>
           </div>
 
-          <!-- Terms Notice -->
-          <div class="auth-terms-notice">
-            Bằng việc nhấn <strong>{{ $t('auth.signUpBtn') }}</strong>, bạn đồng ý với
-            <router-link to="/terms">Điều khoản sử dụng</router-link> &amp;
-            <router-link to="/privacy">Chính sách bảo mật</router-link> của ACC Academy.
+          <!-- Terms & Privacy Opt-in Checkbox -->
+          <div class="auth-terms-checkbox-wrap">
+            <label class="auth-terms-checkbox-label">
+              <input type="checkbox" v-model="agreeTerms" required class="auth-terms-checkbox" />
+              <span class="auth-terms-text">
+                Tôi đồng ý với 
+                <router-link to="/terms-of-service" target="_blank" class="auth-terms-link">Điều khoản dịch vụ</router-link> 
+                &amp; 
+                <router-link to="/privacy-policy" target="_blank" class="auth-terms-link">Chính sách bảo mật</router-link> 
+                của ACC Academy. <span class="text-danger" style="color: #ef4444;">*</span>
+              </span>
+            </label>
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" class="auth-submit-btn" :disabled="loading">
+          <button type="submit" class="auth-submit-btn" :disabled="loading || !agreeTerms">
             <span v-if="loading" class="auth-spinner"></span>
             <span>{{ loading ? $t('auth.signingUp') : $t('auth.signUpBtn') }}</span>
             <svg v-if="!loading" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -288,6 +295,7 @@ const courseStore = useCourseStore();
 
 const loading = ref(false);
 const showPassword = ref(false);
+const agreeTerms = ref(false);
 
 const registerData = ref({
   fullname: '',
@@ -309,6 +317,11 @@ onMounted(() => {
 });
 
 const handleRegister = async () => {
+  if (!agreeTerms.value) {
+    courseStore.showToast('Vui lòng đọc và đồng ý với Điều khoản dịch vụ & Chính sách bảo mật!', 'warning');
+    return;
+  }
+
   if (!registerData.value.fullname || !registerData.value.email || !registerData.value.password || !registerData.value.phone) {
     courseStore.showToast('Vui lòng điền đầy đủ các thông tin bắt buộc (*)!', 'warning');
     return;

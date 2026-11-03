@@ -340,7 +340,7 @@
           >
             <router-link :to="'/course/' + (course.handle || course.id)" class="home-course-img-link">
               <div class="home-course-img-box">
-                <img :src="course.image || '/images/Square-Cover-_1.webp'" :alt="course.title" class="home-course-img" loading="lazy" />
+                <img :src="formatImageUrl(course.image, 'w800') || '/images/Square-Cover-_1.webp'" :alt="course.title" class="home-course-img" loading="lazy" decoding="async" />
               </div>
             </router-link>
             

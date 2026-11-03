@@ -12,6 +12,7 @@
     <ContactSpeedDial />
     <ToastNotification />
     <ConfirmModal />
+    <CookieBanner />
   </div>
 </template>
 
@@ -21,6 +22,7 @@ import Footer from './components/Footer.vue';
 import ContactSpeedDial from './components/ContactSpeedDial.vue';
 import ToastNotification from './components/ToastNotification.vue';
 import ConfirmModal from './components/ConfirmModal.vue';
+import CookieBanner from './components/CookieBanner.vue';
 </script>
 
 <style scoped src="@/styles/App.css"></style>
