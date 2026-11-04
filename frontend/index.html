@@ -85,6 +85,34 @@
     <!-- Cropper.js for precise image cropping like InNhanhTYD -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js" defer></script>
+      <!-- Google Translate Custom Styling: Keep default Google banner and tooltips hidden -->
+    <style>
+      .goog-te-banner-frame.skiptranslate,
+      .goog-te-banner-frame,
+      #goog-gt-tt,
+      .goog-te-balloon-frame {
+        display: none !important;
+      }
+      body {
+        top: 0px !important;
+        position: static !important;
+      }
+      .goog-tooltip,
+      .goog-tooltip:hover {
+        display: none !important;
+      }
+      .goog-text-highlight {
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      #google_translate_element {
+        display: none !important;
+      }
+      .skiptranslate:not(.vue-allowed) {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
     <div id="app">
@@ -100,5 +128,19 @@
     </div>
     <script type="module" src="/src/main.js"></script>
     <script src="/js/magic-text-animate.js" defer></script>
+      <!-- Google Translate Element Container -->
+    <div id="google_translate_element" style="display: none;"></div>
+    <script type="text/javascript">
+      window.googleTranslateElementInit = function() {
+        if (window.google && window.google.translate) {
+          new window.google.translate.TranslateElement({
+            pageLanguage: 'vi',
+            includedLanguages: 'en,vi',
+            autoDisplay: false
+          }, 'google_translate_element');
+        }
+      };
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" defer></script>
   </body>
 </html>

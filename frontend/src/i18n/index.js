@@ -1,13 +1,14 @@
 import { createI18n } from 'vue-i18n';
 import vi from '@/locales/vi.json';
 import en from '@/locales/en.json';
+import { applyGoogleTranslate } from '@/utils/googleTranslate';
 
 let initialLang = 'vi';
 if (typeof window !== 'undefined') {
   if (window.location.pathname === '/en' || window.location.pathname.startsWith('/en/')) {
     initialLang = 'en';
   } else {
-    initialLang = localStorage.getItem('acc_lang') || 'vi';
+    initialLang = 'vi';
   }
 }
 
@@ -27,6 +28,8 @@ export const setLanguage = (lang) => {
     localStorage.setItem('acc_lang', lang);
     if (typeof document !== 'undefined') {
       document.documentElement.lang = lang;
+      // Auto Google Translate fallback for anything not covered by en.json
+      applyGoogleTranslate(lang);
     }
   }
 };

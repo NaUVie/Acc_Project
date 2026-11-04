@@ -330,6 +330,7 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { setLanguage } from '@/i18n';
+import { clearGoogleTranslate } from '@/utils/googleTranslate';
 import { useCourseStore } from '@/stores/courses';
 import { slugify } from '@/utils/slugify';
 import SlideOverSearch from '@/components/SlideOverSearch.vue';
@@ -352,7 +353,10 @@ const toggleLang = () => {
   const route = router.currentRoute.value;
   // Functional / admin pages have no /en version: just switch the UI language in place
   if ((route.meta && route.meta.noLocale) || route.path.startsWith('/admin')) {
-    setLanguage(locale.value === 'vi' ? 'en' : 'vi');
+    const nextLang = locale.value === 'vi' ? 'en' : 'vi';
+    if (nextLang === 'vi') clearGoogleTranslate();
+    setLanguage(nextLang);
+    window.location.reload();
     return;
   }
   const currentPath = route.fullPath;
@@ -360,12 +364,13 @@ const toggleLang = () => {
     setLanguage('en');
     let newPath = '/en' + (currentPath === '/' ? '' : currentPath);
     if (!newPath) newPath = '/en';
-    router.push(newPath);
+    window.location.href = newPath;
   } else {
+    clearGoogleTranslate();
     setLanguage('vi');
     let newPath = currentPath.replace(/^\/en(\/|$)/, '/');
     if (!newPath) newPath = '/';
-    router.push(newPath);
+    window.location.href = newPath;
   }
 };
 

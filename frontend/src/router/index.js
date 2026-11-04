@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { i18n, setLanguage } from '../i18n';
+import { applyGoogleTranslate, clearGoogleTranslate } from '../utils/googleTranslate';
 
 const routes = [
   {
@@ -308,12 +309,13 @@ router.beforeEach(async (to, from, next) => {
     }
   } else if (!to.path.startsWith('/admin') && !to.meta.noLocale) {
     // If navigating internally while currently in English, preserve /en/ prefix
-    const fromIsEn = from.path === '/en' || (from.path && from.path.startsWith('/en/')) || !!(from.meta && from.meta.noLocale);
+    const fromIsEn = from.path === '/en' || (from.path && from.path.startsWith('/en/'));
     if (fromIsEn && currentLocale === 'en') {
       const enTarget = to.fullPath === '/' ? '/en' : `/en${to.fullPath}`;
       return next(enTarget);
     }
     if (currentLocale !== 'vi') {
+      clearGoogleTranslate();
       setLanguage('vi');
     }
   }
@@ -431,6 +433,15 @@ router.afterEach((to) => {
       xDefaultLink.setAttribute('href', viUrl);
     } catch (e) {
       // Ignore in non-browser context
+    }
+
+    // Auto-trigger Google Translate for newly rendered dynamic content when in English mode
+    if (isEn) {
+      setTimeout(() => {
+        applyGoogleTranslate('en');
+      }, 350);
+    } else {
+      clearGoogleTranslate();
     }
   }
 });

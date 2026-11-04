@@ -28,3 +28,10 @@ if (courseStore.token) {
 
 app.mount('#app');
 
+import { applyGoogleTranslate } from './utils/googleTranslate';
+if (typeof window !== 'undefined' && i18n.global.locale.value === 'en') {
+  setTimeout(() => {
+    applyGoogleTranslate('en');
+  }, 600);
+}
+
