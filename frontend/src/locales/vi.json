@@ -17,8 +17,10 @@
     "about": "Về chúng tôi",
     "contact": "Liên hệ",
     "admin": "Quản trị CMS",
-    "partners": "Đối tác tin cậy",
-    "testimonials": "Chia sẻ học viên"
+    "partners": "Đối tác",
+    "testimonials": "Chia sẻ học viên",
+    "fields": "Lĩnh vực",
+    "aboutIntro": "Giới thiệu (Về chúng tôi)"
   },
   "header": {
     "searchPlaceholder": "Tìm kiếm khóa học, kỹ năng AI...",
@@ -211,7 +213,7 @@
       "Đo lường giá trị đào tạo bằng sự tiến bộ và kết quả thực tế."
     ],
     "coreFunctionsTitle": "HAI CHỨC NĂNG CỐT LÕI",
-    "manifestoQuote1": "Thị trường luôn thay đổi. Nhưng yếu tố quyết định không nằm ở thời cuộc — mà ở năng lực thật sự bên trong tổ chức của bạn.",
+    "manifestoQuote1": "Thị trường luôn thay đổi. Nhưng yếu tố quyết định không nằm ở thời cuộc — mà ở năng lực thật sự bên trong tổ chức của bạn.",
     "manifestoQuote2": "ACC — Học viện Cổ phần Kết nối Tri thức — là đơn vị giáo dục chuyên biệt dành cho cán bộ và doanh nghiệp, được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ).",
     "manifestoQuoteStrong": "Chúng tôi không bán khóa học. Chúng tôi kiến tạo năng lực có thể đo lường, đi cùng tổ chức của bạn đến kết quả thực.",
     "func1Tag": "CHỨC NĂNG #1",
@@ -219,7 +221,7 @@
     "func1Desc": "Chương trình đào tạo inhouse may đo cho Doanh nghiệp và các Khóa đào tạo cá nhân.",
     "func2Tag": "CHỨC NĂNG #2",
     "func2Title": "TUYỂN SINH ĐẠI HỌC ANDREWS",
-    "func2Desc": "Thạc sĩ MBA Andrews tại Việt Nam và GEI — Hội thảo Lãnh đạo cấp cao tại Michigan, Hoa Kỳ.",
+    "func2Desc": "Thạc sĩ MBA Andrews tại Việt Nam và GEI — Hội thảo Lãnh đạo cấp cao tại Michigan, Hoa Kỳ.",
     "whyTitle": "VÌ SAO ACC x ANDREWS",
     "why1Title": "Bảo chứng học thuật chuẩn Mỹ",
     "why1Desc": "Andrews University thành lập năm 1874 — Top 10% đại học tốt nhất Hoa Kỳ theo U.S. News, đứng thứ 2 cả nước về đa dạng quốc tịch.",
@@ -289,7 +291,7 @@
     "outcome": "Kết quả & Tác động thực tế"
   },
   "testimonials": {
-    "pageTitle": "Góc nhìn & Phản hồi Thực tế từ Học viên ACC Academy",
+    "pageTitle": "Góc nhìn & Trải nghiệm thực tế",
     "tabAll": "Tất cả phản hồi",
     "tabVideo": "Video Feedback YouTube",
     "tabPhoto": "Hình ảnh & Cảm nhận",

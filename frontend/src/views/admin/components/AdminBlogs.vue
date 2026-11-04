@@ -50,6 +50,7 @@
               <th style="width: 60px;">Ảnh</th>
               <th>Tiêu đề Bài viết</th>
               <th>Chuyên mục</th>
+              <th>Khóa học liên kết</th>
               <th>Ngày đăng</th>
               <th style="text-align: right; width: 140px;">Hành động</th>
             </tr>
@@ -76,6 +77,12 @@
               <td data-label="Chuyên mục">
                 <span class="badge badge-info" style="font-size: 11.5px;">{{ b.category || 'Chung' }}</span>
               </td>
+              <td data-label="Khóa học liên kết">
+                <span v-if="getCourseTitle(b.course_id)" class="badge badge-success" style="font-size: 11.5px; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block;" :title="getCourseTitle(b.course_id)">
+                  📚 {{ getCourseTitle(b.course_id) }}
+                </span>
+                <span v-else style="font-size: 12px; color: #94a3b8;">--</span>
+              </td>
               <td data-label="Ngày đăng">
                 <div style="font-size: 13.5px; color: #64748b;">{{ b.date || '--' }}</div>
               </td>
@@ -88,7 +95,7 @@
               </td>
             </tr>
             <tr v-if="isLoadingBlogs && filteredBlogs.length === 0">
-              <td colspan="5">
+              <td colspan="6">
                 <div class="admin-center-loader" style="padding: 40px 0; min-height: 160px;">
                   <div class="admin-spinner"></div>
                   <p class="admin-loader-text">Đang nạp danh sách tin tức & bài viết...</p>
@@ -96,7 +103,7 @@
               </td>
             </tr>
             <tr v-else-if="filteredBlogs.length === 0">
-              <td colspan="5" class="text-center py-8 text-muted">Không có bài viết nào phù hợp với bộ lọc.</td>
+              <td colspan="6" class="text-center py-8 text-muted">Không có bài viết nào phù hợp với bộ lọc.</td>
             </tr>
           </tbody>
         </table>
@@ -240,7 +247,17 @@ const editBlog = (b) => {
 
 const onBlogSaved = () => {
   activeView.value = 'list';
-  courseStore.fetchAdminBlogPosts();
+  courseStore.fetchAdminBlogPosts(true);
+};
+
+if (courseStore.courses.length === 0) {
+  courseStore.fetchCourses().catch(() => {});
+}
+
+const getCourseTitle = (courseId) => {
+  if (!courseId) return null;
+  const found = (courseStore.courses || []).find(c => Number(c.id) === Number(courseId));
+  return found ? found.title : `Khóa #${courseId}`;
 };
 
 const openQuickCropper = (b) => {

@@ -33,12 +33,15 @@
           <img :src="program.image" :alt="program.title" class="cover-img" />
         </div>
 
-        <!-- Article Sections -->
+        <!-- Article Sections / Dynamic Content -->
         <div class="content-sections">
-          <div v-for="(sec, idx) in program.sections" :key="idx" class="section-block">
-            <h2 class="section-heading">{{ sec.heading }}</h2>
-            <div class="section-text" v-html="sanitizeHtml(sec.content)"></div>
-          </div>
+          <div v-if="program.content" class="section-text" v-html="sanitizeHtml(program.content)"></div>
+          <template v-else-if="program.sections">
+            <div v-for="(sec, idx) in program.sections" :key="idx" class="section-block">
+              <h2 class="section-heading">{{ sec.heading }}</h2>
+              <div class="section-text" v-html="sanitizeHtml(sec.content)"></div>
+            </div>
+          </template>
         </div>
 
         <!-- Call to Action Banner inside article -->
@@ -58,43 +61,34 @@
 
       <!-- Sidebar Sticky Widget -->
       <aside class="article-sidebar">
-        <div class="sidebar-widget glass-card">
-          <h4 class="widget-title">📌 Thông tin Tuyển sinh</h4>
-          <div class="info-list">
-            <div class="info-item">
-              <span class="label">Đối tượng:</span>
-              <span class="val">{{ program.meta.target }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">Thời gian:</span>
-              <span class="val">{{ program.meta.duration }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">Hình thức:</span>
-              <span class="val">{{ program.meta.format }}</span>
-            </div>
-            <div class="info-item">
-              <span class="label">Bằng cấp:</span>
-              <span class="val">{{ program.meta.degree }}</span>
-            </div>
-          </div>
-
-        </div>
-
         <!-- Related Programs Widget -->
-        <div class="sidebar-widget glass-card style-mt">
+        <div class="sidebar-widget glass-card">
           <h4 class="widget-title">Chương trình Tuyển sinh khác</h4>
           <div class="related-list">
             <router-link 
               v-for="rel in otherPrograms" 
-              :key="rel.id" 
-              :to="`/admissions/detail/${rel.id}`" 
+              :key="rel.slug || rel.id" 
+              :to="`/admissions/detail/${rel.slug || rel.id}`" 
               class="related-item"
             >
               <span class="rel-title">{{ rel.title }}</span>
-              <span class="rel-arrow">&rarr;</span>
+              <span class="rel-arrow" style="display: inline-flex; align-items: center;">
+                <svg class="block-arrow-glow" width="32" height="14" viewBox="0 0 52 24" fill="none">
+                  <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#022B9F" />
+                </svg>
+              </span>
             </router-link>
           </div>
+        </div>
+
+        <!-- Hotline Support Widget -->
+        <div class="sidebar-widget glass-card style-mt" style="text-align: center; padding: 22px 18px;">
+          <div style="font-size: 28px; margin-bottom: 8px;">📞</div>
+          <h4 style="margin: 0 0 6px 0; font-size: 16px; color: #0f172a; font-weight: 700;">Hỗ trợ Tuyển sinh</h4>
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 14px; line-height: 1.45;">Giải đáp nhanh điều kiện dự tuyển & chính sách học bổng.</p>
+          <a href="https://zalo.me/0938566700" target="_blank" class="btn btn-primary" style="width: 100%; display: block; text-align: center; padding: 10px; font-weight: 700;">
+            Chat Zalo Ban Tuyển sinh
+          </a>
         </div>
       </aside>
     </div>
@@ -107,11 +101,13 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useCourseStore } from '@/stores/courses';
 import { sanitizeHtml } from '@/utils/sanitize';
 
 const route = useRoute();
+const courseStore = useCourseStore();
 
 const programsData = {
   'mba': {
@@ -192,21 +188,30 @@ const programsData = {
 
 const programId = computed(() => {
   const param = route.params.id || route.path.split('/').pop();
-  if (param === 'mba' || param.includes('mba')) return 'mba';
-  if (param === 'mini-mba' || param.includes('mini')) return 'mini-mba';
-  if (param === 'gei' || param === 'gei' || param.includes('gei')) return 'gei';
-  return 'mba';
+  return param || 'mba';
 });
 
 const program = computed(() => {
+  if (courseStore.admissions && courseStore.admissions.length > 0) {
+    const found = courseStore.admissions.find(p => p.slug === programId.value);
+    if (found) return found;
+  }
   return programsData[programId.value] || programsData['mba'];
 });
 
 const otherPrograms = computed(() => {
+  if (courseStore.admissions && courseStore.admissions.length > 0) {
+    return courseStore.admissions.filter(p => p.slug !== programId.value);
+  }
   return Object.values(programsData).filter(p => p.id !== programId.value);
 });
 
 onMounted(() => {
+  window.scrollTo(0, 0);
+  courseStore.fetchAdmissions().catch(() => {});
+});
+
+watch(programId, () => {
   window.scrollTo(0, 0);
 });
 </script>

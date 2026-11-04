@@ -32,10 +32,6 @@
             <span class="duration">⏱️ {{ course.duration }}</span>
           </div>
           <div class="card-footer">
-            <div class="price-container">
-              <span class="original-price" v-if="course.originalPrice">{{ formatPrice(course.originalPrice) }}</span>
-              <span class="price">{{ formatPrice(course.price) }}</span>
-            </div>
             <button @click.stop="handleEnroll(course.id)" class="btn btn-primary btn-sm">Đăng ký học</button>
           </div>
         </div>
@@ -58,17 +54,8 @@ const formatPrice = (value) => {
 };
 
 const handleEnroll = (courseId) => {
-  if (!courseStore.token) {
-    courseStore.showToast('Vui lòng đăng nhập để đăng ký khóa học!', 'warning');
-    router.push('/login');
-    return;
-  }
-  try {
-    courseStore.buyNow(courseId);
-    router.push('/checkout');
-  } catch (err) {
-    courseStore.showToast(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!', 'error');
-  }
+  const c = softSkillsCourses.value.find(item => item.id === courseId);
+  router.push('/courses/' + (c?.handle || courseId));
 };
 
 const handleImageError = (e) => {

@@ -521,8 +521,13 @@ def delete_banner(db: Session, banner_id: int):
 
 
 # --- Testimonial CRUD ---
-def get_testimonials(db: Session):
-    return db.query(models.Testimonial).all()
+def get_testimonials(db: Session, only_approved: bool = False, course_id: Optional[int] = None):
+    query = db.query(models.Testimonial)
+    if only_approved:
+        query = query.filter(models.Testimonial.is_approved == True)
+    if course_id:
+        query = query.filter(models.Testimonial.course_id == course_id)
+    return query.order_by(models.Testimonial.id.desc()).all()
 
 # --- Enrollment & Progress CRUD ---
 def get_user_enrollments(db: Session, user_id: int):
@@ -1239,4 +1244,100 @@ def delete_partner(db: Session, partner_id: int):
         return True
     return False
 
+# --- Board Member CRUD ---
+def get_board_members(db: Session, active_only: bool = False, role_group: str = None):
+    query = db.query(models.BoardMember)
+    if active_only:
+        query = query.filter(models.BoardMember.is_active == True)
+    if role_group:
+        query = query.filter(models.BoardMember.role_group == role_group)
+    return query.order_by(models.BoardMember.position.asc(), models.BoardMember.id.asc()).all()
+
+def get_board_member_by_id(db: Session, member_id: int):
+    return db.query(models.BoardMember).filter(models.BoardMember.id == member_id).first()
+
+def create_board_member(db: Session, member_in: schemas.BoardMemberCreate):
+    member = models.BoardMember(
+        name=member_in.name,
+        main_role=member_in.main_role,
+        role_group=member_in.role_group or 'executive',
+        avatar=member_in.avatar,
+        bio_list=member_in.bio_list,
+        position=member_in.position or 0,
+        is_active=member_in.is_active if member_in.is_active is not None else True
+    )
+    db.add(member)
+    db.commit()
+    db.refresh(member)
+    return member
+
+def update_board_member(db: Session, member_id: int, member_in: schemas.BoardMemberUpdate):
+    member = get_board_member_by_id(db, member_id)
+    if not member:
+        return None
+    for key, value in member_in.model_dump(exclude_unset=True).items():
+        setattr(member, key, value)
+    db.commit()
+    db.refresh(member)
+    return member
+
+def delete_board_member(db: Session, member_id: int):
+    member = get_board_member_by_id(db, member_id)
+    if member:
+        db.delete(member)
+        db.commit()
+        return True
+    return False
+
+# --- Admission Post CRUD ---
+def get_admission_posts(db: Session, active_only: bool = False):
+    query = db.query(models.AdmissionPost)
+    if active_only:
+        query = query.filter(models.AdmissionPost.is_active == True)
+    return query.order_by(models.AdmissionPost.position.asc(), models.AdmissionPost.id.asc()).all()
+
+def get_admission_post_by_id(db: Session, post_id: int):
+    return db.query(models.AdmissionPost).filter(models.AdmissionPost.id == post_id).first()
+
+def get_admission_post_by_slug(db: Session, slug: str, active_only: bool = False):
+    query = db.query(models.AdmissionPost).filter(models.AdmissionPost.slug == slug)
+    if active_only:
+        query = query.filter(models.AdmissionPost.is_active == True)
+    return query.first()
+
+def create_admission_post(db: Session, post_in: schemas.AdmissionPostCreate):
+    post = models.AdmissionPost(
+        slug=post_in.slug,
+        title=post_in.title,
+        subtitle=post_in.subtitle,
+        category=post_in.category,
+        tag=post_in.tag,
+        image=post_in.image,
+        highlights=post_in.highlights,
+        content=post_in.content,
+        position=post_in.position or 0,
+        is_active=post_in.is_active if post_in.is_active is not None else True
+    )
+    db.add(post)
+    db.commit()
+    db.refresh(post)
+    return post
+
+def update_admission_post(db: Session, post_id: int, post_in: schemas.AdmissionPostUpdate):
+    post = get_admission_post_by_id(db, post_id)
+    if not post:
+        return None
+    for key, value in post_in.model_dump(exclude_unset=True).items():
+        setattr(post, key, value)
+    db.commit()
+    db.refresh(post)
+    return post
+
+def delete_admission_post(db: Session, post_id: int):
+    post = get_admission_post_by_id(db, post_id)
+    if post:
+        db.delete(post)
+        db.commit()
+        return True
+    return False
 

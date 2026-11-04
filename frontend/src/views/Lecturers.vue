@@ -54,7 +54,12 @@
 
                   <p class="mega-program-desc" style="white-space: pre-line;">{{ l.bioShort }}</p>
                   <div class="mega-card-footer" v-if="l.show_detail_btn || l.showDetailBtn">
-                    <router-link :to="'/lecturers/' + l.id" class="mega-enroll-btn">{{ $t('lecturers.viewDetailBtn') }} &rarr;</router-link>
+                    <router-link :to="'/lecturers/' + l.id" class="mega-enroll-btn" style="display: inline-flex; align-items: center; gap: 8px;">
+                      <span>{{ $t('lecturers.viewDetailBtn') }}</span>
+                      <svg class="block-arrow-glow" width="32" height="14" viewBox="0 0 52 24" fill="none">
+                        <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#022B9F" />
+                      </svg>
+                    </router-link>
                   </div>
                 </div>
               </div>

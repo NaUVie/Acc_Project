@@ -1,9 +1,5 @@
 <template>
   <div class="product-card" :data-handle="course.handle">
-    <!-- Discount Badge -->
-    <div v-if="discount > 0" class="product-card__badge-list">
-      <span class="badge badge--on-sale">Giảm {{ formatPrice(discount) }}</span>
-    </div>
 
     <!-- Product Figure (Image + Quick Buy) -->
     <div class="product-card__figure">
@@ -24,17 +20,17 @@
           class="button button--quick-buy desktop-only" 
           type="button"
         >
-          ⚡ Đăng ký ngay
+          Xem chi tiết
         </button>
         <!-- Mobile Quick Buy Icon -->
         <button 
           @click="handleQuickBuy"
           class="product-card__mobile-quick-buy-button mobile-only" 
-          aria-label="Đăng ký ngay"
+          aria-label="Xem chi tiết"
           type="button"
         >
-          <svg role="presentation" fill="none" stroke-width="2" focusable="false" width="16" height="14" class="icon icon-quick-buy-cart" viewBox="0 0 16 14">
-            <path d="M7.75 4.75H2.283a1 1 0 0 0-.97 1.244l1.574 6.25a1 1 0 0 0 .97.756h7.787a1 1 0 0 0 .97-.756l1.573-6.25a1 1 0 0 0-.97-1.244H7.75Zm0 0V1" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"></path>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
         </button>
       </div>
@@ -48,14 +44,6 @@
             {{ course.title }}
           </router-link>
         </span>
-        <div class="price-list">
-          <span class="price-list__sale text-on-sale">
-            {{ formatPrice(course.price) }}
-          </span>
-          <span v-if="discount > 0" class="price-list__compare text-subdued line-through">
-            {{ formatPrice(course.originalPrice) }}
-          </span>
-        </div>
       </div>
     </div>
   </div>
@@ -93,17 +81,7 @@ const handleImageError = (e) => {
 
 const handleQuickBuy = (e) => {
   if (e && e.stopPropagation) e.stopPropagation();
-  if (!courseStore.token) {
-    courseStore.showToast('Vui lòng đăng nhập để đăng ký khóa học!', 'warning');
-    router.push('/login');
-    return;
-  }
-  try {
-    courseStore.buyNow(props.course.id);
-    router.push('/checkout');
-  } catch (err) {
-    courseStore.showToast(err.message || 'Có lỗi xảy ra khi đăng ký khóa học!', 'error');
-  }
+  router.push('/courses/' + (props.course.handle || props.course.id));
 };
 </script>
 

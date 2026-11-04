@@ -22,7 +22,13 @@
                   rel="noopener noreferrer" 
                   class="btn-map-link"
                 >
-                  <span>{{ $t('contact.viewMap') }} &rarr;</span>
+                  <span style="display: inline-flex; align-items: center; gap: 6px;">
+                    <span>{{ $t('contact.viewMap') }}</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                      <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                  </span>
                 </a>
               </div>
             </div>
@@ -113,7 +119,12 @@
 
             <button type="submit" class="btn-submit-form" :disabled="isSubmitting">
               <span>{{ isSubmitting ? $t('contact.submittingBtn') : $t('contact.submitBtn') }}</span>
-              <span class="arrow">&rarr;</span>
+              <span class="arrow" style="display: inline-flex; align-items: center;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </span>
             </button>
           </form>
         </div>

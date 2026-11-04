@@ -188,7 +188,11 @@ export const courseActions = {
         outcomes: course.outcomes || '',
         requirements: course.requirements || '',
         custom_roadmap: course.customRoadmap || '',
-        lecturer_ids: course.lecturerIds || ''
+        lecturer_ids: course.lecturerIds || '',
+        status: course.status || 'ongoing',
+        materials_link: course.materialsLink || null,
+        photos_link: course.photosLink || null,
+        youtube_link: course.youtubeLink || null
       };
       const created = await this.apiRequest('/admin/courses', {
         method: 'POST',
@@ -229,7 +233,11 @@ export const courseActions = {
         outcomes: updatedData.outcomes,
         requirements: updatedData.requirements,
         custom_roadmap: updatedData.customRoadmap,
-        lecturer_ids: updatedData.lecturerIds
+        lecturer_ids: updatedData.lecturerIds,
+        status: updatedData.status !== undefined ? updatedData.status : undefined,
+        materials_link: updatedData.materialsLink !== undefined ? updatedData.materialsLink : undefined,
+        photos_link: updatedData.photosLink !== undefined ? updatedData.photosLink : undefined,
+        youtube_link: updatedData.youtubeLink !== undefined ? updatedData.youtubeLink : undefined
       };
       const updated = await this.apiRequest(`/admin/courses/${courseId}`, {
         method: 'PUT',

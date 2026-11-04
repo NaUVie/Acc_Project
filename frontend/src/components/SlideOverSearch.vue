@@ -92,7 +92,6 @@
                       <span class="course-category">{{ translateCategory(course.category) }}</span>
                       <h4 class="course-title">{{ course.title }}</h4>
                       <div class="course-price">
-                        <span class="price-current">{{ formatCurrency(course.price) }}</span>
                       </div>
                     </div>
                   </div>
@@ -117,10 +116,6 @@
                   <span class="course-category">{{ translateCategory(course.category) }}</span>
                   <h4 class="course-title">{{ course.title }}</h4>
                   <div class="course-price">
-                    <span class="price-current">{{ formatCurrency(course.price) }}</span>
-                    <span v-if="course.originalPrice && course.originalPrice > course.price" class="price-original">
-                      {{ formatCurrency(course.originalPrice) }}
-                    </span>
                   </div>
                 </div>
               </div>

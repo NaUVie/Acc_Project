@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="about-us-page">
     <!-- Hero Section with ACC Slogan -->
     <section class="about-hero-section reveal-on-scroll">
@@ -15,34 +15,31 @@
       </div>
     </section>
 
-    <!-- Vision & Mission Section (Open Clean Layout) -->
-    <section class="vision-mission-section">
+    <!-- Vision & Mission + ACC Difference (2 Columns with Background Image) -->
+    <section class="vision-mission-section reveal-on-scroll">
       <div class="container">
-        <!-- Part 1: Tầm nhìn & Sứ mệnh -->
-        <div class="vm-editorial-row reveal-on-scroll">
-          <div class="vm-img-box">
-            <img src="https://lh3.googleusercontent.com/d/1vOlYLlceRvdI3ozGu31-KP8FIa-Vn0pl" alt="Tầm nhìn và Sứ mệnh ACC" class="vm-section-img" loading="lazy" decoding="async" width="540" height="360" />
-          </div>
-          <div class="vm-text-box">
-            <span class="custom-ui-tag">{{ $t('about.tagOrientation') }}</span>
-            <h2 class="vm-title">{{ $t('about.visionTitle') }}</h2>
-            <p class="vm-text">
-              {{ $t('about.visionText1') }} <strong>{{ $t('about.visionTextStrong1') }}</strong>{{ $t('about.visionText2') }} <strong>{{ $t('about.visionTextStrong2') }}</strong>
-            </p>
-          </div>
-        </div>
+        <div class="vm-banner-card">
+          <div class="vm-columns-grid">
+            <!-- Column 1: Tầm nhìn & Sứ mệnh -->
+            <div class="vm-col">
+              <span class="vm-tag">{{ $t('about.tagOrientation') }}</span>
+              <h2 class="vm-title">{{ $t('about.visionTitle') }}</h2>
+              <p class="vm-text">
+                {{ $t('about.visionText1') }} <strong>{{ $t('about.visionTextStrong1') }}</strong>{{ $t('about.visionText2') }} <strong>{{ $t('about.visionTextStrong2') }}</strong>
+              </p>
+            </div>
 
-        <!-- Part 2: Sự khác biệt của ACC -->
-        <div class="vm-editorial-row reverse reveal-on-scroll">
-          <div class="vm-text-box">
-            <span class="custom-ui-tag">{{ $t('about.tagPractical') }}</span>
-            <h2 class="vm-title">{{ $t('about.diffTitle') }}</h2>
-            <p class="vm-text">
-              {{ $t('about.diffText1') }} <strong>{{ $t('about.diffTextStrong1') }}</strong>{{ $t('about.diffText2') }}
-            </p>
-          </div>
-          <div class="vm-img-box">
-            <img src="https://lh3.googleusercontent.com/d/1K-MqaNwQHes194nALDinlzsaYvVbyPeU" alt="Sự khác biệt của ACC" class="vm-section-img" loading="lazy" decoding="async" width="540" height="360" />
+            <!-- Vertical Divider -->
+            <div class="vm-divider"></div>
+
+            <!-- Column 2: Sự khác biệt của ACC -->
+            <div class="vm-col">
+              <span class="vm-tag">{{ $t('about.tagPractical') }}</span>
+              <h2 class="vm-title">{{ $t('about.diffTitle') }}</h2>
+              <p class="vm-text">
+                {{ $t('about.diffText1') }} <strong>{{ $t('about.diffTextStrong1') }}</strong>{{ $t('about.diffText2') }}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -190,14 +187,14 @@
 
         <div class="leadership-grid">
           <div 
-            v-for="(member, idx) in boardMembers" 
-            :key="idx" 
+            v-for="(member, idx) in displayedBoardMembers" 
+            :key="member.id || idx" 
             class="leader-card reveal-on-scroll"
             :style="{ '--reveal-delay': `${(idx % 4) * 0.12}s` }"
           >
             <div class="leader-avatar-wrapper">
               <img 
-                :src="member.avatar" 
+                :src="member.avatar || '/images/1_6.png'" 
                 :alt="member.name" 
                 class="leader-avatar" loading="lazy" decoding="async" width="280" height="280"
                 @error="(e) => e.target.src = '/images/1_6.png'"
@@ -206,9 +203,9 @@
             </div>
             <div class="leader-info">
               <h3 class="leader-name">{{ member.name }}</h3>
-              <p class="leader-main-role">{{ member.mainRole }}</p>
+              <p class="leader-main-role">{{ member.main_role || member.mainRole }}</p>
               <ul class="leader-bio-list">
-                <li v-for="(bio, bIdx) in member.bioList" :key="bIdx">{{ bio }}</li>
+                <li v-for="(bio, bIdx) in parseBioList(member)" :key="bIdx">{{ bio }}</li>
               </ul>
             </div>
           </div>
@@ -219,11 +216,20 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { useCourseStore } from '@/stores/courses';
 
+const courseStore = useCourseStore();
 let scrollObserver = null;
 
 onMounted(() => {
+  courseStore.fetchBoardMembers().catch(() => {}).finally(() => {
+    nextTick(() => {
+      if (scrollObserver) {
+        document.querySelectorAll('.reveal-on-scroll').forEach(el => scrollObserver.observe(el));
+      }
+    });
+  });
   window.scrollTo({ top: 0, behavior: 'smooth' });
 
   // Scroll reveal animation observer
@@ -245,7 +251,28 @@ onUnmounted(() => {
   }
 });
 
-const boardMembers = [
+const parseBioList = (member) => {
+  if (Array.isArray(member.bioList)) return member.bioList;
+  if (Array.isArray(member.bio_list)) return member.bio_list;
+  if (typeof member.bio_list === 'string') {
+    try {
+      const parsed = JSON.parse(member.bio_list);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      return member.bio_list.split('\n').map(s => s.trim()).filter(Boolean);
+    }
+  }
+  return [];
+};
+
+const displayedBoardMembers = computed(() => {
+  if (courseStore.boardMembers && courseStore.boardMembers.length > 0) {
+    return [...courseStore.boardMembers].sort((a, b) => (Number(a.position) || 0) - (Number(b.position) || 0));
+  }
+  return defaultBoardMembers;
+});
+
+const defaultBoardMembers = [
   {
     name: 'Ông Nguyễn Tiến Điệp',
     mainRole: 'Chủ tịch HĐQT Công ty CP Kết Nối Tri Thức ACC',

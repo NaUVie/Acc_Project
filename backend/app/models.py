@@ -76,6 +76,10 @@ class Course(Base):
     requirements = Column(Text, nullable=True)
     custom_roadmap = Column(Text, nullable=True)
     lecturer_ids = Column(Text, nullable=True)
+    status = Column(String(50), default="ongoing", nullable=True)
+    materials_link = Column(String(500), nullable=True)
+    photos_link = Column(String(500), nullable=True)
+    youtube_link = Column(String(500), nullable=True)
 
     category = relationship("Category", back_populates="courses")
     program = relationship("Program", back_populates="courses")
@@ -116,6 +120,7 @@ class BlogPost(Base):
     date = Column(String(50), nullable=True)
     link = Column(String(255), nullable=True)
     content = Column(Text().with_variant(LONGTEXT, "mysql"), nullable=True)
+    course_id = Column(BigInteger, ForeignKey("courses.id", ondelete="SET NULL"), nullable=True)
 
 class Contact(Base):
     __tablename__ = "contacts"
@@ -211,10 +216,12 @@ class Testimonial(Base):
     rating = Column(Integer, default=5)
     quote = Column(Text, nullable=True)
     course_name = Column(String(255), nullable=True)
+    course_id = Column(BigInteger, ForeignKey("courses.id", ondelete="SET NULL"), nullable=True)
     testimonial_type = Column(String(50), default="text") # "text", "photo", "video"
     youtube_id = Column(String(100), nullable=True)
     thumbnail = Column(String(500), nullable=True)
     video_url = Column(String(500), nullable=True)
+    is_approved = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 class LecturerMajor(Base):
@@ -420,7 +427,34 @@ class Partner(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
+class BoardMember(Base):
+    """Executive Board & Advisors (Ban Điều Hành & Ban Cố Vấn) displayed on AboutUs page"""
+    __tablename__ = "board_members"
 
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(150), nullable=False)
+    main_role = Column(String(255), nullable=False)
+    role_group = Column(String(50), default="executive") # "executive", "advisor"
+    avatar = Column(String(500), nullable=True)
+    bio_list = Column(Text, nullable=True) # JSON array or newline-delimited text
+    position = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
+class AdmissionPost(Base):
+    """Admission Articles / Programs (Bài viết Tuyển sinh) displayed on Admissions pages"""
+    __tablename__ = "admission_posts"
 
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    slug = Column(String(100), nullable=False, unique=True, index=True)
+    title = Column(String(255), nullable=False)
+    subtitle = Column(Text, nullable=True)
+    category = Column(String(150), nullable=True)
+    tag = Column(String(100), nullable=True)
+    image = Column(String(500), nullable=True)
+    highlights = Column(Text, nullable=True) # JSON list or newline-separated text
+    content = Column(Text().with_variant(LONGTEXT, "mysql"), nullable=True)
+    position = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 

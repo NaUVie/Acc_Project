@@ -58,7 +58,8 @@ export const blogActions = {
         excerpt: blog.excerpt || '',
         date: blog.date || '',
         link: blog.link || `/blog/${blog.handle}`,
-        content: blog.content || ''
+        content: blog.content || '',
+        course_id: (blog.course_id !== null && blog.course_id !== undefined && blog.course_id !== '' && blog.course_id !== 'null') ? Number(blog.course_id) : null
       };
       const created = await this.apiRequest('/admin/blogs', {
         method: 'POST',
@@ -69,6 +70,7 @@ export const blogActions = {
         this.blogPosts = [created, ...(this.blogPosts || [])];
       }
       this.fetchAdminBlogPosts(true).catch(() => {});
+      this.fetchBlogs(true).catch(() => {});
       this.showToast('Thêm bài viết / tin tức thành công!', 'success');
       return created;
     } catch (err) {
@@ -89,7 +91,8 @@ export const blogActions = {
         excerpt: blog.excerpt,
         date: blog.date,
         link: blog.link,
-        content: blog.content
+        content: blog.content,
+        course_id: (blog.course_id !== null && blog.course_id !== undefined && blog.course_id !== '' && blog.course_id !== 'null') ? Number(blog.course_id) : null
       };
       const updated = await this.apiRequest(`/admin/blogs/${id}`, {
         method: 'PUT',
@@ -101,6 +104,7 @@ export const blogActions = {
         this.blogPosts = (this.blogPosts || []).map(updateItem);
       }
       this.fetchAdminBlogPosts(true).catch(() => {});
+      this.fetchBlogs(true).catch(() => {});
       this.showToast('Cập nhật bài viết thành công!', 'success');
       return updated;
     } catch (err) {
@@ -119,6 +123,7 @@ export const blogActions = {
       this.adminBlogPosts = (this.adminBlogPosts || []).filter(b => b.id !== id);
       this.blogPosts = (this.blogPosts || []).filter(b => b.id !== id);
       this.fetchAdminBlogPosts(true).catch(() => {});
+      this.fetchBlogs(true).catch(() => {});
       this.showToast('Đã xóa bài viết thành công!', 'success');
     } catch (err) {
       console.error("Failed to delete admin blog post:", err);
@@ -172,6 +177,7 @@ export const blogActions = {
       if (updated) {
         this.blogCategories = (this.blogCategories || []).map(c => c.id === id ? updated : c);
         this.fetchAdminBlogPosts(true).catch(() => {});
+      this.fetchBlogs(true).catch(() => {});
         this.showToast?.('Đã cập nhật chuyên mục bài viết!', 'success');
         return updated;
       }

@@ -18,13 +18,29 @@
 
       <!-- Filters & Search -->
       <div class="flex-between mt-4 mb-4 gap-4" style="flex-wrap: wrap;">
-        <div class="filter-tabs" style="display: flex; gap: 8px; margin: 0;">
+        <div class="filter-tabs" style="display: flex; gap: 8px; margin: 0; flex-wrap: wrap;">
           <button 
             @click="filterType = 'all'" 
             class="btn btn-sm"
             :class="filterType === 'all' ? 'btn-primary' : 'btn-secondary'"
           >
             Tất cả ({{ testimonials.length }})
+          </button>
+          <button 
+            @click="filterType = 'pending'" 
+            class="btn btn-sm"
+            :class="filterType === 'pending' ? 'btn-warning-active' : 'btn-secondary'"
+            style="font-weight: 700;"
+          >
+            ⏳ Chờ duyệt ({{ pendingCount }})
+          </button>
+          <button 
+            @click="filterType = 'approved'" 
+            class="btn btn-sm"
+            :class="filterType === 'approved' ? 'btn-success-active' : 'btn-secondary'"
+            style="font-weight: 700;"
+          >
+            🟢 Đã duyệt ({{ approvedCount }})
           </button>
           <button 
             @click="filterType = 'video'" 
@@ -38,7 +54,7 @@
             class="btn btn-sm"
             :class="filterType === 'photo' ? 'btn-primary' : 'btn-secondary'"
           >
-            Ảnh & Bài viết ({{ photoCount }})
+            Ảnh & Trích dẫn ({{ photoCount }})
           </button>
         </div>
 
@@ -63,6 +79,7 @@
               <th>Preview</th>
               <th>Học viên & Chức danh</th>
               <th>Khóa học</th>
+              <th>Trạng thái</th>
               <th>Nội dung / Trích dẫn</th>
               <th style="width: 110px;">Hành động</th>
             </tr>
@@ -98,10 +115,21 @@
                 </small>
               </td>
               <td class="wrap-cell" data-label="Khóa học">
-                <span v-if="t.course_name" class="badge" style="background: rgba(2, 43, 159, 0.08); color: #022b9f; font-weight: 700;">
-                  {{ t.course_name }}
+                <span v-if="t.course_name || t.courseName" class="badge" style="background: rgba(2, 43, 159, 0.08); color: #022b9f; font-weight: 700;">
+                  📚 {{ t.course_name || t.courseName }}
                 </span>
                 <span v-else class="text-muted" style="font-size: 12px;">(Tất cả)</span>
+              </td>
+              <td data-label="Trạng thái">
+                <button 
+                  type="button" 
+                  class="badge" 
+                  :style="t.isApproved ? 'background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; cursor: pointer;' : 'background: #fef3c7; color: #b45309; border: 1px solid #fde68a; cursor: pointer; font-weight: 800;'"
+                  @click="toggleApproval(t)"
+                  :title="t.isApproved ? 'Nhấp để ẩn cảm nhận này' : 'Nhấp để duyệt hiển thị công khai cảm nhận này'"
+                >
+                  {{ t.isApproved ? '🟢 Đã duyệt' : '⏳ Chờ duyệt' }}
+                </button>
               </td>
               <td class="wrap-cell" data-label="Nội dung / Trích dẫn">
                 <div style="max-width: 280px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; font-size: 13.5px; color: #334155;">
@@ -119,7 +147,7 @@
               </td>
             </tr>
             <tr v-if="filteredTestimonials.length === 0">
-              <td colspan="7" class="text-center py-8 text-muted">
+              <td colspan="8" class="text-center py-8 text-muted">
                 Không tìm thấy cảm nhận nào phù hợp.
               </td>
             </tr>
@@ -187,8 +215,23 @@
           </div>
 
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Tên Khóa học tham gia</label>
-            <input v-model="form.courseName" type="text" class="admin-input-style" placeholder="Ví dụ: Khóa học Generative AI trong Quản trị" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+            <label style="color: #1e293b; font-weight: 600;">Khóa học tham gia</label>
+            <select v-model="form.courseId" @change="onCourseSelectChange" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
+              <option :value="null">-- Không gán khóa học cụ thể / Cảm nhận chung --</option>
+              <option v-for="c in coursesList" :key="c.id" :value="c.id">
+                {{ c.title }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-2 gap-4 mt-3">
+          <div class="form-group">
+            <label style="color: #1e293b; font-weight: 600;">Trạng thái kiểm duyệt</label>
+            <select v-model="form.isApproved" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 600;">
+              <option :value="true">🟢 Đã duyệt (Hiển thị công khai)</option>
+              <option :value="false">⏳ Chờ duyệt (Tạm ẩn)</option>
+            </select>
           </div>
         </div>
 
@@ -341,6 +384,31 @@ const filterType = ref('all');
 const searchQuery = ref('');
 const currentPage = ref(1);
 const pageSize = ref(10);
+
+const coursesList = computed(() => courseStore.courses || []);
+
+const onCourseSelectChange = () => {
+  if (!form.value.courseId) {
+    form.value.courseName = '';
+  } else {
+    const found = coursesList.value.find(c => Number(c.id) === Number(form.value.courseId));
+    form.value.courseName = found ? found.title : '';
+  }
+};
+
+const toggleApproval = async (item) => {
+  const newStatus = !item.isApproved;
+  try {
+    await courseStore.updateAdminTestimonial(item.id, {
+      ...item,
+      isApproved: newStatus
+    });
+    item.isApproved = newStatus;
+    courseStore.showToast(`Đã ${newStatus ? 'duyệt hiển thị' : 'chuyển sang chờ duyệt'} cảm nhận của ${item.name}!`, 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi đổi trạng thái: ' + (err.message || err), 'error');
+  }
+};
 const isEditing = ref(false);
 const editingId = ref(null);
 const saving = ref(false);
@@ -353,6 +421,8 @@ const form = ref({
   text: '',
   quote: '',
   courseName: '',
+  courseId: null,
+  isApproved: true,
   testimonialType: 'video',
   youtubeId: '',
   thumbnail: '',
@@ -365,9 +435,14 @@ const testimonials = computed(() => courseStore.adminTestimonials || []);
 
 const videoCount = computed(() => testimonials.value.filter(t => t.testimonial_type === 'video').length);
 const photoCount = computed(() => testimonials.value.filter(t => t.testimonial_type === 'photo' || t.testimonial_type === 'text').length);
+const pendingCount = computed(() => testimonials.value.filter(t => t.isApproved === false).length);
+const approvedCount = computed(() => testimonials.value.filter(t => t.isApproved !== false).length);
 
 const filteredTestimonials = computed(() => {
   return testimonials.value.filter(t => {
+    // Approval Filter
+    if (filterType.value === 'pending' && t.isApproved !== false) return false;
+    if (filterType.value === 'approved' && t.isApproved === false) return false;
     // Type Filter
     if (filterType.value === 'video' && t.testimonial_type !== 'video') return false;
     if (filterType.value === 'photo' && t.testimonial_type !== 'photo' && t.testimonial_type !== 'text') return false;
@@ -432,6 +507,8 @@ const openAddModal = () => {
     text: '',
     quote: '',
     courseName: '',
+    courseId: null,
+    isApproved: true,
     testimonialType: 'video',
     youtubeId: '',
     thumbnail: '',
@@ -452,7 +529,9 @@ const editTestimonial = (t) => {
     company: t.company || '',
     text: t.text || '',
     quote: t.quote || t.text || '',
-    courseName: t.course_name || '',
+    courseName: t.course_name || t.courseName || '',
+    courseId: t.course_id || t.courseId || null,
+    isApproved: t.isApproved !== undefined ? t.isApproved : (t.is_approved !== false),
     testimonialType: t.testimonial_type || 'text',
     youtubeId: t.youtube_id || '',
     thumbnail: t.thumbnail || '',

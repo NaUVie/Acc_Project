@@ -92,7 +92,11 @@ def create_course_admin(course_in: schemas.CourseAdminCreate, db: Session = Depe
         outcomes=course_in.outcomes,
         requirements=course_in.requirements,
         custom_roadmap=course_in.custom_roadmap,
-        lecturer_ids=course_in.lecturer_ids
+        lecturer_ids=course_in.lecturer_ids,
+        status=course_in.status or "ongoing",
+        materials_link=course_in.materials_link,
+        photos_link=course_in.photos_link,
+        youtube_link=course_in.youtube_link
     )
     db.add(db_course)
     db.commit()
@@ -146,6 +150,14 @@ def update_course_admin(id: int, course_in: schemas.CourseAdminUpdate, db: Sessi
         db_course.custom_roadmap = course_in.custom_roadmap
     if course_in.lecturer_ids is not None:
         db_course.lecturer_ids = course_in.lecturer_ids
+    if course_in.status is not None:
+        db_course.status = course_in.status
+    if course_in.materials_link is not None:
+        db_course.materials_link = course_in.materials_link
+    if course_in.photos_link is not None:
+        db_course.photos_link = course_in.photos_link
+    if course_in.youtube_link is not None:
+        db_course.youtube_link = course_in.youtube_link
         
     db.commit()
     db.refresh(db_course)

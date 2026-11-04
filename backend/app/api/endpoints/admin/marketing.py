@@ -88,7 +88,7 @@ def delete_banner_admin(id: int, db: Session = Depends(get_db)):
 
 @router.get("/testimonials", response_model=List[schemas.TestimonialResponse])
 def get_all_testimonials_admin(db: Session = Depends(get_db)):
-    return crud.get_testimonials(db)
+    return crud.get_testimonials(db, only_approved=False)
 
 @router.post("/testimonials", response_model=schemas.TestimonialResponse, status_code=status.HTTP_201_CREATED)
 def create_testimonial_admin(test_in: schemas.TestimonialCreate, db: Session = Depends(get_db)):
@@ -132,4 +132,59 @@ def delete_partner_admin(id: int, db: Session = Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="Đối tác không tồn tại")
     return {"message": "Đã xóa đối tác thành công"}
+
+# ==================== BOARD MEMBER MANAGEMENT ====================
+
+@router.get("/board-members", response_model=List[schemas.BoardMemberResponse])
+def get_all_board_members_admin(role_group: str = None, db: Session = Depends(get_db)):
+    return crud.get_board_members(db, active_only=False, role_group=role_group)
+
+@router.post("/board-members", response_model=schemas.BoardMemberResponse, status_code=status.HTTP_201_CREATED)
+def create_board_member_admin(member_in: schemas.BoardMemberCreate, db: Session = Depends(get_db)):
+    return crud.create_board_member(db, member_in)
+
+@router.put("/board-members/{id}", response_model=schemas.BoardMemberResponse)
+def update_board_member_admin(id: int, member_in: schemas.BoardMemberUpdate, db: Session = Depends(get_db)):
+    updated = crud.update_board_member(db, id, member_in)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Thành viên ban điều hành không tồn tại")
+    return updated
+
+@router.delete("/board-members/{id}", status_code=status.HTTP_200_OK)
+def delete_board_member_admin(id: int, db: Session = Depends(get_db)):
+    success = crud.delete_board_member(db, id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Thành viên ban điều hành không tồn tại")
+    return {"message": "Đã xóa thành viên thành công"}
+
+# ==================== ADMISSION POST MANAGEMENT ====================
+
+@router.get("/admissions", response_model=List[schemas.AdmissionPostResponse])
+def get_all_admission_posts_admin(db: Session = Depends(get_db)):
+    return crud.get_admission_posts(db, active_only=False)
+
+@router.post("/admissions", response_model=schemas.AdmissionPostResponse, status_code=status.HTTP_201_CREATED)
+def create_admission_post_admin(post_in: schemas.AdmissionPostCreate, db: Session = Depends(get_db)):
+    existing = crud.get_admission_post_by_slug(db, post_in.slug)
+    if existing:
+        raise HTTPException(status_code=400, detail="Đường dẫn tĩnh (slug) này đã tồn tại.")
+    return crud.create_admission_post(db, post_in)
+
+@router.put("/admissions/{id}", response_model=schemas.AdmissionPostResponse)
+def update_admission_post_admin(id: int, post_in: schemas.AdmissionPostUpdate, db: Session = Depends(get_db)):
+    if post_in.slug:
+        existing = crud.get_admission_post_by_slug(db, post_in.slug)
+        if existing and existing.id != id:
+            raise HTTPException(status_code=400, detail="Đường dẫn tĩnh (slug) này đã tồn tại ở bài viết khác.")
+    updated = crud.update_admission_post(db, id, post_in)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Bài viết tuyển sinh không tồn tại")
+    return updated
+
+@router.delete("/admissions/{id}", status_code=status.HTTP_200_OK)
+def delete_admission_post_admin(id: int, db: Session = Depends(get_db)):
+    success = crud.delete_admission_post(db, id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Bài viết tuyển sinh không tồn tại")
+    return {"message": "Đã xóa bài viết tuyển sinh thành công"}
 

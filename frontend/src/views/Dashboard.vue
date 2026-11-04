@@ -61,15 +61,6 @@
 
           <button 
             class="sidebar-nav-item" 
-            :class="{ active: activeTab === 'cart' }"
-            @click="activeTab = 'cart'"
-          >
-            <span class="tab-label">Giỏ hàng</span>
-            <span class="tab-badge" v-if="courseStore.cart.length > 0">{{ courseStore.cart.length }}</span>
-          </button>
-
-          <button 
-            class="sidebar-nav-item" 
             :class="{ active: activeTab === 'wishlist' }"
             @click="activeTab = 'wishlist'"
           >
@@ -767,52 +758,6 @@
           </div>
         </div>
 
-        <!-- TAB 5: CART -->
-        <div v-show="activeTab === 'cart'" class="tab-pane animate-fade-in">
-          <div class="panel-card glass-card">
-            <h2 class="panel-title">Giỏ hàng của bạn ({{ courseStore.cart.length }})</h2>
-            
-            <div v-if="courseStore.cart.length === 0" class="empty-state py-12">
-              <div class="empty-state-icon" style="display: flex; justify-content: center; margin-bottom: 12px; color: #94a3b8;">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-              </div>
-              <p style="font-size: 15px; font-weight: 600; color: #0f172a;">Giỏ hàng của bạn đang trống.</p>
-              <router-link to="/courses/ai" class="btn btn-primary btn-sm mt-4 inline-block">Khám phá các khóa học</router-link>
-            </div>
-            
-            <div v-else class="cart-tab-wrapper">
-              <div class="cart-items-list">
-                <div v-for="item in courseStore.cart" :key="item.id" class="cart-item-row">
-                  <img :src="formatImageUrl(item.course.image, 'w800')" :alt="item.course.title" class="cart-item-img" />
-                  <div class="cart-item-info">
-                    <h4>{{ item.course.title }}</h4>
-                    <div class="price">{{ formatPrice(item.course.price) }}</div>
-                  </div>
-                  <button @click="handleRemoveFromCart(item.course.id)" class="remove-btn" title="Xóa khỏi giỏ hàng">
-                    Xóa
-                  </button>
-                </div>
-              </div>
-
-              <!-- Checkout discount indicator -->
-              <div class="checkout-summary-box mt-6">
-                <div class="summary-row" v-if="hasReferralDiscount">
-                  <span>Giảm giá giới thiệu (10%):</span>
-                  <span class="discount-price">- {{ formatPrice(calculatedDiscount) }}</span>
-                </div>
-                <div class="summary-row total-row">
-                  <span>Tổng tiền thanh toán:</span>
-                  <span class="total-price">{{ formatPrice(calculatedTotal) }}</span>
-                </div>
-                
-                <button @click="handleCheckout" class="btn btn-primary w-full mt-4" :disabled="loading">
-                  {{ loading ? 'Đang tạo đơn hàng...' : 'Xác nhận Đặt hàng & Nhận ưu đãi' }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- TAB 6: WISHLIST -->
         <div v-show="activeTab === 'wishlist'" class="tab-pane animate-fade-in">
           <div class="panel-card glass-card">
@@ -1292,8 +1237,7 @@ const refreshDashboardData = async () => {
   try {
     const promises = [
       courseStore.fetchUserMe(),
-      courseStore.fetchCart(),
-      courseStore.fetchReferrals(),
+            courseStore.fetchReferrals(),
       courseStore.fetchOrders(),
       courseStore.fetchEnrollments(),
       courseStore.fetchWishlist()
@@ -1319,45 +1263,7 @@ const hasReferralDiscount = computed(() => {
   return courseStore.userMe?.referredById && isFirstPurchase;
 });
 
-const calculatedDiscount = computed(() => {
-  if (!hasReferralDiscount.value) return 0;
-  const standardTotal = courseStore.cart.reduce((sum, item) => sum + item.course.price, 0);
-  const discount = Math.floor(standardTotal * 0.10);
-  return Math.min(discount, 14500000); // capped at 14,500,000 VND
-});
 
-const calculatedTotal = computed(() => {
-  const standardTotal = courseStore.cart.reduce((sum, item) => sum + item.course.price, 0);
-  return standardTotal - calculatedDiscount.value;
-});
-
-const handleLogout = () => {
-  courseStore.logout();
-  courseStore.showToast('Đã đăng xuất khỏi tài khoản.', 'info');
-  router.push('/login');
-};
-
-// Shopping cart actions
-const handleRemoveFromCart = async (courseId) => {
-  try {
-    await courseStore.removeFromCart(courseId);
-  } catch (err) {
-    courseStore.showToast('Không thể xóa khóa học: ' + err.message, 'error');
-  }
-};
-
-const handleCheckout = async () => {
-  loading.value = true;
-  try {
-    await courseStore.checkout();
-    courseStore.showToast('Đơn hàng đã được tạo thành công!', 'success');
-    await refreshDashboardData();
-  } catch (err) {
-    courseStore.showToast('Đơn hàng lỗi: ' + err.message, 'error');
-  } finally {
-    loading.value = false;
-  }
-};
 
 const handlePayOrder = async (orderId) => {
   loading.value = true;

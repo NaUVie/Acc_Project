@@ -64,7 +64,12 @@
             <div class="prog-footer">
               <router-link to="/contact" class="btn-consult">
                 <span>Đăng ký tư vấn In-House</span>
-                <span class="arrow">&rarr;</span>
+                <span class="arrow" style="display: inline-flex; align-items: center;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </span>
               </router-link>
             </div>
           </div>

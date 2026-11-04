@@ -54,7 +54,7 @@
                 </div>
               </div>
               <div class="video-card-body">
-                <span class="program-tag-badge" v-if="v.courseName"> {{ v.courseName }}</span>
+                <span class="program-tag-badge" v-if="v.courseName">📚 Khóa học: {{ v.courseName }}</span>
                 <h4 class="video-card-title">{{ v.title }}</h4>
                 <div class="student-profile-info">
                   <span class="s-name"> {{ v.studentName || v.name }}</span>
@@ -92,7 +92,13 @@
             </div>
           </div>
           <a :href="youtubePlaylistUrl" target="_blank" rel="noopener noreferrer" class="btn-yt-playlist">
-            <span>XEM THÊM TRÊN YOUTUBE&rarr;</span>
+            <span style="display: inline-flex; align-items: center; gap: 6px;">
+              <span>XEM THÊM TRÊN YOUTUBE</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </span>
           </a>
         </div>
       </div>
@@ -123,7 +129,7 @@
 
                 <div class="stars">★★★★★</div>
                 <p class="quote-text">"{{ p.quote }}"</p>
-                <span class="course-badge">{{ p.courseName }}</span>
+                <span class="course-badge" v-if="p.courseName">📚 Khóa học: {{ p.courseName }}</span><span class="course-badge" v-else>📚 Học viên ACC Academy</span>
               </div>
             </div>
           </div>

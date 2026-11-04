@@ -1,5 +1,6 @@
 let fetchBannersPromise = null;
 let fetchPartnersPromise = null;
+let fetchBoardMembersPromise = null;
 
 export const marketingActions = {
   async fetchBanners(force = false) {
@@ -145,6 +146,168 @@ export const marketingActions = {
     return data;
   },
 
+  async fetchBoardMembers(force = false) {
+    if (!force && this.boardMembers && this.boardMembers.length > 0) {
+      return this.boardMembers;
+    }
+    if (fetchBoardMembersPromise) {
+      return fetchBoardMembersPromise;
+    }
+    this.boardMembersLoading = true;
+    fetchBoardMembersPromise = (async () => {
+      try {
+        const data = await this.apiRequest('/courses/board-members');
+        if (Array.isArray(data)) {
+          this.boardMembers = data;
+          this.boardMembersLoaded = true;
+          try {
+            localStorage.setItem('acc_board_members_cache', JSON.stringify(data));
+          } catch (e) {}
+        }
+        return this.boardMembers;
+      } catch (err) {
+        console.error("Failed to fetch board members:", err);
+        return this.boardMembers || [];
+      } finally {
+        this.boardMembersLoading = false;
+        fetchBoardMembersPromise = null;
+      }
+    })();
+    return fetchBoardMembersPromise;
+  },
+
+  async fetchAdminBoardMembers(force = false) {
+    try {
+      const url = force ? `/admin/board-members?_t=${Date.now()}` : '/admin/board-members';
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
+      this.adminBoardMembers = data || [];
+      return this.adminBoardMembers;
+    } catch (err) {
+      console.error("Failed to fetch admin board members:", err);
+      throw err;
+    }
+  },
+
+  async createBoardMember(memberData) {
+    const data = await this.apiRequest('/admin/board-members', {
+      method: 'POST',
+      body: JSON.stringify(memberData)
+    });
+    await Promise.all([this.fetchAdminBoardMembers(true).catch(() => {}), this.fetchBoardMembers(true).catch(() => {})]);
+    this.showToast('Thêm thành viên ban điều hành thành công!', 'success');
+    return data;
+  },
+
+  async updateBoardMember(memberId, memberData) {
+    const data = await this.apiRequest(`/admin/board-members/${memberId}`, {
+      method: 'PUT',
+      body: JSON.stringify(memberData)
+    });
+    await Promise.all([this.fetchAdminBoardMembers(true).catch(() => {}), this.fetchBoardMembers(true).catch(() => {})]);
+    this.showToast('Cập nhật thành viên ban điều hành thành công!', 'success');
+    return data;
+  },
+
+  async deleteBoardMember(memberId) {
+    const data = await this.apiRequest(`/admin/board-members/${memberId}`, {
+      method: 'DELETE'
+    });
+    if (this.adminBoardMembers) {
+      this.adminBoardMembers = this.adminBoardMembers.filter(m => m.id !== memberId);
+    }
+    if (this.boardMembers) {
+      this.boardMembers = this.boardMembers.filter(m => m.id !== memberId);
+    }
+    this.showToast('Xóa thành viên ban điều hành thành công!', 'success');
+    return data;
+  },
+
+    async fetchAdmissions(force = false) {
+    if (!force && this.admissions && this.admissions.length > 0) {
+      return this.admissions;
+    }
+    if (fetchAdmissionsPromise) {
+      return fetchAdmissionsPromise;
+    }
+    this.admissionsLoading = true;
+    fetchAdmissionsPromise = (async () => {
+      try {
+        const data = await this.apiRequest('/courses/admissions');
+        if (Array.isArray(data)) {
+          this.admissions = data;
+          this.admissionsLoaded = true;
+          try {
+            localStorage.setItem('acc_admissions_cache', JSON.stringify(data));
+          } catch (e) {}
+        }
+        return this.admissions;
+      } catch (err) {
+        console.error("Failed to fetch admissions:", err);
+        return this.admissions || [];
+      } finally {
+        this.admissionsLoading = false;
+        fetchAdmissionsPromise = null;
+      }
+    })();
+    return fetchAdmissionsPromise;
+  },
+
+  async fetchAdmissionBySlug(slug, force = false) {
+    try {
+      const data = await this.apiRequest(`/courses/admissions/${slug}`);
+      return data;
+    } catch (err) {
+      console.error(`Failed to fetch admission post ${slug}:`, err);
+      return null;
+    }
+  },
+
+  async fetchAdminAdmissions(force = false) {
+    try {
+      const url = force ? `/admin/admissions?_t=${Date.now()}` : '/admin/admissions';
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
+      this.adminAdmissions = data || [];
+      return this.adminAdmissions;
+    } catch (err) {
+      console.error("Failed to fetch admin admissions:", err);
+      throw err;
+    }
+  },
+
+  async createAdmissionPost(postData) {
+    const data = await this.apiRequest('/admin/admissions', {
+      method: 'POST',
+      body: JSON.stringify(postData)
+    });
+    await Promise.all([this.fetchAdminAdmissions(true).catch(() => {}), this.fetchAdmissions(true).catch(() => {})]);
+    this.showToast('Thêm bài viết tuyển sinh thành công!', 'success');
+    return data;
+  },
+
+  async updateAdmissionPost(id, postData) {
+    const data = await this.apiRequest(`/admin/admissions/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(postData)
+    });
+    await Promise.all([this.fetchAdminAdmissions(true).catch(() => {}), this.fetchAdmissions(true).catch(() => {})]);
+    this.showToast('Cập nhật bài viết tuyển sinh thành công!', 'success');
+    return data;
+  },
+
+  async deleteAdmissionPost(id) {
+    const data = await this.apiRequest(`/admin/admissions/${id}`, {
+      method: 'DELETE'
+    });
+    if (this.adminAdmissions) {
+      this.adminAdmissions = this.adminAdmissions.filter(p => p.id !== id);
+    }
+    if (this.admissions) {
+      this.admissions = this.admissions.filter(p => p.id !== id);
+    }
+    this.showToast('Xóa bài viết tuyển sinh thành công!', 'success');
+    return data;
+  },
+
   async fetchContactSettings(force = false) {
     if (!force && this.contactSettings) return this.contactSettings;
     try {
@@ -218,8 +381,13 @@ export const marketingActions = {
     try {
       const url = force ? `/admin/testimonials?_t=${Date.now()}` : '/admin/testimonials';
       const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
-      this.adminTestimonials = data;
-      return data;
+      this.adminTestimonials = (data || []).map(item => ({
+        ...item,
+        courseId: item.course_id || null,
+        courseName: item.course_name || '',
+        isApproved: item.is_approved !== false
+      }));
+      return this.adminTestimonials;
     } catch (err) {
       console.error("Failed to fetch admin testimonials:", err);
     }
@@ -237,6 +405,8 @@ export const marketingActions = {
         rating: Number(testimonial.rating) || 5,
         quote: testimonial.quote || testimonial.text || '',
         course_name: testimonial.courseName || '',
+        course_id: (testimonial.courseId !== null && testimonial.courseId !== undefined && testimonial.courseId !== '') ? Number(testimonial.courseId) : null,
+        is_approved: testimonial.isApproved !== undefined ? testimonial.isApproved : true,
         testimonial_type: testimonial.testimonialType || 'text',
         youtube_id: testimonial.youtubeId || '',
         thumbnail: testimonial.thumbnail || '',
@@ -267,6 +437,8 @@ export const marketingActions = {
         rating: Number(testimonial.rating) || 5,
         quote: testimonial.quote,
         course_name: testimonial.courseName,
+        course_id: testimonial.courseId !== undefined ? (testimonial.courseId ? Number(testimonial.courseId) : null) : undefined,
+        is_approved: testimonial.isApproved !== undefined ? testimonial.isApproved : undefined,
         testimonial_type: testimonial.testimonialType,
         youtube_id: testimonial.youtubeId,
         thumbnail: testimonial.thumbnail,

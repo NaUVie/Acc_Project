@@ -128,9 +128,10 @@ import AdminCoupons from './components/AdminCoupons.vue';
 import AdminCommissions from './components/AdminCommissions.vue';
 import AdminLecturers from './components/AdminLecturers.vue';
 import AdminTestimonials from './components/AdminTestimonials.vue';
-import AdminProjects from './components/AdminProjects.vue';
 import AdminBlogs from './components/AdminBlogs.vue';
 import AdminPartners from './components/AdminPartners.vue';
+import AdminBoardMembers from './components/AdminBoardMembers.vue';
+import AdminAdmissions from './components/AdminAdmissions.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -148,13 +149,14 @@ const businessTabs = [
 const educationTabs = [
   { id: 'categories', name: 'Chuyên mục' },
   { id: 'courses', name: 'Khóa học' },
-      { id: 'lecturers', name: 'Giảng viên & Chuyên gia' }
+      { id: 'lecturers', name: 'Giảng viên & Chuyên gia' },
+  { id: 'board-members', name: 'Ban điều hành & Cố vấn' },
+  { id: 'admissions', name: 'Bài viết Tuyển sinh' }
 ];
 
 const marketingTabs = [
   { id: 'banners', name: 'Banner & Video Trang chủ' },
   { id: 'blogs', name: 'Tin tức & Bài viết' },
-  { id: 'projects', name: 'Dự án Case Study' },
   { id: 'testimonials', name: 'Cảm nhận học viên' },
   { id: 'partners', name: 'Doanh nghiệp hợp tác' }
 ];
@@ -229,11 +231,12 @@ const currentTabComponent = computed(() => {
     case 'overview': return AdminOverview;
     case 'partners': return AdminPartners;
     case 'blogs': return AdminBlogs;
-    case 'projects': return AdminProjects;
     case 'testimonials': return AdminTestimonials;
     case 'coupons': return AdminCoupons;
     case 'commissions': return AdminCommissions;
     case 'lecturers': return AdminLecturers;
+    case 'board-members': return AdminBoardMembers;
+    case 'admissions': return AdminAdmissions;
     case 'banners': return AdminBanners;
     case 'categories': return AdminCategories;
     case 'courses': return AdminCourses;

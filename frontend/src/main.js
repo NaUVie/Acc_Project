@@ -21,7 +21,6 @@ const testimonialStore = useTestimonialStore();
 if (courseStore.token) {
   Promise.all([
     courseStore.fetchUserMe(),
-    courseStore.fetchCart(),
     courseStore.fetchOrders(),
     courseStore.fetchReferrals()
   ]).catch(err => console.error("Error pre-fetching user data:", err));

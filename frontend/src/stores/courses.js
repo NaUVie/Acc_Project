@@ -65,6 +65,14 @@ export const useCourseStore = defineStore('courses', {
     projectsLoaded: false,
     projectsLoading: false,
     bannersLoaded: false,
+    boardMembers: [],
+    adminBoardMembers: [],
+    boardMembersLoaded: false,
+    admissions: [],
+    adminAdmissions: [],
+    admissionsLoaded: false,
+    admissionsLoading: false,
+    boardMembersLoading: false,
     error: null,
 
     // Auth states

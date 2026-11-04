@@ -54,8 +54,12 @@
                 <p class="login-cta-desc">
                   Đăng nhập hoặc đăng ký tài khoản ACC Academy ngay để lấy mã giới thiệu độc quyền và bắt đầu tích lũy thưởng.
                 </p>
-                <router-link to="/login" class="btn-login-cta">
-                  Đăng nhập để nhận mã ngay &rarr;
+                <router-link to="/login" class="btn-login-cta" style="display: inline-flex; align-items: center; gap: 8px;">
+                  <span>Đăng nhập để nhận mã ngay</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
                 </router-link>
               </div>
             </div>

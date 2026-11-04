@@ -40,8 +40,13 @@
         <article class="course-article-main">
           <!-- Article Header -->
           <header class="article-header-box">
-            <div class="article-badges">
-              <!-- <span class="cat-badge-pill">{{ getCategoryName(course.category) }}</span> -->
+            <div class="article-badges" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <span 
+                class="status-badge-pill" 
+                :class="'badge-status-' + (course.status || 'ongoing')"
+              >
+                {{ course.status === 'upcoming' ? '⏳ Sắp diễn ra' : (course.status === 'completed' ? '🏁 Đã diễn ra' : '🟢 Đang diễn ra') }}
+              </span>
               <span v-if="parentProgram" class="program-badge-pill">🎓 {{ parentProgram.title }}</span>
             </div>
             
@@ -67,17 +72,6 @@
           <div class="article-content-body">
             <!-- Full Description / Content -->
             <div v-if="course.description" class="rich-article-html" v-html="sanitizeHtml(course.description)"></div>
-
-            <!-- Outcomes / Highlights -->
-            <div v-if="courseOutcomes.length > 0" class="article-section-block">
-              <h3 class="article-sub-heading">Giá trị cốt lõi & Mục tiêu đạt được</h3>
-              <div class="article-outcomes-grid">
-                <div v-for="(outcome, oIdx) in courseOutcomes" :key="oIdx" class="article-outcome-card">
-                  <span class="check-icon">✓</span>
-                  <span>{{ outcome }}</span>
-                </div>
-              </div>
-            </div>
 
             <!-- Detailed Roadmap / Curriculum if exists -->
             <div v-if="course.customRoadmap" class="article-section-block">
@@ -119,6 +113,121 @@
                 </div>
               </div>
             </div>
+
+            <!-- End of Article Resource Action Buttons Bar (Lấy học liệu, Lấy link ảnh, Link Youtube) -->
+            <div class="article-section-block course-resource-actions-wrapper">
+              <h4 class="resource-block-title">Tài nguyên & Học liệu khóa học</h4>
+              <p class="resource-block-desc">Sau khi đọc và tìm hiểu nội dung khóa học, học viên có thể tải học liệu, xem kho ảnh hoạt động và video bài giảng bên dưới:</p>
+              <div class="course-resource-actions-bar">
+                <button 
+                  type="button" 
+                  class="btn-course-resource btn-resource-materials" 
+                  @click="handleOpenResource(course.materialsLink, 'học liệu')"
+                  title="Nhấp để mở hoặc tải tài liệu học tập của khóa học"
+                >
+                  Lấy học liệu
+                </button>
+
+                <button 
+                  type="button" 
+                  class="btn-course-resource btn-resource-photos" 
+                  @click="handleOpenResource(course.photosLink, 'kho ảnh')"
+                  title="Nhấp để xem album / kho ảnh hoạt động của khóa học"
+                >
+                  Lấy link ảnh
+                </button>
+
+                <button 
+                  type="button" 
+                  class="btn-course-resource btn-resource-youtube" 
+                  @click="handleOpenResource(course.youtubeLink, 'video YouTube')"
+                  title="Nhấp để xem video bài giảng / giới thiệu trên YouTube"
+                >
+                  Link YouTube
+                </button>
+              </div>
+            </div>
+
+            <!-- Student Reviews & Testimonials Section (Nhận xét học viên - Không cần đăng nhập) -->
+            <div class="article-section-block course-reviews-section">
+              <div class="reviews-header flex-between" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
+                <div>
+                  <h3 class="article-sub-heading" style="margin-bottom: 4px;">💬 Chia sẻ & Cảm nhận từ Học viên</h3>
+                  <p class="text-muted" style="font-size: 14px; margin: 0;">Đánh giá thực tế từ học viên sau khi hoàn thành khóa học tại ACC Academy.</p>
+                </div>
+                <button 
+                  type="button" 
+                  class="btn btn-primary btn-sm" 
+                  @click="showReviewForm = !showReviewForm"
+                  style="font-weight: 700; border-radius: 8px; padding: 8px 16px; white-space: nowrap;"
+                >
+                  {{ showReviewForm ? '✕ Đóng form' : '✍️ Viết nhận xét' }}
+                </button>
+              </div>
+
+              <!-- Form gửi cảm nhận (KHÔNG CẦN ĐĂNG NHẬP) -->
+              <div v-if="showReviewForm" class="review-submit-box mt-4 animate-fade-in" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px;">
+                <h4 style="font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 14px 0;">Gửi cảm nhận của bạn về khóa học (Không cần đăng nhập)</h4>
+                <form @submit.prevent="submitReviewNoAuth">
+                  <div class="grid grid-2 gap-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
+                    <div class="form-group" style="margin: 0;">
+                      <label style="font-size: 13px; font-weight: 600; color: #334155;">Họ và tên học viên <span style="color: #ef4444;">*</span></label>
+                      <input v-model="studentReviewForm.name" type="text" required placeholder="Ví dụ: Nguyễn Văn An" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+                    </div>
+                    <div class="form-group" style="margin: 0;">
+                      <label style="font-size: 13px; font-weight: 600; color: #334155;">Chức vụ / Đơn vị công tác (Tùy chọn)</label>
+                      <input v-model="studentReviewForm.role" type="text" placeholder="Ví dụ: Trưởng phòng Vận hành • Công ty XYZ" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3" style="margin-top: 12px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px;">Đánh giá chất lượng khóa học</label>
+                    <div class="star-rating-selector" style="display: flex; gap: 6px; font-size: 26px; cursor: pointer; align-items: center;">
+                      <span v-for="star in 5" :key="star" @click="studentReviewForm.rating = star" :style="{ color: star <= studentReviewForm.rating ? '#f59e0b' : '#cbd5e1' }">★</span>
+                      <span style="font-size: 13px; color: #64748b; font-weight: 600; margin-left: 8px;">({{ studentReviewForm.rating }} sao)</span>
+                    </div>
+                  </div>
+
+                  <div class="form-group mt-3" style="margin-top: 12px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px;">Nội dung nhận xét / chia sẻ trải nghiệm <span style="color: #ef4444;">*</span></label>
+                    <textarea v-model="studentReviewForm.text" rows="4" required placeholder="Chia sẻ cảm nhận của bạn về giảng viên, nội dung bài giảng, ứng dụng vào công việc thực tế..." class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
+                  </div>
+
+                  <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-top: 14px;">
+                    <button type="button" class="btn btn-secondary btn-sm" @click="showReviewForm = false">Hủy</button>
+                    <button type="submit" class="btn btn-primary btn-sm" :disabled="submittingReview" style="padding: 8px 24px; font-weight: 700;">
+                      {{ submittingReview ? 'Đang gửi...' : 'Gửi nhận xét ngay' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Danh sách nhận xét đã được duyệt của khóa học -->
+              <div class="course-reviews-list mt-4" style="margin-top: 16px;">
+                <div v-if="courseTestimonials.length > 0" class="reviews-grid">
+                  <div v-for="t in courseTestimonials" :key="t.id" class="review-card-item" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div class="review-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                      <img :src="formatImageUrl(t.image || t.avatar) || '/images/default-avatar.jpg'" :alt="t.name" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1;" />
+                      <div>
+                        <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a;">{{ t.name }}</h4>
+                        <p v-if="t.role || t.company" style="margin: 2px 0 0; font-size: 12.5px; color: #64748b;">{{ t.role }} <span v-if="t.company">• {{ t.company }}</span></p>
+                      </div>
+                      <div style="color: #f59e0b; font-size: 14px; margin-left: auto;">
+                        {{ '★'.repeat(t.rating || 5) }}
+                      </div>
+                    </div>
+                    <p style="font-size: 14px; line-height: 1.6; color: #334155; margin: 0; font-style: italic;">"{{ t.text || t.quote }}"</p>
+                    <div v-if="t.createdAt" style="margin-top: 8px; font-size: 12px; color: #94a3b8;">
+                      📅 {{ formatDate(t.createdAt) }}
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else class="empty-reviews-box" style="padding: 28px; text-align: center; background: #f8fafc; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                  <p style="color: #64748b; margin: 0; font-size: 14px;">Chưa có nhận xét nào được hiển thị cho khóa học này. Hãy là người đầu tiên gửi chia sẻ của bạn!</p>
+                </div>
+              </div>
+            </div>
           </div>
 
         </article>
@@ -126,32 +235,12 @@
         <!-- Right Side: Sticky Registration Sidebar -->
         <aside class="course-article-sidebar">
           <div class="sticky-register-card">
-            <div class="sidebar-price-header">
-              <span class="price-label">{{ hasDiscount(course) ? $t('course.discountTuition') : $t('course.tuition') }}</span>
-              <div class="price-val-row">
-                <span class="price-current">{{ formatCurrency(course.price) }}</span>
-                <span v-if="hasDiscount(course)" class="price-old">
-                  {{ formatCurrency(course.originalPrice || course.original_price) }}
-                </span>
-              </div>
-              <div class="vat-badge-text" style="font-size: 11.5px; color: #16a34a; font-weight: 600; margin-top: 4px;">
-                ✓ Đã bao gồm thuế GTGT (VAT)
-              </div>
-            </div>
-
-            <div class="sidebar-perks-list">
-              <div class="sidebar-perk-item">{{ $t('course.perk1') }}</div>
-              <div class="sidebar-perk-item">{{ $t('course.perk2') }}</div>
-              <div class="sidebar-perk-item">{{ $t('course.perk3') }}</div>
-              <div class="sidebar-perk-item">{{ $t('course.perk4') }}</div>
-            </div>
-
             <!-- Nếu đã sở hữu: Hiển thị nút Vào học ngay -->
             <router-link 
               v-if="isAlreadyEnrolled"
               :to="'/courses/' + (course.handle || course.id) + '/study'"
               class="sidebar-register-btn enrolled-study-btn" 
-              style="width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 700;"
+              style="width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 700; margin-bottom: 12px;"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
                 <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -159,61 +248,72 @@
               <span>Vào Học Ngay</span>
             </router-link>
 
-            <!-- Nếu chưa sở hữu: Hiển thị nút Đăng ký -->
-            <button 
-              v-else
-              type="button" 
-              class="sidebar-register-btn" 
-              style="width: 100%; box-sizing: border-box; cursor: pointer; border: none; font-family: var(--font-sans);" 
-              @click="buyNow"
-            >
-              Đăng Ký
-            </button>
+            <!-- Nếu chưa sở hữu: Nút Đăng ký (Zalo) và Nút Liên hệ (Form liên hệ) -->
+            <template v-else>
+              <a 
+                href="https://zalo.me/0938566700" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="sidebar-register-btn sidebar-zalo-btn" 
+                style="width: 100%; box-sizing: border-box; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: var(--font-sans); margin-bottom: 10px;"
+              >
+                Đăng Ký
+              </a>
+
+              <button 
+                type="button" 
+                class="sidebar-contact-btn" 
+                @click="showConsultationModal = true"
+                style="width: 100%; box-sizing: border-box; cursor: pointer; font-family: var(--font-sans); margin-bottom: 10px;"
+              >
+                Liên Hệ
+              </button>
+            </template>
 
             <a href="tel:0938566700" class="sidebar-hotline-btn">
-             Hotline: 0938 566 700
+              Hotline: 0938 566 700
             </a>
 
-            <!-- Sidebar Related Courses Widget (Cùng nằm trong sidebar container, cuộn tự nhiên) -->
-            <div v-if="relatedCourses.length > 0" class="sidebar-related-courses-box">
+            <!-- Sidebar Related Articles Widget (Bài viết liên quan) -->
+            <div v-if="relatedBlogs.length > 0" class="sidebar-related-courses-box">
               <div class="sidebar-related-header">
-                <span class="related-badge">{{ $t('course.relatedBadge') }}</span>
-                <h3 class="sidebar-related-title">{{ $t('course.relatedTitle') }}</h3>
+                <span class="related-badge">BÀI VIẾT</span>
+                <h3 class="sidebar-related-title">Bài viết liên quan</h3>
               </div>
 
               <div class="sidebar-related-list">
                 <div 
-                  v-for="relCourse in relatedCourses" 
-                  :key="relCourse.id" 
+                  v-for="blog in relatedBlogs" 
+                  :key="blog.id" 
                   class="sidebar-related-item"
                 >
-                  <router-link :to="'/course/' + (relCourse.handle || relCourse.id)" class="sidebar-rel-thumb-link">
+                  <router-link :to="'/blog/' + blog.handle" class="sidebar-rel-thumb-link">
                     <img 
-                      :src="relCourse.image || '/images/Square-Cover-_1.webp'" 
-                      :alt="relCourse.title" 
+                      :src="blog.image || '/images/Square-Cover-_1.webp'" 
+                      :alt="blog.title" 
                       class="sidebar-rel-thumb" 
                       loading="lazy" 
                     />
                   </router-link>
                   <div class="sidebar-rel-info">
-                    <span class="sidebar-rel-cat">{{ getCategoryName(relCourse.category) }}</span>
+                    <span class="sidebar-rel-cat">{{ blog.category }}</span>
                     <h4 class="sidebar-rel-name">
-                      <router-link :to="'/course/' + (relCourse.handle || relCourse.id)">
-                        {{ relCourse.title }}
+                      <router-link :to="'/blog/' + blog.handle">
+                        {{ blog.title }}
                       </router-link>
                     </h4>
-                    <div class="sidebar-rel-price-row">
-                      <span class="sidebar-rel-price">{{ formatCurrency(relCourse.price) }}</span>
-                      <span v-if="hasDiscount(relCourse)" class="sidebar-rel-price-old">
-                        {{ formatCurrency(relCourse.originalPrice || relCourse.original_price) }}
-                      </span>
+                    <div class="sidebar-rel-price-row" v-if="blog.date">
+                      <span class="text-xs text-muted" style="font-size: 12px; color: #64748b;">📅 {{ blog.date }}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <router-link :to="course?.category ? '/courses/category/' + course.category : '/courses'" class="sidebar-related-more-btn">
-                Xem tất cả khóa học &rarr;
+              <router-link to="/library/blog" class="sidebar-related-more-btn" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>Xem tất cả bài viết</span>
+                <svg class="block-arrow-glow" width="36" height="16" viewBox="0 0 52 24" fill="none">
+                  <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#022B9F" />
+                </svg>
               </router-link>
             </div>
           </div>
@@ -221,6 +321,55 @@
 
       </div>
     </div>
+
+    <!-- Consultation Registration Modal -->
+    <Transition name="fade">
+      <div v-if="showConsultationModal" class="consultation-modal-overlay" @click.self="showConsultationModal = false">
+        <div class="consultation-modal-card">
+          <div class="modal-card-header">
+            <div>
+              <h3 class="modal-card-title">Liên Hệ Tư Vấn Khóa Học</h3>
+              <p class="modal-card-subtitle" v-if="course">{{ course.title }}</p>
+            </div>
+            <button type="button" class="modal-close-btn" @click="showConsultationModal = false" aria-label="Đóng">&times;</button>
+          </div>
+
+          <form @submit.prevent="submitConsultationForm" class="modal-card-body">
+            <div class="form-group" style="margin-bottom: 14px;">
+              <label style="font-size: 13px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px;">Họ và tên học viên <span style="color: #ef4444;">*</span></label>
+              <input v-model="consultationForm.fullname" type="text" required placeholder="Ví dụ: Nguyễn Văn An" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; width: 100%;" />
+            </div>
+
+            <div class="grid grid-2 gap-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 14px;">
+              <div class="form-group" style="margin: 0;">
+                <label style="font-size: 13px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px;">Số điện thoại <span style="color: #ef4444;">*</span></label>
+                <input v-model="consultationForm.phone" type="tel" required placeholder="Ví dụ: 0912 345 678" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; width: 100%;" />
+              </div>
+              <div class="form-group" style="margin: 0;">
+                <label style="font-size: 13px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px;">Email liên hệ <span style="color: #ef4444;">*</span></label>
+                <input v-model="consultationForm.email" type="email" required placeholder="Ví dụ: email@gmail.com" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; width: 100%;" />
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label style="font-size: 13px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px;">Nhu cầu tư vấn / Lời nhắn</label>
+              <textarea v-model="consultationForm.message" rows="3" placeholder="Ví dụ: Tôi muốn tìm hiểu chi tiết lịch học, chính sách ưu đãi..." class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; width: 100%;"></textarea>
+            </div>
+
+            <div class="modal-actions-row" style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
+              <button type="button" class="btn btn-secondary btn-sm" @click="showConsultationModal = false">Hủy</button>
+              <button type="submit" class="btn btn-primary btn-sm" :disabled="submittingConsultation" style="font-weight: 700; padding: 9px 24px;">
+                {{ submittingConsultation ? 'Đang gửi...' : 'Gửi thông tin liên hệ' }}
+              </button>
+            </div>
+
+            <div class="modal-support-footer" style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 13px; color: #64748b;">
+              Hoặc kết nối trực tiếp Hotline: <a href="tel:0938566700" style="color: #022B9F; font-weight: 700;">0938 566 700</a> • <a href="https://zalo.me/0938566700" target="_blank" rel="noopener" style="color: #022B9F; font-weight: 600;">Zalo</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -228,6 +377,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import { useTestimonialStore } from '@/stores/testimonials';
 import { stripHtml } from '@/utils/stripHtml';
 import { sanitizeHtml } from '@/utils/sanitize';
 import { formatImageUrl } from '@/utils/imageHelper';
@@ -296,61 +446,6 @@ const getCategoryName = (cat) => {
   }
 };
 
-const courseOutcomes = computed(() => {
-  if (!course.value) return [];
-  if (course.value.outcomes) {
-    if (Array.isArray(course.value.outcomes)) return course.value.outcomes;
-    if (typeof course.value.outcomes === 'string') {
-      const trimmed = course.value.outcomes.trim();
-      if (trimmed.startsWith('[')) {
-        try {
-          const parsed = JSON.parse(trimmed);
-          if (Array.isArray(parsed)) return parsed;
-        } catch (e) {}
-      }
-      return trimmed.split('\n').map(s => s.trim()).filter(Boolean);
-    }
-  }
-  
-  const cat = course.value.category;
-  if (cat === 'ky-nang-ai') {
-    return [
-      'Làm chủ công cụ AI & ứng dụng tự động hóa công việc thực tế',
-      'Tối ưu thời gian xử lý dữ liệu và tạo nội dung x5 lần',
-      'Xây dựng quy trình làm việc thông minh cho bản thân & đội ngũ',
-      'Nhận chứng nhận hoàn thành khóa học từ ACC Academy'
-    ];
-  } else if (cat === 'ky-nang-mem') {
-    return [
-      'Rèn luyện tư duy giao tiếp và thuyết phục hiệu quả trong công việc',
-      'Làm chủ phương pháp quản lý thời gian và giải quyết vấn đề linh hoạt',
-      'Nâng cao khả năng làm việc nhóm và đàm phán chuyên nghiệp',
-      'Nhận chứng nhận hoàn thành khóa học từ ACC Academy'
-    ];
-  } else if (cat === 'ky-nang-chuyen-mon') {
-    return [
-      'Thành thạo kỹ năng chuyên môn ứng dụng trực tiếp vào công việc',
-      'Xây dựng quy trình làm việc chuẩn mực và đạt hiệu suất tối đa',
-      'Nâng cao năng lực phân tích, quản lý và tối ưu hóa kết quả công việc',
-      'Nhận chứng nhận hoàn thành khóa học từ ACC Academy'
-    ];
-  } else if (cat === 'bundles') {
-    return [
-      'Sở hữu lộ trình học tập toàn diện từ cơ bản đến chuyên sâu',
-      'Tiết kiệm chi phí ưu đãi đặc biệt so với đăng ký từng khóa học lẻ',
-      'Truy cập trọn đời tất cả tài liệu và video bài giảng trong gói Combo',
-      'Nhận chứng nhận hoàn thành chương trình từ ACC Academy'
-    ];
-  }
-  
-  return [
-    `Nắm vững kiến thức trọng tâm của khóa ${course.value.title || 'học'}`,
-    'Ứng dụng thực tiễn ngay vào công việc hằng ngày',
-    'Tài liệu giáo trình đính kèm và nhóm hỗ trợ 24/7',
-    'Nhận chứng nhận hoàn thành khóa học từ ACC Academy'
-  ];
-});
-
 const courseRequirements = computed(() => {
   if (!course.value) return [];
   if (course.value.requirements) {
@@ -393,50 +488,52 @@ const parsedCurriculum = computed(() => {
   }
 });
 
-const registerForm = ref({
+const showConsultationModal = ref(false);
+const submittingConsultation = ref(false);
+const consultationForm = ref({
   fullname: '',
   phone: '',
   email: '',
   message: ''
 });
-const submittingRegister = ref(false);
 
-const scrollToRegister = () => {
-  const el = document.getElementById('course-register-form');
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' });
+// Auto-fill user contact info if logged in
+watch(() => courseStore.userMe, (u) => {
+  if (u) {
+    if (!consultationForm.value.fullname) consultationForm.value.fullname = u.fullname || '';
+    if (!consultationForm.value.email) consultationForm.value.email = u.email || '';
+    if (!consultationForm.value.phone) consultationForm.value.phone = u.phone || '';
   }
-};
+}, { immediate: true });
 
-const handleBottomRegister = async () => {
-  if (!registerForm.value.fullname || !registerForm.value.phone || !registerForm.value.email) {
+const submitConsultationForm = async () => {
+  if (!consultationForm.value.fullname || !consultationForm.value.phone || !consultationForm.value.email) {
     courseStore.showToast('Vui lòng điền đầy đủ các thông tin bắt buộc (*)', 'warning');
     return;
   }
-
-  submittingRegister.value = true;
+  submittingConsultation.value = true;
   try {
-    const nameParts = registerForm.value.fullname.trim().split(' ');
+    const nameParts = consultationForm.value.fullname.trim().split(' ');
     const lastName = nameParts.length > 0 ? nameParts[nameParts.length - 1] : '';
-    const firstName = nameParts.length > 1 ? nameParts[0] : registerForm.value.fullname.trim();
+    const firstName = nameParts.length > 1 ? nameParts[0] : consultationForm.value.fullname.trim();
     const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : '';
 
     await courseStore.sendContact(
       firstName,
       middleName,
       lastName,
-      registerForm.value.email,
-      registerForm.value.phone,
-      course.value?.handle || 'course-detail-register',
-      registerForm.value.message || `Đăng ký tư vấn cho khóa học: ${course.value?.title || ''}`
+      consultationForm.value.email,
+      consultationForm.value.phone,
+      course.value?.handle || 'course-register',
+      consultationForm.value.message || `Đăng ký tư vấn cho khóa học: ${course.value?.title || ''}`
     );
-
-    courseStore.showToast('Cảm ơn bạn! Đã gửi thông tin đăng ký tư vấn thành công.', 'success');
-    registerForm.value = { fullname: '', phone: '', email: '', message: '' };
+    courseStore.showToast('Cảm ơn bạn! Thông tin liên hệ đã được gửi thành công.', 'success');
+    showConsultationModal.value = false;
+    consultationForm.value.message = '';
   } catch (err) {
-    courseStore.showToast(err.message || 'Gửi thông tin thất bại. Vui lòng thử lại!', 'error');
+    courseStore.showToast(err.message || 'Gửi thông tin thất bại. Vui lòng liên hệ Hotline 0938 566 700!', 'error');
   } finally {
-    submittingRegister.value = false;
+    submittingConsultation.value = false;
   }
 };
 
@@ -472,27 +569,64 @@ const loadCourse = async () => {
 watch(() => route.params.handle, () => {
   loadCourse().then(() => {
     loadReviews();
+    loadCourseTestimonials();
   });
 });
 
-const addToCart = async () => {
-  if (!course.value) return;
-  if (!courseStore.token) {
-    courseStore.showToast('Vui lòng đăng nhập để đăng ký khóa học!', 'warning');
-    router.push('/login');
+
+
+const testimonialStore = useTestimonialStore();
+const courseTestimonials = ref([]);
+const showReviewForm = ref(false);
+const submittingReview = ref(false);
+
+const studentReviewForm = ref({
+  name: '',
+  role: '',
+  rating: 5,
+  text: ''
+});
+
+const loadCourseTestimonials = async () => {
+  if (!course.value || !course.value.id) return;
+  courseTestimonials.value = await testimonialStore.fetchCourseTestimonials(course.value.id);
+};
+
+const handleOpenResource = (url, label) => {
+  if (url && url.trim()) {
+    window.open(url.trim(), '_blank', 'noopener,noreferrer');
+  } else {
+    courseStore.showToast(`Liên kết ${label} của khóa học này đang được chuẩn bị và sẽ cập nhật sớm!`, 'info');
+  }
+};
+
+const submitReviewNoAuth = async () => {
+  if (!studentReviewForm.value.name.trim() || !studentReviewForm.value.text.trim()) {
+    courseStore.showToast('Vui lòng nhập đầy đủ họ tên và nội dung cảm nhận!', 'warning');
     return;
   }
+  submittingReview.value = true;
   try {
-    await courseStore.addToCart(course.value.id);
-    courseStore.showToast(`Đã thêm "${course.value.title}" vào giỏ hàng!`, 'success');
+    await testimonialStore.submitPublicTestimonial({
+      name: studentReviewForm.value.name.trim(),
+      role: studentReviewForm.value.role.trim(),
+      rating: studentReviewForm.value.rating,
+      text: studentReviewForm.value.text.trim(),
+      courseId: course.value.id,
+      courseName: course.value.title
+    });
+    courseStore.showToast('Cảm ơn bạn! Cảm nhận đã được gửi thành công và sẽ hiển thị sau khi Ban quản trị kiểm duyệt.', 'success');
+    studentReviewForm.value = { name: '', role: '', rating: 5, text: '' };
+    showReviewForm.value = false;
   } catch (err) {
-    courseStore.showToast(err.message || 'Không thể thêm khóa học vào giỏ hàng', 'error');
+    courseStore.showToast(err.message || 'Không thể gửi cảm nhận. Vui lòng thử lại!', 'error');
+  } finally {
+    submittingReview.value = false;
   }
 };
 
 const reviews = ref([]);
 const newReview = ref({ rating: 5, comment: '' });
-const submittingReview = ref(false);
 
 const isWishlisted = computed(() => {
   if (!course.value || !courseStore.wishlist) return false;
@@ -542,28 +676,7 @@ const submitReview = async () => {
   }
 };
 
-const buyNow = () => {
-  if (!course.value) return;
-  if (!courseStore.token) {
-    courseStore.showToast('Vui lòng đăng nhập để đăng ký khóa học!', 'warning');
-    router.push('/login');
-    return;
-  }
-  if (isAlreadyEnrolled.value) {
-    courseStore.showToast('Bạn đã sở hữu khóa học này rồi! Đang chuyển đến phòng học...', 'info');
-    router.push('/courses/' + (course.value.handle || course.value.id) + '/study');
-    return;
-  }
-  courseStore.buyNow(course.value)
-    .then(() => {
-      router.push('/checkout');
-    })
-    .catch(err => {
-      if (err.message !== 'CANCELLED') {
-        courseStore.showToast(err.message || 'Không thể tiến hành thanh toán', 'error');
-      }
-    });
-};
+
 
 const courseLecturers = computed(() => {
   if (!course.value || !course.value.lecturerIds) return [];
@@ -571,38 +684,24 @@ const courseLecturers = computed(() => {
   return ids.map(id => courseStore.lecturers.find(l => String(l.id) === String(id))).filter(Boolean);
 });
 
-// Khóa học liên quan: cùng category hoặc cùng programId, loại trừ chính khóa học hiện tại
-const relatedCourses = computed(() => {
-  if (!course.value || !courseStore.courses || courseStore.courses.length === 0) return [];
-  const currentId = course.value.id;
-  const currentHandle = course.value.handle;
-  const currentCategory = course.value.category;
-  const currentProgramId = course.value.programId;
+// Bài viết liên quan: CHỈ hiển thị những bài viết được gán đúng khóa học này (qua course_id)
+const relatedBlogs = computed(() => {
+  if (!course.value || !courseStore.blogPosts || courseStore.blogPosts.length === 0) return [];
+  const currentCourseId = Number(course.value.id);
 
-  // 1. Ưu tiên khóa học cùng chuyên mục (category) hoặc cùng chương trình (program)
-  let sameCategory = courseStore.courses.filter(c => {
-    if (c.id === currentId || c.handle === currentHandle) return false;
-    return (currentCategory && c.category === currentCategory) || 
-           (currentProgramId && c.programId === currentProgramId);
-  });
-
-  // 2. Nếu không đủ 4 khóa học, lấy thêm các khóa học khác để gợi ý đủ tối đa 4 khóa
-  if (sameCategory.length < 4) {
-    const others = courseStore.courses.filter(c => {
-      if (c.id === currentId || c.handle === currentHandle) return false;
-      return !sameCategory.some(sc => sc.id === c.id);
-    });
-    sameCategory = [...sameCategory, ...others];
-  }
-
-  return sameCategory.slice(0, 4);
+  return courseStore.blogPosts.filter(b => b.course_id && Number(b.course_id) === currentCourseId);
 });
 
 onMounted(() => {
-  loadCourse();
+  loadCourse().then(() => {
+    loadCourseTestimonials();
+  });
   loadReviews();
   if (courseStore.courses.length === 0) {
     courseStore.fetchCourses();
+  }
+  if (courseStore.blogPosts.length === 0) {
+    courseStore.fetchBlogs().catch(() => {});
   }
   if (courseStore.token) {
     courseStore.fetchWishlist();

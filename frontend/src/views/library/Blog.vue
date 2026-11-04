@@ -46,11 +46,11 @@
         </span>
       </div>
 
-      <!-- Loading Skeleton Cards -->
-      <div class="blog-grid" v-if="isLoading && posts.length === 0">
-        <article v-for="n in 6" :key="n" class="blog-card skeleton-card">
-          <div class="card-image-wrapper skeleton-img-box"></div>
-          <div class="card-body">
+      <!-- Loading Skeleton Strips -->
+      <div class="blog-list-wrapper" v-if="isLoading && posts.length === 0">
+        <article v-for="n in 5" :key="n" class="blog-strip-item skeleton-strip">
+          <div class="strip-image-link skeleton-img-box"></div>
+          <div class="strip-content">
             <div class="skeleton-shimmer skeleton-date"></div>
             <div class="skeleton-shimmer skeleton-title"></div>
             <div class="skeleton-shimmer skeleton-desc"></div>
@@ -59,28 +59,28 @@
         </article>
       </div>
 
-      <!-- Blog Grid -->
-      <div class="blog-grid" v-else-if="filteredPosts.length > 0" ref="blogGridRef">
+      <!-- Blog List (Kiểu ngang từng thanh) -->
+      <div class="blog-list-wrapper" v-else-if="filteredPosts.length > 0" ref="blogGridRef">
         <article 
           v-for="post in paginatedPosts" 
           :key="post.id" 
-          class="blog-card"
+          class="blog-strip-item"
         >
-          <router-link :to="post.link || '/blog/' + post.handle" class="card-image-link">
-            <div class="card-image-wrapper">
+          <router-link :to="post.link || '/blog/' + post.handle" class="strip-image-link">
+            <div class="strip-image-wrapper">
               <img 
-                :src="post.image || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop'" 
+                :src="formatImageUrl(post.image, 'w800') || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop'" 
                 :alt="post.title"
-                class="card-image"
+                class="strip-image"
                 loading="lazy"
                 decoding="async"
               />
-              <span class="category-badge">{{ post.category }}</span>
+              <span class="category-badge" v-if="post.category">{{ post.category }}</span>
             </div>
           </router-link>
 
-          <div class="card-body">
-            <div class="card-meta">
+          <div class="strip-content">
+            <div class="strip-meta">
               <span class="meta-date">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -88,23 +88,35 @@
                   <line x1="8" y1="2" x2="8" y2="6"></line>
                   <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
-                {{ post.date || 'Mới cập nhật' }}
+                {{ formatDate(post.date || post.created_at || post.createdAt) }}
               </span>
+              <span class="meta-dot">•</span>
               <span class="meta-author">ACC Editorial</span>
+              <span v-if="getLinkedCourseTitle(post.course_id)" class="linked-course-pill">
+                📚 {{ getLinkedCourseTitle(post.course_id) }}
+              </span>
             </div>
 
-            <h3 class="card-title">
-              <router-link :to="post.link || '/blog/' + post.handle" class="title-link">
+            <h3 class="strip-title">
+              <router-link :to="post.link || '/blog/' + post.handle" class="strip-title-link">
                 {{ post.title }}
               </router-link>
             </h3>
 
-            <p class="card-excerpt">{{ post.excerpt }}</p>
+            <p class="strip-excerpt" v-if="post.excerpt">{{ post.excerpt }}</p>
 
-            <div class="card-footer">
-              <router-link :to="post.link || '/blog/' + post.handle" class="btn-read-more">
-                <span>Đọc bài viết</span>
-                <span class="arrow">&rarr;</span>
+            <div class="strip-footer">
+              <router-link :to="post.link || '/blog/' + post.handle" class="arrow-container" aria-label="Xem chi tiết bài viết" title="Xem chi tiết">
+                <svg class="block-arrow-glow" width="46" height="20" viewBox="0 0 52 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="blogArrowBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#022B9F"/>
+                      <stop offset="100%" stop-color="#2563eb"/>
+                    </linearGradient>
+                  </defs>
+                  <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" 
+                        fill="url(#blogArrowBlue)" />
+                </svg>
               </router-link>
             </div>
           </div>
@@ -136,6 +148,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import Pagination from '@/components/Pagination.vue';
+import { formatImageUrl } from '@/utils/imageHelper';
 
 const courseStore = useCourseStore();
 const blogGridRef = ref(null);
@@ -159,7 +172,24 @@ onMounted(async () => {
 const selectedCategory = ref('All posts');
 const searchQuery = ref('');
 const currentPage = ref(1);
-const pageSize = ref(6); // 6 bài viết mỗi trang (chia đều lưới 2 hoặc 3 cột)
+const pageSize = ref(8); // 8 bài viết mỗi trang dạng danh sách ngang
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return 'Mới cập nhật';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  } catch (e) {
+    return dateStr;
+  }
+};
+
+const getLinkedCourseTitle = (courseId) => {
+  if (!courseId) return null;
+  const c = courseStore.courses.find(item => item.id === courseId);
+  return c ? c.title : null;
+};
 
 const posts = computed(() => courseStore.getBlogPosts || []);
 

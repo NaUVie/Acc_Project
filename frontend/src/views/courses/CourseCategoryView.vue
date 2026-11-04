@@ -1,173 +1,234 @@
 <template>
   <div class="course-category-view container">
-
-
-    <!-- Mega Dropdown-Style Layout Container -->
+    <!-- Mega Style Layout Container -->
     <div class="mega-style-layout glass-card">
-      <!-- Left Sidebar: Categories Navigation -->
-      <div class="mega-menu-sidebar">
+      <!-- Left Sidebar: Dynamic Categories Navigation -->
+      <aside class="mega-menu-sidebar" aria-label="Danh mục khóa học">
         <button 
           v-for="cat in availableCategories" 
           :key="cat.id"
+          type="button"
           class="mega-sidebar-item"
           :class="{ active: selectedCategory === cat.id }"
-          @click="selectCategory(cat.id)"
-          @mouseenter="selectCategoryHover(cat.id)"
+          @click="scrollToCategory(cat.id)"
         >
           <span class="indicator-bar"></span>
-          <span>{{ cat.name }}</span>
-          <span class="cat-count-badge">{{ getCategoryCount(cat.id) }}</span>
+          <span class="sidebar-item-label">{{ cat.name }}</span>
+          <span class="cat-count-badge">{{ cat.count }}</span>
         </button>
-      </div>
+      </aside>
 
-      <!-- Right Content: Courses Grid for regular categories -->
-      <div class="mega-menu-content" v-if="selectedCategory !== 'corporate'">
+      <!-- Right Content: Dynamic Category Sections with Course Cards -->
+      <main class="mega-menu-content">
+        <!-- Loading State -->
+        <div v-if="courseStore.loading && courseStore.courses.length === 0" class="category-loading-state">
+          <div class="loading-spinner"></div>
+          <p>Đang tải danh sách khóa học...</p>
+        </div>
 
-        <!-- Course Cards Grid (Matching Mega Program Card Grid Style) -->
-        <template v-if="filteredCourses.length > 0">
-          <div class="mega-programs-grid">
-            <div 
-              v-for="course in paginatedCourses" 
-              :key="course.id"
-              class="mega-program-card"
-            >
-              <router-link :to="'/course/' + (course.handle || course.id)" class="mega-card-link">
-                <div class="mega-school-logo">
-                  <img :src="formatImageUrl(course.image, 'w800') || '/images/Square-Cover-_1.webp'" :alt="course.title" loading="lazy" decoding="async" @error="handleImageError" />
-                </div>
-                <div class="mega-card-info">
-                  <span class="mega-school-name">{{ course.level || 'Khóa học' }}</span>
-                  <h4 class="mega-program-title" :title="course.title">{{ course.title }}</h4>
-                  <p class="mega-program-desc">{{ stripHtml(course.description) }}</p>
-                  <div class="mega-card-footer">
-                    <div class="btn-link-stretch">
-                      <div class="arrow-stretch-box">
-                        <span class="line-body"></span>
-                        <span class="arrow-tip"></span>
+        <!-- Render All Dynamic Category Sections -->
+        <template v-else-if="dynamicCategories.length > 0">
+          <section 
+            v-for="cat in dynamicCategories" 
+            :key="cat.slug" 
+            :id="'category-' + cat.slug"
+            class="category-group-section"
+          >
+            <div class="category-section-header">
+              <div class="category-header-info">
+                <span class="cat-badge-small">CHƯƠNG TRÌNH ĐÀO TẠO</span>
+                <h3 class="category-section-title">{{ cat.name }}</h3>
+              </div>
+              <span class="category-count-pill">{{ cat.courses.length }} khóa học</span>
+            </div>
+
+            <!-- Course Cards Grid -->
+            <div v-if="cat.courses.length > 0" class="mega-programs-grid">
+              <div 
+                v-for="course in cat.courses" 
+                :key="course.id"
+                class="mega-program-card"
+              >
+                <router-link :to="'/course/' + (course.handle || course.id)" class="mega-card-link">
+                  <div class="mega-school-logo">
+                    <img 
+                      :src="formatImageUrl(course.image, 'w800') || '/images/Square-Cover-_1.webp'" 
+                      :alt="course.title" 
+                      loading="lazy" 
+                      decoding="async" 
+                      @error="handleImageError" 
+                    />
+                    <span class="card-status-pill" :class="'card-status-' + (course.status || 'ongoing')">
+                      {{ course.status === 'upcoming' ? '⏳ Sắp diễn ra' : (course.status === 'completed' ? '🏁 Đã diễn ra' : '🟢 Đang diễn ra') }}
+                    </span>
+                  </div>
+                  <div class="mega-card-info">
+                    <span class="mega-school-name">{{ course.level || 'Khóa học' }}</span>
+                    <h4 class="mega-program-title" :title="course.title">{{ course.title }}</h4>
+                    <p class="mega-program-desc">{{ stripHtml(course.description) }}</p>
+                    <div class="mega-card-footer">
+                      <div class="arrow-container" aria-label="Xem chi tiết">
+                        <svg class="block-arrow-glow" width="46" height="20" viewBox="0 0 52 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <defs>
+                            <linearGradient id="catArrowBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+                              <stop offset="0%" stop-color="#022B9F"/>
+                              <stop offset="100%" stop-color="#2563eb"/>
+                            </linearGradient>
+                          </defs>
+                          <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" 
+                                fill="url(#catArrowBlue)" />
+                        </svg>
                       </div>
                     </div>
                   </div>
-                </div>
-              </router-link>
+                </router-link>
+              </div>
             </div>
-          </div>
 
-          <!-- Pagination Component -->
-          <Pagination 
-            v-if="filteredCourses.length > pageSize"
-            v-model:currentPage="currentPage"
-            :totalItems="filteredCourses.length"
-            :pageSize="pageSize"
-            @page-change="onPageChange"
-          />
+            <!-- Empty category state if no courses exist yet in this category -->
+            <div v-else class="empty-category-notice">
+              <p>Chưa có khóa học nào trong danh mục này.</p>
+            </div>
+          </section>
         </template>
 
+        <!-- Empty State when no courses or categories exist at all -->
         <div v-else class="empty-state">
-          <p>{{ $t('course.emptyCategory') }}</p>
+          <p>{{ $t('course.emptyCategory') || 'Chưa có khóa học nào.' }}</p>
         </div>
-      </div>
-
-      <!-- Corporate Menu Panel inside Mega Style Layout -->
-      <div class="mega-menu-content corporate-mega-content" v-else>
-        <div class="mega-content-header">
-          <div>
-            <span class="cat-badge-small">IN-HOUSE & TƯ VẤN</span>
-            <h2 class="mega-content-title">Giải pháp Đào tạo Doanh nghiệp</h2>
-          </div>
-          <router-link to="/corporate/dao-tao" class="mega-view-all-link">
-            Tìm hiểu chi tiết &rarr;
-          </router-link>
-        </div>
-
-        <div class="corporate-menu-grid">
-          <div class="corporate-menu-group">
-            <div class="corporate-group-header">
-              <router-link to="/corporate/dao-tao" class="corporate-group-title">
-                <span class="icon-bullet">🚀</span>
-                Đào tạo AI INHOUSE cho doanh nghiệp
-              </router-link>
-            </div>
-            <ul class="corporate-sub-list">
-              <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI cho Cơ quan Nhà nước, UBND & Phường/Xã</router-link></li>
-              <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI chuyên ngành Y tế & Thẩm mỹ</router-link></li>
-              <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI chuyên ngành Xây dựng</router-link></li>
-              <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI cho Doanh nghiệp Sản xuất & Thương mại</router-link></li>
-              <li><router-link to="/corporate/dao-tao" class="corporate-sub-link">Đào tạo AI cho Trường học & Cơ sở Giáo dục</router-link></li>
-            </ul>
-          </div>
-
-          <div class="corporate-menu-group">
-            <div class="corporate-group-header">
-              <router-link to="/corporate/coe" class="corporate-group-title">
-                <span class="icon-bullet">🛡️</span>
-                Quản trị & Bảo mật Dữ liệu Doanh nghiệp
-              </router-link>
-            </div>
-
-            <div class="corporate-group-header style-mt">
-              <router-link to="/corporate/for-team" class="corporate-group-title">
-                <span class="icon-bullet">📊</span>
-                Xây dựng Khung năng lực & Phát triển Nhân sự
-              </router-link>
-            </div>
-            <ul class="corporate-sub-list">
-              <li><router-link to="/corporate/for-team" class="corporate-sub-link">Xây dựng Ma trận năng lực theo vị trí</router-link></li>
-              <li><router-link to="/corporate/for-team" class="corporate-sub-link">Tích hợp năng lực AI & năng lực số</router-link></li>
-              <li><router-link to="/corporate/for-team" class="corporate-sub-link">Xây dựng khung năng lực theo phòng ban</router-link></li>
-              <li><router-link to="/corporate/for-team" class="corporate-sub-link">Xây dựng Lộ trình đào tạo toàn diện</router-link></li>
-            </ul>
-          </div>
-
-          <div class="corporate-menu-group">
-            <div class="corporate-group-header">
-              <router-link to="/corporate/case-studies" class="corporate-group-title">
-                <span class="icon-bullet">💡</span>
-                Năng lực Lãnh đạo Chủ động & Hiệu quả
-              </router-link>
-            </div>
-
-            <div class="corporate-group-header style-mt">
-              <router-link to="/corporate/case-studies" class="corporate-group-title">
-                <span class="icon-bullet">🤝</span>
-                Phát triển Kỹ năng mềm Doanh nghiệp
-              </router-link>
-            </div>
-
-            <div class="corporate-group-header style-mt">
-              <router-link to="/corporate/case-studies" class="corporate-group-title">
-                <span class="icon-bullet">🎤</span>
-                Nghệ thuật Kể chuyện & Truyền cảm hứng
-              </router-link>
-            </div>
-          </div>
-        </div>
-      </div>
+      </main>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import { useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
 import { stripHtml } from '@/utils/stripHtml';
 import { formatImageUrl } from '@/utils/imageHelper';
-import Pagination from '@/components/Pagination.vue';
 
 const route = useRoute();
-const router = useRouter();
 const courseStore = useCourseStore();
 
-const selectedCategory = ref(route.params.categorySlug || 'all');
-const currentPage = ref(1);
-const pageSize = ref(6);
+const selectedCategory = ref('all');
+let isProgrammaticScroll = false;
 
-onMounted(async () => {
-  const paramSlug = route.params.categorySlug;
-  if (paramSlug) {
-    selectedCategory.value = paramSlug;
+// Dynamic categories with courses grouped directly from store (API / DB)
+const dynamicCategories = computed(() => {
+  const cats = (courseStore.categories || []).filter(c => c.slug !== 'bundles');
+  const handledIds = new Set();
+
+  const list = cats.map(c => {
+    const courses = courseStore.getCoursesByCategory(c.slug) || [];
+    courses.forEach(crs => handledIds.add(crs.id));
+    return {
+      slug: c.slug,
+      name: c.name,
+      courses
+    };
+  });
+
+  // Any remaining courses without a matched category
+  const remaining = (courseStore.courses || []).filter(c => !handledIds.has(c.id));
+  if (remaining.length > 0) {
+    list.push({
+      slug: 'other',
+      name: 'Khóa học khác',
+      courses: remaining
+    });
   }
 
+  return list;
+});
+
+// Dynamic Sidebar Categories Navigation
+const availableCategories = computed(() => {
+  const list = [
+    {
+      id: 'all',
+      name: 'Tất cả khóa học',
+      count: courseStore.courses.length
+    }
+  ];
+
+  dynamicCategories.value.forEach(cat => {
+    list.push({
+      id: cat.slug,
+      name: cat.name,
+      count: cat.courses.length
+    });
+  });
+
+  return list;
+});
+
+const scrollToCategory = (id, smooth = true) => {
+  selectedCategory.value = id;
+  isProgrammaticScroll = true;
+
+  if (id === 'all') {
+    const layoutEl = document.querySelector('.mega-style-layout');
+    if (layoutEl) {
+      const headerOffset = 90;
+      const targetY = layoutEl.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+      window.scrollTo({ top: Math.max(0, targetY), behavior: smooth ? 'smooth' : 'auto' });
+    } else {
+      window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'auto' });
+    }
+    if (window.location.pathname !== '/courses') {
+      history.replaceState(null, '', '/courses');
+    }
+  } else {
+    const el = document.getElementById(`category-${id}`);
+    if (el) {
+      const headerOffset = 90;
+      const targetY = el.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+      window.scrollTo({ top: Math.max(0, targetY), behavior: smooth ? 'smooth' : 'auto' });
+    }
+    history.replaceState(null, '', `/courses/category/${id}`);
+  }
+
+  setTimeout(() => {
+    isProgrammaticScroll = false;
+  }, 750);
+};
+
+const handleScroll = () => {
+  if (isProgrammaticScroll) return;
+
+  const sections = dynamicCategories.value;
+  if (!sections.length) return;
+
+  const headerOffset = 130;
+  const scrollY = window.pageYOffset;
+  const layoutEl = document.querySelector('.mega-style-layout');
+
+  if (layoutEl) {
+    const layoutTop = layoutEl.getBoundingClientRect().top + window.pageYOffset - headerOffset;
+    if (scrollY < layoutTop + 40) {
+      selectedCategory.value = 'all';
+      return;
+    }
+  }
+
+  let currentActive = 'all';
+  for (const cat of sections) {
+    const el = document.getElementById(`category-${cat.slug}`);
+    if (el) {
+      const top = el.getBoundingClientRect().top;
+      if (top <= headerOffset + 40) {
+        currentActive = cat.slug;
+      }
+    }
+  }
+
+  if (selectedCategory.value !== currentActive) {
+    selectedCategory.value = currentActive;
+  }
+};
+
+onMounted(async () => {
   const promises = [];
   if (courseStore.courses.length === 0) {
     promises.push(courseStore.fetchCourses());
@@ -178,76 +239,29 @@ onMounted(async () => {
   if (promises.length > 0) {
     await Promise.all(promises).catch(() => {});
   }
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+
+  const paramSlug = route.params.categorySlug;
+  if (paramSlug) {
+    await nextTick();
+    setTimeout(() => {
+      scrollToCategory(paramSlug, true);
+    }, 200);
+  }
+});
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleScroll);
 });
 
 watch(() => route.params.categorySlug, (newSlug) => {
-  currentPage.value = 1;
   if (newSlug) {
-    selectedCategory.value = newSlug;
+    scrollToCategory(newSlug, true);
   } else {
-    selectedCategory.value = 'all';
+    scrollToCategory('all', true);
   }
 });
-
-const selectCategory = (id) => {
-  currentPage.value = 1;
-  selectedCategory.value = id;
-  if (id === 'all') {
-    router.push('/courses');
-  } else if (id !== 'corporate') {
-    router.push(`/courses/category/${id}`);
-  }
-};
-
-const selectCategoryHover = (id) => {
-  if (selectedCategory.value !== id) {
-    currentPage.value = 1;
-  }
-  selectedCategory.value = id;
-};
-
-const availableCategories = computed(() => {
-  const list = [{ id: 'all', name: 'Tất cả khóa học' }];
-  const cats = courseStore.categories || [];
-  cats.forEach(c => {
-    if (c.slug !== 'bundles') {
-      list.push({ id: c.slug, name: c.name });
-    }
-  });
-  return list;
-});
-
-const getCategoryCount = (id) => {
-  if (id === 'all') return courseStore.courses.length;
-  if (id === 'bundles') return courseStore.bundles ? courseStore.bundles.length : 0;
-  return courseStore.getCoursesByCategory(id).length;
-};
-
-
-
-const filteredCourses = computed(() => {
-  if (selectedCategory.value === 'all') {
-    return courseStore.courses;
-  }
-  return courseStore.getCoursesByCategory(selectedCategory.value);
-});
-
-const paginatedCourses = computed(() => {
-  const start = (currentPage.value - 1) * pageSize.value;
-  return filteredCourses.value.slice(start, start + pageSize.value);
-});
-
-const onPageChange = () => {
-  window.scrollTo({ top: 180, behavior: 'smooth' });
-};
-
-const formatPrice = (value) => {
-  if (!value) return 'Liên hệ';
-  if (typeof value === 'number') {
-    return value.toLocaleString('vi-VN') + 'đ';
-  }
-  return value;
-};
 
 const handleImageError = (e) => {
   e.target.src = '/images/Square-Cover-_1.webp';

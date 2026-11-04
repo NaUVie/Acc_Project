@@ -62,14 +62,12 @@ const routes = [
   {
     path: '/projects',
     alias: ['/du-an', '/corporate/case-studies', '/su-kien'],
-    name: 'Projects',
-    component: () => import('../views/Projects.vue')
+    redirect: '/'
   },
   {
     path: '/projects/:id',
     alias: ['/du-an/:id'],
-    name: 'ProjectDetail',
-    component: () => import('../views/ProjectDetail.vue')
+    redirect: '/'
   },
   {
     path: '/library/blog',
@@ -133,14 +131,11 @@ const routes = [
   },
   {
     path: '/cart',
-    name: 'Cart',
-    component: () => import('../views/Cart.vue')
+    redirect: '/courses'
   },
   {
     path: '/checkout',
-    name: 'Checkout',
-    component: () => import('../views/Checkout.vue'),
-    meta: { requiresAuth: true }
+    redirect: '/courses'
   },
   {
     path: '/testimonials',
@@ -168,8 +163,7 @@ const routes = [
   },
   {
     path: '/payment/vnpay-return',
-    name: 'VnpayReturn',
-    component: () => import('../views/VnpayReturn.vue')
+    redirect: '/courses'
   },
   {
     path: '/admin',
@@ -217,8 +211,8 @@ const routes = [
 // Functional pages (auth / cart / checkout / learning room ...) stay Vietnamese-only
 // and are NOT duplicated under /en
 const NO_LOCALE_PATHS = [
-  '/login', '/register', '/cart', '/checkout', '/dashboard',
-  '/courses/:handle/study', '/order/:id', '/payment/vnpay-return', '/referral'
+  '/login', '/register', '/dashboard',
+  '/courses/:handle/study', '/order/:id', '/referral'
 ];
 routes.forEach(r => {
   if (NO_LOCALE_PATHS.includes(r.path)) r.meta = { ...(r.meta || {}), noLocale: true };

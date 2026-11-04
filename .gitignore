@@ -37,6 +37,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+.eslintcache
+.cache/
 
 # OS & Editor clutter
 .DS_Store
@@ -46,11 +48,17 @@ Thumbs.db
 *.swp
 *.tmp
 *.local
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 
 # Temporary markdown & notes
 suadoi.md
 suadoi2.md
 *.scratch.*
+scratch/
+**/scratch/
 clean_images.py
 logo.jpg
 logo2.jpg

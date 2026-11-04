@@ -38,6 +38,47 @@
         </div>
       </div>
 
+      <!-- Filter by Event Status (Sắp diễn ra / Đang diễn ra / Đã diễn ra) -->
+      <div class="status-tabs-container mt-3" style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <span style="font-size: 13px; font-weight: 700; color: #475569; margin-right: 4px;">Trạng thái:</span>
+        <button 
+          type="button" 
+          class="btn btn-sm" 
+          :class="selectedStatusFilter === 'all' ? 'btn-primary' : 'btn-secondary'"
+          @click="selectedStatusFilter = 'all'"
+          style="font-weight: 600; border-radius: 20px; padding: 5px 14px;"
+        >
+          Tất cả ({{ courses.length }})
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-sm" 
+          :class="selectedStatusFilter === 'upcoming' ? 'btn-status-filter-upcoming-active' : 'btn-secondary'"
+          @click="selectedStatusFilter = 'upcoming'"
+          style="font-weight: 600; border-radius: 20px; padding: 5px 14px;"
+        >
+          ⏳ Sắp diễn ra ({{ countByStatus('upcoming') }})
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-sm" 
+          :class="selectedStatusFilter === 'ongoing' ? 'btn-status-filter-ongoing-active' : 'btn-secondary'"
+          @click="selectedStatusFilter = 'ongoing'"
+          style="font-weight: 600; border-radius: 20px; padding: 5px 14px;"
+        >
+          🟢 Đang diễn ra ({{ countByStatus('ongoing') }})
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-sm" 
+          :class="selectedStatusFilter === 'completed' ? 'btn-status-filter-completed-active' : 'btn-secondary'"
+          @click="selectedStatusFilter = 'completed'"
+          style="font-weight: 600; border-radius: 20px; padding: 5px 14px;"
+        >
+          🏁 Đã diễn ra ({{ countByStatus('completed') }})
+        </button>
+      </div>
+
       <div class="table-responsive mt-6">
         <table class="admin-table">
           <thead>
@@ -45,6 +86,7 @@
               <th style="width: 60px;">Ảnh</th>
               <th>Tên khóa học</th>
               <th>Chuyên mục</th>
+              <th>Trạng thái</th>
               <th>Thời lượng</th>
               <th>Giá bán</th>
               <th>Hành động</th>
@@ -62,6 +104,19 @@
               <td data-label="Chuyên mục">
                 <span class="badge badge-info">{{ getCategoryName(c.category) }}</span>
               </td>
+              <td data-label="Trạng thái">
+                <select 
+                  :value="c.status || 'ongoing'" 
+                  @change="handleQuickStatusChange(c, $event.target.value)"
+                  class="admin-course-status-select"
+                  :class="'select-status-' + (c.status || 'ongoing')"
+                  title="Nhấp để chuyển trực tiếp trạng thái của khóa học"
+                >
+                  <option value="upcoming">⏳ Sắp diễn ra</option>
+                  <option value="ongoing">🟢 Đang diễn ra</option>
+                  <option value="completed">🏁 Đã diễn ra</option>
+                </select>
+              </td>
               <td data-label="Thời lượng">{{ c.duration || 'N/A' }}</td>
               <td data-label="Giá bán">
                 <span class="font-bold text-success">{{ formatCurrency(c.price) }}</span>
@@ -78,7 +133,7 @@
               </td>
             </tr>
             <tr v-if="isLoadingCourses && filteredCourses.length === 0">
-              <td colspan="6">
+              <td colspan="7">
                 <div class="admin-center-loader" style="padding: 40px 0; min-height: 160px;">
                   <div class="admin-spinner"></div>
                   <p class="admin-loader-text">Đang nạp danh sách khóa học...</p>
@@ -152,7 +207,31 @@ const selectedCourseForCurriculum = ref(null);
 
 const searchQuery = ref('');
 const selectedCategoryFilter = ref('all');
+const selectedStatusFilter = ref('all');
 const currentPage = ref(1);
+
+const countByStatus = (st) => {
+  return courses.value.filter(c => (c.status || 'ongoing') === st).length;
+};
+
+const getStatusLabel = (st) => {
+  if (st === 'upcoming') return 'Sắp diễn ra';
+  if (st === 'completed') return 'Đã diễn ra';
+  return 'Đang diễn ra';
+};
+
+const handleQuickStatusChange = async (course, newStatus) => {
+  try {
+    await courseStore.updateAdminCourse(course.id, {
+      ...course,
+      status: newStatus
+    });
+    course.status = newStatus;
+    courseStore.showToast(`Đã chuyển khóa học sang "${getStatusLabel(newStatus)}"`, 'success');
+  } catch (err) {
+    courseStore.showToast('Lỗi khi đổi trạng thái: ' + (err.message || err), 'error');
+  }
+};
 const pageSize = ref(8);
 
 const courses = computed(() => courseStore.courses || []);
@@ -178,6 +257,9 @@ const filteredCourses = computed(() => {
   if (selectedCategoryFilter.value !== 'all') {
     list = list.filter(c => c.category === selectedCategoryFilter.value);
   }
+  if (selectedStatusFilter.value !== 'all') {
+    list = list.filter(c => (c.status || 'ongoing') === selectedStatusFilter.value);
+  }
   if (searchQuery.value.trim()) {
     const q = searchQuery.value.toLowerCase().trim();
     list = list.filter(c => 
@@ -193,7 +275,7 @@ const paginatedCourses = computed(() => {
   return filteredCourses.value.slice(start, start + pageSize.value);
 });
 
-watch([selectedCategoryFilter, searchQuery], () => {
+watch([selectedCategoryFilter, selectedStatusFilter, searchQuery], () => {
   currentPage.value = 1;
 });
 
@@ -260,4 +342,55 @@ onMounted(async () => {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* Status Tabs & Select Styles */
+.btn-status-filter-upcoming-active {
+  background: #f59e0b !important;
+  color: #ffffff !important;
+  border-color: #d97706 !important;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.35);
+}
+.btn-status-filter-ongoing-active {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  border-color: #059669 !important;
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.35);
+}
+.btn-status-filter-completed-active {
+  background: #64748b !important;
+  color: #ffffff !important;
+  border-color: #475569 !important;
+  box-shadow: 0 2px 6px rgba(100, 116, 139, 0.35);
+}
+
+.admin-course-status-select {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  outline: none;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.admin-course-status-select:hover {
+  filter: brightness(0.95);
+}
+.admin-course-status-select.select-status-upcoming {
+  background: #fef3c7;
+  color: #b45309;
+  border-color: #fcd34d;
+}
+.admin-course-status-select.select-status-ongoing {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #6ee7b7;
+}
+.admin-course-status-select.select-status-completed {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+}
+
 </style>

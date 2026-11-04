@@ -44,6 +44,10 @@ class CourseBase(BaseModel):
     requirements: Optional[str] = None
     custom_roadmap: Optional[str] = None
     lecturer_ids: Optional[str] = None
+    status: Optional[str] = "ongoing"
+    materials_link: Optional[str] = None
+    photos_link: Optional[str] = None
+    youtube_link: Optional[str] = None
 
 class CoursePublicResponse(CourseBase):
     tags: List[CourseTagResponse] = []
@@ -159,6 +163,7 @@ class BlogPostBase(BaseModel):
     date: Optional[str] = None
     link: Optional[str] = None
     content: Optional[str] = None
+    course_id: Optional[int] = None
 
 class BlogPostCreate(BaseModel):
     title: str
@@ -169,6 +174,7 @@ class BlogPostCreate(BaseModel):
     date: Optional[str] = None
     link: Optional[str] = None
     content: Optional[str] = None
+    course_id: Optional[int] = None
 
 class BlogPostUpdate(BaseModel):
     title: Optional[str] = None
@@ -179,6 +185,7 @@ class BlogPostUpdate(BaseModel):
     date: Optional[str] = None
     link: Optional[str] = None
     content: Optional[str] = None
+    course_id: Optional[int] = None
 
 class BlogPostResponse(BlogPostBase):
     class Config:
@@ -193,6 +200,7 @@ class BlogPostListResponse(BaseModel):
     image: Optional[str] = None
     date: Optional[str] = None
     link: Optional[str] = None
+    course_id: Optional[int] = None
 
     class Config:
         from_attributes = True
@@ -521,10 +529,12 @@ class TestimonialCreate(BaseModel):
     rating: Optional[int] = 5
     quote: Optional[str] = None
     course_name: Optional[str] = None
+    course_id: Optional[int] = None
     testimonial_type: Optional[str] = "text"
     youtube_id: Optional[str] = None
     thumbnail: Optional[str] = None
     video_url: Optional[str] = None
+    is_approved: Optional[bool] = False
 
 class TestimonialUpdate(BaseModel):
     name: Optional[str] = None
@@ -535,10 +545,12 @@ class TestimonialUpdate(BaseModel):
     rating: Optional[int] = None
     quote: Optional[str] = None
     course_name: Optional[str] = None
+    course_id: Optional[int] = None
     testimonial_type: Optional[str] = None
     youtube_id: Optional[str] = None
     thumbnail: Optional[str] = None
     video_url: Optional[str] = None
+    is_approved: Optional[bool] = None
 
 class TestimonialResponse(BaseModel):
     id: int
@@ -550,10 +562,12 @@ class TestimonialResponse(BaseModel):
     rating: Optional[int] = 5
     quote: Optional[str] = None
     course_name: Optional[str] = None
+    course_id: Optional[int] = None
     testimonial_type: Optional[str] = "text"
     youtube_id: Optional[str] = None
     thumbnail: Optional[str] = None
     video_url: Optional[str] = None
+    is_approved: Optional[bool] = True
     created_at: Optional[datetime] = None
 
     class Config:
@@ -701,6 +715,10 @@ class CourseAdminCreate(BaseModel):
     requirements: Optional[str] = None
     custom_roadmap: Optional[str] = None
     lecturer_ids: Optional[str] = None
+    status: Optional[str] = "ongoing"
+    materials_link: Optional[str] = None
+    photos_link: Optional[str] = None
+    youtube_link: Optional[str] = None
 
 class CourseAdminUpdate(BaseModel):
     title: Optional[str] = None
@@ -719,6 +737,10 @@ class CourseAdminUpdate(BaseModel):
     requirements: Optional[str] = None
     custom_roadmap: Optional[str] = None
     lecturer_ids: Optional[str] = None
+    status: Optional[str] = None
+    materials_link: Optional[str] = None
+    photos_link: Optional[str] = None
+    youtube_link: Optional[str] = None
 
 class ContactSettingUpdate(BaseModel):
     address: Optional[str] = None
@@ -961,6 +983,70 @@ class PartnerUpdate(BaseModel):
 
 
 class PartnerResponse(PartnerBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Board Member Schemas
+class BoardMemberBase(BaseModel):
+    name: str
+    main_role: str
+    role_group: Optional[str] = "executive" # "executive", "advisor"
+    avatar: Optional[str] = None
+    bio_list: Optional[str] = None # JSON string or newline-delimited text
+    position: Optional[int] = 0
+    is_active: Optional[bool] = True
+
+class BoardMemberCreate(BoardMemberBase):
+    pass
+
+class BoardMemberUpdate(BaseModel):
+    name: Optional[str] = None
+    main_role: Optional[str] = None
+    role_group: Optional[str] = None
+    avatar: Optional[str] = None
+    bio_list: Optional[str] = None
+    position: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class BoardMemberResponse(BoardMemberBase):
+    id: int
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+# Admission Post Schemas
+class AdmissionPostBase(BaseModel):
+    slug: str
+    title: str
+    subtitle: Optional[str] = None
+    category: Optional[str] = None
+    tag: Optional[str] = None
+    image: Optional[str] = None
+    highlights: Optional[str] = None
+    content: Optional[str] = None
+    position: Optional[int] = 0
+    is_active: Optional[bool] = True
+
+class AdmissionPostCreate(AdmissionPostBase):
+    pass
+
+class AdmissionPostUpdate(BaseModel):
+    slug: Optional[str] = None
+    title: Optional[str] = None
+    subtitle: Optional[str] = None
+    category: Optional[str] = None
+    tag: Optional[str] = None
+    image: Optional[str] = None
+    highlights: Optional[str] = None
+    content: Optional[str] = None
+    position: Optional[int] = None
+    is_active: Optional[bool] = None
+
+class AdmissionPostResponse(AdmissionPostBase):
     id: int
     created_at: datetime
 

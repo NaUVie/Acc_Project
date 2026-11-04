@@ -72,6 +72,18 @@ def perform_startup_tasks():
                 if "cover_image" not in courses_cols:
                     conn.execute(text("ALTER TABLE courses ADD COLUMN cover_image VARCHAR(255) NULL"))
                     print("Added column cover_image to courses table.")
+                if "status" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN status VARCHAR(50) DEFAULT 'ongoing'"))
+                    print("Added column status to courses table.")
+                if "materials_link" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN materials_link VARCHAR(500) NULL"))
+                    print("Added column materials_link to courses table.")
+                if "photos_link" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN photos_link VARCHAR(500) NULL"))
+                    print("Added column photos_link to courses table.")
+                if "youtube_link" not in courses_cols:
+                    conn.execute(text("ALTER TABLE courses ADD COLUMN youtube_link VARCHAR(500) NULL"))
+                    print("Added column youtube_link to courses table.")
             
             if inspector.has_table("orders"):
                 orders_cols = [c["name"] for c in inspector.get_columns("orders")]
@@ -98,7 +110,9 @@ def perform_startup_tasks():
                     ("testimonial_type", "VARCHAR(50) DEFAULT 'text'"),
                     ("youtube_id", "VARCHAR(100) NULL"),
                     ("thumbnail", "VARCHAR(500) NULL"),
-                    ("video_url", "VARCHAR(500) NULL")
+                    ("video_url", "VARCHAR(500) NULL"),
+                    ("course_id", "BIGINT NULL"),
+                    ("is_approved", "BOOLEAN DEFAULT TRUE")
                 ]
                 for col_name, col_def in testimonial_migrations:
                     if col_name not in test_cols:
@@ -129,6 +143,15 @@ def perform_startup_tasks():
                 if "row_type" not in part_cols:
                     conn.execute(text("ALTER TABLE partners ADD COLUMN row_type VARCHAR(50) DEFAULT 'marquee'"))
                     print("Added column row_type to partners table.")
+
+            if inspector.has_table("blog_posts"):
+                bp_cols = [c["name"] for c in inspector.get_columns("blog_posts")]
+                if "course_id" not in bp_cols:
+                    try:
+                        conn.execute(text("ALTER TABLE blog_posts ADD COLUMN course_id BIGINT NULL"))
+                        print("Added column course_id to blog_posts table.")
+                    except Exception as ex:
+                        print(f"Error adding course_id to blog_posts: {ex}")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
 
@@ -165,6 +188,203 @@ def perform_startup_tasks():
                     db.add(db_bcat)
                 db.commit()
                 print(f"Seeded {len(cat_names)} initial blog categories.")
+
+            # Seed default board members if empty
+            board_count = db.query(models.BoardMember).count()
+            if board_count == 0:
+                import json
+                initial_board = [
+                    {
+                        "name": "Ông Nguyễn Tiến Điệp",
+                        "main_role": "Chủ tịch HĐQT Công ty CP Kết Nối Tri Thức ACC",
+                        "role_group": "executive",
+                        "avatar": "/images/VeChungToi/TienDiep.webp",
+                        "bio_list": json.dumps([
+                            "CEO Sadaco Tas",
+                            "Chủ tịch HĐQT CTY CP Tập đoàn Sài Gòn Tiến Đoàn",
+                            "Chủ tịch Alumni Andrews Việt Nam",
+                            "Thạc sĩ QTKD Đại học Andrews (Hoa Kỳ)"
+                        ], ensure_ascii=False),
+                        "position": 1,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Ông Ngô Trí Thủy",
+                        "main_role": "Tổng Giám đốc Công ty CP Kết Nối Tri Thức ACC",
+                        "role_group": "executive",
+                        "avatar": "/images/VeChungToi/NgoTriThuy.webp",
+                        "bio_list": json.dumps([
+                            "Thành viên sáng lập - Phó Chủ tịch HĐQT Imap Logistics",
+                            "Thành viên sáng lập – Thành viên HĐQT Icom Trading",
+                            "Phó Chủ tịch Hội Doanh nhân Trẻ TPHCM (Chi Hội Chợ Lớn)",
+                            "Nguyên Giám đốc Marketing và Phát triển Sản phẩm các Ngân hàng"
+                        ], ensure_ascii=False),
+                        "position": 2,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Bà Nguyễn Thị Thu Hoà",
+                        "main_role": "Thành viên Hội Đồng Quản Trị ACC",
+                        "role_group": "executive",
+                        "avatar": "/images/VeChungToi/ThuHoa.webp",
+                        "bio_list": json.dumps([
+                            "Tổng Giám Đốc của ADP Group",
+                            "Nguyên Giám Đốc Marketing của Tập Đội BĐS Khang Điền",
+                            "Quyền Giám Đốc Nhãn Hàng Tập Đoàn Cà phê Trung Nguyên"
+                        ], ensure_ascii=False),
+                        "position": 3,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Ông Lê Nguyễn Ngọc Sơn",
+                        "main_role": "Thành viên HĐQT Công ty CP Kết nối Tri thức ACC",
+                        "role_group": "executive",
+                        "avatar": "/images/VeChungToi/Ngocson.webp",
+                        "bio_list": json.dumps([
+                            "Giám Đốc Andrews Alumni Việt Nam",
+                            "Phó Giám Đốc Phát Triển Đại Học Andrews Hoa Kỳ tại Việt Nam"
+                        ], ensure_ascii=False),
+                        "position": 4,
+                        "is_active": True
+                    },
+                    {
+                        "name": "TS. Nguyễn Tấn Bình",
+                        "main_role": "Cố vấn Cao cấp Công ty CP Kết nối Tri thức ACC",
+                        "role_group": "advisor",
+                        "avatar": "/images/VeChungToi/ThayBinh.webp",
+                        "bio_list": json.dumps([
+                            "Viện trưởng Viện nghiên cứu Khoa học Lãnh đạo & Quản trị Doanh nghiệp – Leadman",
+                            "Giảng viên cao cấp Andrews University Hoa Kỳ tại Việt Nam",
+                            "Giảng viên thỉnh giảng chương trình Fulbright",
+                            "Giảng viên cao cấp, tác giả nhiều sách về Tài chính - Kế toán"
+                        ], ensure_ascii=False),
+                        "position": 5,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Bà Nguyễn Thị Kim Anh",
+                        "main_role": "Cố vấn Cao cấp Công ty CP Kết nối Tri thức ACC",
+                        "role_group": "advisor",
+                        "avatar": "/images/VeChungToi/KimAnh.webp",
+                        "bio_list": json.dumps([
+                            "Thạc sĩ Quản trị Kinh doanh, Andrews University, Hoa Kỳ",
+                            "Chủ tịch HĐQT Hệ thống Trường Việt Anh",
+                            "Quản lý chuỗi hệ thống 10 trường từ hệ Mầm non đến Trung học Phổ thông chuẩn quốc tế"
+                        ], ensure_ascii=False),
+                        "position": 6,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Bà Nguyễn Thị Mỹ Dung",
+                        "main_role": "Co-Founder Công ty CP Kết nối Tri thức ACC",
+                        "role_group": "executive",
+                        "avatar": "/images/VeChungToi/MYDUNG.webp",
+                        "bio_list": json.dumps([
+                            "Nguyên Giám đốc chi nhánh Techcombank",
+                            "Thạc sĩ QTKD trường Đại học Andrews (ĐH Quốc tế, ĐHQG Tp.HCM)",
+                            "Giảng viên Đại học"
+                        ], ensure_ascii=False),
+                        "position": 7,
+                        "is_active": True
+                    },
+                    {
+                        "name": "Bà Ngô Vũ Ngọc Thảo",
+                        "main_role": "Co-Founder Công ty CP Kết nối Tri thức ACC",
+                        "role_group": "executive",
+                        "avatar": "/images/VeChungToi/NgocThao.webp",
+                        "bio_list": json.dumps([
+                            "Trưởng phòng Cao cấp Tập đoàn L’Oreal Việt Nam",
+                            "Trưởng ban Học Thuật – Trường ĐH Andrews (ĐH Quốc tế - ĐHQG Tp.HCM)",
+                            "Giảng viên Đại học & Thạc sĩ QTKD Đại học Andrews"
+                        ], ensure_ascii=False),
+                        "position": 8,
+                        "is_active": True
+                    }
+                ]
+                for mb in initial_board:
+                    db.add(models.BoardMember(**mb))
+                db.commit()
+                print(f"Seeded {len(initial_board)} initial board members.")
+
+            # Seed default admission posts if empty
+            admission_count = db.query(models.AdmissionPost).count()
+            if admission_count == 0:
+                initial_admissions = [
+                    {
+                        "slug": "mba",
+                        "title": "MBA Andrews Hoa Kỳ: Học quản trị theo chuẩn Mỹ, phát triển sự nghiệp tại Việt Nam",
+                        "subtitle": "Bạn muốn nâng cao năng lực quản trị, mở rộng tư duy kinh doanh và sẵn sàng cho bước tiến mới trong sự nghiệp? Chương trình Thạc sĩ Quản trị Kinh doanh (MBA) của Đại học Andrews, Hoa Kỳ mang đến cơ hội học tập chương trình quốc tế ngay tại Việt Nam.",
+                        "category": "BẰNG QUỐC TẾ HOA KỲ",
+                        "tag": "Đại học Andrews Hoa Kỳ",
+                        "image": "/images/andrew.jpg",
+                        "highlights": json.dumps([
+                            "Bằng Thạc sĩ do ĐH Andrews (Hoa Kỳ) trực tiếp cấp",
+                            "Được Bộ Giáo dục & Đào tạo Việt Nam chính thức công nhận",
+                            "Chương trình kiểm định kép IACBE & HLC Hoa Kỳ",
+                            "Lịch học cuối tuần linh hoạt, phù hợp lãnh đạo bận rộn"
+                        ], ensure_ascii=False),
+                        "content": """<h2>1. Vì sao chọn Đại học Andrews?</h2>
+<p>Được thành lập năm 1874 tại bang Michigan, Đại học Andrews là một trường đại học lâu đời của Hoa Kỳ với cộng đồng sinh viên và cựu học viên quốc tế rộng lớn. Chương trình kinh doanh của trường được kiểm định chuyên ngành bởi IACBE; Đại học Andrews được kiểm định vùng bởi Higher Learning Commission (HLC) và được Bộ Giáo dục — Đào tạo Việt Nam chính thức công nhận.</p>
+<h2>2. Cấu trúc Chương trình Đào tạo</h2>
+<p>Chương trình học tinh gọn, phù hợp người đi làm kéo dài khoảng 18–20 tháng, với lịch học tập trung vào cuối tuần. Học viên được trang bị kiến thức từ nền tảng đến chuyên sâu về quản trị kinh doanh, với nội dung đào tạo theo chương trình MBA của Đại học Andrews.</p>
+<p>Các môn học có thể bao gồm lãnh đạo và hành vi tổ chức, quản trị tài chính, marketing chiến lược, quản trị nguồn nhân lực, kinh doanh quốc tế và quản trị chiến lược.</p>
+<h2>3. Điều kiện tuyển sinh tham khảo</h2>
+<ul>
+  <li>Tốt nghiệp đại học; đáp ứng yêu cầu GPA của chương trình, thường từ 2.6/4.0, hoặc thỏa điều kiện về điểm GPA của ít nhất 50% số môn học.</li>
+  <li>Trình độ tiếng Anh tương đương IELTS 5.5; chứng chỉ VSTEP bậc 4 có thể được xem xét theo quy định tuyển sinh.</li>
+  <li>Điều kiện GMAT có thể được đáp ứng bằng điểm GMAT theo yêu cầu, hoặc theo phương án thay thế dành cho ứng viên đủ kinh nghiệm làm việc và hoàn thành các môn Thống kê, Đại số theo yêu cầu của chương trình.</li>
+  <li>Bằng Cử nhân Ngôn ngữ Anh được giảng dạy hoàn toàn bằng tiếng Anh có thể thuộc diện xét miễn chứng chỉ tiếng Anh.</li>
+</ul>
+<p><em>* Điều kiện cụ thể có thể khác theo hồ sơ và đợt tuyển sinh. Ứng viên nên liên hệ chương trình để được xác nhận yêu cầu hiện hành.</em></p>""",
+                        "position": 1,
+                        "is_active": True
+                    },
+                    {
+                        "slug": "mini-mba",
+                        "title": "Chương trình Mini MBA Practical – Quản trị Tinh gọn Thực chiến",
+                        "subtitle": "Cô đọng tinh hoa quản trị MBA trong 3-6 tháng dành cho Quản lý cấp trung và Chủ doanh nghiệp SMEs.",
+                        "category": "QUẢN TRỊ TINH GỌN",
+                        "tag": "Quản trị Tinh gọn",
+                        "image": "/images/mba.jpg",
+                        "highlights": json.dumps([
+                            "Tập trung 100% vào bài tập & case study thực tế",
+                            "Giảng dạy bởi đội ngũ Chuyên gia & C-Level thực chiến",
+                            "Áp dụng ngay giải pháp vào tối ưu doanh nghiệp của học viên"
+                        ], ensure_ascii=False),
+                        "content": """<h2>1. Tại sao lựa chọn Mini MBA Practical?</h2>
+<p>Mini MBA Practical là mô hình đào tạo tinh gọn được tối ưu hóa nhằm giải quyết trực tiếp các điểm nghẽn trong vận hành, nhân sự và tài chính của doanh nghiệp Việt Nam.</p>
+<h2>2. Nội dung huấn luyện trọng tâm</h2>
+<p>Học viên sẽ làm chủ 5 trụ cột: Xây dựng Ma trận Năng lực phòng ban, Tối ưu Dòng tiền, Ứng dụng AI trong vận hành tự động, Thiết lập KPI/OKR thực chiến và Tư duy Lãnh đạo tạo tác động.</p>""",
+                        "position": 2,
+                        "is_active": False
+                    },
+                    {
+                        "slug": "gei",
+                        "title": "Global Executive Institute (GEI): Chương trình phát triển năng lực lãnh đạo trong thời đại AI",
+                        "subtitle": "Trong bối cảnh trí tuệ nhân tạo đang tác động sâu rộng đến hoạt động của doanh nghiệp và cơ quan công quyền, nhà lãnh đạo cần nhiều hơn khả năng tiếp cận công nghệ. Họ cần biết cách kết nối AI với chiến lược tổ chức, đánh giá cơ hội và rủi ro, đồng thời dẫn dắt quá trình đổi mới theo hướng tạo ra giá trị bền vững.",
+                        "category": "LÃNH ĐẠO TOÀN CẦU",
+                        "tag": "AUCORE Andrews University",
+                        "image": "/images/GEL.jpg",
+                        "highlights": json.dumps([
+                            "Phát triển năng lực lãnh đạo kết nối AI với chiến lược tổ chức",
+                            "Không gian trao đổi thực chiến giữa các nhà lãnh đạo đa ngành",
+                            "Được chứng nhận bởi AUCORE – Đại học Andrews (Hoa Kỳ)"
+                        ], ensure_ascii=False),
+                        "content": """<h2>1. Giới thiệu về Global Executive Institute (GEI)</h2>
+<p>Global Executive Institute (GEI) là chương trình lãnh đạo cấp cao thuộc AUCORE – Trung tâm Năng lực Tổ chức và Xuất sắc của Đại học Andrews, Hoa Kỳ.</p>
+<p>Chương trình dành cho lãnh đạo doanh nghiệp và khu vực công, tập trung vào các lĩnh vực như phát triển bền vững, ESG, chuyển đổi số, trí tuệ nhân tạo và năng lực tài chính. Thông qua đào tạo, nghiên cứu và hợp tác, GEI hướng đến việc trang bị cho người học tư duy và năng lực cần thiết để điều hành tổ chức trong môi trường kinh doanh biến đổi nhanh chóng.</p>
+<h2>2. Kết nối kiến thức với thực tiễn quản trị</h2>
+<p>GEI không giới hạn việc học trong lớp học. Các hoạt động tham quan thực tế để tìm hiểu các mô hình vận hành trong những lĩnh vực khác nhau mở ra cơ hội quan sát trực tiếp các bài toán quản trị liên quan đến hiệu quả hoạt động, sử dụng nguồn lực, đầu tư, phát triển nhân lực và tính bền vững. Qua đó, người học có thể liên hệ các nội dung được thảo luận với bối cảnh tổ chức và ngành nghề của mình.</p>
+<p>Chương trình cũng tạo không gian trao đổi giữa các nhà lãnh đạo đến từ nhiều lĩnh vực. Việc chia sẻ kinh nghiệm và góc nhìn giúp học viên mở rộng cách tiếp cận trước những thách thức chung, đồng thời xem xét khả năng vận dụng kiến thức vào thực tế điều hành.</p>
+<p>Với sự kết hợp giữa nền tảng học thuật, nội dung quản trị và trải nghiệm thực tế, Global Executive Institute hướng đến việc giúp các nhà lãnh đạo hiểu rõ hơn tiềm năng của công nghệ mới, đưa ra quyết định có cơ sở và dẫn dắt đổi mới gắn với mục tiêu của tổ chức.</p>""",
+                        "position": 3,
+                        "is_active": True
+                    }
+                ]
+                for adm in initial_admissions:
+                    db.add(models.AdmissionPost(**adm))
+                db.commit()
+                print(f"Seeded {len(initial_admissions)} initial admission posts.")
 
             # Clean up any expired pending orders on startup
             crud.cleanup_expired_pending_orders(db, timeout_minutes=30)

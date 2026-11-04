@@ -17,8 +17,10 @@
     "about": "About Us",
     "contact": "Contact",
     "admin": "CMS Admin",
-    "partners": "Trusted Partners",
-    "testimonials": "Testimonials"
+    "partners": "Partners",
+    "testimonials": "Testimonials",
+    "fields": "Fields",
+    "aboutIntro": "Introduction (About Us)"
   },
   "header": {
     "searchPlaceholder": "Search courses, AI skills...",

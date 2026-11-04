@@ -48,6 +48,16 @@
             <input v-model="customCategorySlug" type="text" placeholder="Nhập mã slug chuyên mục mới (ví dụ: marketing-ai)" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
           </div>
         </div>
+
+        <div class="form-group">
+          <label style="color: #1e293b; font-weight: 600;">Trạng thái diễn ra</label>
+          <select v-model="courseForm.status" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 600;">
+            <option value="upcoming">⏳ Sắp diễn ra</option>
+            <option value="ongoing">🟢 Đang diễn ra</option>
+            <option value="completed">🏁 Đã diễn ra</option>
+          </select>
+          <small class="text-muted" style="display: block; margin-top: 4px;">Phân loại khóa học: Sắp diễn ra, Đang diễn ra hoặc Đã diễn ra.</small>
+        </div>
       </div>
 
       <div class="grid-2 mt-3">
@@ -110,6 +120,29 @@
         </div>
       </div>
 
+      <!-- Course Resource Links (Học liệu, Link ảnh, Video Youtube) -->
+      <div class="mt-4 p-4" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+        <h4 style="margin: 0 0 12px 0; font-size: 14.5px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+          <span>🔗</span>
+          <span>Liên kết tài nguyên khóa học (Học liệu, Link ảnh, Video YouTube)</span>
+        </h4>
+        <div class="grid grid-3 gap-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+          <div class="form-group" style="margin: 0;">
+            <label style="color: #1e293b; font-weight: 600; font-size: 13px;">📥 Link Lấy học liệu</label>
+            <input v-model="courseForm.materialsLink" type="url" class="admin-input-style" placeholder="https://drive.google.com/..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label style="color: #1e293b; font-weight: 600; font-size: 13px;">📸 Link Lấy ảnh / Album</label>
+            <input v-model="courseForm.photosLink" type="url" class="admin-input-style" placeholder="https://photos.app.goo.gl/..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+          </div>
+          <div class="form-group" style="margin: 0;">
+            <label style="color: #1e293b; font-weight: 600; font-size: 13px;">▶️ Link Video YouTube</label>
+            <input v-model="courseForm.youtubeLink" type="url" class="admin-input-style" placeholder="https://youtube.com/watch?v=..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+          </div>
+        </div>
+        <small class="text-muted" style="display: block; margin-top: 6px;">Học viên có thể nhấp các nút tương ứng tại trang chi tiết để tải học liệu, xem kho ảnh hoặc xem video YouTube.</small>
+      </div>
+
       <div class="form-group mt-3">
         <label style="color: #1e293b; font-weight: 600;">Mô tả chi tiết & Tổng quan khóa học (Soạn thảo văn bản)</label>
         <RichTextEditor v-model="courseForm.description" placeholder="Soạn thảo mô tả chi tiết, tổng quan nội dung khóa học..." />
@@ -135,12 +168,6 @@
             </span>
           </div>
         </div>
-      </div>
-
-      <div class="form-group mt-3">
-        <label style="color: #1e293b; font-weight: 600;">Bạn sẽ đạt được gì sau khóa học này? (Mỗi mục 1 dòng)</label>
-        <textarea v-model="courseForm.outcomes" rows="4" class="admin-input-style" placeholder="Ví dụ:&#10;Rèn luyện tư duy giao tiếp và thuyết phục hiệu quả trong công việc&#10;Làm chủ phương pháp quản lý thời gian và giải quyết vấn đề linh hoạt&#10;Nâng cao khả năng làm việc nhóm và đàm phán chuyên nghiệp" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
-        <small class="text-muted" style="display: block; margin-top: 4px;">Nhập từng kết quả đạt được trên một dòng riêng biệt.</small>
       </div>
 
       <div class="form-group mt-3">
@@ -227,6 +254,10 @@ const courseForm = ref({
   originalPrice: 0,
   duration: '12 tuần',
   level: 'Trung cấp',
+  status: 'ongoing',
+  materialsLink: '',
+  photosLink: '',
+  youtubeLink: '',
   description: '',
   outcomes: '',
   requirements: '',
@@ -268,6 +299,10 @@ onMounted(() => {
       originalPrice: c.originalPrice,
       duration: c.duration,
       level: c.level,
+      status: c.status || 'ongoing',
+      materialsLink: c.materialsLink || '',
+      photosLink: c.photosLink || '',
+      youtubeLink: c.youtubeLink || '',
       description: c.description,
       outcomes: formattedOutcomes,
       requirements: formattedRequirements,
@@ -286,6 +321,10 @@ onMounted(() => {
       originalPrice: 12000000,
       duration: '12 tuần',
       level: 'Trung cấp',
+      status: 'ongoing',
+      materialsLink: '',
+      photosLink: '',
+      youtubeLink: '',
       description: '',
       outcomes: '',
       requirements: '',

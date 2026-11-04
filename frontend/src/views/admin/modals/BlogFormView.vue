@@ -110,9 +110,20 @@
         </div>
 
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Link liên kết ngoài (Tùy chọn)</label>
-          <input v-model="form.link" type="text" class="admin-input-style" placeholder="/blog/... hoặc URL ngoài" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+          <label style="color: #1e293b; font-weight: 600;">Khóa học liên kết (Bài viết thuộc khóa học nào)</label>
+          <select v-model="form.course_id" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
+            <option :value="null">-- Không liên kết khóa học nào --</option>
+            <option v-for="c in coursesList" :key="c.id" :value="c.id">
+              {{ c.title }}
+            </option>
+          </select>
+          <small class="text-muted" style="display: block; margin-top: 2px;">Bài viết sẽ tự động xuất hiện ở mục "Bài viết liên quan" trên trang chi tiết khóa học này.</small>
         </div>
+      </div>
+
+      <div class="form-group mt-4">
+        <label style="color: #1e293b; font-weight: 600;">Link liên kết ngoài (Tùy chọn)</label>
+        <input v-model="form.link" type="text" class="admin-input-style" placeholder="/blog/... hoặc URL ngoài" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
       </div>
 
       <div class="form-group mt-4">
@@ -200,6 +211,8 @@ const cropAspectRatio = ref('wide');
 const cropModalTitle = ref('✂ Cắt Thumbnail Bài Viết');
 let cropTargetCallback = null;
 
+const coursesList = computed(() => courseStore.courses || []);
+
 const form = ref({
   id: '',
   title: '',
@@ -209,10 +222,15 @@ const form = ref({
   image: '',
   excerpt: '',
   content: '',
-  link: ''
+  link: '',
+  course_id: null
 });
 
-onMounted(() => {
+onMounted(async () => {
+  if (courseStore.courses.length === 0) {
+    courseStore.fetchCourses().catch(() => {});
+  }
+
   if (props.initialData) {
     const p = props.initialData;
     form.value = {
@@ -224,8 +242,23 @@ onMounted(() => {
       image: p.image || '',
       excerpt: p.excerpt || '',
       content: p.content || '',
-      link: p.link || ''
+      link: p.link || '',
+      course_id: (p.course_id !== null && p.course_id !== undefined && p.course_id !== '') ? Number(p.course_id) : null
     };
+
+    if (p.id) {
+      try {
+        const detail = await courseStore.apiRequest(`/admin/blogs/${p.id}`);
+        if (detail) {
+          if (detail.content) form.value.content = detail.content;
+          if (detail.course_id !== undefined && detail.course_id !== null) {
+            form.value.course_id = Number(detail.course_id);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load blog detail", err);
+      }
+    }
   } else {
     form.value = {
       id: '',
@@ -236,7 +269,8 @@ onMounted(() => {
       image: '',
       excerpt: '',
       content: '',
-      link: ''
+      link: '',
+      course_id: null
     };
   }
 });

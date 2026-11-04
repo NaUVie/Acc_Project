@@ -8,94 +8,60 @@
 
       <!-- Desktop Nav -->
       <nav class="desktop-nav">
-        <!-- 1. VỀ CHÚNG TÔI -->
-        <router-link to="/about-us" class="nav-link">{{ $t("nav.about").toUpperCase() }}</router-link>
-
-        <!-- 2. ĐÀO TẠO -->
+        <!-- 1. VỀ CHÚNG TÔI (Dropdown: Giới thiệu, Đội ngũ giảng viên, Đối tác) -->
         <div class="nav-item dropdown">
-          <router-link to="/courses" class="nav-link dropdown-toggle">
-            {{ $t("nav.courses").toUpperCase() }}
+          <router-link to="/about-us" class="nav-link dropdown-toggle" :class="{ 'router-link-active': isAboutActive }">
+            {{ $t("nav.about").toUpperCase() }}
             <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
           </router-link>
           <div class="dropdown-menu">
-            <router-link to="/courses" class="dropdown-item">
-              <div class="dropdown-title">{{ $t("nav.allCourses").toUpperCase() }}</div>
-              <div class="dropdown-desc">Khám phá toàn bộ các khóa học & chương trình đào tạo</div>
+            <router-link to="/about-us" class="dropdown-item">
+              <div class="dropdown-title">{{ $t("nav.aboutIntro").toUpperCase() }}</div>
+              <div class="dropdown-desc">Tầm nhìn, sứ mệnh & giá trị cốt lõi của ACC Academy</div>
             </router-link>
-            <router-link 
-              v-for="cat in navCategories" 
-              :key="cat.slug"
-              :to="getCategoryLink(cat)" 
-              class="dropdown-item"
-            >
-              <div class="dropdown-title">{{ (cat.name || '').toUpperCase() }}</div>
-              <div class="dropdown-desc">{{ getCategoryDesc(cat) }}</div>
+            <router-link to="/lecturers" class="dropdown-item">
+              <div class="dropdown-title">{{ $t("nav.lecturers").toUpperCase() }}</div>
+              <div class="dropdown-desc">Đội ngũ chuyên gia, học giả & lãnh đạo doanh nghiệp hàng đầu</div>
             </router-link>
+            <a href="javascript:void(0)" class="dropdown-item" @click.prevent="openDrawer('trusted-partners')">
+              <div class="dropdown-title">{{ $t("nav.partners").toUpperCase() }}</div>
+              <div class="dropdown-desc">MBA Đại học Andrews, Hoa Kỳ & Viện Leadman</div>
+            </a>
           </div>
         </div>
 
-        <!-- 3. TUYỂN SINH (Single Link) -->
-        <router-link to="/admissions" class="nav-link nav-link-admission">
-          <span class="bell-ringing-icon">🔔</span>
-          {{ $t("nav.admissions").toUpperCase() }}
-        </router-link>
-
-        <!-- 4. ĐỐI TÁC TIN CẬY -->
+        <!-- 2. LĨNH VỰC (Dropdown: Tuyển sinh, Đào tạo) -->
         <div class="nav-item dropdown">
-          <button class="nav-link dropdown-toggle" @click.prevent="openDrawer('trusted-partners')">
-            {{ $t("nav.partners").toUpperCase() }}
+          <router-link to="/courses" class="nav-link dropdown-toggle" :class="{ 'router-link-active': isFieldsActive }">
+            {{ $t("nav.fields").toUpperCase() }}
             <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
-          </button>
+          </router-link>
           <div class="dropdown-menu">
-            <a href="https://andrews.edu.vn/" target="_blank" rel="noopener noreferrer" class="dropdown-item">
-              <div class="dropdown-title">MBA ĐẠI HỌC ANDREWS, HOA KỲ</div>
-              <div class="dropdown-desc">Chương trình Thạc sĩ Quản trị Kinh doanh hàng đầu Hoa Kỳ tại Việt Nam</div>
-            </a>
-            <a href="https://alumni.andrews.edu.vn/" target="_blank" rel="noopener noreferrer" class="dropdown-item">
-              <div class="dropdown-title"> VIỆN KHOA HỌC LÃNH ĐẠO VÀ QUẢN TRỊ DOANH NGHIỆP - LEADMAN</div>
-              <div class="dropdown-desc">Mạng lưới kết nối lãnh đạo và cựu học viên Andrews</div>
-            </a>
+            <router-link to="/admissions" class="dropdown-item">
+              <div class="dropdown-title">
+                <span class="bell-ringing-icon" style="margin-right: 4px;">🔔</span>
+                {{ $t("nav.admissions").toUpperCase() }}
+              </div>
+              <div class="dropdown-desc">Thạc sĩ MBA Andrews Hoa Kỳ & Hội thảo Lãnh đạo cấp cao GEI</div>
+            </router-link>
+            <router-link to="/courses" class="dropdown-item">
+              <div class="dropdown-title">{{ $t("nav.courses").toUpperCase() }}</div>
+              <div class="dropdown-desc">Các chương trình đào tạo Doanh nghiệp, Cá nhân & Khối Nhà nước</div>
+            </router-link>
           </div>
         </div>
 
-        <!-- 5. TIN TỨC -->
+        <!-- 3. TIN TỨC -->
         <router-link to="/library/blog" class="nav-link">{{ $t("nav.blog").toUpperCase() }}</router-link>
 
-        <!-- 6. ĐỘI NGŨ GIẢNG VIÊN -->
-        <router-link to="/lecturers" class="nav-link">{{ $t("nav.lecturers").toUpperCase() }}</router-link>
-
-        <!-- 7. DỰ ÁN -->
-        <div class="nav-item dropdown">
-          <router-link to="/projects" class="nav-link dropdown-toggle">
-            {{ $t("nav.projects").toUpperCase() }}
-            <svg class="chevron-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 9l6 6 6-6"/>
-            </svg>
-          </router-link>
-          <div class="dropdown-menu">
-            <router-link to="/projects?cat=du-an-doanh-nghiep" class="dropdown-item">
-              <div class="dropdown-title">DỰ ÁN DOANH NGHIỆP</div>
-              <div class="dropdown-desc">Các dự án đào tạo In-house & chuyển đổi số may đo cho doanh nghiệp</div>
-            </router-link>
-            <router-link to="/projects?cat=du-an-ca-nhan" class="dropdown-item">
-              <div class="dropdown-title">DỰ ÁN CÁ NHÂN</div>
-              <div class="dropdown-desc">Các chương trình huấn luyện gia tốc năng lực 1:1 cho nhà quản lý</div>
-            </router-link>
-            <router-link to="/projects?cat=du-an-nha-nuoc" class="dropdown-item">
-              <div class="dropdown-title">DỰ ÁN NHÀ NƯỚC</div>
-              <div class="dropdown-desc">Bồi dưỡng năng lực số & an toàn thông tin khối cơ quan - nhà nước</div>
-            </router-link>
-          </div>
-        </div>
-
-        <!-- 8. CHIA SẺ HỌC VIÊN -->
+        <!-- 5. CHIA SẺ HỌC VIÊN -->
         <router-link to="/testimonials" class="nav-link">{{ $t("nav.testimonials").toUpperCase() }}</router-link>
 
-        <!-- 9. LIÊN HỆ -->
+        <!-- 6. LIÊN HỆ -->
         <router-link to="/contact" class="nav-link">{{ $t("nav.contact").toUpperCase() }}</router-link>
       </nav>
 
@@ -201,15 +167,6 @@
             <path d="M21 21l-4.35-4.35"/>
           </svg>
         </button>
-        
-        <button class="icon-btn cart-btn" aria-label="Giỏ hàng" @click="isCartOpen = true">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <path d="M16 10a4 4 0 0 1-8 0"/>
-          </svg>
-          <span class="cart-badge">{{ courseStore.cart.length }}</span>
-        </button>
 
         <!-- Language Switcher Pill Button -->
         <button 
@@ -234,68 +191,40 @@
     <!-- Mobile Nav Overlay -->
     <div class="mobile-nav" :class="{ 'open': isMobileMenuOpen }">
       <div class="mobile-nav-inner">
-        <!-- 1. VỀ CHÚNG TÔI -->
-        <router-link to="/about-us" class="mobile-single-link" @click="closeMobileMenu">{{ $t("nav.about").toUpperCase() }}</router-link>
-
-        <!-- 2. ĐÀO TẠO -->
+        <!-- 1. VỀ CHÚNG TÔI (Dropdown: Giới thiệu, Đội ngũ giảng viên, Đối tác) -->
         <div class="mobile-nav-group">
-          <div class="mobile-nav-label" @click="toggleMobileSection('courses-menu')">
-            {{ $t("nav.courses").toUpperCase() }}
-            <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'courses-menu' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <div class="mobile-nav-label" @click="toggleMobileSection('about-menu')">
+            {{ $t("nav.about").toUpperCase() }}
+            <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'about-menu' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M6 9l6 6 6-6"/>
             </svg>
           </div>
-          <div class="mobile-nav-links" v-show="activeMobileSection === 'courses-menu'">
-            <router-link to="/courses" @click="closeMobileMenu" class="mobile-single-sublink">{{ $t("nav.allCourses") }}</router-link>
-            <router-link 
-              v-for="cat in navCategories" 
-              :key="cat.slug"
-              :to="getCategoryLink(cat)" 
-              @click="closeMobileMenu" 
-              class="mobile-single-sublink"
-            >
-              {{ cat.name }}
+          <div class="mobile-nav-links" v-show="activeMobileSection === 'about-menu'">
+            <router-link to="/about-us" @click="closeMobileMenu" class="mobile-single-sublink">{{ $t("nav.aboutIntro").toUpperCase() }}</router-link>
+            <router-link to="/lecturers" @click="closeMobileMenu" class="mobile-single-sublink">{{ $t("nav.lecturers").toUpperCase() }}</router-link>
+            <a href="javascript:void(0)" @click="closeMobileMenu(); openDrawer('trusted-partners')" class="mobile-single-sublink">{{ $t("nav.partners").toUpperCase() }}</a>
+          </div>
+        </div>
+
+        <!-- 2. LĨNH VỰC (Dropdown: Tuyển sinh, Đào tạo) -->
+        <div class="mobile-nav-group">
+          <div class="mobile-nav-label" @click="toggleMobileSection('fields-menu')">
+            {{ $t("nav.fields").toUpperCase() }}
+            <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'fields-menu' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9l6 6 6-6"/>
+            </svg>
+          </div>
+          <div class="mobile-nav-links" v-show="activeMobileSection === 'fields-menu'">
+            <router-link to="/admissions" @click="closeMobileMenu" class="mobile-single-sublink">
+              <span class="bell-ringing-icon" style="margin-right: 4px;">🔔</span>
+              {{ $t("nav.admissions").toUpperCase() }}
             </router-link>
+            <router-link to="/courses" @click="closeMobileMenu" class="mobile-single-sublink">{{ $t("nav.courses").toUpperCase() }}</router-link>
           </div>
         </div>
 
-        <!-- 3. TUYỂN SINH -->
-        <router-link to="/admissions" class="mobile-single-link" @click="closeMobileMenu">TUYỂN SINH</router-link>
-
-        <!-- 4. ĐỐI TÁC TIN CẬY -->
-        <div class="mobile-nav-group">
-          <div class="mobile-nav-label" @click="toggleMobileSection('trusted-partners')">
-            {{ $t("nav.partners").toUpperCase() }}
-            <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'trusted-partners' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 9l6 6 6-6"/>
-            </svg>
-          </div>
-          <div class="mobile-nav-links" v-show="activeMobileSection === 'trusted-partners'">
-            <a href="https://andrews.edu.vn/" target="_blank" rel="noopener noreferrer" @click="closeMobileMenu">MBA ĐẠI HỌC ANDREWS, HOA KỲ</a>
-            <a href="https://alumni.andrews.edu.vn/" target="_blank" rel="noopener noreferrer" @click="closeMobileMenu">VIỆN KHOA HỌC LÃNH ĐẠO VÀ QUẢN TRỊ DOANH NGHIỆP - LEADMAN</a>
-          </div>
-        </div>
-
-        <!-- 5. TIN TỨC -->
+        <!-- 3. TIN TỨC -->
         <router-link to="/library/blog" class="mobile-single-link" @click="closeMobileMenu">{{ $t("nav.blog").toUpperCase() }}</router-link>
-
-        <!-- 6. ĐỘI NGŨ GIẢNG VIÊN -->
-        <router-link to="/lecturers" class="mobile-single-link" @click="closeMobileMenu">{{ $t("nav.lecturers").toUpperCase() }}</router-link>
-
-        <!-- 7. DỰ ÁN -->
-        <div class="mobile-nav-group">
-          <div class="mobile-nav-label" @click="toggleMobileSection('projects')">
-            {{ $t("nav.projects").toUpperCase() }}
-            <svg class="chevron-icon" :class="{ 'rotate': activeMobileSection === 'projects' }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 9l6 6 6-6"/>
-            </svg>
-          </div>
-          <div class="mobile-nav-links" v-show="activeMobileSection === 'projects'">
-            <router-link to="/projects?cat=du-an-doanh-nghiep" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN DOANH NGHIỆP</router-link>
-            <router-link to="/projects?cat=du-an-ca-nhan" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN CÁ NHÂN</router-link>
-            <router-link to="/projects?cat=du-an-nha-nuoc" @click="closeMobileMenu" class="mobile-single-sublink">DỰ ÁN NHÀ NƯỚC</router-link>
-          </div>
-        </div>
 
         <!-- 8. CHIA SẺ HỌC VIÊN -->
         <router-link to="/testimonials" class="mobile-single-link" @click="closeMobileMenu">{{ $t("nav.testimonials").toUpperCase() }}</router-link>
@@ -388,14 +317,6 @@
       </div>
     </Transition>
 
-    <!-- Slide-over Cart -->
-    <SlideOverCart 
-      :isOpen="isCartOpen" 
-      @close="isCartOpen = false"
-      @view-cart="handleViewCart"
-      @checkout="handleCheckout"
-    />
-
     <!-- Slide-over Search -->
     <SlideOverSearch
       :isOpen="isSearchOpen"
@@ -406,15 +327,23 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { setLanguage } from '@/i18n';
 import { useCourseStore } from '@/stores/courses';
 import { slugify } from '@/utils/slugify';
-import SlideOverCart from '@/components/SlideOverCart.vue';
 import SlideOverSearch from '@/components/SlideOverSearch.vue';
 
 const router = useRouter();
+const route = useRoute();
+
+const isAboutActive = computed(() => {
+  return ['/about-us', '/lecturers'].some(p => route.path.startsWith(p));
+});
+
+const isFieldsActive = computed(() => {
+  return ['/courses', '/admissions', '/course/'].some(p => route.path.startsWith(p));
+});
 const courseStore = useCourseStore();
 const { locale } = useI18n();
 const currentLang = computed(() => locale.value);
@@ -465,7 +394,7 @@ const getCategoryDesc = (cat) => {
   return 'Khám phá các khóa học thuộc chuyên mục ' + cat.name;
 };
 
-const isCartOpen = ref(false);
+
 const isSearchOpen = ref(false);
 const isUserDropdownOpen = ref(false);
 const isScrolled = ref(false);
@@ -482,20 +411,7 @@ const handleLogout = () => {
   router.push('/login');
 };
 
-const handleViewCart = () => {
-  isCartOpen.value = false;
-  router.push('/cart');
-};
 
-const handleCheckout = () => {
-  isCartOpen.value = false;
-  if (!courseStore.token) {
-    courseStore.showToast('Vui lòng đăng nhập để tiến hành thanh toán!', 'warning');
-    router.push('/login');
-    return;
-  }
-  router.push('/checkout');
-};
 
 // Drawer states
 const isDrawerOpen = ref(false);
@@ -705,7 +621,7 @@ const handleScroll = (event) => {
   isScrolled.value = scrollTop > 20;
   
   // Prevent hiding header if mobile menu, mega drawer, cart, or search is open
-  if (isMobileMenuOpen.value || isDrawerOpen.value || isCartOpen.value || isSearchOpen.value) {
+  if (isMobileMenuOpen.value || isDrawerOpen.value || isSearchOpen.value) {
     isHidden.value = false;
     lastScrollTop.value = scrollTop;
     return;

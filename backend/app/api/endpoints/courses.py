@@ -35,6 +35,28 @@ def read_partners(response: Response, db: Session = Depends(get_db)):
     response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
     return crud.get_partners(db, active_only=True)
 
+@router.get("/board-members", response_model=List[schemas.BoardMemberResponse])
+def read_board_members(response: Response, role_group: Optional[str] = None, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=300, stale-while-revalidate=60"
+    return crud.get_board_members(db, active_only=True, role_group=role_group)
+
+@router.get("/admissions", response_model=List[schemas.AdmissionPostResponse])
+def read_admission_posts(response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
+    return crud.get_admission_posts(db, active_only=True)
+
+@router.get("/admissions/{slug}", response_model=schemas.AdmissionPostResponse)
+def read_admission_post(slug: str, response: Response, db: Session = Depends(get_db)):
+    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
+    post = crud.get_admission_post_by_slug(db, slug=slug, active_only=True)
+    if not post:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Bài viết tuyển sinh '{slug}' không tồn tại."
+        )
+    return post
+
+
 
 @router.get("/{handle}", response_model=schemas.CoursePublicResponse)
 def read_course(handle: str, response: Response, db: Session = Depends(get_db)):

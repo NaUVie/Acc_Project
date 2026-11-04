@@ -164,100 +164,99 @@
   color: #0f172a;
 }
 
-/* 4. Blog Grid */
-.blog-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 32px;
-}
-
-@media (min-width: 768px) {
-  .blog-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1200px) {
-  .blog-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* 5. Blog Card Component */
-.blog-card {
-  background: #ffffff;
-  border-radius: 18px;
-  border: 1px solid #e2e8f0;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* 4. Blog Horizontal Strip Layout (Từng thanh ngang) */
+.blog-list-wrapper {
   display: flex;
   flex-direction: column;
+  gap: 22px;
+  max-width: 1040px;
+  margin-inline: auto;
 }
 
-.blog-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px rgba(2, 43, 159, 0.08);
+/* 5. Blog Strip Item */
+.blog-strip-item {
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+}
+
+.blog-strip-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(2, 43, 159, 0.09);
   border-color: #022b9f;
 }
 
-.card-image-link {
+.strip-image-link {
   display: block;
   text-decoration: none;
+  flex-shrink: 0;
+  width: 290px;
+  position: relative;
   overflow: hidden;
 }
 
-.card-image-wrapper {
+.strip-image-wrapper {
   position: relative;
   width: 100%;
-  height: 220px;
+  height: 100%;
+  min-height: 200px;
   overflow: hidden;
-  background-color: #e2e8f0;
+  background-color: #f1f5f9;
 }
 
-.card-image {
+.strip-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 0.45s ease;
+  display: block;
 }
 
-.blog-card:hover .card-image {
-  transform: scale(1.06);
+.blog-strip-item:hover .strip-image {
+  transform: scale(1.05);
 }
 
 .category-badge {
   position: absolute;
   top: 14px;
   left: 14px;
-  padding: 6px 14px;
-  border-radius: 12px;
-  font-size: 11.5px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11px;
   font-weight: 800;
   color: #ffffff;
   background: linear-gradient(135deg, #022b9f 0%, #1e40af 100%);
   letter-spacing: 0.5px;
   text-transform: uppercase;
   box-shadow: 0 4px 10px rgba(2, 43, 159, 0.3);
+  z-index: 2;
 }
 
-/* 6. Card Body Content */
-.card-body {
-  padding: 24px;
+/* 6. Strip Content Area */
+.strip-content {
+  padding: 24px 28px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   flex-grow: 1;
+  min-width: 0;
 }
 
-.card-meta {
+.strip-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   font-size: 12.5px;
   font-weight: 600;
   color: #64748b;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .meta-date {
@@ -267,24 +266,38 @@
   color: #64748b;
 }
 
+.meta-dot {
+  color: #cbd5e1;
+}
+
 .meta-author {
   color: #022b9f;
-  background: #f0f4ff;
-  padding: 3px 8px;
+  background: #eff6ff;
+  padding: 3px 9px;
   border-radius: 6px;
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 700;
 }
 
-.card-title {
-  font-size: 18px;
-  font-weight: 800;
-  color: #0f172a;
-  margin: 0 0 12px 0;
-  line-height: 1.45;
+.linked-course-pill {
+  color: #1e40af;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
-.title-link {
+.strip-title {
+  font-size: 19px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 10px 0;
+  line-height: 1.4;
+}
+
+.strip-title-link {
   color: inherit;
   text-decoration: none;
   transition: color 0.2s ease;
@@ -294,52 +307,77 @@
   overflow: hidden;
 }
 
-.title-link:hover {
+.strip-title-link:hover {
   color: #022b9f;
 }
 
-.card-excerpt {
+.strip-excerpt {
   font-size: 14px;
   color: #475569;
   line-height: 1.6;
-  margin: 0 0 20px 0;
+  margin: 0 0 16px 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.card-footer {
+.strip-footer {
   margin-top: auto;
-  padding-top: 16px;
-  border-top: 1px solid #f1f5f9;
-}
-
-.btn-read-more {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 11px 18px;
-  background: #022b9f;
-  color: #ffffff;
-  font-weight: 700;
-  font-size: 13.5px;
-  border-radius: 10px;
+  justify-content: flex-end;
+}
+
+.arrow-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
   text-decoration: none;
-  transition: all 0.25s ease;
+  cursor: pointer;
+  padding: 4px;
 }
 
-.btn-read-more:hover {
-  background: #1e40af;
-  box-shadow: 0 4px 12px rgba(2, 43, 159, 0.25);
+.block-arrow-glow {
+  display: inline-block;
+  vertical-align: middle;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 2px 4px rgba(2, 43, 159, 0.15));
+  cursor: pointer;
 }
 
-.btn-read-more .arrow {
-  transition: transform 0.2s ease;
+.blog-strip-item:hover .block-arrow-glow,
+.arrow-container:hover .block-arrow-glow,
+.block-arrow-glow:hover {
+  transform: translateX(6px) scale(1.05);
+  filter: drop-shadow(0 0 8px rgba(37, 99, 235, 0.95)) 
+          drop-shadow(0 0 16px rgba(2, 43, 159, 0.8))
+          brightness(1.25);
 }
 
-.btn-read-more:hover .arrow {
-  transform: translateX(4px);
+/* Skeleton Strip Loading */
+.skeleton-strip {
+  pointer-events: none;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .blog-strip-item {
+    flex-direction: column;
+  }
+  .strip-image-link {
+    width: 100%;
+  }
+  .strip-image-wrapper {
+    height: 200px;
+    min-height: auto;
+  }
+  .strip-content {
+    padding: 18px 20px;
+  }
+  .strip-title {
+    font-size: 17px;
+  }
 }
 
 /* 7. Empty State */

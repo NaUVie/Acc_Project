@@ -36,7 +36,11 @@ export const mapCourse = (c) => {
     outcomes: c.outcomes,
     requirements: c.requirements,
     customRoadmap: c.custom_roadmap,
-    lecturerIds: c.lecturer_ids
+    lecturerIds: c.lecturer_ids,
+    status: c.status || 'ongoing',
+    materialsLink: c.materials_link || '',
+    photosLink: c.photos_link || '',
+    youtubeLink: c.youtube_link || ''
   };
 };
 

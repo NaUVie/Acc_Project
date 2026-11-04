@@ -341,6 +341,9 @@
             <router-link :to="'/course/' + (course.handle || course.id)" class="home-course-img-link">
               <div class="home-course-img-box">
                 <img :src="formatImageUrl(course.image, 'w800') || '/images/Square-Cover-_1.webp'" :alt="course.title" class="home-course-img" loading="lazy" decoding="async" />
+                <span class="card-status-pill" :class="'card-status-' + (course.status || 'ongoing')">
+                  {{ course.status === 'upcoming' ? '⏳ Sắp diễn ra' : (course.status === 'completed' ? '🏁 Đã diễn ra' : '🟢 Đang diễn ra') }}
+                </span>
               </div>
             </router-link>
             
@@ -351,11 +354,17 @@
               <!-- <p class="home-course-desc">{{ stripHtml(course.description) }}</p> -->
               
               <div class="home-course-footer">
-                <router-link :to="'/course/' + (course.handle || course.id)" class="btn-link-stretch" :aria-label="$t('common.viewDetails')">
-                  <div class="arrow-stretch-box">
-                    <span class="line-body"></span>
-                    <span class="arrow-tip"></span>
-                  </div>
+                <router-link :to="'/course/' + (course.handle || course.id)" class="arrow-container" :aria-label="$t('common.viewDetails')">
+                  <svg class="block-arrow-glow" width="46" height="20" viewBox="0 0 52 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                      <linearGradient id="homeArrowBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#022B9F"/>
+                        <stop offset="100%" stop-color="#2563eb"/>
+                      </linearGradient>
+                    </defs>
+                    <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" 
+                          fill="url(#homeArrowBlue)" />
+                  </svg>
                 </router-link>
               </div>
             </div>
@@ -383,12 +392,9 @@
           </div>
           <router-link to="/lecturers" class="header-link-with-arrow" aria-label="Xem tất cả giảng viên">
             <span class="header-link-text">{{ $t('common.seeAll') }}</span>
-            <div class="btn-link-stretch">
-              <div class="arrow-stretch-box">
-                <span class="line-body"></span>
-                <span class="arrow-tip"></span>
-              </div>
-            </div>
+            <svg class="block-arrow-glow" width="40" height="18" viewBox="0 0 52 24" fill="none">
+              <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#022B9F" />
+            </svg>
           </router-link>
         </div>
 
@@ -445,12 +451,9 @@
           </div>
           <router-link to="/testimonials" class="header-link-with-arrow" :aria-label="$t('common.seeMore')">
             <span class="header-link-text">{{ $t('common.seeMore') }}</span>
-            <div class="btn-link-stretch">
-              <div class="arrow-stretch-box">
-                <span class="line-body"></span>
-                <span class="arrow-tip"></span>
-              </div>
-            </div>
+            <svg class="block-arrow-glow" width="40" height="18" viewBox="0 0 52 24" fill="none">
+              <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#022B9F" />
+            </svg>
           </router-link>
         </div>
 
@@ -572,7 +575,12 @@
             </div>
 
             <button type="submit" class="card-submit-btn" :disabled="isSubmittingContact">
-              <span v-if="!isSubmittingContact">{{ $t('home.popupSubmit') }} &rarr;</span>
+              <span v-if="!isSubmittingContact" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>{{ $t('home.popupSubmit') }}</span>
+                <svg class="block-arrow-glow" width="34" height="15" viewBox="0 0 52 24" fill="none">
+                  <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#ffffff" />
+                </svg>
+              </span>
               <span v-else>{{ $t('home.popupSubmitting') }}</span>
             </button>
           </form>
