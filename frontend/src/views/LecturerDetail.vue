@@ -27,15 +27,7 @@
           <p class="lecturer-title">{{ lecturer.title }}</p>
           <p class="lecturer-tagline">{{ lecturer.tagline }}</p>
           
-          <!-- Statistics Row -->
-          <div class="stats-row" style="margin-top: 14px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap;">
-            <div style="background: #f1f5f9; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px;">
-              <span>🎓</span> {{ lecturer.totalStudents ? lecturer.totalStudents.toLocaleString('vi-VN') : '10,000+' }} Học viên đã đào tạo
-            </div>
-            <div style="background: #f1f5f9; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px;">
-              <span>🏫</span> {{ lecturer.totalSessions || 150 }}+ Buổi huấn luyện doanh nghiệp
-            </div>
-          </div>
+
           
           <div class="action-buttons">
             <a v-if="lecturer.driveProfile" :href="lecturer.driveProfile" target="_blank" rel="noopener noreferrer" class="btn-profile-drive">
