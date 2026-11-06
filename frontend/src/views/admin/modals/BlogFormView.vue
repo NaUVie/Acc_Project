@@ -14,7 +14,10 @@
 
     <form @submit.prevent="saveBlog" class="mt-2">
       <div class="form-group mb-4">
-        <label style="color: #1e293b; font-weight: 600;">Tiêu đề Bài viết <span style="color: #e11d48;">*</span></label>
+        <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+          <span>Tiêu đề Bài viết <span style="color: #e11d48;">*</span></span>
+          <HelpTooltip desc="Tiêu đề chính của bài viết, tự động tạo Slug bên dưới." impact="Xuất hiện trên card bài viết và tiêu đề H1 trang chi tiết." />
+        </label>
         <input 
           v-model="form.title" 
           @input="generateSlug" 
@@ -28,7 +31,10 @@
 
       <div class="grid grid-2 gap-4">
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Đường dẫn tĩnh Slug (Handle) <span style="color: #e11d48;">*</span></label>
+          <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+            <span>Đường dẫn tĩnh Slug (Handle) <span style="color: #e11d48;">*</span></span>
+            <HelpTooltip desc="Định danh URL thân thiện cho SEO, viết thường không dấu nối bằng gạch ngang." impact="Đường dẫn xem bài viết: /blog/[slug]." />
+          </label>
           <input 
             v-model="form.handle" 
             type="text" 
@@ -42,7 +48,10 @@
 
         <div class="form-group">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label style="color: #1e293b; font-weight: 600; margin: 0;">Chuyên mục Bài viết <span style="color: #e11d48;">*</span></label>
+            <label style="color: #1e293b; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 6px;">
+              <span>Chuyên mục Bài viết <span style="color: #e11d48;">*</span></span>
+              <HelpTooltip desc="Nhóm chủ đề bài viết giúp phân loại tại Thư viện Cẩm nang." impact="Hiển thị badge chuyên mục trên card bài viết." />
+            </label>
             <button 
               type="button" 
               @click="$emit('open-category-modal')" 
@@ -105,12 +114,18 @@
 
       <div class="grid grid-2 gap-4 mt-4">
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Ngày hiển thị (Hiển thị công khai)</label>
+          <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+            <span>Ngày hiển thị (Công khai)</span>
+            <HelpTooltip desc="Ngày xuất bản hiển thị cho độc giả (ví dụ: 15/08/2026)." />
+          </label>
           <input v-model="form.date" type="text" class="admin-input-style" placeholder="Ví dụ: 15/08/2026" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
         </div>
 
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Khóa học liên kết (Bài viết thuộc khóa học nào)</label>
+          <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+            <span>Khóa học liên kết</span>
+            <HelpTooltip desc="Chọn khóa học để bài viết tự xuất hiện trong mục 'Bài viết liên quan' ở trang khóa học đó." impact="Hiển thị tại trang chi tiết khóa học được chọn." />
+          </label>
           <select v-model="form.course_id" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
             <option :value="null">-- Không liên kết khóa học nào --</option>
             <option v-for="c in coursesList" :key="c.id" :value="c.id">
@@ -122,12 +137,18 @@
       </div>
 
       <div class="form-group mt-4">
-        <label style="color: #1e293b; font-weight: 600;">Link liên kết ngoài (Tùy chọn)</label>
+        <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+          <span>Link liên kết ngoài (Tùy chọn)</span>
+          <HelpTooltip desc="Điền link nếu muốn người đọc nhấp vào bài viết sẽ nhảy sang một trang web hoặc tài liệu khác." />
+        </label>
         <input v-model="form.link" type="text" class="admin-input-style" placeholder="/blog/... hoặc URL ngoài" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
       </div>
 
       <div class="form-group mt-4">
-        <label style="color: #1e293b; font-weight: 600;">Ảnh đại diện Bài viết (Thumbnail URL)</label>
+        <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+          <span>Ảnh đại diện Bài viết (Thumbnail URL)</span>
+          <HelpTooltip desc="Ảnh bìa bài viết tỷ lệ chuẩn 16:9, có thể tải lên hoặc dán URL ảnh và dùng công cụ cắt ảnh." impact="Hiển thị trên thẻ bài viết và ảnh xem trước khi chia sẻ mạng xã hội." />
+        </label>
         <div style="display: flex; gap: 8px;">
           <input v-model="form.image" type="text" class="admin-input-style" placeholder="https://... hoặc URL ảnh" style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
           <input type="file" ref="imageFileRef" @change="onFileSelectForCrop($event, (url) => { form.image = url; }, 'wide', '✂ Cắt Thumbnail Bài Viết (16:9)')" style="display: none;" accept="image/*" />
@@ -142,13 +163,19 @@
       </div>
 
       <div class="form-group mt-4">
-        <label style="color: #1e293b; font-weight: 600;">Tóm tắt ngắn Bài viết (Excerpt)</label>
+        <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+          <span>Tóm tắt ngắn Bài viết (Excerpt)</span>
+          <HelpTooltip desc="Đoạn văn ngắn 2-3 câu giới thiệu nhanh nội dung bài viết." impact="Hiển thị ngay dưới tiêu đề trên danh sách bài viết /library/blog." />
+        </label>
         <textarea v-model="form.excerpt" rows="3" class="admin-input-style" placeholder="Tóm tắt 2-3 câu ngắn gọn hiển thị trên trang danh sách tin tức..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
       </div>
 
       <!-- Detailed Content Editor (Rich Text) -->
       <div class="mt-6 p-4" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
-        <h4 style="margin: 0 0 12px 0; color: #022b9f; font-size: 16px; font-weight: 800;">Nội dung chi tiết Bài viết (WYSIWYG Soạn thảo văn bản)</h4>
+        <h4 style="margin: 0 0 12px 0; color: #022b9f; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          <span>Nội dung chi tiết Bài viết (WYSIWYG Soạn thảo văn bản)</span>
+          <HelpTooltip desc="Soạn thảo toàn văn bài viết với các công cụ In đậm, Tiêu đề H2-H3, Chèn ảnh, Bảng, Danh sách." impact="Hiển thị toàn bộ nội dung trong trang xem chi tiết bài viết." />
+        </h4>
         <RichTextEditor 
           v-model="form.content" 
           placeholder="Soạn thảo nội dung bài viết tin tức đầy đủ (In đậm, In nghiêng, H2, H3, Danh sách, Link, Chèn bảng/ảnh)..." 
@@ -180,6 +207,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import RichTextEditor from '@/components/RichTextEditor.vue';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
+import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
 const props = defineProps({
   initialData: {

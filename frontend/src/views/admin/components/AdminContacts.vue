@@ -3,7 +3,13 @@
     <!-- Header Section -->
     <div class="content-header flex-between" style="flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
       <div>
-        <h2>Quản lý Lời nhắn Liên hệ</h2>
+        <h2 style="display: flex; align-items: center; gap: 8px;">
+          Quản lý Lời nhắn Liên hệ
+          <HelpTooltip 
+            desc="Tiếp nhận thông tin khách hàng để lại họ tên, số điện thoại, email cần tư vấn khóa học." 
+            impact="Dữ liệu gửi từ form đăng ký tư vấn ở Footer Trang chủ và các trang chi tiết khóa học." 
+          />
+        </h2>
         <p>Danh sách các yêu cầu hỗ trợ và tư vấn lộ trình học của học viên tiềm năng.</p>
       </div>
       <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -18,6 +24,10 @@
           <span>⚙️</span>
           <span>{{ isSettingsOpen ? 'Thu gọn cấu hình ▲' : 'Cấu hình thông tin liên hệ ▼' }}</span>
         </button>
+        <HelpTooltip 
+          desc="Thay đổi Hotline, Email, Địa chỉ, Số Zalo/Viber hiển thị ở chân trang và trang Liên hệ." 
+          impact="Cập nhật lập tức thông tin liên hệ ở toàn bộ Footer và trang Liên hệ website." 
+        />
 
         <!-- Refresh Button -->
         <button 
@@ -227,6 +237,7 @@
 import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import Pagination from '@/components/Pagination.vue';
+import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
 const courseStore = useCourseStore();
 

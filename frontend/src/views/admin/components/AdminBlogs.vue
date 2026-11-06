@@ -4,7 +4,13 @@
     <div v-if="activeView === 'list'">
       <div class="content-header flex-between">
         <div>
-          <h2>Quản lý Tin tức & Bài viết</h2>
+          <h2 style="display: flex; align-items: center; gap: 8px;">
+            Quản lý Tin tức & Bài viết
+            <HelpTooltip 
+              desc="Quản lý kho bài viết kiến thức, tin tức công nghệ và cẩm nang đào tạo." 
+              impact="Hiển thị tại Thư viện Cẩm nang tri thức /library/blog và mục Bài viết liên quan trong khóa học." 
+            />
+          </h2>
           <p>Danh sách các bài viết chia sẻ, kiến thức AI và cập nhật xu hướng công nghệ trên toàn hệ thống.</p>
         </div>
         <div style="display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; align-items: center;">
@@ -15,6 +21,7 @@
           <button @click="showCatManagerModal = true" class="btn btn-secondary btn-sm" type="button" style="display: inline-flex; align-items: center; gap: 6px;">
             <span>🏷️ Quản lý Chuyên mục</span>
           </button>
+          <HelpTooltip desc="Tạo và quản lý các danh mục phân loại bài viết (ví dụ: Xu hướng AI, Quản trị số, Case Study)." />
           <button @click="openAddModal" class="btn btn-primary btn-sm" style="white-space: nowrap;">+ Thêm Bài viết mới</button>
         </div>
       </div>
@@ -48,9 +55,18 @@
           <thead>
             <tr>
               <th style="width: 60px;">Ảnh</th>
-              <th>Tiêu đề Bài viết</th>
-              <th>Chuyên mục</th>
-              <th>Khóa học liên kết</th>
+              <th>
+                Tiêu đề Bài viết
+                <HelpTooltip desc="Tiêu đề và đường dẫn tĩnh (Slug URL) của bài viết." />
+              </th>
+              <th>
+                Chuyên mục
+                <HelpTooltip desc="Phân loại bài viết theo chủ đề giúp học viên dễ tìm kiếm." />
+              </th>
+              <th>
+                Khóa học liên kết
+                <HelpTooltip desc="Nếu chọn khóa học, bài viết này sẽ tự động xuất hiện ở phần 'Bài viết liên quan' trên trang chi tiết khóa học đó." impact="Hiển thị ở trang chi tiết khóa học tương ứng." />
+              </th>
               <th>Ngày đăng</th>
               <th style="text-align: right; width: 140px;">Hành động</th>
             </tr>
@@ -155,6 +171,7 @@ import Pagination from '@/components/Pagination.vue';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
 import BlogCategoryModal from '../modals/BlogCategoryModal.vue';
 import BlogFormView from '../modals/BlogFormView.vue';
+import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
 const courseStore = useCourseStore();
 

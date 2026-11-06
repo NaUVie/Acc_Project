@@ -33,13 +33,19 @@
       </div>
 
       <div class="form-group mt-3">
-        <label style="color: #1e293b; font-weight: 600;">Đường dẫn tĩnh (Slug / Handle - Tự động tạo)</label>
+        <label style="color: #1e293b; font-weight: 600;">
+          Đường dẫn tĩnh (Slug / Handle)
+          <HelpTooltip desc="Mã đường dẫn tĩnh không dấu cho URL (Ví dụ: coo-chuyen-nghiep)." />
+        </label>
         <input v-model="courseForm.handle" type="text" required class="admin-input-style" placeholder="chatgpt-nang-cao" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
       </div>
 
       <div class="grid-2 mt-3">
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Chuyên mục</label>
+          <label style="color: #1e293b; font-weight: 600;">
+            Chuyên mục
+            <HelpTooltip desc="Chọn chuyên mục đào tạo trực thuộc." impact="Quyết định khóa học xuất hiện ở tab nào trên Trang chủ." />
+          </label>
           <select v-model="courseForm.category" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
             <option v-for="cat in categories" :key="cat.slug" :value="cat.slug">{{ cat.name }} ({{ cat.slug }})</option>
             <option value="custom">+ Nhập chuyên mục tùy chỉnh mới...</option>
@@ -50,7 +56,10 @@
         </div>
 
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Trạng thái diễn ra</label>
+          <label style="color: #1e293b; font-weight: 600;">
+            Trạng thái diễn ra
+            <HelpTooltip desc="Sắp diễn ra (chiêu sinh), Đang diễn ra, Đã diễn ra." impact="Hiển thị huy hiệu màu trên góc card khóa học Trang chủ." />
+          </label>
           <select v-model="courseForm.status" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 600;">
             <option value="upcoming">⏳ Sắp diễn ra</option>
             <option value="ongoing">🟢 Đang diễn ra</option>
@@ -62,7 +71,10 @@
 
       <div class="grid-2 mt-3">
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Ảnh Thumbnail / Danh sách (Card)</label>
+          <label style="color: #1e293b; font-weight: 600;">
+            Ảnh Thumbnail / Danh sách (Card)
+            <HelpTooltip desc="Ảnh đại diện hiển thị trên lưới card trang chủ. Tỷ lệ chuẩn 16:9 hoặc vuông." />
+          </label>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <input v-model="courseForm.image" type="text" required class="admin-input-style" placeholder="/images/default.jpg hoặc URL Cloudinary" style="flex: 1; min-width: 200px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
             <label class="btn btn-primary btn-sm" style="padding: 10px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600;">
@@ -80,7 +92,10 @@
         </div>
 
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Ảnh Bìa hiển thị trang chi tiết (Cover Image)</label>
+          <label style="color: #1e293b; font-weight: 600;">
+            Ảnh Bìa hiển thị trang chi tiết (Cover Image)
+            <HelpTooltip desc="Ảnh banner lớn hiển thị trên đỉnh trang chi tiết lộ trình khóa học. Để trống sẽ dùng ảnh thumbnail." />
+          </label>
           <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <input v-model="courseForm.coverImage" type="text" class="admin-input-style" placeholder="Để trống sẽ dùng chung ảnh Thumbnail" style="flex: 1; min-width: 200px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
             <label class="btn btn-primary btn-sm" style="padding: 10px 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; margin: 0; font-weight: 600; background: #475569;">
@@ -195,6 +210,7 @@ import { slugify } from '@/utils/slugify';
 import { formatImageUrl } from '@/utils/imageHelper';
 import RichTextEditor from '@/components/RichTextEditor.vue';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
+import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
 const props = defineProps({
   initialData: {

@@ -1,40 +1,43 @@
 <template>
   <div class="corporate-training-page">
-    <div class="container">
-      <!-- Header Section -->
-      <div class="header-section">
-        <span class="custom-ui-tag hero-tag">ĐÀO TẠO DOANH NGHIỆP</span>
-        <h1 class="hero-title">Giải pháp <span class="gradient-text">Đào tạo In-House & May đo</span></h1>
-        <p class="hero-subtitle">
-          Chương trình đào tạo năng lực số, tư duy quản lý và công nghệ AI được thiết kế riêng theo thách thức thực tế và mục tiêu tăng trưởng dài hạn của doanh nghiệp.
+    <!-- Header Section với nền xanh navy gradient nhạt dần -->
+    <section class="corporate-hero-section">
+      <div class="hero-backdrop-glow"></div>
+      <div class="container hero-inner">
+        <span class="hero-badge animate-fade-in">ĐÀO TẠO DOANH NGHIỆP</span>
+        <h1 class="hero-title animate-fade-in">Giải pháp <span class="gradient-text">Đào tạo In-House & May đo</span></h1>
+        <p class="hero-subtitle animate-fade-in">
+          Chương trình đào tạo năng lực số, tư duy quản lý và công nghệ AI được thiết kế riêng theo thách thức thực tế và mục tiêu tăng trưởng dài hạn của doanh nghiệp
         </p>
-      </div>
 
-      <!-- Filter Tabs / Navbar -->
-      <div class="filter-tabs">
-        <button 
-          class="tab-btn" 
-          :class="{ active: activeFilter === 'all' }"
-          @click="activeFilter = 'all'"
-        >
-          Tất cả chương trình
-        </button>
-        <button 
-          class="tab-btn" 
-          :class="{ active: activeFilter === 'da-thuc-hien' }"
-          @click="activeFilter = 'da-thuc-hien'"
-        >
-          Chương trình đã thực hiện
-        </button>
-        <button 
-          class="tab-btn" 
-          :class="{ active: activeFilter === 'dang-thuc-hien' }"
-          @click="activeFilter = 'dang-thuc-hien'"
-        >
-          Chương trình đang thực hiện
-        </button>
+        <!-- Filter Tabs / Navbar -->
+        <div class="filter-tabs animate-fade-in">
+          <button 
+            class="tab-btn" 
+            :class="{ active: activeFilter === 'all' }"
+            @click="activeFilter = 'all'"
+          >
+            Tất cả chương trình
+          </button>
+          <button 
+            class="tab-btn" 
+            :class="{ active: activeFilter === 'da-thuc-hien' }"
+            @click="activeFilter = 'da-thuc-hien'"
+          >
+            Chương trình đã thực hiện
+          </button>
+          <button 
+            class="tab-btn" 
+            :class="{ active: activeFilter === 'dang-thuc-hien' }"
+            @click="activeFilter = 'dang-thuc-hien'"
+          >
+            Chương trình đang thực hiện
+          </button>
+        </div>
       </div>
+    </section>
 
+    <div class="container corporate-content-container">
       <!-- Training Programs Grid -->
       <div class="programs-grid">
         <div 

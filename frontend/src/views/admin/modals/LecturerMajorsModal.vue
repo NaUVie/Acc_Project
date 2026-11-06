@@ -1,5 +1,6 @@
 <template>
-  <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')">
+  <Teleport to="body">
+    <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')">
     <div class="modal-content animate-fade-in" style="max-width: 700px;">
       <div class="modal-header">
         <h3>Quản lý Chuyên ngành Giảng viên (Database)</h3>
@@ -106,7 +107,8 @@
         <button type="button" class="btn btn-secondary" @click="$emit('close')">Đóng</button>
       </div>
     </div>
-  </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>

@@ -3,7 +3,13 @@
     <!-- Compact Header Section -->
     <div class="content-header admin-overview-header">
       <div>
-        <h2 class="overview-title">Tổng quan Vận hành</h2>
+        <h2 class="overview-title">
+          Tổng quan Vận hành
+          <HelpTooltip 
+            desc="Trung tâm điều khiển hiển thị 6 chỉ số KPI và 2 bảng tác vụ ưu tiên xử lý trong ngày." 
+            impact="Phản ánh số liệu tức thì từ mọi tương tác của học viên trên website." 
+          />
+        </h2>
         <p class="overview-subtitle">Trung tâm kiểm soát dữ liệu: Đào tạo, Tuyển sinh, Học viên và Đánh giá học vụ.</p>
       </div>
       <div class="admin-export-actions">
@@ -21,6 +27,9 @@
         <button type="button" @click="exportContacts" class="btn-export-action" title="Tải file CSV yêu cầu tư vấn">
           Xuất CSV Tư vấn
         </button>
+        <HelpTooltip 
+          desc="Lọc dữ liệu thống kê & xuất file CSV theo các mốc thời gian: Hôm nay, 7 ngày qua, Tháng, Quý, Năm hoặc Tất cả." 
+        />
         <button type="button" @click="refreshAllData" class="btn-export-action btn-refresh" :disabled="isLoading" title="Làm mới toàn bộ số liệu">
           {{ isLoading ? 'Đang tải...' : 'Làm mới' }}
         </button>
@@ -32,7 +41,10 @@
       <!-- 1. Yêu cầu tư vấn tuyển sinh -->
       <div class="admin-stat-card clickable-stat-card" @click="goToTab('contacts')">
         <div class="stat-top-row">
-          <span class="stat-track">TƯ VẤN MỚI</span>
+          <span class="stat-track">
+            TƯ VẤN MỚI
+            <HelpTooltip desc="Số yêu cầu tư vấn tuyển sinh cần gọi điện hỗ trợ." impact="Nhận từ Form tư vấn ở chân Trang chủ và trang khóa học." />
+          </span>
           <span v-if="periodUnresolvedContacts.length > 0" class="badge-alert-tag">
             {{ periodUnresolvedContacts.length }} mới
           </span>
@@ -51,7 +63,10 @@
       <!-- 2. Khóa học đào tạo -->
       <div class="admin-stat-card clickable-stat-card" @click="goToTab('courses')">
         <div class="stat-top-row">
-          <span class="stat-track">ĐÀO TẠO</span>
+          <span class="stat-track">
+            ĐÀO TẠO
+            <HelpTooltip desc="Tổng số chương trình đào tạo đang quản lý." impact="Hiển thị tại Section 6 Khóa học Tiêu biểu Trang chủ." />
+          </span>
         </div>
         <div class="stat-number">
           <span v-if="isLoading && courses.length === 0" class="stat-skeleton-pulse"></span>
@@ -64,7 +79,10 @@
       <!-- 3. Học viên & Người dùng -->
       <div class="admin-stat-card clickable-stat-card" @click="goToTab('users')">
         <div class="stat-top-row">
-          <span class="stat-track">HỌC VIÊN</span>
+          <span class="stat-track">
+            HỌC VIÊN
+            <HelpTooltip desc="Số tài khoản học viên đăng ký trên hệ thống." impact="Đồng bộ với cổng thông tin cá nhân /dashboard." />
+          </span>
           <span v-if="exportPeriod !== 'all' && periodUsers.length > 0" class="badge-alert-tag">
             +{{ periodUsers.length }} mới
           </span>
@@ -83,7 +101,10 @@
       <!-- 4. Cảm nhận học viên -->
       <div class="admin-stat-card clickable-stat-card" @click="goToTab('testimonials')">
         <div class="stat-top-row">
-          <span class="stat-track">ĐÁNH GIÁ</span>
+          <span class="stat-track">
+            ĐÁNH GIÁ
+            <HelpTooltip desc="Số cảm nhận đã duyệt và số bài chờ kiểm duyệt." impact="Chỉ bài đã DUYỆT mới xuất hiện tại Section 9 Trang chủ." />
+          </span>
           <span v-if="periodPendingOrSpamCount > 0" class="badge-warning-tag">
             {{ periodPendingOrSpamCount }} cần xử lý
           </span>
@@ -99,7 +120,10 @@
       <!-- 5. Tin tức & Tuyển sinh -->
       <div class="admin-stat-card clickable-stat-card" @click="goToTab('admissions')">
         <div class="stat-top-row">
-          <span class="stat-track">BÀI VIẾT</span>
+          <span class="stat-track">
+            BÀI VIẾT
+            <HelpTooltip desc="Tổng bài viết chuyên môn và thông báo chiêu sinh." impact="Liên kết đến trang Tuyển sinh và Thư viện Cẩm nang." />
+          </span>
         </div>
         <div class="stat-number">
           <span v-if="isLoading && blogs.length === 0 && admissions.length === 0" class="stat-skeleton-pulse"></span>
@@ -112,7 +136,10 @@
       <!-- 6. Giảng viên & Cố vấn -->
       <div class="admin-stat-card clickable-stat-card" @click="goToTab('lecturers')">
         <div class="stat-top-row">
-          <span class="stat-track">CHUYÊN GIA</span>
+          <span class="stat-track">
+            CHUYÊN GIA
+            <HelpTooltip desc="Đội ngũ giảng viên và cố vấn chiến lược." impact="Hiển thị tại Section 8 Đội ngũ Giảng viên Trang chủ." />
+          </span>
         </div>
         <div class="stat-number">
           <span v-if="isLoading && lecturers.length === 0" class="stat-skeleton-pulse"></span>
@@ -129,7 +156,10 @@
       <div class="workstation-panel glass-card">
         <div class="panel-header-row flex-between">
           <div class="panel-title-group">
-            <h3 class="panel-title">Yêu cầu Tư vấn Tuyển sinh</h3>
+            <h3 class="panel-title">
+              Yêu cầu Tư vấn Tuyển sinh
+              <HelpTooltip desc="4 khách hàng mới nhất. Nhấp 'Xử lý' để gọi điện và đổi trạng thái sang 'Đã liên hệ'." />
+            </h3>
             <span class="panel-badge-count">{{ periodUnresolvedContacts.length }} chưa xử lý</span>
           </div>
           <button type="button" @click="goToTab('contacts')" class="btn-text-link">
@@ -176,7 +206,10 @@
       <div class="workstation-panel glass-card">
         <div class="panel-header-row flex-between">
           <div class="panel-title-group">
-            <h3 class="panel-title">Đánh giá & Cảm nhận Học viên</h3>
+            <h3 class="panel-title">
+              Đánh giá & Cảm nhận Học viên
+              <HelpTooltip desc="4 nhận xét mới nhất. Nhấp 'Kiểm duyệt' để duyệt bài hiển thị ra ngoài website." />
+            </h3>
             <span v-if="periodPendingOrSpamCount > 0" class="panel-badge-warning">{{ periodPendingOrSpamCount }} cần duyệt</span>
           </div>
           <button type="button" @click="goToTab('testimonials')" class="btn-text-link">
@@ -240,6 +273,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
 const router = useRouter();
 const route = useRoute();

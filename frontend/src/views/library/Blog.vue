@@ -1,13 +1,16 @@
 <template>
   <div class="blog-page">
-    <div class="container">
-      <!-- Hero Section đồng bộ phong cách ACC Academy -->
-      <div class="blog-hero">
-        <h1 class="hero-title">Tin tức, Kiến thức </h1>
-      
+    <!-- Hero Section đồng bộ phong cách ACC Academy với nền xanh navy gradient nhạt dần -->
+    <section class="blog-hero-section">
+      <div class="hero-backdrop-glow"></div>
+      <div class="container hero-inner">
+        <h1 class="hero-title animate-fade-in">Tin tức, Kiến thức</h1>
+        <!-- <p class="hero-subtitle animate-fade-in">
+          Cập nhật xu hướng công nghệ AI, tự động hóa và phương pháp quản trị hiện đại cùng chuyên gia ACC
+        </p> -->
 
         <!-- Search Box -->
-        <div class="search-filter-wrapper">
+        <div class="search-filter-wrapper animate-fade-in">
           <div class="search-input-container">
             <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <circle cx="11" cy="11" r="8"></circle>
@@ -24,21 +27,23 @@
             </button>
           </div>
         </div>
-      </div>
 
-      <!-- Category Filter Tabs -->
-      <div class="category-tabs">
-        <button 
-          v-for="cat in availableCategories" 
-          :key="cat"
-          class="cat-tab-btn"
-          :class="{ active: selectedCategory === cat }"
-          @click="changeCategory(cat)"
-        >
-          {{ cat === 'All posts' ? 'Tất cả bài viết' : cat }}
-        </button>
+        <!-- Category Filter Tabs -->
+        <div class="category-tabs animate-fade-in">
+          <button 
+            v-for="cat in availableCategories" 
+            :key="cat"
+            class="cat-tab-btn"
+            :class="{ active: selectedCategory === cat }"
+            @click="changeCategory(cat)"
+          >
+            {{ cat === 'All posts' ? 'Tất cả bài viết' : cat }}
+          </button>
+        </div>
       </div>
+    </section>
 
+    <div class="container blog-content-container">
       <!-- Result Counter (nếu có tìm kiếm hoặc lọc) -->
       <div class="results-header" v-if="filteredPosts.length > 0">
         <span class="results-count">

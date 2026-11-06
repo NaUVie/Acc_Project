@@ -1,82 +1,126 @@
 .corporate-training-page {
-  padding-top: 120px;
-  padding-bottom: 100px;
-  background-color: #f8fafc;
+  width: 100%;
   min-height: 100vh;
+  background-color: #f8fafc;
+  padding: 0 0 100px;
 }
 
-.header-section {
+/* 1. Hero Section - Nền Xanh Navy Gradient Nhạt Dần Sang Trọng */
+.corporate-hero-section {
+  position: relative;
+  width: 100%;
+  padding: 120px 20px 50px;
+  background: 
+    radial-gradient(circle at 50% 18%, rgba(56, 189, 248, 0.22) 0%, transparent 65%),
+    linear-gradient(180deg, #051336 0%, #071e54 30%, #022B9F 62%, rgba(2, 43, 159, 0.12) 88%, rgba(248, 250, 252, 0) 100%);
+  overflow: hidden;
   text-align: center;
-  max-width: 860px;
-  margin-inline: auto;
-  margin-bottom: 48px;
+}
+
+.hero-backdrop-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 28px 28px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, transparent 92%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85) 0%, transparent 92%);
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
 }
 
-.hero-tag {
-  background: rgba(2, 43, 159, 0.08);
-  color: #022b9f;
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.12);
+  color: #7dd3fc;
   font-weight: 800;
-  padding: 6px 16px;
+  padding: 6px 18px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid rgba(125, 211, 252, 0.35);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
 }
 
 .hero-title {
-  font-size: clamp(32px, 4vw, 48px);
-  font-weight: 800;
-  color: #0f172a;
+  font-size: clamp(32px, 4.5vw, 48px);
+  font-weight: 900;
+  color: #ffffff;
   margin: 0;
   line-height: 1.2;
+  font-family: var(--font-display, 'Manrope', sans-serif);
+  letter-spacing: -0.5px;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #022b9f 0%, #2563eb 100%);
+  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .hero-subtitle {
   font-size: 16px;
-  color: #475569;
+  color: #e2e8f0;
   line-height: 1.6;
+  max-width: 680px;
   margin: 0;
+  font-weight: 500;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.corporate-content-container {
+  padding-top: 24px;
 }
 
 .filter-tabs {
   display: flex;
   justify-content: center;
   gap: 12px;
-  margin-bottom: 48px;
+  margin-top: 14px;
   flex-wrap: wrap;
 }
 
 .tab-btn {
   padding: 10px 24px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 24px;
-  color: #475569;
+  color: #1e293b;
   font-weight: 700;
   font-size: 14px;
   cursor: pointer;
   transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(5, 19, 54, 0.08);
 }
 
 .tab-btn:hover {
-  border-color: #022b9f;
-  color: #022b9f;
-  background: #f0f4ff;
+  border-color: #022B9F;
+  color: #022B9F;
+  background: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(5, 19, 54, 0.15);
 }
 
 .tab-btn.active {
-  background: #022b9f;
+  background: linear-gradient(135deg, #022B9F 0%, #1e40af 100%);
   color: #ffffff;
-  border-color: #022b9f;
-  box-shadow: 0 4px 14px rgba(2, 43, 159, 0.25);
+  border-color: #3b82f6;
+  box-shadow: 0 6px 20px rgba(2, 43, 159, 0.4);
+  transform: translateY(-2px);
 }
 
 .programs-grid {

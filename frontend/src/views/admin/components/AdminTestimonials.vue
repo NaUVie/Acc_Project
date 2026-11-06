@@ -4,7 +4,13 @@
     <div v-if="activeView === 'list'">
       <div class="content-header flex-between">
         <div>
-          <h2>Quản lý Cảm nhận & Video Feedback Học viên</h2>
+          <h2 style="display: flex; align-items: center; gap: 8px;">
+            Quản lý Cảm nhận & Video Feedback Học viên
+            <HelpTooltip 
+              desc="Quản lý đánh giá sao, lời nhận xét và video phỏng vấn học viên." 
+              impact="Chỉ các bài được chọn 'ĐÃ DUYỆT' mới hiển thị tại Section 9 Trang chủ." 
+            />
+          </h2>
           <p>Quản lý các lời nhận xét, hình ảnh thực tế và video phỏng vấn học viên trên YouTube.</p>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
@@ -30,26 +36,29 @@
             @click="filterType = 'pending'" 
             class="btn btn-sm"
             :class="filterType === 'pending' ? 'btn-warning-active' : 'btn-secondary'"
-            style="font-weight: 700;"
+            style="font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"
           >
-            ⏳ Chờ duyệt ({{ pendingCount }})
+            <span>⏳ Chờ duyệt ({{ pendingCount }})</span>
+            <HelpTooltip desc="Các đánh giá học viên mới gửi cần kiểm tra nội dung trước khi cho hiển thị công khai." />
           </button>
           <button 
             @click="filterType = 'approved'" 
             class="btn btn-sm"
             :class="filterType === 'approved' ? 'btn-success-active' : 'btn-secondary'"
-            style="font-weight: 700;"
+            style="font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"
           >
-            🟢 Đã duyệt ({{ approvedCount }})
+            <span>🟢 Đã duyệt ({{ approvedCount }})</span>
+            <HelpTooltip desc="Các nhận xét đã được duyệt và đang xuất hiện công khai trên website." impact="Hiển thị tại Section 9 Trang chủ." />
           </button>
           <button 
             @click="filterType = 'spam'" 
             class="btn btn-sm"
             :class="filterType === 'spam' ? 'btn-danger' : 'btn-secondary'"
-            style="font-weight: 700;"
+            style="font-weight: 700; display: inline-flex; align-items: center; gap: 4px;"
             :style="filterType !== 'spam' && spamCount > 0 ? 'color: #dc2626; border-color: #fca5a5; background: #fff1f2;' : ''"
           >
-            ⚠️ Nghi ngờ spam ({{ spamCount }})
+            <span>⚠️ Spam ({{ spamCount }})</span>
+            <HelpTooltip desc="Nhận xét bị hệ thống gắn cờ do chứa từ khóa nhạy cảm hoặc link spam." />
           </button>
           <button 
             @click="filterType = 'video'" 
@@ -96,60 +105,92 @@
         </button>
       </div>
 
-      <!-- Testimonials Table -->
-      <div class="table-responsive">
-        <table class="admin-table">
+      <!-- Testimonials Table (Tối ưu 100% độ rộng màn hình, không cần cuộn ngang) -->
+      <div class="table-responsive" style="overflow-x: hidden; width: 100%;">
+        <table class="admin-table" style="width: 100%; table-layout: auto;">
           <thead>
             <tr>
-              <th style="width: 50px;">ID</th>
-              <th style="width: 100px;">Loại</th>
-              <th>Preview</th>
-              <th>Học viên & Chức danh</th>
-              <th>Khóa học</th>
-              <th>Trạng thái</th>
-              <th>Nội dung / Trích dẫn</th>
-              <th style="width: 110px;">Hành động</th>
+              <th style="width: 90px; text-align: center;">
+                Ảnh & Loại
+                <HelpTooltip desc="Hình ảnh / video feedback và phân loại nhận xét." />
+              </th>
+              <th style="width: 210px;">
+                Học viên & Khóa học
+                <HelpTooltip desc="Tên học viên, chức danh, công ty và khóa học tham gia." />
+              </th>
+              <th style="min-width: 250px;">
+                Nội dung Cảm nhận & Đánh giá
+              </th>
+              <th style="width: 140px; text-align: center;">
+                Trạng thái
+                <HelpTooltip desc="Chỉ nhận xét ĐÃ DUYỆT mới xuất hiện tại Section 9 Trang chủ." impact="Tác động đến Section 9 Trang chủ." />
+              </th>
+              <th style="width: 80px; text-align: right;">Thao tác</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="t in paginatedTestimonials" :key="t.id">
-              <td class="font-bold text-center" data-label="ID">#{{ t.id }}</td>
-              <td data-label="Loại">
-                <span 
-                  class="badge" 
-                  :style="t.testimonial_type === 'video' ? 'background: #ffe4e6; color: #be123c;' : (t.testimonial_type === 'photo' ? 'background: #e0f2fe; color: #0369a1;' : 'background: #f1f5f9; color: #475569;')"
-                >
-                  {{ t.testimonial_type === 'video' ? 'Video' : (t.testimonial_type === 'photo' ? 'Ảnh' : 'Trích dẫn') }}
-                </span>
-              </td>
-              <td data-label="Preview">
-                <div style="position: relative; width: 80px; height: 50px; border-radius: 8px; overflow: hidden; background: #0f172a; border: 1px solid #cbd5e1;">
+              <!-- Cột 1: Ảnh đại diện + Loại nhận xét -->
+              <td data-label="Ảnh & Loại" style="vertical-align: top; padding: 12px 8px; text-align: center;">
+                <div style="position: relative; width: 68px; height: 44px; border-radius: 6px; overflow: hidden; background: #0f172a; border: 1px solid #cbd5e1; margin: 0 auto;">
                   <img 
                     :src="formatImageUrl(t.thumbnail || t.image) || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'" 
                     :alt="t.name" 
                     style="width: 100%; height: 100%; object-fit: cover;" 
                     referrerpolicy="no-referrer"
                   />
-                  <div v-if="t.testimonial_type === 'video'" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3);">
-                    <span style="color: #ffffff; font-size: 16px;">▶</span>
+                  <div v-if="t.testimonial_type === 'video'" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.35);">
+                    <span style="color: #ffffff; font-size: 13px;">▶</span>
                   </div>
                 </div>
+                <div style="margin-top: 4px;">
+                  <span 
+                    class="badge" 
+                    :style="t.testimonial_type === 'video' ? 'background: #ffe4e6; color: #be123c;' : (t.testimonial_type === 'photo' ? 'background: #e0f2fe; color: #0369a1;' : 'background: #f1f5f9; color: #475569;')"
+                    style="font-size: 10.5px; padding: 2px 6px; white-space: nowrap; font-weight: 700;"
+                  >
+                    {{ t.testimonial_type === 'video' ? 'Video' : (t.testimonial_type === 'photo' ? 'Ảnh' : 'Trích dẫn') }}
+                  </span>
+                </div>
               </td>
-              <td class="wrap-cell" data-label="Học viên & Chức danh">
-                <div class="font-bold" style="color: #0f172a; font-size: 15px;">{{ t.name }}</div>
-                <small class="text-muted" style="display: block; margin-top: 2px; color: #475569;">
-                  {{ t.role || 'Học viên' }} <span v-if="t.company">• {{ t.company }}</span>
-                </small>
+
+              <!-- Cột 2: Học viên, Chức danh & Khóa học -->
+              <td data-label="Học viên & Khóa học" style="vertical-align: top; padding: 12px 10px;">
+                <div style="display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;">
+                  <span class="font-bold" style="color: #0f172a; font-size: 14px;">{{ t.name }}</span>
+                  <span style="font-size: 11px; color: #94a3b8; font-weight: 600;">#{{ t.id }}</span>
+                </div>
+                <div class="text-muted" style="margin-top: 2px; color: #475569; font-size: 12px; line-height: 1.35;">
+                  {{ t.role || 'Học viên' }}
+                  <span v-if="t.company" style="display: block; color: #64748b; font-size: 11.5px;">{{ t.company }}</span>
+                </div>
+                <div style="margin-top: 6px;">
+                  <span v-if="t.course_name || t.courseName" class="badge" style="background: rgba(2, 43, 159, 0.08); color: #022b9f; font-weight: 600; font-size: 11px; line-height: 1.3; display: inline-block; padding: 2px 8px; border-radius: 4px;">
+                    📚 {{ t.course_name || t.courseName }}
+                  </span>
+                  <span v-else class="text-muted" style="font-size: 11px; font-style: italic; color: #94a3b8;">Chung toàn khóa</span>
+                </div>
               </td>
-              <td class="wrap-cell" data-label="Khóa học">
-                <span v-if="t.course_name || t.courseName" class="badge" style="background: rgba(2, 43, 159, 0.08); color: #022b9f; font-weight: 700;">
-                  📚 {{ t.course_name || t.courseName }}
-                </span>
-                <span v-else class="text-muted" style="font-size: 12px;">(Tất cả)</span>
+
+              <!-- Cột 3: Nội dung Cảm nhận & Đánh giá sao (Rộng rãi, chiếm phần lớn bảng) -->
+              <td data-label="Nội dung Cảm nhận" style="vertical-align: top; padding: 12px 14px;">
+                <div style="font-size: 13.5px; color: #1e293b; line-height: 1.55; font-style: italic; word-break: break-word;">
+                  “{{ t.quote || t.text || '...' }}”
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; margin-top: 6px;">
+                  <span style="color: #f59e0b; font-size: 13px; letter-spacing: 1px;">
+                    {{ '★'.repeat(t.rating || 5) }}
+                  </span>
+                  <span style="color: #64748b; font-size: 11.5px; font-weight: 600;">
+                    ({{ t.rating || 5 }}/5 sao)
+                  </span>
+                </div>
               </td>
-              <td data-label="Trạng thái">
-                <div v-if="t.testimonial_type === 'spam' || t.isSpam" style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
-                  <span class="badge" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; font-weight: 800; font-size: 11.5px;">
+
+              <!-- Cột 4: Trạng thái duyệt / Spam -->
+              <td data-label="Trạng thái" style="vertical-align: top; padding: 12px 8px; text-align: center;">
+                <div v-if="t.testimonial_type === 'spam' || t.isSpam" style="display: flex; flex-direction: column; gap: 4px; align-items: center;">
+                  <span class="badge" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; font-weight: 800; font-size: 11px; padding: 3px 8px;">
                     ⚠️ Nghi ngờ spam
                   </span>
                   <div style="display: flex; gap: 4px; margin-top: 2px;">
@@ -167,19 +208,20 @@
                       @click="setStatus(t, 'pending')" 
                       class="btn btn-xs" 
                       style="padding: 2px 7px; font-size: 11px; background: #fef3c7; color: #b45309; border: 1px solid #fde68a; border-radius: 4px; font-weight: 600; cursor: pointer;"
-                      title="Bỏ nhãn spam, chuyển sang chờ duyệt"
+                      title="Chuyển sang chờ duyệt"
                     >
                       Chờ duyệt
                     </button>
                   </div>
                 </div>
 
-                <div v-else style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                <div v-else style="display: flex; flex-direction: column; align-items: center; gap: 6px;">
                   <button 
                     type="button" 
                     class="badge" 
                     :style="t.isApproved ? 'background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; cursor: pointer;' : 'background: #fef3c7; color: #b45309; border: 1px solid #fde68a; cursor: pointer; font-weight: 800;'"
                     @click="toggleApproval(t)"
+                    style="padding: 4px 10px; font-size: 11.5px; width: 100%; max-width: 115px; text-align: center;"
                     :title="t.isApproved ? 'Nhấp để ẩn cảm nhận này' : 'Nhấp để duyệt hiển thị công khai cảm nhận này'"
                   >
                     {{ t.isApproved ? '🟢 Đã duyệt' : '⏳ Chờ duyệt' }}
@@ -187,30 +229,24 @@
                   <button 
                     type="button" 
                     @click="setStatus(t, 'spam')" 
-                    style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 4px; cursor: pointer; color: #e11d48; font-size: 11px; padding: 2px 6px; font-weight: 700;"
+                    style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 4px; cursor: pointer; color: #e11d48; font-size: 11px; padding: 2px 8px; font-weight: 600;"
                     title="Đánh dấu nghi ngờ spam"
                   >
-                    🚩 Spam
+                    🚩 Gắn cờ spam
                   </button>
                 </div>
               </td>
-              <td class="wrap-cell" data-label="Nội dung / Trích dẫn">
-                <div style="max-width: 280px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; font-size: 13.5px; color: #334155;">
-                  "{{ t.quote || t.text || '...' }}"
-                </div>
-                <div style="color: #f59e0b; font-size: 12px; margin-top: 2px;">
-                  {{ '★'.repeat(t.rating || 5) }}
-                </div>
-              </td>
-              <td data-label="Hành động">
-                <div class="action-buttons">
+
+              <!-- Cột 5: Thao tác Sửa / Xóa -->
+              <td data-label="Hành động" style="vertical-align: top; padding: 12px 8px; text-align: right;">
+                <div class="action-buttons" style="justify-content: flex-end;">
                   <button @click="editTestimonial(t)" class="btn-action edit" title="Sửa đánh giá">✏️</button>
                   <button @click="deleteItem(t.id)" class="btn-action delete" title="Xóa đánh giá">🗑️</button>
                 </div>
               </td>
             </tr>
             <tr v-if="filteredTestimonials.length === 0">
-              <td colspan="8" class="text-center py-8 text-muted">
+              <td colspan="5" class="text-center py-8 text-muted">
                 Không tìm thấy cảm nhận nào phù hợp.
               </td>
             </tr>
@@ -244,7 +280,10 @@
       <form @submit.prevent="saveTestimonial" class="mt-2">
         <!-- Select Testimonial Type -->
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 700;">Phân loại Feedback học viên</label>
+          <label style="color: #1e293b; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+            <span>Phân loại Feedback học viên</span>
+            <HelpTooltip desc="Chọn loại nhận xét: Video YouTube (học viên bấm xem clip trực tiếp) hoặc Ảnh & Trích dẫn văn bản." />
+          </label>
           <div style="display: flex; gap: 16px; margin-top: 6px;">
             <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-weight: 600;">
               <input type="radio" v-model="form.testimonialType" value="video" /> Video Feedback YouTube
@@ -261,24 +300,36 @@
         <!-- Student Basic Info -->
         <div class="grid grid-2 gap-4 mt-4">
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Họ và Tên Học viên <span style="color: #e11d48;">*</span></label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Họ và Tên Học viên <span style="color: #e11d48;">*</span></span>
+              <HelpTooltip desc="Tên người đánh giá hiển thị trên website." />
+            </label>
             <input v-model="form.name" type="text" required class="admin-input-style" placeholder="Ví dụ: Nguyễn Văn Hoàng" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
           </div>
 
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Chức danh / Vị trí</label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Chức danh / Vị trí</span>
+              <HelpTooltip desc="Chức danh nghề nghiệp (ví dụ: Founder, Trưởng phòng Kinh doanh)." />
+            </label>
             <input v-model="form.role" type="text" class="admin-input-style" placeholder="Ví dụ: Founder & CEO / Giám đốc Vận hành" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
           </div>
         </div>
 
         <div class="grid grid-2 gap-4 mt-4">
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Công ty / Tổ chức</label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Công ty / Tổ chức</span>
+              <HelpTooltip desc="Tên doanh nghiệp học viên đang công tác để tăng độ uy tín." />
+            </label>
             <input v-model="form.company" type="text" class="admin-input-style" placeholder="Ví dụ: VNG Corporation / TechVision Group" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
           </div>
 
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Khóa học tham gia</label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Khóa học tham gia</span>
+              <HelpTooltip desc="Chọn khóa học để nhận xét này tự động xuất hiện ở trang chi tiết khóa học đó." impact="Hiển thị tại trang chi tiết khóa học được chọn." />
+            </label>
             <select v-model="form.courseId" @change="onCourseSelectChange" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;">
               <option :value="null">-- Không gán khóa học cụ thể / Cảm nhận chung --</option>
               <option v-for="c in coursesList" :key="c.id" :value="c.id">
@@ -290,7 +341,10 @@
 
         <div class="grid grid-2 gap-4 mt-3">
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Trạng thái kiểm duyệt</label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Trạng thái kiểm duyệt</span>
+              <HelpTooltip desc="Chọn 'Đã duyệt' để hiển thị ra trang chủ, 'Chờ duyệt' hoặc 'Nghi ngờ spam' để ẩn." impact="Chỉ bài ĐÃ DUYỆT mới xuất hiện tại Section 9 Trang chủ." />
+            </label>
             <select v-model="form.statusMode" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 600;">
               <option value="approved">🟢 Đã duyệt (Hiển thị công khai)</option>
               <option value="pending">⏳ Chờ duyệt (Tạm ẩn)</option>
@@ -304,7 +358,10 @@
           <h4 style="margin: 0 0 12px 0; color: #be123c; font-size: 15px; font-weight: 800;">Cấu hình YouTube Video</h4>
           
           <div class="form-group">
-            <label style="color: #9f1239; font-weight: 600;">Đường dẫn Video YouTube hoặc YouTube Video ID</label>
+            <label style="color: #9f1239; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Đường dẫn Video YouTube hoặc YouTube Video ID</span>
+              <HelpTooltip desc="Dán URL video hoặc Video ID YouTube, hệ thống tự trích xuất ID và tạo Thumbnail." />
+            </label>
             <input 
               v-model="youtubeInput" 
               @input="onYoutubeInputChange"
@@ -320,7 +377,10 @@
 
           <div class="grid grid-2 gap-4 mt-3">
             <div class="form-group">
-              <label style="color: #9f1239; font-weight: 600;">Link Thumbnail Ảnh bìa Video</label>
+              <label style="color: #9f1239; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                <span>Link Thumbnail Ảnh bìa Video</span>
+                <HelpTooltip desc="Ảnh bìa xem trước cho video YouTube, có thể cắt lại theo tỷ lệ 16:9." />
+              </label>
               <div style="display: flex; gap: 8px;">
                 <input v-model="form.thumbnail" type="text" class="admin-input-style" placeholder="https://img.youtube.com/vi/..." style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #fda4af;" />
                 <input type="file" ref="thumbFileRef" @change="onFileSelectForCrop($event, (url) => { form.thumbnail = url; }, 'wide', '✂ Cắt Thumbnail Video (16:9)')" style="display: none;" accept="image/*" />
@@ -344,7 +404,10 @@
           <h4 style="margin: 0 0 12px 0; color: #022b9f; font-size: 15px; font-weight: 800;">Cấu hình Ảnh & Trích dẫn</h4>
 
           <div class="form-group" v-if="form.testimonialType === 'photo'">
-            <label style="color: #1e293b; font-weight: 600;">Link Hình Ảnh Feedback Học viên</label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Link Hình Ảnh Feedback Học viên</span>
+              <HelpTooltip desc="Ảnh đại diện hoặc ảnh chụp học viên (chuẩn vuông 1:1)." />
+            </label>
             <div style="display: flex; gap: 8px;">
               <input v-model="form.image" type="text" class="admin-input-style" placeholder="https://... hoặc /images/..." style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
               <input type="file" ref="photoFileRef" @change="onFileSelectForCrop($event, (url) => { form.image = url; }, 'square', '✂ Cắt Ảnh Đại Diện Học Viên (1:1)')" style="display: none;" accept="image/*" />
@@ -357,14 +420,20 @@
           </div>
 
           <div class="form-group mt-3">
-            <label style="color: #1e293b; font-weight: 600;">Nội dung Cảm nhận / Trích dẫn chi tiết <span style="color: #e11d48;">*</span></label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Nội dung Cảm nhận / Trích dẫn chi tiết <span style="color: #e11d48;">*</span></span>
+              <HelpTooltip desc="Nội dung lời nhận xét thực tế của học viên về chất lượng giảng dạy." impact="Nội dung hiển thị chính trong card cảm nhận tại Section 9 Trang chủ." />
+            </label>
             <textarea v-model="form.quote" rows="4" required class="admin-input-style" placeholder="Viết cảm nhận thực tế của học viên..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
           </div>
         </div>
 
         <!-- Rating Rating -->
         <div class="form-group mt-4">
-          <label style="color: #1e293b; font-weight: 600;">Số sao Đánh giá (Rating)</label>
+          <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+            <span>Số sao Đánh giá (Rating)</span>
+            <HelpTooltip desc="Số sao từ 3 đến 5 sao hiển thị kèm nhận xét." />
+          </label>
           <select v-model.number="form.rating" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; width: 160px;">
             <option :value="5">⭐⭐⭐⭐⭐ (5 sao - Xuất sắc)</option>
             <option :value="4">⭐⭐⭐⭐ (4 sao - Tốt)</option>
@@ -392,6 +461,7 @@ import { useCourseStore } from '@/stores/courses';
 import Pagination from '@/components/Pagination.vue';
 import { formatImageUrl } from '@/utils/imageHelper';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
+import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
 const courseStore = useCourseStore();
 

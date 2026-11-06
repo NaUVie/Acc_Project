@@ -144,7 +144,8 @@
     />
 
     <!-- ==================== MODAL: XEM CHI TIẾT HỌC VIÊN ==================== -->
-    <div v-if="detailModalOpen && selectedUser" class="modal-overlay" @click.self="detailModalOpen = false">
+    <Teleport to="body">
+      <div v-if="detailModalOpen && selectedUser" class="modal-overlay" @click.self="detailModalOpen = false">
       <div class="modal-content glass-card user-detail-modal animate-scale-up">
         <!-- Modal Header -->
         <div class="detail-header-card">
@@ -311,9 +312,11 @@
         </div>
       </div>
     </div>
+    </Teleport>
 
     <!-- ==================== MODAL: ADD/EDIT USER ==================== -->
-    <div v-if="userModalOpen" class="modal-overlay" @click.self="userModalOpen = false">
+    <Teleport to="body">
+      <div v-if="userModalOpen" class="modal-overlay" @click.self="userModalOpen = false">
       <div class="modal-content glass-card user-form-modal animate-scale-up">
         <div class="user-form-header">
           <div class="flex-align-center gap-3">
@@ -375,6 +378,7 @@
         </form>
       </div>
     </div>
+    </Teleport>
   </div>
 </template>
 

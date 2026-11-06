@@ -104,7 +104,8 @@
     />
 
     <!-- ==================== MODAL: ADD/EDIT ORDER ==================== -->
-    <div v-if="orderModalOpen" class="modal-overlay">
+    <Teleport to="body">
+      <div v-if="orderModalOpen" class="modal-overlay">
       <div class="modal-content glass-card">
         <h3>{{ isEditingOrder ? 'Chỉnh sửa đơn hàng' : 'Tạo đơn hàng mới' }}</h3>
         <form @submit.prevent="saveOrder" class="mt-4">
@@ -172,6 +173,7 @@
         </form>
       </div>
     </div>
+    </Teleport>
   </div>
 </template>
 

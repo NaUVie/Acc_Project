@@ -69,50 +69,52 @@
     </div>
 
     <!-- MODAL ADD / EDIT CATEGORY -->
-    <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
-      <div class="modal-content animate-fade-in" style="max-width: 500px;">
-        <div class="modal-header">
-          <h3>{{ isEditing ? 'Sửa Tên Chuyên Mục' : 'Thêm Chuyên Mục Mới' }}</h3>
-          <button class="close-btn" @click="closeModal">&times;</button>
+    <Teleport to="body">
+      <div v-if="showModal" class="modal-overlay" @click.self="closeModal">
+        <div class="modal-content animate-fade-in" style="max-width: 500px;">
+          <div class="modal-header">
+            <h3>{{ isEditing ? 'Sửa Tên Chuyên Mục' : 'Thêm Chuyên Mục Mới' }}</h3>
+            <button class="close-btn" @click="closeModal">&times;</button>
+          </div>
+          
+          <form @submit.prevent="saveCategory">
+            <div class="form-group mb-3">
+              <label style="color: #1e293b; font-weight: 600;">Tên chuyên mục</label>
+              <input 
+                v-model="catForm.name" 
+                @input="onNameInput"
+                type="text" 
+                required 
+                class="admin-input-style" 
+                placeholder="Ví dụ: Kỹ năng Quản trị & Lãnh đạo" 
+                style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" 
+              />
+            </div>
+
+            <div class="form-group mb-4">
+              <label style="color: #1e293b; font-weight: 600;">Đường dẫn tĩnh (Slug)</label>
+              <input 
+                v-model="catForm.slug" 
+                :readonly="isEditing"
+                type="text" 
+                required 
+                class="admin-input-style" 
+                placeholder="ky-nang-quan-tri" 
+                style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" 
+              />
+              <small v-if="isEditing" style="color: #64748b; margin-top: 4px; display: block;">Mã slug không thể sửa sau khi khởi tạo để giữ liên kết khóa học.</small>
+            </div>
+
+            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end;">
+              <button type="button" class="btn btn-outline" @click="closeModal">Hủy</button>
+              <button type="submit" class="btn btn-primary" :disabled="submitting">
+                {{ submitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Tạo mới') }}
+              </button>
+            </div>
+          </form>
         </div>
-        
-        <form @submit.prevent="saveCategory">
-          <div class="form-group mb-3">
-            <label style="color: #1e293b; font-weight: 600;">Tên chuyên mục</label>
-            <input 
-              v-model="catForm.name" 
-              @input="onNameInput"
-              type="text" 
-              required 
-              class="admin-input-style" 
-              placeholder="Ví dụ: Kỹ năng Quản trị & Lãnh đạo" 
-              style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" 
-            />
-          </div>
-
-          <div class="form-group mb-4">
-            <label style="color: #1e293b; font-weight: 600;">Đường dẫn tĩnh (Slug)</label>
-            <input 
-              v-model="catForm.slug" 
-              :readonly="isEditing"
-              type="text" 
-              required 
-              class="admin-input-style" 
-              placeholder="ky-nang-quan-tri" 
-              style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" 
-            />
-            <small v-if="isEditing" style="color: #64748b; margin-top: 4px; display: block;">Mã slug không thể sửa sau khi khởi tạo để giữ liên kết khóa học.</small>
-          </div>
-
-          <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end;">
-            <button type="button" class="btn btn-outline" @click="closeModal">Hủy</button>
-            <button type="submit" class="btn btn-primary" :disabled="submitting">
-              {{ submitting ? 'Đang lưu...' : (isEditing ? 'Cập nhật' : 'Tạo mới') }}
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 

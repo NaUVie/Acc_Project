@@ -1,6 +1,7 @@
 <template>
-  <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 1050; padding: 20px;">
-    <div class="modal-content animate-fade-in" style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); border: 1px solid #e2e8f0; overflow: hidden;">
+  <Teleport to="body">
+    <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')" style="position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 20px;">
+      <div class="modal-content animate-fade-in" style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); border: 1px solid #e2e8f0; overflow: hidden;">
       <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
         <div>
           <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a;">🏷️ Quản lý Chuyên mục Bài viết</h3>
@@ -87,7 +88,8 @@
         <button type="button" @click="$emit('close')" class="btn btn-secondary">Đóng</button>
       </div>
     </div>
-  </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup>

@@ -44,7 +44,10 @@
     <div v-if="activeView === 'list'">
       <div class="content-header flex-between">
         <div>
-          <h2>Quản lý Đối tác & Doanh nghiệp hợp tác ({{ partners.length }})</h2>
+          <h2>
+            Quản lý Đối tác & Doanh nghiệp hợp tác ({{ partners.length }})
+            <HelpTooltip desc="Quản lý logo các thương hiệu đối tác đồng hành cùng học viện." impact="Hiển thị tại Section 4 ngay dưới banner Trang chủ." />
+          </h2>
           <p>
             Trang chủ hiển thị 3 hàng: <strong>Hàng trên</strong> (cố định 6 đối tác), <strong>Hàng giữa</strong> (chạy vô tận Marquee), và <strong>Hàng dưới</strong> (cố định 6 đối tác).
           </p>
@@ -99,9 +102,18 @@
               <th style="width: 70px;">Thứ tự</th>
               <th style="width: 140px;">Logo</th>
               <th>Tên doanh nghiệp / Đối tác</th>
-              <th style="width: 190px;">Vị trí hàng</th>
-              <th>Liên kết (Link website)</th>
-              <th style="width: 140px;">Trạng thái</th>
+              <th style="width: 190px;">
+                Vị trí hàng
+                <HelpTooltip desc="Hàng trên (cố định), Hàng giữa (chạy Marquee) hoặc Hàng dưới (cố định)." impact="Hiển thị tại Section 4 Trang chủ." />
+              </th>
+              <th>
+                Liên kết (Website)
+                <HelpTooltip desc="Link website của đối tác khi học viên click vào logo." />
+              </th>
+              <th style="width: 140px;">
+                Trạng thái
+                <HelpTooltip desc="Bấm vào để chuyển đổi giữa 'Đang hiển thị' và 'Đã ẩn'." impact="Ẩn hoặc hiện logo ngoài Trang chủ." />
+              </th>
               <th style="width: 110px;">Hành động</th>
             </tr>
           </thead>
@@ -217,7 +229,10 @@
       <form @submit.prevent="savePartner" class="mt-2">
         <div class="grid grid-2 gap-4">
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Tên Doanh nghiệp / Đối tác <span style="color: #e11d48;">*</span></label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Tên Doanh nghiệp / Đối tác <span style="color: #e11d48;">*</span></span>
+              <HelpTooltip desc="Tên thương hiệu đối tác (ví dụ: Vinamilk, FPT, Vietcombank)." impact="Dùng để hiển thị chú thích khi rê chuột vào logo." />
+            </label>
             <input 
               v-model="form.name" 
               type="text" 
@@ -229,7 +244,10 @@
           </div>
 
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Vị trí hàng hiển thị trên Home <span style="color: #e11d48;">*</span></label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Vị trí hàng hiển thị trên Home <span style="color: #e11d48;">*</span></span>
+              <HelpTooltip desc="Chọn 1 trong 3 hàng: Hàng 1 (cố định), Hàng 2 (chạy cuộn Marquee), Hàng 3 (cố định)." impact="Xác định chính xác vị trí logo xuất hiện tại Section 4 Trang chủ." />
+            </label>
             <select 
               v-model="form.row_type" 
               class="admin-input-style"
@@ -247,7 +265,10 @@
 
         <div class="grid grid-2 gap-4 mt-4">
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Logo Doanh nghiệp (URL hoặc tải lên) <span style="color: #e11d48;">*</span></label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Logo Doanh nghiệp (URL hoặc tải lên) <span style="color: #e11d48;">*</span></span>
+              <HelpTooltip desc="File ảnh logo định dạng PNG hoặc SVG trong suốt (khuyến nghị nền trong suốt đẹp nhất)." impact="Hiển thị trên dải logo đối tác ngoài trang chủ." />
+            </label>
             <div style="display: flex; gap: 8px; margin-top: 4px;">
               <input 
                 v-model="form.src" 
@@ -269,7 +290,10 @@
           </div>
 
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Thứ tự sắp xếp (Position)</label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Thứ tự sắp xếp (Position)</span>
+              <HelpTooltip desc="Số nhỏ hơn sẽ đứng trước (từ trái qua phải)." />
+            </label>
             <input 
               v-model.number="form.position" 
               type="number" 
@@ -283,7 +307,10 @@
         </div>
 
         <div class="form-group mt-4">
-          <label style="color: #1e293b; font-weight: 600;">Đường dẫn website doanh nghiệp (Link ngoài - Tùy chọn)</label>
+          <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+            <span>Đường dẫn website doanh nghiệp (Link ngoài - Tùy chọn)</span>
+            <HelpTooltip desc="Nếu nhập link, học viên bấm vào logo sẽ mở trang web của đối tác trong tab mới." />
+          </label>
           <input 
             v-model="form.link" 
             type="text" 
@@ -297,8 +324,9 @@
         <div class="mt-4" style="background: #f8fafc; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0;">
           <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin: 0;">
             <input v-model="form.is_active" type="checkbox" id="partner_active" style="width: 18px; height: 18px; cursor: pointer;" />
-            <label for="partner_active" style="color: #1e293b; font-weight: 600; cursor: pointer; margin: 0;">
-              Hiển thị Logo này trên trang chủ (Kích hoạt)
+            <label for="partner_active" style="color: #1e293b; font-weight: 600; cursor: pointer; margin: 0; display: flex; align-items: center; gap: 6px;">
+              <span>Hiển thị Logo này trên trang chủ (Kích hoạt)</span>
+              <HelpTooltip desc="Bật để hiển thị công khai trên trang chủ, bỏ chọn để tạm thời ẩn." impact="Tác động trực tiếp lên Section 4 Trang chủ." />
             </label>
           </div>
         </div>
@@ -321,6 +349,7 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import { formatImageUrl } from '@/utils/imageHelper';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
+import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
 const courseStore = useCourseStore();
 

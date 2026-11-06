@@ -155,77 +155,79 @@
     </div>
 
     <!-- Review Detail Modal in Admin -->
-    <div v-if="selectedReviewDetail" class="admin-modal-overlay animate-fade-in" @click.self="selectedReviewDetail = null">
-      <div class="admin-modal-box">
-        <div class="admin-modal-header">
-          <h3>Chi tiết nhận xét của học viên</h3>
-          <button @click="selectedReviewDetail = null" class="btn-modal-close">✕</button>
-        </div>
-        <div class="admin-modal-body">
-          <div class="review-detail-meta-grid">
-            <div>
-              <span class="meta-label">Người gửi:</span>
-              <strong>{{ selectedReviewDetail.author_name }}</strong>
-            </div>
-            <div>
-              <span class="meta-label">Email:</span>
-              <span>{{ selectedReviewDetail.author_email || 'Chưa cung cấp' }}</span>
-            </div>
-            <div>
-              <span class="meta-label">Dự án:</span>
-              <strong style="color: #022b9f;">{{ getProjectTitle(selectedReviewDetail.project_id) }}</strong>
-            </div>
-            <div>
-              <span class="meta-label">Thời gian:</span>
-              <span>{{ formatReviewDate(selectedReviewDetail.created_at) }}</span>
-            </div>
-            <div>
-              <span class="meta-label">Đánh giá sao:</span>
-              <span style="color: #f59e0b; font-weight: 700; font-size: 15px;">
-                ★ {{ selectedReviewDetail.rating }}/5 Sao
-              </span>
-            </div>
-            <div>
-              <span class="meta-label">Trạng thái:</span>
-              <span 
-                class="badge" 
-                :style="selectedReviewDetail.is_approved ? 'background: #d1fae5; color: #065f46; font-weight: 700;' : 'background: #fef3c7; color: #92400e; font-weight: 700;'"
-              >
-                {{ selectedReviewDetail.is_approved ? 'Đã hiển thị công khai' : 'Đang chờ phê duyệt' }}
-              </span>
-            </div>
+    <Teleport to="body">
+      <div v-if="selectedReviewDetail" class="admin-modal-overlay animate-fade-in" @click.self="selectedReviewDetail = null">
+        <div class="admin-modal-box">
+          <div class="admin-modal-header">
+            <h3>Chi tiết nhận xét của học viên</h3>
+            <button @click="selectedReviewDetail = null" class="btn-modal-close">✕</button>
           </div>
+          <div class="admin-modal-body">
+            <div class="review-detail-meta-grid">
+              <div>
+                <span class="meta-label">Người gửi:</span>
+                <strong>{{ selectedReviewDetail.author_name }}</strong>
+              </div>
+              <div>
+                <span class="meta-label">Email:</span>
+                <span>{{ selectedReviewDetail.author_email || 'Chưa cung cấp' }}</span>
+              </div>
+              <div>
+                <span class="meta-label">Dự án:</span>
+                <strong style="color: #022b9f;">{{ getProjectTitle(selectedReviewDetail.project_id) }}</strong>
+              </div>
+              <div>
+                <span class="meta-label">Thời gian:</span>
+                <span>{{ formatReviewDate(selectedReviewDetail.created_at) }}</span>
+              </div>
+              <div>
+                <span class="meta-label">Đánh giá sao:</span>
+                <span style="color: #f59e0b; font-weight: 700; font-size: 15px;">
+                  ★ {{ selectedReviewDetail.rating }}/5 Sao
+                </span>
+              </div>
+              <div>
+                <span class="meta-label">Trạng thái:</span>
+                <span 
+                  class="badge" 
+                  :style="selectedReviewDetail.is_approved ? 'background: #d1fae5; color: #065f46; font-weight: 700;' : 'background: #fef3c7; color: #92400e; font-weight: 700;'"
+                >
+                  {{ selectedReviewDetail.is_approved ? 'Đã hiển thị công khai' : 'Đang chờ phê duyệt' }}
+                </span>
+              </div>
+            </div>
 
-          <div class="review-detail-content-section mt-4">
-            <span class="meta-label" style="display: block; margin-bottom: 6px;">Nội dung nhận xét đầy đủ:</span>
-            <div class="review-detail-comment-full">
-              {{ selectedReviewDetail.comment }}
+            <div class="review-detail-content-section mt-4">
+              <span class="meta-label" style="display: block; margin-bottom: 6px;">Nội dung nhận xét đầy đủ:</span>
+              <div class="review-detail-comment-full">
+                {{ selectedReviewDetail.comment }}
+              </div>
             </div>
           </div>
-        </div>
-        <div class="admin-modal-footer">
-          <button 
-            type="button" 
-            @click="handleToggleApproval(selectedReviewDetail)" 
-            class="btn"
-            :class="selectedReviewDetail.is_approved ? 'btn-secondary' : 'btn-primary'"
-          >
-            {{ selectedReviewDetail.is_approved ? 'Chuyển về Chờ duyệt' : 'Duyệt & Đăng công khai' }}
-          </button>
-          <button 
-            type="button" 
-            @click="handleDeleteReview(selectedReviewDetail.id); selectedReviewDetail = null;" 
-            class="btn btn-secondary" 
-            style="color: #b91c1c; border-color: #fca5a5;"
-          >
-            Xóa nhận xét này
-          </button>
-          <button type="button" @click="selectedReviewDetail = null" class="btn btn-secondary">
-            Đóng
-          </button>
+          <div class="admin-modal-footer">
+            <button 
+              type="button" 
+              @click="handleToggleApproval(selectedReviewDetail)" 
+              class="btn"
+              :class="selectedReviewDetail.is_approved ? 'btn-secondary' : 'btn-primary'"
+            >
+              {{ selectedReviewDetail.is_approved ? 'Chuyển về Chờ duyệt' : 'Duyệt & Đăng công khai' }}
+            </button>
+            <button 
+              type="button" 
+              @click="handleDeleteReview(selectedReviewDetail.id); selectedReviewDetail = null;" 
+              class="btn btn-secondary" 
+              style="color: #b91c1c; border-color: #fca5a5;"
+            >
+              Xóa nhận xét này
+            </button>
+            <button type="button" @click="selectedReviewDetail = null" class="btn btn-secondary">
+              Đóng
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 

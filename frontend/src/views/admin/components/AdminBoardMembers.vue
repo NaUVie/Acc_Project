@@ -156,7 +156,8 @@
     </div>
 
     <!-- VIEW 2: ADD / EDIT MODAL (COMPACT 2-COLUMN, NO SCROLL) -->
-    <div v-if="isModalOpen" class="admin-modal-overlay" @click.self="closeModal">
+    <Teleport to="body">
+      <div v-if="isModalOpen" class="admin-modal-overlay" @click.self="closeModal">
       <div class="admin-modal-card" style="max-width: 820px; width: 95%; padding: 20px 24px;">
         <div class="modal-header flex-between" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
           <h3 style="font-size: 17px; font-weight: 700; color: #0f172a; margin: 0;">
@@ -307,6 +308,7 @@
         </form>
       </div>
     </div>
+    </Teleport>
 
     <!-- Image Cropper Modal (Hỗ trợ Vuông 1:1, Tự do, Thu phóng, Căn chỉnh khuôn mặt) -->
     <ImageCropperModal 
@@ -603,17 +605,17 @@ onMounted(() => {
 
 .admin-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 99999;
   padding: 16px;
+  box-sizing: border-box;
 }
 
 .admin-modal-card {

@@ -1,36 +1,42 @@
 <template>
-  <section class="testimonials-section">
-    <div class="container">
-      <!-- Section Header -->
-      <div class="section-header">
-        <h2 class="section-title">{{ $t('testimonials.pageTitle') }}</h2>
-      </div>
+  <div class="testimonials-wrapper">
+    <!-- Hero Banner Section với nền xanh navy gradient nhạt dần -->
+    <section class="testimonials-hero-section">
+      <div class="hero-backdrop-glow"></div>
+      <div class="container hero-inner">
+        <h1 class="hero-title animate-fade-in">{{ $t('testimonials.pageTitle') }}</h1>
+        <p class="hero-subtitle animate-fade-in">
+          Lắng nghe những câu chuyện chuyển hóa thực tế và đánh giá khách quan từ các học viên, lãnh đạo doanh nghiệp tại ACC Academy
+        </p>
 
-      <!-- Filter Tabs -->
-      <div class="filter-tabs">
-        <button 
-          class="tab-btn"
-          :class="{ active: activeTab === 'all' }"
-          @click="setTab('all')"
-        >
-          {{ $t('testimonials.tabAll') }} ({{ videoTestimonialsData.length + photoTestimonialsData.length }})
-        </button>
-        <button 
-          class="tab-btn"
-          :class="{ active: activeTab === 'video' }"
-          @click="setTab('video')"
-        >
-          {{ $t('testimonials.tabVideo') }} ({{ videoTestimonialsData.length }})
-        </button>
-        <button 
-          class="tab-btn"
-          :class="{ active: activeTab === 'photo' }"
-          @click="setTab('photo')"
-        >
-          {{ $t('testimonials.tabPhoto') }} ({{ photoTestimonialsData.length }})
-        </button>
+        <!-- Filter Tabs -->
+        <div class="filter-tabs animate-fade-in">
+          <button 
+            class="tab-btn"
+            :class="{ active: activeTab === 'all' }"
+            @click="setTab('all')"
+          >
+            {{ $t('testimonials.tabAll') }} ({{ videoTestimonialsData.length + photoTestimonialsData.length }})
+          </button>
+          <button 
+            class="tab-btn"
+            :class="{ active: activeTab === 'video' }"
+            @click="setTab('video')"
+          >
+            {{ $t('testimonials.tabVideo') }} ({{ videoTestimonialsData.length }})
+          </button>
+          <button 
+            class="tab-btn"
+            :class="{ active: activeTab === 'photo' }"
+            @click="setTab('photo')"
+          >
+            {{ $t('testimonials.tabPhoto') }} ({{ photoTestimonialsData.length }})
+          </button>
+        </div>
       </div>
+    </section>
 
+    <div class="container testimonials-content-container">
       <!-- Video Feedbacks Grid -->
       <div v-if="activeTab === 'all' || activeTab === 'video'" class="feedback-sub-section">
         <h3 class="sub-section-title">{{ $t('testimonials.videoHeading') }} </h3>
@@ -166,7 +172,7 @@
         </div>
       </div>
     </Teleport>
-  </section>
+  </div>
 </template>
 
 <script setup>

@@ -4,7 +4,10 @@
     <div v-if="activeView === 'list'">
       <div class="content-header flex-between">
         <div>
-          <h2>Quản lý Khóa học & Giáo trình</h2>
+          <h2>
+            Quản lý Khóa học & Giáo trình
+            <HelpTooltip desc="Quản lý danh sách khóa học nhận tư vấn, lộ trình và đề cương bài giảng." impact="Hiển thị tại Section 6 Khóa học Tiêu biểu Trang chủ." />
+          </h2>
           <p>Danh sách các khóa học đào tạo, bài giảng và giáo trình trên toàn hệ thống.</p>
         </div>
         <div style="display: flex; gap: 10px; align-items: center;">
@@ -85,9 +88,18 @@
             <tr>
               <th style="width: 60px;">Ảnh</th>
               <th>Tên khóa học</th>
-              <th>Chuyên mục</th>
-              <th>Trạng thái</th>
-              <th>Thời lượng</th>
+              <th>
+                Chuyên mục
+                <HelpTooltip desc="Phân loại chương trình đào tạo." impact="Giúp học viên lọc theo chuyên đề trên Trang chủ." />
+              </th>
+              <th>
+                Trạng thái
+                <HelpTooltip desc="Gồm Sắp diễn ra, Đang diễn ra, Đã diễn ra. Bấm chọn đổi ngay trên bảng." impact="Hiển thị huy hiệu màu trên góc card khóa học Trang chủ." />
+              </th>
+              <th>
+                Thời lượng
+                <HelpTooltip desc="Thời gian đào tạo (Ví dụ: 12 tuần, 24 giờ học thực chiến)." />
+              </th>
               <th>Hành động</th>
             </tr>
           </thead>
@@ -175,6 +187,7 @@ import { useCourseStore } from '@/stores/courses';
 import Pagination from '@/components/Pagination.vue';
 import CourseFormView from '../modals/CourseFormView.vue';
 import CourseCurriculumView from '../modals/CourseCurriculumView.vue';
+import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
 const courseStore = useCourseStore();
 const isLoadingCourses = ref(courseStore.courses.length === 0);

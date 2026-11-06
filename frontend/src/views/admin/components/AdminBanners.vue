@@ -16,9 +16,13 @@
         @click="openHomeIntroTab" 
         class="btn btn-sm"
         :class="subTab === 'home_intro' ? 'btn-primary' : 'btn-secondary'"
-        style="font-weight: 700; border-radius: 8px;"
+        style="font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;"
       >
-        Video & Giới thiệu Kiến tạo năng lực
+        <span>Video & Giới thiệu Kiến tạo năng lực</span>
+        <HelpTooltip 
+          desc="Tùy chỉnh video YouTube và nội dung 4 gạch đầu dòng giới thiệu sứ mệnh ACC." 
+          impact="Hiển thị tại Section 3 (Video & Giới thiệu) ở Trang chủ." 
+        />
       </button>
     </div>
 
@@ -28,7 +32,13 @@
       <div v-if="activeView === 'list'">
         <div class="content-header flex-between">
           <div>
-            <h2>Quản lý Banner (Hero Carousel)</h2>
+            <h2 style="display: flex; align-items: center; gap: 8px;">
+              Quản lý Banner (Hero Carousel)
+              <HelpTooltip 
+                desc="Tùy chỉnh các banner ảnh trình chiếu tự động ở đầu trang chủ." 
+                impact="Hiển thị ngay đầu màn hình Trang chủ (Section Hero Banner)." 
+              />
+            </h2>
             <p>Tùy chỉnh các banner quảng cáo và hình ảnh trình chiếu trên trang chủ.</p>
           </div>
           <div style="display: flex; gap: 10px; align-items: center;">
@@ -47,9 +57,18 @@
             <tr>
               <th style="width: 60px;">Vị trí</th>
               <th>Preview Banner</th>
-              <th>Tiêu đề & Link</th>
-              <th>Loại Link</th>
-              <th>Trạng thái</th>
+              <th>
+                Tiêu đề & Link
+                <HelpTooltip desc="Tên banner và đường dẫn điều hướng khi người dùng nhấp vào." />
+              </th>
+              <th>
+                Loại Link
+                <HelpTooltip desc="Nội bộ (chuyển trang trong website) hoặc Ngoại bộ (mở tab mới sang web ngoài)." />
+              </th>
+              <th>
+                Trạng thái
+                <HelpTooltip desc="Nhấp để chuyển đổi giữa 'Đang hiển thị' và 'Đã ẩn'." impact="Ẩn hoặc hiện banner trên slide Trang chủ." />
+              </th>
               <th>Hành động</th>
             </tr>
           </thead>
@@ -119,13 +138,19 @@
 
       <form @submit.prevent="saveBanner" class="mt-2">
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Tiêu đề Banner</label>
+          <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+            <span>Tiêu đề Banner</span>
+            <HelpTooltip desc="Tên gợi nhớ của banner để tiện quản lý trong hệ thống." />
+          </label>
           <input v-model="form.title" type="text" required class="admin-input-style" placeholder="Ví dụ: AI Center of Excellence" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
         </div>
 
         <div class="grid grid-2 gap-4 mt-4">
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Ảnh Desktop (Yêu cầu)</label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Ảnh Desktop (Yêu cầu)</span>
+              <HelpTooltip desc="Ảnh banner kích thước lớn cho màn hình máy tính (tỷ lệ chuẩn 1920x720)." impact="Ảnh nền slide chính tại Section 1 Trang chủ." />
+            </label>
             <div style="display: flex; gap: 8px; margin-top: 4px;">
               <input v-model="form.desktop_image" type="text" required class="admin-input-style" placeholder="/images/CoE-Web.png hoặc URL" style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
               <input type="file" ref="desktopFileRef" @change="onFileSelectForCrop($event, (url) => { form.desktop_image = url; }, 'banner', '✂ Cắt Banner Desktop (1920x720)')" style="display: none;" accept="image/*" />
@@ -138,7 +163,10 @@
           </div>
 
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Ảnh Mobile (Tùy chọn)</label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Ảnh Mobile (Tùy chọn)</span>
+              <HelpTooltip desc="Ảnh tối ưu riêng cho điện thoại màn hình dọc (tùy chọn)." impact="Tự động hiển thị khi học viên truy cập bằng điện thoại." />
+            </label>
             <div style="display: flex; gap: 8px; margin-top: 4px;">
               <input v-model="form.mobile_image" type="text" class="admin-input-style" placeholder="/images/CoE-Mobile.png hoặc URL" style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
               <input type="file" ref="mobileFileRef" @change="onFileSelectForCrop($event, (url) => { form.mobile_image = url; }, 'free', '✂ Cắt Banner Mobile')" style="display: none;" accept="image/*" />
@@ -153,12 +181,18 @@
 
         <div class="grid grid-2 gap-4 mt-4">
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Đường dẫn Liên kết (Link)</label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Đường dẫn Liên kết (Link)</span>
+              <HelpTooltip desc="Link đích khi người dùng click vào banner (ví dụ: /corporate/coe hoặc https://...)." impact="Điều hướng khách hàng khi nhấp vào banner." />
+            </label>
             <input v-model="form.link" type="text" class="admin-input-style" placeholder="Ví dụ: /corporate/coe hoặc https://..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
           </div>
 
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 600;">Thứ tự hiển thị (Position)</label>
+            <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+              <span>Thứ tự hiển thị (Position)</span>
+              <HelpTooltip desc="Thứ tự xuất hiện của slide (1, 2, 3...)." />
+            </label>
             <input v-model.number="form.position" type="number" min="0" class="admin-input-style" placeholder="1, 2, 3..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
           </div>
         </div>
@@ -166,15 +200,17 @@
         <div class="grid grid-2 gap-4 mt-4" style="background: #f8fafc; padding: 16px; border-radius: 10px; border: 1px solid #e2e8f0;">
           <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin: 0;">
             <input v-model="form.is_external" type="checkbox" id="is_external" style="width: 18px; height: 18px; cursor: pointer;" />
-            <label for="is_external" style="color: #1e293b; font-weight: 600; cursor: pointer; margin: 0;">
-              Mở link trong tab mới (Trang ngoài / External Link)
+            <label for="is_external" style="color: #1e293b; font-weight: 600; cursor: pointer; margin: 0; display: flex; align-items: center; gap: 6px;">
+              <span>Mở link trong tab mới (Trang ngoài / External Link)</span>
+              <HelpTooltip desc="Nếu bật, khi nhấp vào banner sẽ mở trang mới trong tab khác (thường dùng cho link ngoài)." />
             </label>
           </div>
 
           <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin: 0;">
             <input v-model="form.is_active" type="checkbox" id="is_active" style="width: 18px; height: 18px; cursor: pointer;" />
-            <label for="is_active" style="color: #1e293b; font-weight: 600; cursor: pointer; margin: 0;">
-              Hiển thị Banner này trên trang chủ (Active)
+            <label for="is_active" style="color: #1e293b; font-weight: 600; cursor: pointer; margin: 0; display: flex; align-items: center; gap: 6px;">
+              <span>Hiển thị Banner này trên trang chủ (Active)</span>
+              <HelpTooltip desc="Bật để slide này hiển thị trên trang chủ, tắt để tạm ẩn." impact="Ẩn hoặc hiện slide trên Trang chủ." />
             </label>
           </div>
         </div>
@@ -203,7 +239,10 @@
 
       <form @submit.prevent="saveHomeIntro">
         <div class="form-group mb-4">
-          <label style="color: #1e293b; font-weight: 700; font-size: 14px;">Tiêu đề chính (Hiệu ứng chữ từng từ) <span style="color: #e11d48;">*</span></label>
+          <label style="color: #1e293b; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+            <span>Tiêu đề chính (Hiệu ứng chữ từng từ) <span style="color: #e11d48;">*</span></span>
+            <HelpTooltip desc="Dòng chữ lớn chạy hiệu ứng từng từ (Word-by-word fade in)." impact="Xuất hiện ở đầu Section 3 (Kiến tạo năng lực) Trang chủ." />
+          </label>
           <input 
             v-model="introForm.title" 
             type="text" 
@@ -217,7 +256,10 @@
 
         <div class="grid grid-2 gap-4 mb-4">
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 700; font-size: 14px;">Đoạn giới thiệu 1 <span style="color: #e11d48;">*</span></label>
+            <label style="color: #1e293b; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <span>Đoạn giới thiệu 1 <span style="color: #e11d48;">*</span></span>
+              <HelpTooltip desc="Đoạn văn đầu tiên giới thiệu về tầm nhìn và sứ mệnh đào tạo của ACC." impact="Hiển thị ở cột bên trái Section 3 Trang chủ." />
+            </label>
             <textarea 
               v-model="introForm.desc1" 
               rows="4" 
@@ -229,7 +271,10 @@
           </div>
 
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 700; font-size: 14px;">Đoạn giới thiệu 2 <span style="color: #e11d48;">*</span></label>
+            <label style="color: #1e293b; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <span>Đoạn giới thiệu 2 <span style="color: #e11d48;">*</span></span>
+              <HelpTooltip desc="Đoạn văn thứ hai chi tiết về mô hình kết hợp Đào tạo - Tư vấn - Công nghệ." impact="Hiển thị dưới đoạn 1 ở Section 3 Trang chủ." />
+            </label>
             <textarea 
               v-model="introForm.desc2" 
               rows="4" 
@@ -243,7 +288,10 @@
 
         <div class="grid grid-2 gap-4 mb-4" style="background: #f8fafc; padding: 18px; border-radius: 12px; border: 1px solid #e2e8f0;">
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 700; font-size: 14px;">Số đếm hiển thị (Counter number)</label>
+            <label style="color: #1e293b; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <span>Số đếm hiển thị (Counter number)</span>
+              <HelpTooltip desc="Con số dự án/chương trình đào tạo, tự động có hiệu ứng đếm số khi cuộn tới." impact="Hiển thị số lớn kèm dấu + (Ví dụ: 500+)." />
+            </label>
             <input 
               v-model.number="introForm.counter_number" 
               type="number" 
@@ -256,7 +304,10 @@
           </div>
 
           <div class="form-group">
-            <label style="color: #1e293b; font-weight: 700; font-size: 14px;">Mô tả dưới số đếm</label>
+            <label style="color: #1e293b; font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+              <span>Mô tả dưới số đếm</span>
+              <HelpTooltip desc="Dòng chữ chú thích bên dưới con số bộ đếm." impact="Hiển thị ngay dưới con số 500+ ở Section 3." />
+            </label>
             <input 
               v-model="introForm.counter_label" 
               type="text" 
@@ -272,7 +323,10 @@
           <h4 style="margin: 0 0 12px 0; color: #166534; font-size: 15px; font-weight: 800;">Cấu hình Video Giới thiệu Trang chủ</h4>
 
           <div class="form-group mb-3">
-            <label style="color: #14532d; font-weight: 700; font-size: 13.5px;">Đường dẫn Video (Hỗ trợ Link YouTube, Google Drive, Direct MP4 hoặc Upload file) <span style="color: #e11d48;">*</span></label>
+            <label style="color: #14532d; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+              <span>Đường dẫn Video (Hỗ trợ Link YouTube, Google Drive, Direct MP4 hoặc Upload file) <span style="color: #e11d48;">*</span></span>
+              <HelpTooltip desc="Hỗ trợ dán link YouTube (thường hoặc Shorts), link chia sẻ Google Drive hoặc file MP4 tải lên." impact="Video phát khi học viên bấm nút 'Xem Video' tại Trang chủ." />
+            </label>
             <div style="display: flex; gap: 8px;">
               <input 
                 v-model="introForm.video_url" 
@@ -294,7 +348,10 @@
 
           <div class="grid grid-2 gap-4">
             <div class="form-group">
-              <label style="color: #14532d; font-weight: 700; font-size: 13.5px;">Ảnh bìa Video (Poster Thumbnail)</label>
+              <label style="color: #14532d; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+                <span>Ảnh bìa Video (Poster Thumbnail)</span>
+                <HelpTooltip desc="Ảnh đại diện của khung video trước khi người dùng bấm phát clip." impact="Ảnh bìa hiển thị tại Section 3 Trang chủ." />
+              </label>
               <div style="display: flex; gap: 8px;">
                 <input 
                   v-model="introForm.poster_url" 
@@ -315,7 +372,10 @@
             </div>
 
             <div class="form-group">
-              <label style="color: #14532d; font-weight: 700; font-size: 13.5px;">Chữ nút phát trên ảnh bìa</label>
+              <label style="color: #14532d; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+                <span>Chữ nút phát trên ảnh bìa</span>
+                <HelpTooltip desc="Nhãn chữ trên nút phát video màu đỏ (ví dụ: XEM VIDEO GIỚI THIỆU ACC ACADEMY)." />
+              </label>
               <input 
                 v-model="introForm.btn_label" 
                 type="text" 
@@ -344,6 +404,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import { formatImageUrl } from '@/utils/imageHelper';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
+import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
 const courseStore = useCourseStore();
 

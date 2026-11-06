@@ -1,12 +1,19 @@
 <template>
   <div class="contact-page">
-    <div class="container">
-      <!-- Header Section -->
-      <div class="contact-hero">
-        <h1 class="hero-title">{{ $t('contact.heroTitle') }} <span class="highlight-text"> {{ $t('contact.heroHighlight') }} </span></h1>
-        
+    <!-- Hero Banner Section với nền xanh navy gradient nhạt dần -->
+    <section class="contact-hero-section">
+      <div class="hero-backdrop-glow"></div>
+      <div class="container hero-inner">
+        <h1 class="hero-title animate-fade-in">
+          {{ $t('contact.heroTitle') }} <span class="highlight-text">{{ $t('contact.heroHighlight') }}</span>
+        </h1>
+        <p class="hero-subtitle animate-fade-in">
+          Đội ngũ chuyên gia ACC Academy luôn sẵn sàng đồng hành, giải đáp mọi thắc mắc và tư vấn lộ trình đào tạo tối ưu nhất cho bạn
+        </p>
       </div>
+    </section>
 
+    <div class="container contact-content-container">
       <div class="contact-grid">
         <!-- Office Info & Maps Section -->
         <div class="info-section">

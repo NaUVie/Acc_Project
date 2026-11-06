@@ -4,7 +4,13 @@
     <div v-if="activeView === 'list'">
       <div class="content-header flex-between">
         <div>
-          <h2>Quản lý Bài viết Tuyển sinh ({{ admissions.length }})</h2>
+          <h2 style="display: flex; align-items: center; gap: 8px;">
+            Quản lý Bài viết Tuyển sinh ({{ admissions.length }})
+            <HelpTooltip 
+              desc="Quản lý các chương trình chiêu sinh (MBA, Mini MBA, GEI...) và thông báo tuyển sinh học vụ." 
+              impact="Hiển thị tại trang Tuyển sinh (/admissions) và liên kết từ nút Tuyển sinh trên Header." 
+            />
+          </h2>
           <p>
             Quản lý các chương trình và bài viết tuyển sinh (MBA, GEI, Mini MBA...) hiển thị trên trang <strong>Tuyển sinh</strong> và trang chi tiết.
           </p>
@@ -46,12 +52,24 @@
         <table class="admin-table">
           <thead>
             <tr>
-              <th style="width: 120px; text-align: center;">Thứ tự</th>
+              <th style="width: 120px; text-align: center;">
+                Thứ tự
+                <HelpTooltip desc="Thứ tự sắp xếp từ trên xuống dưới trên trang Tuyển sinh." />
+              </th>
               <th style="width: 110px;">Ảnh bìa</th>
               <th style="min-width: 240px;">Tiêu đề Bài viết</th>
-              <th style="width: 180px;">Chuyên mục / Tag</th>
-              <th style="min-width: 200px;">Điểm nổi bật</th>
-              <th style="width: 120px; text-align: center;">Trạng thái</th>
+              <th style="width: 180px;">
+                Chuyên mục / Tag
+                <HelpTooltip desc="Phân loại chương trình (ví dụ: BẰNG QUỐC TẾ HOA KỲ) và thẻ nhãn trường." />
+              </th>
+              <th style="min-width: 200px;">
+                Điểm nổi bật
+                <HelpTooltip desc="Các gạch đầu dòng điểm mạnh của chương trình tuyển sinh." />
+              </th>
+              <th style="width: 120px; text-align: center;">
+                Trạng thái
+                <HelpTooltip desc="Bấm vào để chuyển đổi giữa 'Đang hiển thị' và 'Đã ẩn'." impact="Ẩn hoặc hiện bài viết trên trang Tuyển sinh." />
+              </th>
               <th style="width: 110px; text-align: center;">Hành động</th>
             </tr>
           </thead>
@@ -184,7 +202,8 @@
     </div>
 
     <!-- VIEW 2: ADD / EDIT MODAL (CLEAN 2-COLUMN LAYOUT) -->
-    <div v-if="isModalOpen" class="admin-modal-overlay" @click.self="closeModal">
+    <Teleport to="body">
+      <div v-if="isModalOpen" class="admin-modal-overlay" @click.self="closeModal">
       <div class="admin-modal-card" style="max-width: 900px; width: 95%; max-height: 92vh; overflow-y: auto; padding: 22px 26px;">
         <div class="modal-header flex-between" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
           <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0;">
@@ -199,7 +218,10 @@
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <!-- TIÊU ĐỀ -->
               <div>
-                <label style="display: block; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">Tiêu đề Bài viết Tuyển sinh *</label>
+                <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">
+                  <span>Tiêu đề Bài viết Tuyển sinh *</span>
+                  <HelpTooltip desc="Tiêu đề chính của chương trình tuyển sinh." impact="Xuất hiện trên card tuyển sinh và tiêu đề trang chi tiết." />
+                </label>
                 <input 
                   v-model="form.title" 
                   @input="onTitleInput"
@@ -214,7 +236,10 @@
               <!-- SLUG & THỨ TỰ -->
               <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
                 <div>
-                  <label style="display: block; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">Đường dẫn tĩnh (Slug) *</label>
+                  <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">
+                    <span>Đường dẫn tĩnh (Slug) *</span>
+                    <HelpTooltip desc="Định danh URL thân thiện cho SEO (ví dụ: mba, gei, mini-mba)." impact="Đường dẫn xem bài: /admissions/[slug]." />
+                  </label>
                   <input 
                     v-model="form.slug" 
                     type="text" 
@@ -225,7 +250,10 @@
                   />
                 </div>
                 <div>
-                  <label style="display: block; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">Thứ tự *</label>
+                  <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">
+                    <span>Thứ tự *</span>
+                    <HelpTooltip desc="Thứ tự xuất hiện từ trên xuống dưới trên trang Tuyển sinh." />
+                  </label>
                   <input 
                     v-model.number="form.position" 
                     type="number" 
@@ -240,7 +268,10 @@
               <!-- CHUYÊN MỤC & NHÃN TAG -->
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                 <div>
-                  <label style="display: block; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">Chuyên mục tuyển sinh</label>
+                  <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">
+                    <span>Chuyên mục tuyển sinh</span>
+                    <HelpTooltip desc="Nhóm phân loại chương trình (ví dụ: BẰNG QUỐC TẾ HOA KỲ)." />
+                  </label>
                   <input 
                     v-model="form.category" 
                     type="text" 
@@ -250,7 +281,10 @@
                   />
                 </div>
                 <div>
-                  <label style="display: block; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">Nhãn Badge (Tag)</label>
+                  <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">
+                    <span>Nhãn Badge (Tag)</span>
+                    <HelpTooltip desc="Thẻ nhãn phụ hiển thị nổi bật trên thẻ bài viết." />
+                  </label>
                   <input 
                     v-model="form.tag" 
                     type="text" 
@@ -263,7 +297,10 @@
 
               <!-- ẢNH BÌA & CẮT ẢNH -->
               <div>
-                <label style="display: block; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 4px;">Ảnh bìa bài viết</label>
+                <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 4px;">
+                  <span>Ảnh bìa bài viết</span>
+                  <HelpTooltip desc="Ảnh đại diện tỷ lệ 16:9, có thể upload hoặc dán URL và bấm Cắt ảnh." impact="Hiển thị ở card danh sách và banner đầu trang chi tiết." />
+                </label>
                 <div style="display: flex; gap: 10px; align-items: center;">
                   <div 
                     @click="$refs.coverFileRef.click()"
@@ -298,7 +335,10 @@
 
               <!-- MÔ TẢ PHỤ ĐỀ -->
               <div>
-                <label style="display: block; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">Mô tả ngắn / Phụ đề</label>
+                <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; color: #1e293b; margin-bottom: 3px;">
+                  <span>Mô tả ngắn / Phụ đề</span>
+                  <HelpTooltip desc="Đoạn văn tóm tắt chương trình hiển thị ở thẻ danh sách." />
+                </label>
                 <textarea 
                   v-model="form.subtitle" 
                   rows="3" 
@@ -311,7 +351,10 @@
               <!-- ĐIỂM NỔI BẬT (HIGHLIGHTS) -->
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
-                  <label style="font-weight: 600; font-size: 13px; color: #1e293b; margin: 0;">Điểm nổi bật (mỗi dòng 1 gạch đầu dòng)</label>
+                  <label style="font-weight: 600; font-size: 13px; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 6px;">
+                    <span>Điểm nổi bật (mỗi dòng 1 gạch đầu dòng)</span>
+                    <HelpTooltip desc="Các điểm mạnh của khóa học, mỗi dòng một gạch đầu dòng." impact="Hiển thị dạng danh sách checkmark trên card tuyển sinh." />
+                  </label>
                   <span style="font-size: 11px; color: #64748b;">(Hiển thị ở card danh sách)</span>
                 </div>
                 <textarea 
@@ -327,13 +370,17 @@
               <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: #1e293b;">
                 <input v-model="form.is_active" type="checkbox" style="width: 16px; height: 16px; accent-color: #2563eb;" />
                 <span>Hiển thị công khai bài viết trên trang Tuyển sinh</span>
+                <HelpTooltip desc="Bật để xuất bản bài viết lên trang Tuyển sinh, tắt để tạm ẩn." impact="Ẩn/hiện trên trang /admissions." />
               </label>
             </div>
 
             <!-- CỘT PHẢI: NỘI DUNG CHI TIẾT BÀI VIẾT (HTML) -->
             <div style="display: flex; flex-direction: column;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                <label style="font-weight: 600; font-size: 13px; color: #1e293b; margin: 0;">Nội dung chi tiết bài viết (HTML)</label>
+                <label style="font-weight: 600; font-size: 13px; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 6px;">
+                  <span>Nội dung chi tiết bài viết (HTML)</span>
+                  <HelpTooltip desc="Toàn bộ nội dung bài viết chi tiết giới thiệu chương trình, điều kiện tuyển sinh, lộ trình học." impact="Hiển thị trong trang chi tiết /admissions/[slug]." />
+                </label>
                 <span style="font-size: 11.5px; color: #64748b;">Hỗ trợ thẻ &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;&lt;li&gt;</span>
               </div>
               <textarea 
@@ -356,6 +403,7 @@
         </form>
       </div>
     </div>
+    </Teleport>
 
     <!-- Image Cropper Modal -->
     <ImageCropperModal 
@@ -373,6 +421,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
+import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
 const courseStore = useCourseStore();
 
@@ -688,17 +737,17 @@ onMounted(() => {
 
 .admin-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 99999;
   padding: 16px;
+  box-sizing: border-box;
 }
 
 .admin-modal-card {
