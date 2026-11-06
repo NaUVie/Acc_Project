@@ -174,9 +174,16 @@
 /* Main Content Styles */
 .admin-main {
   position: relative;
-  padding: 40px;
+  padding: 28px 32px;
   background-color: #ffffff;
-  overflow-x: hidden;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 16px 14px;
+  }
 }
 
 .content-header h2 {

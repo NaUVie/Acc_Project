@@ -317,13 +317,14 @@ class ProjectResponse(ProjectBase):
 class ContactCreate(BaseModel):
     first_name: str
     middle_name: Optional[str] = ""
-    last_name: str
-    email: EmailStr
+    last_name: Optional[str] = ""
+    email: str
     phone: str
     course_handle: Optional[str] = ""
-    message: str
+    message: Optional[str] = ""
+    honeypot: Optional[str] = "" # Anti-spam honeypot (bots fill this, real users don't)
 
-    @field_validator("first_name", "last_name")
+    @field_validator("first_name")
     @classmethod
     def validate_name(cls, v: str) -> str:
         clean = (v or "").strip()
@@ -331,21 +332,42 @@ class ContactCreate(BaseModel):
             raise ValueError("Họ và tên không được để trống!")
         return clean
 
+    @field_validator("email")
+    @classmethod
+    def validate_email_val(cls, v: str) -> str:
+        clean = (v or "").strip().lower()
+        if not clean:
+            raise ValueError("Email không được để trống!")
+        import re
+        email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if not re.match(email_regex, clean):
+            raise ValueError("Địa chỉ email không đúng định dạng (Ví dụ: name@gmail.com)!")
+        return clean
+
     @field_validator("phone")
     @classmethod
     def validate_phone(cls, v: str) -> str:
+        import re
         clean = (v or "").strip()
-        digits = [c for c in clean if c.isdigit()]
-        if len(digits) < 9 or len(digits) > 15:
-            raise ValueError("Số điện thoại không hợp lệ (cần từ 9 đến 15 chữ số)!")
-        return clean
+        if not clean:
+            raise ValueError("Số điện thoại không được để trống!")
+        clean_num = re.sub(r"[\s.\-()]", "", clean)
+        if clean_num.startswith("+84"):
+            clean_num = "0" + clean_num[3:]
+        elif clean_num.startswith("84") and len(clean_num) >= 11:
+            clean_num = "0" + clean_num[2:]
+
+        # Validate Vietnamese mobile (10 digits starting with 03, 05, 07, 08, 09) or landline (02x)
+        if not re.match(r"^(0[35789]\d{8}|02\d{9})$", clean_num):
+            raise ValueError("Số điện thoại không đúng chuẩn Việt Nam (Vui lòng nhập 10 chữ số, ví dụ: 0938566700)!")
+        return clean_num
 
     @field_validator("message")
     @classmethod
-    def validate_message(cls, v: str) -> str:
+    def validate_message(cls, v: Optional[str]) -> str:
         clean = (v or "").strip()
-        if len(clean) < 5:
-            raise ValueError("Nội dung lời nhắn cần tối thiểu 5 ký tự!")
+        if not clean:
+            return "Đăng ký tư vấn thông tin từ website ACC Academy"
         if len(clean) > 3000:
             raise ValueError("Nội dung lời nhắn không được vượt quá 3000 ký tự!")
         return clean
@@ -440,6 +462,7 @@ class PasswordResetRequestCreate(BaseModel):
     email: EmailStr
     phone: Optional[str] = None
     note: Optional[str] = None
+    honeypot: Optional[str] = ""
 
 class UserLogin(BaseModel):
     username: str # OAuth2 password form standard requires 'username' (which is the email)
@@ -535,6 +558,7 @@ class TestimonialCreate(BaseModel):
     thumbnail: Optional[str] = None
     video_url: Optional[str] = None
     is_approved: Optional[bool] = False
+    honeypot: Optional[str] = ""
 
 class TestimonialUpdate(BaseModel):
     name: Optional[str] = None

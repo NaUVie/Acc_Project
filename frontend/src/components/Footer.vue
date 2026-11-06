@@ -114,20 +114,40 @@ import { useCourseStore } from '@/stores/courses';
 
 const router = useRouter();
 const { locale } = useI18n();
-const currentLang = computed(() => locale.value);
+
+const isEnActive = () => {
+  if (locale.value === 'en') return true;
+  if (typeof document !== 'undefined') {
+    if (document.cookie.includes('googtrans=/vi/en') || document.documentElement.classList.contains('translated-ltr')) {
+      return true;
+    }
+  }
+  if (typeof window !== 'undefined' && localStorage.getItem('acc_lang') === 'en') {
+    return true;
+  }
+  return false;
+};
+
+const currentLang = computed(() => isEnActive() ? 'en' : 'vi');
 
 const toggleLang = () => {
   const route = router.currentRoute.value;
+  const isEnCurrently = isEnActive();
+
   // Functional / admin pages have no /en version: just switch the UI language in place
   if ((route.meta && route.meta.noLocale) || route.path.startsWith('/admin')) {
-    const nextLang = locale.value === 'vi' ? 'en' : 'vi';
-    if (nextLang === 'vi') clearGoogleTranslate();
-    setLanguage(nextLang);
+    const nextLang = isEnCurrently ? 'vi' : 'en';
+    if (nextLang === 'vi') {
+      clearGoogleTranslate();
+      setLanguage('vi');
+    } else {
+      setLanguage('en');
+    }
     window.location.reload();
     return;
   }
   const currentPath = route.fullPath;
-  if (locale.value === 'vi') {
+  if (!isEnCurrently) {
     setLanguage('en');
     let newPath = '/en' + (currentPath === '/' ? '' : currentPath);
     if (!newPath) newPath = '/en';

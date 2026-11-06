@@ -71,6 +71,18 @@
             <h2 class="form-title">{{ $t('contact.formTitle') }}</h2>
             <p class="form-desc">{{ $t('contact.formDesc') }}</p>
 
+            <!-- Selected Course Banner if navigated from Course Detail -->
+            <div v-if="selectedCourseTitle" class="selected-course-banner">
+              <div class="selected-course-left">
+                <span class="selected-course-icon">🎓</span>
+                <div class="selected-course-info">
+                  <span class="selected-course-label">Khóa học quan tâm tư vấn</span>
+                  <strong class="selected-course-title">{{ selectedCourseTitle }}</strong>
+                </div>
+              </div>
+              <button type="button" class="btn-clear-course" @click="clearSelectedCourse" title="Bỏ chọn">&times;</button>
+            </div>
+
             <div class="form-row">
               <div class="form-group">
                 <label for="fullName">{{ $t('contact.fullNameLabel') }}</label>
@@ -79,13 +91,37 @@
             </div>
 
             <div class="form-row two-cols">
-              <div class="form-group">
-                <label for="phone">{{ $t('contact.phoneLabel') }}</label>
-                <input v-model="formData.phone" type="tel" id="phone" placeholder="0938..." required />
+              <div class="form-group" :class="{ 'has-error': phoneError }">
+                <label for="phone">{{ $t('contact.phoneLabel') }} <span class="required-star">*</span></label>
+                <input 
+                  v-model="formData.phone" 
+                  type="tel" 
+                  id="phone" 
+                  placeholder="Ví dụ: 0938 566 700" 
+                  required 
+                  @blur="validatePhoneField"
+                  @input="onPhoneInput"
+                />
+                <span v-if="phoneError" class="field-error-text">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  {{ phoneError }}
+                </span>
               </div>
-              <div class="form-group">
-                <label for="email">{{ $t('contact.emailFormLabel') }}</label>
-                <input v-model="formData.email" type="email" id="email" placeholder="example@gmail.com" required />
+              <div class="form-group" :class="{ 'has-error': emailError }">
+                <label for="email">{{ $t('contact.emailFormLabel') }} <span class="required-star">*</span></label>
+                <input 
+                  v-model="formData.email" 
+                  type="email" 
+                  id="email" 
+                  placeholder="Ví dụ: example@gmail.com" 
+                  required 
+                  @blur="validateEmailField"
+                  @input="onEmailInput"
+                />
+                <span v-if="emailError" class="field-error-text">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  {{ emailError }}
+                </span>
               </div>
             </div>
 
@@ -117,9 +153,16 @@
               ></textarea>
             </div>
 
-            <button type="submit" class="btn-submit-form" :disabled="isSubmitting">
-              <span>{{ isSubmitting ? $t('contact.submittingBtn') : $t('contact.submitBtn') }}</span>
-              <span class="arrow" style="display: inline-flex; align-items: center;">
+            <!-- Anti-spam Honeypot field (hidden from real users, bots will auto-fill) -->
+            <div class="ohnohoney" aria-hidden="true">
+              <label for="fax_number">Do not fill this</label>
+              <input type="text" id="fax_number" v-model="honeypotValue" autocomplete="off" tabindex="-1" />
+            </div>
+
+            <button type="submit" class="btn-submit-form" :disabled="isSubmitting || submitCooldown > 0">
+              <span v-if="submitCooldown > 0">Đã gửi yêu cầu (Đợi {{ submitCooldown }}s)</span>
+              <span v-else>{{ isSubmitting ? $t('contact.submittingBtn') : $t('contact.submitBtn') }}</span>
+              <span v-if="submitCooldown <= 0" class="arrow" style="display: inline-flex; align-items: center;">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                   <polyline points="12 5 19 12 12 19"></polyline>
@@ -134,15 +177,61 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import { validateVietnamesePhone, validateEmail } from '@/utils/validation';
 
 const route = useRoute();
 const courseStore = useCourseStore();
 const { t } = useI18n();
 const isSubmitting = ref(false);
+const selectedCourseTitle = ref('');
+const selectedCourseHandle = ref('');
+
+const phoneError = ref('');
+const emailError = ref('');
+
+// Anti-spam Honeypot & Cooldown state
+const honeypotValue = ref('');
+const submitCooldown = ref(0);
+let cooldownTimer = null;
+
+const startCooldown = (seconds = 30) => {
+  submitCooldown.value = seconds;
+  try {
+    localStorage.setItem('acc_contact_cooldown_until', (Date.now() + seconds * 1000).toString());
+  } catch (e) {}
+
+  if (cooldownTimer) clearInterval(cooldownTimer);
+  cooldownTimer = setInterval(() => {
+    submitCooldown.value -= 1;
+    if (submitCooldown.value <= 0) {
+      clearInterval(cooldownTimer);
+      cooldownTimer = null;
+      try {
+        localStorage.removeItem('acc_contact_cooldown_until');
+      } catch (e) {}
+    }
+  }, 1000);
+};
+
+const checkExistingCooldown = () => {
+  try {
+    const until = Number(localStorage.getItem('acc_contact_cooldown_until') || 0);
+    const remaining = Math.ceil((until - Date.now()) / 1000);
+    if (remaining > 0) {
+      startCooldown(remaining);
+    }
+  } catch (e) {}
+};
+
+const clearSelectedCourse = () => {
+  selectedCourseTitle.value = '';
+  selectedCourseHandle.value = '';
+  formData.value.message = '';
+};
 
 const formData = ref({
   fullName: '',
@@ -152,7 +241,37 @@ const formData = ref({
   message: ''
 });
 
+const validatePhoneField = () => {
+  if (!formData.value.phone) {
+    phoneError.value = '';
+    return;
+  }
+  const check = validateVietnamesePhone(formData.value.phone);
+  phoneError.value = check.isValid ? '' : check.error;
+};
 
+const onPhoneInput = () => {
+  if (phoneError.value) {
+    const check = validateVietnamesePhone(formData.value.phone);
+    if (check.isValid) phoneError.value = '';
+  }
+};
+
+const validateEmailField = () => {
+  if (!formData.value.email) {
+    emailError.value = '';
+    return;
+  }
+  const check = validateEmail(formData.value.email);
+  emailError.value = check.isValid ? '' : check.error;
+};
+
+const onEmailInput = () => {
+  if (emailError.value) {
+    const check = validateEmail(formData.value.email);
+    if (check.isValid) emailError.value = '';
+  }
+};
 
 const contactInfo = computed(() => {
   const s = courseStore.contactSettings;
@@ -167,35 +286,145 @@ const rawPhone = computed(() => {
   return contactInfo.value.hotline.replace(/\s+/g, '');
 });
 
+const initFromQuery = () => {
+  const courseQuery = route.query.course || route.query.course_title;
+  const handleQuery = route.query.handle || route.query.course_handle;
+  const programQuery = route.query.program;
+  const categoryQuery = route.query.category;
+
+  if (courseQuery) {
+    selectedCourseTitle.value = courseQuery;
+    selectedCourseHandle.value = handleQuery || courseQuery;
+    if (!formData.value.message) {
+      formData.value.message = `Tôi muốn nhận tư vấn thông tin và đăng ký khóa học: ${courseQuery}`;
+    }
+  } else if (programQuery) {
+    const progUpper = String(programQuery).toUpperCase();
+    selectedCourseTitle.value = `Chương trình: ${progUpper}`;
+    selectedCourseHandle.value = programQuery;
+    formData.value.serviceCategory = 'postgraduate';
+    if (!formData.value.message) {
+      formData.value.message = `Tôi muốn nhận tư vấn thông tin chương trình tuyển sinh: ${progUpper}`;
+    }
+  }
+
+  if (categoryQuery) {
+    const cat = String(categoryQuery).toLowerCase();
+    if (cat.includes('doanh-nghiep') || cat.includes('corporate') || cat.includes('nha-nuoc')) {
+      formData.value.serviceCategory = 'corporate';
+    } else if (cat.includes('postgraduate') || cat.includes('mba') || cat.includes('gei') || cat.includes('tuyen-sinh')) {
+      formData.value.serviceCategory = 'postgraduate';
+    } else if (cat.includes('individual') || cat.includes('ai') || cat.includes('ca-nhan') || cat.includes('mem') || cat.includes('chuyen-mon')) {
+      formData.value.serviceCategory = 'individual';
+    } else {
+      formData.value.serviceCategory = categoryQuery;
+    }
+  }
+
+  // Auto-fill logged in user info if available (NOT required!)
+  if (courseStore.userMe) {
+    if (!formData.value.fullName) formData.value.fullName = courseStore.userMe.fullname || '';
+    if (!formData.value.phone) formData.value.phone = courseStore.userMe.phone || '';
+    if (!formData.value.email) formData.value.email = courseStore.userMe.email || '';
+  }
+};
+
 onMounted(() => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (!courseStore.contactSettings) {
     courseStore.fetchContactSettings();
   }
+  initFromQuery();
+  checkExistingCooldown();
+});
 
-  // Handle pre-filled category from URL query if provided
-  const categoryQuery = route.query.category;
-  if (categoryQuery) {
-    formData.value.serviceCategory = categoryQuery;
-  }
+onUnmounted(() => {
+  if (cooldownTimer) clearInterval(cooldownTimer);
 });
 
 const submitForm = async () => {
+  if (submitCooldown.value > 0) {
+    courseStore.showToast(`Bạn vừa gửi yêu cầu rồi. Vui lòng đợi ${submitCooldown.value} giây trước khi gửi tiếp!`, 'warning');
+    return;
+  }
+
+  const cleanName = (formData.value.fullName || '').trim();
+  if (!cleanName) {
+    courseStore.showToast('Vui lòng nhập họ và tên của bạn', 'warning');
+    const el = document.getElementById('fullName');
+    if (el) el.focus();
+    return;
+  }
+
+  const phoneCheck = validateVietnamesePhone(formData.value.phone);
+  if (!phoneCheck.isValid) {
+    phoneError.value = phoneCheck.error;
+    courseStore.showToast(phoneCheck.error, 'warning');
+    const el = document.getElementById('phone');
+    if (el) el.focus();
+    return;
+  }
+  phoneError.value = '';
+
+  const emailCheck = validateEmail(formData.value.email);
+  if (!emailCheck.isValid) {
+    emailError.value = emailCheck.error;
+    courseStore.showToast(emailCheck.error, 'warning');
+    const el = document.getElementById('email');
+    if (el) el.focus();
+    return;
+  }
+  emailError.value = '';
+
   isSubmitting.value = true;
   try {
-    const fullMessage = `Mục dịch vụ: ${formData.value.serviceCategory}\nGhi chú: ${formData.value.message}`;
-    
+    const getCategoryName = (cat) => {
+      const map = {
+        corporate: 'Đào tạo cho doanh nghiệp',
+        postgraduate: 'Tuyển sinh các chương trình sau đại học',
+        individual: 'Đào tạo cho cá nhân'
+      };
+      return map[cat] || cat || '';
+    };
+
+    const categoryTitle = getCategoryName(formData.value.serviceCategory);
+
+    // Xác định tên Khóa học / Chủ đề tư vấn
+    let courseTarget = '';
+    if (selectedCourseTitle.value) {
+      courseTarget = categoryTitle 
+        ? `${selectedCourseTitle.value} (${categoryTitle})`
+        : selectedCourseTitle.value;
+    } else if (categoryTitle) {
+      courseTarget = categoryTitle;
+    } else {
+      courseTarget = 'Tư vấn thông tin chung';
+    }
+
+    // Giữ nguyên nội dung lời nhắn của khách hàng, không chèn tiền tố slug thô
+    const userMsg = (formData.value.message || '').trim();
+    const fullMessage = userMsg || (selectedCourseTitle.value
+      ? `Đăng ký nhận tư vấn khóa học: ${selectedCourseTitle.value}`
+      : `Đăng ký nhận tư vấn dịch vụ: ${categoryTitle || 'ACC Academy'}`);
+
+    const nameParts = cleanName.split(' ');
+    const lastName = nameParts.length > 0 ? nameParts[nameParts.length - 1] : '';
+    const firstName = nameParts.length > 1 ? nameParts[0] : cleanName;
+    const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : '';
+
     await courseStore.sendContact(
-      formData.value.fullName,
-      '',
-      '',
-      formData.value.email,
-      formData.value.phone,
-      formData.value.serviceCategory,
-      fullMessage
+      firstName,
+      middleName,
+      lastName,
+      emailCheck.email,
+      phoneCheck.normalized,
+      courseTarget,
+      fullMessage,
+      honeypotValue.value
     );
 
     courseStore.showToast(t('contact.successToast'), 'success');
+    startCooldown(30);
     
     formData.value = {
       fullName: '',
@@ -204,15 +433,10 @@ const submitForm = async () => {
       serviceCategory: '',
       message: ''
     };
+    selectedCourseTitle.value = '';
+    selectedCourseHandle.value = '';
   } catch (err) {
-    courseStore.showToast('Gửi thông tin thành công! Cảm ơn bạn đã liên hệ ACC Academy.', 'success');
-    formData.value = {
-      fullName: '',
-      phone: '',
-      email: '',
-      serviceCategory: '',
-      message: ''
-    };
+    courseStore.showToast(err.message || 'Gửi thông tin thất bại. Vui lòng liên hệ Hotline 0938 566 700!', 'error');
   } finally {
     isSubmitting.value = false;
   }

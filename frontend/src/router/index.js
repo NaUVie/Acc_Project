@@ -90,8 +90,7 @@ const routes = [
   {
     path: '/referral',
     alias: ['/gioi-thieu', '/referrals', '/gioi-thieu-nhan-thuong'],
-    name: 'ReferralProgram',
-    component: () => import('../views/ReferralProgram.vue')
+    redirect: '/'
   },
   {
     path: '/contact',
@@ -152,9 +151,7 @@ const routes = [
   },
   {
     path: '/courses/:handle/study',
-    name: 'CourseStudy',
-    component: () => import('../views/courses/CourseStudy.vue'),
-    meta: { requiresAuth: true, requiresEnrollment: true }
+    redirect: to => `/courses/${to.params.handle}`
   },
   {
     path: '/order/:id',
@@ -212,8 +209,8 @@ const routes = [
 // Functional pages (auth / cart / checkout / learning room ...) stay Vietnamese-only
 // and are NOT duplicated under /en
 const NO_LOCALE_PATHS = [
-  '/login', '/register', '/dashboard',
-  '/courses/:handle/study', '/order/:id', '/referral'
+  '/login', '/register',
+  '/courses/:handle/study', '/order/:id'
 ];
 routes.forEach(r => {
   if (NO_LOCALE_PATHS.includes(r.path)) r.meta = { ...(r.meta || {}), noLocale: true };
@@ -307,16 +304,24 @@ router.beforeEach(async (to, from, next) => {
     if (currentLocale !== 'en') {
       setLanguage('en');
     }
-  } else if (!to.path.startsWith('/admin') && !to.meta.noLocale) {
-    // If navigating internally while currently in English, preserve /en/ prefix
-    const fromIsEn = from.path === '/en' || (from.path && from.path.startsWith('/en/'));
-    if (fromIsEn && currentLocale === 'en') {
-      const enTarget = to.fullPath === '/' ? '/en' : `/en${to.fullPath}`;
-      return next(enTarget);
-    }
-    if (currentLocale !== 'vi') {
-      clearGoogleTranslate();
-      setLanguage('vi');
+  } else if (!to.path.startsWith('/admin')) {
+    if (to.meta && to.meta.noLocale) {
+      // Functional pages (dashboard, auth, checkout) stay Vietnamese-only by default
+      if (currentLocale !== 'vi' || (typeof document !== 'undefined' && document.cookie.includes('googtrans=/vi/en'))) {
+        clearGoogleTranslate();
+        setLanguage('vi');
+      }
+    } else {
+      // If navigating internally while currently in English, preserve /en/ prefix
+      const fromIsEn = from.path === '/en' || (from.path && from.path.startsWith('/en/'));
+      if ((fromIsEn || currentLocale === 'en') && currentLocale === 'en') {
+        const enTarget = to.fullPath === '/' ? '/en' : `/en${to.fullPath}`;
+        return next(enTarget);
+      }
+      if (currentLocale !== 'vi') {
+        clearGoogleTranslate();
+        setLanguage('vi');
+      }
     }
   }
 
@@ -393,6 +398,9 @@ router.afterEach((to) => {
   if (typeof document !== 'undefined') {
     if (to.meta && to.meta.noLocale) {
       document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
+      if (i18n.global.locale.value === 'vi') {
+        clearGoogleTranslate();
+      }
       return;
     }
     const isEn = to.path === '/en' || to.path.startsWith('/en/');

@@ -211,6 +211,69 @@
   margin: 0 0 28px 0;
 }
 
+/* Selected Course Banner when navigated from Course Detail */
+.selected-course-banner {
+  background: linear-gradient(135deg, rgba(2, 43, 159, 0.08) 0%, rgba(2, 132, 199, 0.08) 100%);
+  border: 1.5px solid rgba(2, 43, 159, 0.25);
+  border-radius: 14px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.selected-course-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.selected-course-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.selected-course-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.selected-course-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #022B9F;
+}
+
+.selected-course-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.35;
+}
+
+.btn-clear-course {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.btn-clear-course:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #ef4444;
+}
+
 .form-row {
   margin-bottom: 20px;
 }
@@ -260,6 +323,46 @@
   background-color: #ffffff !important;
   outline: none;
   box-shadow: 0 0 0 3px rgba(2, 43, 159, 0.1);
+}
+
+.form-group.has-error input {
+  border-color: #ef4444 !important;
+  background-color: #fffaf0 !important;
+}
+
+.form-group.has-error input:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18) !important;
+}
+
+.field-error-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #dc2626;
+  margin-top: 3px;
+  line-height: 1.35;
+}
+
+.required-star {
+  color: #ef4444;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* Anti-spam Honeypot field (hidden from view and assistive tech) */
+.ohnohoney {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: -9999px;
+  height: 0;
+  width: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
 }
 
 .sub-category-box {

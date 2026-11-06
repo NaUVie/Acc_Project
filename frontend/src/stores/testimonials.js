@@ -45,7 +45,9 @@ export const useTestimonialStore = defineStore('testimonials', {
       this.loading = true;
       fetchTestimonialsPromise = (async () => {
         try {
-          const response = await fetch(`${API_BASE}/testimonials`);
+          const response = await fetch(`${API_BASE}/testimonials?_t=${Date.now()}`, {
+            cache: 'no-store'
+          });
           if (response.ok) {
             const data = await response.json();
             if (Array.isArray(data)) {
@@ -91,10 +93,12 @@ export const useTestimonialStore = defineStore('testimonials', {
           company: testimonial.company || '',
           text: testimonial.text,
           quote: testimonial.text,
+          image: testimonial.image || null,
           rating: Number(testimonial.rating) || 5,
           course_id: testimonial.courseId ? Number(testimonial.courseId) : null,
           course_name: testimonial.courseName || '',
-          testimonial_type: 'text'
+          testimonial_type: testimonial.image ? 'photo' : 'text',
+          honeypot: testimonial.honeypot || ''
         };
         const response = await fetch(`${API_BASE}/testimonials`, {
           method: 'POST',
@@ -112,26 +116,44 @@ export const useTestimonialStore = defineStore('testimonials', {
       }
     },
 
+    async uploadReviewImage(file) {
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch(`${API_BASE}/upload/review-image`, {
+        method: 'POST',
+        body: formData
+      });
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.detail || 'Không thể tải ảnh đính kèm lên');
+      }
+      return await response.json();
+    },
+
     async fetchCourseTestimonials(courseId) {
       if (!courseId) return [];
       try {
-        const response = await fetch(`${API_BASE}/testimonials?course_id=${courseId}`);
+        const response = await fetch(`${API_BASE}/testimonials?course_id=${courseId}&_t=${Date.now()}`, {
+          cache: 'no-store'
+        });
         if (response.ok) {
           const data = await response.json();
-          return Array.isArray(data) ? data.map(item => ({
-            id: item.id,
-            name: item.name,
-            role: item.role || '',
-            company: item.company || '',
-            text: item.text || item.quote || '',
-            quote: item.quote || item.text || '',
-            rating: item.rating || 5,
-            image: item.image || item.thumbnail || '',
-            avatar: item.thumbnail || item.image || '',
-            courseName: item.course_name || '',
-            courseId: item.course_id || null,
-            createdAt: item.created_at || null
-          })) : [];
+          return Array.isArray(data) 
+            ? data.filter(item => item.testimonial_type !== 'spam').map(item => ({
+                id: item.id,
+                name: item.name,
+                role: item.role || '',
+                company: item.company || '',
+                text: item.text || item.quote || '',
+                quote: item.quote || item.text || '',
+                rating: item.rating || 5,
+                image: item.image || item.thumbnail || '',
+                avatar: item.thumbnail || item.image || '',
+                courseName: item.course_name || '',
+                courseId: item.course_id || null,
+                createdAt: item.created_at || null
+              })) 
+            : [];
         }
         return [];
       } catch (err) {

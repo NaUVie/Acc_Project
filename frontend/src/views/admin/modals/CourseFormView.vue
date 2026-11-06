@@ -100,17 +100,6 @@
 
       <div class="grid-2 mt-3">
         <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Giá bán (VNĐ)</label>
-          <input v-model.number="courseForm.price" type="number" required class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: bold;" />
-        </div>
-        <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Giá gốc niêm yết (VNĐ)</label>
-          <input v-model.number="courseForm.originalPrice" type="number" required class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-        </div>
-      </div>
-
-      <div class="grid-2 mt-3">
-        <div class="form-group">
           <label style="color: #1e293b; font-weight: 600;">Thời lượng</label>
           <input v-model="courseForm.duration" type="text" required class="admin-input-style" placeholder="12 tuần, 24 giờ học..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
         </div>
@@ -317,8 +306,8 @@ onMounted(() => {
       programId: null,
       image: '/images/default.jpg',
       coverImage: '',
-      price: 9800000,
-      originalPrice: 12000000,
+      price: 0,
+      originalPrice: 0,
       duration: '12 tuần',
       level: 'Trung cấp',
       status: 'ongoing',

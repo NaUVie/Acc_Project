@@ -21,7 +21,7 @@
             Xem chi tiết đơn hàng
           </router-link>
           <router-link to="/dashboard" class="btn btn-primary" style="padding: 10px 24px; font-weight: 700; background: #0284c7; color: white;">
-            Vào học ngay →
+            Về trang cá nhân →
           </router-link>
         </div>
       </div>

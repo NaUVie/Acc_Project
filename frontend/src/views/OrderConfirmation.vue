@@ -78,10 +78,10 @@
                   <div class="course-item-action">
                     <router-link
                       v-if="order.status === 'paid'"
-                      :to="`/courses/${item.course.handle}/study`"
+                      :to="`/courses/${item.course.handle}`"
                       class="btn-study"
                     >
-                      ▶ Học ngay
+                      Xem khóa học
                     </router-link>
                     <span v-else class="btn-study-disabled">🔒 Chờ thanh toán</span>
                   </div>
@@ -126,7 +126,7 @@
                 </div>
                 <div class="step-item">
                   <span class="step-num">3</span>
-                  <span>Chia sẻ <strong>mã giới thiệu</strong> của bạn để nhận hoa hồng</span>
+                  <span>Theo dõi <strong>lịch khai giảng</strong> và nhận tài liệu đào tạo</span>
                 </div>
               </div>
               <div v-else class="next-steps">

@@ -236,7 +236,7 @@
                 <ol>
                   <li>Đăng nhập tài khoản trên website <strong>accacademy.vn</strong>.</li>
                   <li>Nhấp vào ảnh đại diện hoặc chọn menu <strong>"Dashboard / Khóa học của tôi"</strong>.</li>
-                  <li>Bấm vào nút <strong>"Vào học ngay"</strong> để bắt đầu xem video bài giảng và tải tài liệu đính kèm.</li>
+                  <li>Bấm vào khóa học để xem thông tin chi tiết và tải tài liệu học tập đính kèm.</li>
                   <li>Khóa học có giá trị truy cập không giới hạn thời gian (trừ các chương trình có cam kết mentor đặc biệt theo kỳ hạn).</li>
                 </ol>
               </section>

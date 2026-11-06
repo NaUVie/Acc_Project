@@ -116,7 +116,7 @@
                 </div>
               </router-link>
 
-              <router-link to="/dashboard" class="user-dropdown-link" @click="isUserDropdownOpen = false">
+              <router-link :to="currentLang === 'en' ? '/en/dashboard' : '/dashboard'" class="user-dropdown-link" @click="isUserDropdownOpen = false">
                 <span class="dropdown-icon">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -126,22 +126,6 @@
                 <div class="dropdown-link-text">
                   <span class="link-title">{{ $t("header.profile") }}</span>
                   <span class="link-desc">Thông tin cá nhân & khóa học</span>
-                </div>
-              </router-link>
-
-              <router-link to="/referral" class="user-dropdown-link" @click="isUserDropdownOpen = false">
-                <span class="dropdown-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <polyline points="20 12 20 22 4 22 4 12"></polyline>
-                    <rect x="2" y="7" width="20" height="5"></rect>
-                    <line x1="12" y1="22" x2="12" y2="7"></line>
-                    <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
-                    <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
-                  </svg>
-                </span>
-                <div class="dropdown-link-text">
-                  <span class="link-title">Giới thiệu & Nhận thưởng</span>
-                  <span class="link-desc">Nhận đến 29.000.000 VNĐ hoa hồng</span>
                 </div>
               </router-link>
             </div>
@@ -241,7 +225,7 @@
         <router-link v-if="!courseStore.token" to="/login" class="mobile-login-btn" @click="closeMobileMenu">{{ $t("header.login") }}</router-link>
         <div v-else class="mobile-user-menu" style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
           <router-link v-if="courseStore.userMe?.role === 'admin'" to="/admin" class="mobile-login-btn" style="background: var(--primary-gradient); color: white;" @click="closeMobileMenu">👑 Quản trị hệ thống</router-link>
-          <router-link to="/dashboard" class="mobile-login-btn" @click="closeMobileMenu">🙋‍♂️ {{ courseStore.userMe?.fullname || 'Học viên' }}</router-link>
+          <router-link :to="currentLang === 'en' ? '/en/dashboard' : '/dashboard'" class="mobile-login-btn" @click="closeMobileMenu">🙋‍♂️ {{ courseStore.userMe?.fullname || 'Học viên' }}</router-link>
         </div>
       </div>
     </div>
@@ -347,20 +331,40 @@ const isFieldsActive = computed(() => {
 });
 const courseStore = useCourseStore();
 const { locale } = useI18n();
-const currentLang = computed(() => locale.value);
+
+const isEnActive = () => {
+  if (locale.value === 'en') return true;
+  if (typeof document !== 'undefined') {
+    if (document.cookie.includes('googtrans=/vi/en') || document.documentElement.classList.contains('translated-ltr')) {
+      return true;
+    }
+  }
+  if (typeof window !== 'undefined' && localStorage.getItem('acc_lang') === 'en') {
+    return true;
+  }
+  return false;
+};
+
+const currentLang = computed(() => isEnActive() ? 'en' : 'vi');
 
 const toggleLang = () => {
   const route = router.currentRoute.value;
+  const isEnCurrently = isEnActive();
+
   // Functional / admin pages have no /en version: just switch the UI language in place
   if ((route.meta && route.meta.noLocale) || route.path.startsWith('/admin')) {
-    const nextLang = locale.value === 'vi' ? 'en' : 'vi';
-    if (nextLang === 'vi') clearGoogleTranslate();
-    setLanguage(nextLang);
+    const nextLang = isEnCurrently ? 'vi' : 'en';
+    if (nextLang === 'vi') {
+      clearGoogleTranslate();
+      setLanguage('vi');
+    } else {
+      setLanguage('en');
+    }
     window.location.reload();
     return;
   }
   const currentPath = route.fullPath;
-  if (locale.value === 'vi') {
+  if (!isEnCurrently) {
     setLanguage('en');
     let newPath = '/en' + (currentPath === '/' ? '' : currentPath);
     if (!newPath) newPath = '/en';
@@ -617,29 +621,35 @@ const toggleMobileSubSection = (subSec) => {
   activeMobileSubSection.value = activeMobileSubSection.value === subSec ? '' : subSec;
 };
 
-const handleScroll = (event) => {
-  let scrollTop = window.scrollY;
-  if (event && event.target && event.target !== document && event.target !== window) {
-    scrollTop = event.target.scrollTop;
-  }
-  
-  isScrolled.value = scrollTop > 20;
-  
-  // Prevent hiding header if mobile menu, mega drawer, cart, or search is open
-  if (isMobileMenuOpen.value || isDrawerOpen.value || isSearchOpen.value) {
-    isHidden.value = false;
+let scrollTicking = false;
+const handleScroll = () => {
+  if (scrollTicking) return;
+  scrollTicking = true;
+  window.requestAnimationFrame(() => {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrolled = scrollTop > 20;
+    if (isScrolled.value !== scrolled) {
+      isScrolled.value = scrolled;
+    }
+    
+    // Prevent hiding header if mobile menu, mega drawer, cart, or search is open
+    if (isMobileMenuOpen.value || isDrawerOpen.value || isSearchOpen.value) {
+      isHidden.value = false;
+      lastScrollTop.value = scrollTop;
+      scrollTicking = false;
+      return;
+    }
+    
+    // Hide header when scrolling down, show when scrolling up
+    if (scrollTop > lastScrollTop.value && scrollTop > 80) {
+      if (!isHidden.value) isHidden.value = true;
+    } else if (scrollTop < lastScrollTop.value) {
+      if (isHidden.value) isHidden.value = false;
+    }
+    
     lastScrollTop.value = scrollTop;
-    return;
-  }
-  
-  // Hide header when scrolling down, show when scrolling up
-  if (scrollTop > lastScrollTop.value && scrollTop > 80) {
-    isHidden.value = true;
-  } else if (scrollTop < lastScrollTop.value) {
-    isHidden.value = false;
-  }
-  
-  lastScrollTop.value = scrollTop;
+    scrollTicking = false;
+  });
 };
 
 // Real Master Programs from Store & Mega Menu Navigation Logic
@@ -689,7 +699,7 @@ const realPrograms = computed(() => {
 });
 
 onMounted(async () => {
-  window.addEventListener('scroll', handleScroll, { capture: true, passive: true });
+  window.addEventListener('scroll', handleScroll, { passive: true });
   try {
     const tasks = [];
     if (!courseStore.categories || courseStore.categories.length === 0) {
@@ -710,7 +720,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', handleScroll, { capture: true });
+  window.removeEventListener('scroll', handleScroll);
   document.body.classList.remove('lock-scroll'); // teardown scroll lock safety
 });
 </script>

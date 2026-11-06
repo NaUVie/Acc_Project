@@ -227,6 +227,58 @@ async def upload_image(
         )
 
 
+@router.post(
+    "/review-image",
+    dependencies=[Depends(rate_limit(max_requests=8, window_seconds=60, scope="review_image_upload"))]
+)
+async def upload_review_image(
+    file: UploadFile = File(...)
+):
+    """
+    Cho phép học viên/người dùng tải ảnh đính kèm (ảnh đại diện hoặc ảnh bài học/chứng nhận) khi gửi nhận xét khóa học.
+    Có giới hạn kích thước tối đa 8MB và chuyển đổi sang WebP để tối ưu dung lượng.
+    """
+    content_type = (file.content_type or "").lower().strip()
+    if content_type not in ALLOWED_IMAGE_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Tệp tải lên phải là hình ảnh (PNG, JPG, JPEG, WEBP)!"
+        )
+
+    max_review_img_size = 8 * 1024 * 1024  # 8MB
+    file_bytes = await file.read(max_review_img_size + 1)
+    if len(file_bytes) > max_review_img_size:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="Dung lượng ảnh đính kèm không được vượt quá 8MB!"
+        )
+
+    upload_kwargs = {
+        "folder": f"{CLOUDINARY_FOLDER}/reviews",
+        "resource_type": "image",
+        "format": "webp",
+        "quality": "auto:good",
+        "transformation": [{"width": 1200, "height": 1200, "crop": "limit"}]
+    }
+
+    try:
+        result = await run_in_threadpool(
+            cloudinary.uploader.upload,
+            file_bytes,
+            **upload_kwargs
+        )
+        secure_url = result.get("secure_url") or result.get("url")
+        return {
+            "success": True,
+            "url": secure_url
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi tải ảnh nhận xét lên máy chủ: {str(e)}"
+        )
+
+
 class DeleteImageRequest(BaseModel):
     url: Optional[str] = None
     public_id: Optional[str] = None

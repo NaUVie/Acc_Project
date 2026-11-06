@@ -159,12 +159,12 @@ def delete_blog_category(db: Session, cat_id: int):
 def create_contact(db: Session, contact_in: schemas.ContactCreate):
     db_contact = models.Contact(
         first_name=contact_in.first_name,
-        middle_name=contact_in.middle_name,
-        last_name=contact_in.last_name,
+        middle_name=contact_in.middle_name or "",
+        last_name=contact_in.last_name or "",
         email=contact_in.email,
         phone=contact_in.phone,
-        course_handle=contact_in.course_handle,
-        message=contact_in.message
+        course_handle=contact_in.course_handle or "",
+        message=contact_in.message or "Đăng ký tư vấn thông tin từ website ACC Academy"
     )
     db.add(db_contact)
     db.commit()
@@ -526,7 +526,17 @@ def get_testimonials(db: Session, only_approved: bool = False, course_id: Option
     if only_approved:
         query = query.filter(models.Testimonial.is_approved == True)
     if course_id:
-        query = query.filter(models.Testimonial.course_id == course_id)
+        course = db.query(models.Course).filter(models.Course.id == course_id).first()
+        if course and course.title:
+            from sqlalchemy import or_
+            query = query.filter(
+                or_(
+                    models.Testimonial.course_id == course_id,
+                    models.Testimonial.course_name == course.title
+                )
+            )
+        else:
+            query = query.filter(models.Testimonial.course_id == course_id)
     return query.order_by(models.Testimonial.id.desc()).all()
 
 # --- Enrollment & Progress CRUD ---

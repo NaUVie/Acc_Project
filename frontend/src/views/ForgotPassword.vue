@@ -158,6 +158,12 @@
               ></textarea>
             </div>
 
+            <!-- Anti-spam Honeypot field (hidden from view and bots will auto-fill) -->
+            <div style="opacity: 0; position: absolute; top: 0; left: -9999px; height: 0; width: 0; z-index: -1; overflow: hidden; pointer-events: none;" aria-hidden="true">
+              <label for="fax_forgot">Do not fill this</label>
+              <input type="text" id="fax_forgot" v-model="honeypotValue" autocomplete="off" tabindex="-1" />
+            </div>
+
             <!-- Submit Button -->
             <button type="submit" class="auth-submit-btn" :disabled="loading">
               <span v-if="loading" class="auth-spinner"></span>
@@ -220,6 +226,7 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCourseStore } from '@/stores/courses';
+import { validateVietnamesePhone, validateEmail } from '@/utils/validation';
 import '@/styles/auth.css';
 
 const router = useRouter();
@@ -229,6 +236,7 @@ const loading = ref(false);
 const submitted = ref(false);
 const submittedEmail = ref('');
 const contactZalo = ref('https://zalo.me/0901234567');
+const honeypotValue = ref('');
 
 const resetForm = ref({
   email: '',
@@ -257,36 +265,34 @@ onMounted(async () => {
 });
 
 const handleSubmit = async () => {
-  if (!resetForm.value.email) {
-    courseStore.showToast('Vui lòng nhập địa chỉ Email tài khoản!', 'warning');
+  const emailCheck = validateEmail(resetForm.value.email);
+  if (!emailCheck.isValid) {
+    courseStore.showToast(emailCheck.error, 'warning');
     return;
   }
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(resetForm.value.email)) {
-    courseStore.showToast('Địa chỉ Email không đúng định dạng!', 'warning');
-    return;
-  }
-
-  if (resetForm.value.phone) {
-    const phoneDigits = resetForm.value.phone.replace(/\D/g, '');
-    if (phoneDigits.length < 9 || phoneDigits.length > 15) {
-      courseStore.showToast('Số điện thoại không hợp lệ (cần từ 9 đến 15 chữ số)!', 'warning');
+  let cleanPhone = null;
+  if (resetForm.value.phone && resetForm.value.phone.trim()) {
+    const phoneCheck = validateVietnamesePhone(resetForm.value.phone);
+    if (!phoneCheck.isValid) {
+      courseStore.showToast(phoneCheck.error, 'warning');
       return;
     }
+    cleanPhone = phoneCheck.normalized;
   }
 
   loading.value = true;
   try {
     await courseStore.requestPasswordReset(
-      resetForm.value.email,
-      resetForm.value.phone,
-      resetForm.value.note
+      emailCheck.email,
+      cleanPhone,
+      resetForm.value.note,
+      honeypotValue.value
     );
 
-    submittedEmail.value = resetForm.value.email;
+    submittedEmail.value = emailCheck.email;
     submitted.value = true;
-    courseStore.showToast('Yêu cầu đã được gửi đến Ban quản trị thành công!', 'success');
+    courseStore.showToast('Yêu cầu đã được gửi đến Ban quản trị thành công! Chúng tôi sẽ kiểm tra và hỗ trợ bạn sớm nhất.', 'success');
   } catch (err) {
     courseStore.showToast('Không thể gửi yêu cầu: ' + (err.message || 'Lỗi kết nối máy chủ'), 'error');
   } finally {

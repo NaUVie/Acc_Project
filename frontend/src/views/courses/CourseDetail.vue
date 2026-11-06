@@ -79,19 +79,6 @@
               <div class="rich-article-html" v-html="sanitizeHtml(course.customRoadmap)"></div>
             </div>
 
-            <div v-else-if="parsedCurriculum.length > 0" class="article-section-block">
-              <h3 class="article-sub-heading">Nội dung bài giảng</h3>
-              <div class="article-curriculum-list">
-                <div v-for="(item, idx) in parsedCurriculum" :key="idx" class="article-curriculum-item">
-                  <span class="item-num">{{ idx + 1 }}</span>
-                  <div class="item-info">
-                    <h4 class="item-title">{{ item.title || item.name || item }}</h4>
-                    <span v-if="item.duration" class="item-dur">⏱️ {{ item.duration }}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             <!-- Requirements & Target Audience -->
             <div v-if="courseRequirements.length > 0" class="article-section-block">
               <h3 class="article-sub-heading">Đối tượng & Yêu cầu tham gia</h3>
@@ -152,7 +139,7 @@
             <div class="article-section-block course-reviews-section">
               <div class="reviews-header flex-between" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
                 <div>
-                  <h3 class="article-sub-heading" style="margin-bottom: 4px;">💬 Chia sẻ & Cảm nhận từ Học viên</h3>
+                  <h3 class="article-sub-heading" style="margin-bottom: 4px;">Chia sẻ & Cảm nhận từ Học viên</h3>
                   <p class="text-muted" style="font-size: 14px; margin: 0;">Đánh giá thực tế từ học viên sau khi hoàn thành khóa học tại ACC Academy.</p>
                 </div>
                 <button 
@@ -161,7 +148,7 @@
                   @click="showReviewForm = !showReviewForm"
                   style="font-weight: 700; border-radius: 8px; padding: 8px 16px; white-space: nowrap;"
                 >
-                  {{ showReviewForm ? '✕ Đóng form' : '✍️ Viết nhận xét' }}
+                  {{ showReviewForm ? 'Đóng form' : 'Viết nhận xét' }}
                 </button>
               </div>
 
@@ -169,6 +156,11 @@
               <div v-if="showReviewForm" class="review-submit-box mt-4 animate-fade-in" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 22px;">
                 <h4 style="font-size: 15px; font-weight: 700; color: #0f172a; margin: 0 0 14px 0;">Gửi cảm nhận của bạn về khóa học (Không cần đăng nhập)</h4>
                 <form @submit.prevent="submitReviewNoAuth">
+                  <!-- Honeypot anti-spam (ẩn khỏi người dùng) -->
+                  <div style="position: absolute; left: -9999px; opacity: 0; height: 0; width: 0; pointer-events: none;" aria-hidden="true">
+                    <input v-model="studentReviewForm.honeypot" tabindex="-1" autocomplete="off" />
+                  </div>
+
                   <div class="grid grid-2 gap-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;">
                     <div class="form-group" style="margin: 0;">
                       <label style="font-size: 13px; font-weight: 600; color: #334155;">Họ và tên học viên <span style="color: #ef4444;">*</span></label>
@@ -193,9 +185,50 @@
                     <textarea v-model="studentReviewForm.text" rows="4" required placeholder="Chia sẻ cảm nhận của bạn về giảng viên, nội dung bài giảng, ứng dụng vào công việc thực tế..." class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"></textarea>
                   </div>
 
-                  <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-top: 14px;">
+                  <!-- Upload ảnh đính kèm (Ảnh lớp học, bài tập, chứng chỉ, avatar...) -->
+                  <div class="form-group mt-3" style="margin-top: 14px;">
+                    <label style="font-size: 13px; font-weight: 600; color: #334155; display: block; margin-bottom: 6px;">
+                      Đính kèm ảnh thực tế <span style="font-size: 12px; font-weight: 400; color: #64748b;">(Ảnh học viên, lớp học, bài tập, chứng chỉ... tối đa 8MB)</span>
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                      <label 
+                        class="btn btn-secondary btn-sm" 
+                        style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; border: 1px dashed #022B9F; color: #022B9F; background: #eff6ff; padding: 7px 14px; border-radius: 8px;"
+                        :style="uploadingReviewImage ? { opacity: 0.6, pointerEvents: 'none' } : {}"
+                      >
+                        <input 
+                          type="file" 
+                          accept="image/jpeg,image/png,image/webp,image/gif" 
+                          style="display: none;" 
+                          @change="handleReviewImageUpload" 
+                          :disabled="uploadingReviewImage"
+                        />
+                        <span v-if="uploadingReviewImage">Đang tải ảnh lên...</span>
+                        <span v-else>Chọn ảnh đính kèm</span>
+                      </label>
+
+                      <!-- Preview ảnh đã chọn -->
+                      <div v-if="studentReviewForm.imagePreview || studentReviewForm.image" style="position: relative; display: inline-block;">
+                        <img 
+                          :src="studentReviewForm.imagePreview || formatImageUrl(studentReviewForm.image)" 
+                          alt="Ảnh đính kèm" 
+                          style="width: 58px; height: 58px; border-radius: 8px; object-fit: cover; border: 2px solid #022B9F; box-shadow: 0 2px 6px rgba(0,0,0,0.1);" 
+                        />
+                        <button 
+                          type="button" 
+                          @click="removeReviewImage" 
+                          title="Xóa ảnh này" 
+                          style="position: absolute; top: -6px; right: -6px; width: 20px; height: 20px; border-radius: 50%; background: #ef4444; color: #fff; border: 2px solid #fff; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0;"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-top: 16px;">
                     <button type="button" class="btn btn-secondary btn-sm" @click="showReviewForm = false">Hủy</button>
-                    <button type="submit" class="btn btn-primary btn-sm" :disabled="submittingReview" style="padding: 8px 24px; font-weight: 700;">
+                    <button type="submit" class="btn btn-primary btn-sm" :disabled="submittingReview || uploadingReviewImage" style="padding: 8px 24px; font-weight: 700;">
                       {{ submittingReview ? 'Đang gửi...' : 'Gửi nhận xét ngay' }}
                     </button>
                   </div>
@@ -207,7 +240,7 @@
                 <div v-if="courseTestimonials.length > 0" class="reviews-grid">
                   <div v-for="t in courseTestimonials" :key="t.id" class="review-card-item" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
                     <div class="review-card-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-                      <img :src="formatImageUrl(t.image || t.avatar) || '/images/default-avatar.jpg'" :alt="t.name" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1;" />
+                      <img :src="formatImageUrl(t.avatar || t.image) || '/images/default-avatar.jpg'" :alt="t.name" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid #cbd5e1;" />
                       <div>
                         <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #0f172a;">{{ t.name }}</h4>
                         <p v-if="t.role || t.company" style="margin: 2px 0 0; font-size: 12.5px; color: #64748b;">{{ t.role }} <span v-if="t.company">• {{ t.company }}</span></p>
@@ -217,8 +250,20 @@
                       </div>
                     </div>
                     <p style="font-size: 14px; line-height: 1.6; color: #334155; margin: 0; font-style: italic;">"{{ t.text || t.quote }}"</p>
+                    
+                    <!-- Hiển thị ảnh thực tế đính kèm của đánh giá nếu có -->
+                    <div v-if="t.image && t.image !== t.avatar" class="review-attached-media" style="margin-top: 12px;">
+                      <img 
+                        :src="formatImageUrl(t.image)" 
+                        :alt="'Ảnh cảm nhận từ ' + t.name"
+                        @click="openImageLightbox(formatImageUrl(t.image))"
+                        style="max-height: 180px; max-width: 240px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;"
+                        title="Bấm để xem ảnh phóng to"
+                      />
+                    </div>
+
                     <div v-if="t.createdAt" style="margin-top: 8px; font-size: 12px; color: #94a3b8;">
-                      📅 {{ formatDate(t.createdAt) }}
+                      {{ formatDate(t.createdAt) }}
                     </div>
                   </div>
                 </div>
@@ -235,40 +280,31 @@
         <!-- Right Side: Sticky Registration Sidebar -->
         <aside class="course-article-sidebar">
           <div class="sticky-register-card">
-            <!-- Nếu đã sở hữu: Hiển thị nút Vào học ngay -->
-            <router-link 
-              v-if="isAlreadyEnrolled"
-              :to="'/courses/' + (course.handle || course.id) + '/study'"
-              class="sidebar-register-btn enrolled-study-btn" 
-              style="width: 100%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; font-weight: 700; margin-bottom: 12px;"
+            <!-- Nút Đăng ký (Zalo) và Nút Liên hệ (Form liên hệ) -->
+            <a 
+              href="https://zalo.me/0938566700" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="sidebar-register-btn sidebar-zalo-btn" 
+              style="width: 100%; box-sizing: border-box; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: var(--font-sans); margin-bottom: 10px;"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-              </svg>
-              <span>Vào Học Ngay</span>
+              Đăng Ký
+            </a>
+
+            <router-link 
+              :to="{
+                path: '/contact',
+                query: {
+                  course: course?.title,
+                  handle: course?.handle || course?.slug,
+                  category: course?.category
+                }
+              }"
+              class="sidebar-contact-btn" 
+              style="width: 100%; box-sizing: border-box; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: var(--font-sans); margin-bottom: 10px;"
+            >
+              Liên Hệ
             </router-link>
-
-            <!-- Nếu chưa sở hữu: Nút Đăng ký (Zalo) và Nút Liên hệ (Form liên hệ) -->
-            <template v-else>
-              <a 
-                href="https://zalo.me/0938566700" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="sidebar-register-btn sidebar-zalo-btn" 
-                style="width: 100%; box-sizing: border-box; text-decoration: none; display: flex; align-items: center; justify-content: center; font-family: var(--font-sans); margin-bottom: 10px;"
-              >
-                Đăng Ký
-              </a>
-
-              <button 
-                type="button" 
-                class="sidebar-contact-btn" 
-                @click="showConsultationModal = true"
-                style="width: 100%; box-sizing: border-box; cursor: pointer; font-family: var(--font-sans); margin-bottom: 10px;"
-              >
-                Liên Hệ
-              </button>
-            </template>
 
             <a href="tel:0938566700" class="sidebar-hotline-btn">
               Hotline: 0938 566 700
@@ -303,7 +339,7 @@
                       </router-link>
                     </h4>
                     <div class="sidebar-rel-price-row" v-if="blog.date">
-                      <span class="text-xs text-muted" style="font-size: 12px; color: #64748b;">📅 {{ blog.date }}</span>
+                      <span class="text-xs text-muted" style="font-size: 12px; color: #64748b;">{{ blog.date }}</span>
                     </div>
                   </div>
                 </div>
@@ -356,10 +392,17 @@
               <textarea v-model="consultationForm.message" rows="3" placeholder="Ví dụ: Tôi muốn tìm hiểu chi tiết lịch học, chính sách ưu đãi..." class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; width: 100%;"></textarea>
             </div>
 
+            <!-- Anti-spam Honeypot field (hidden from real users, bots will auto-fill) -->
+            <div class="ohnohoney" aria-hidden="true" style="opacity: 0; position: absolute; top: 0; left: -9999px; height: 0; width: 0; z-index: -1; overflow: hidden; pointer-events: none;">
+              <label for="fax_number_detail">Do not fill this</label>
+              <input type="text" id="fax_number_detail" v-model="detailHoneypotValue" autocomplete="off" tabindex="-1" />
+            </div>
+
             <div class="modal-actions-row" style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
               <button type="button" class="btn btn-secondary btn-sm" @click="showConsultationModal = false">Hủy</button>
-              <button type="submit" class="btn btn-primary btn-sm" :disabled="submittingConsultation" style="font-weight: 700; padding: 9px 24px;">
-                {{ submittingConsultation ? 'Đang gửi...' : 'Gửi thông tin liên hệ' }}
+              <button type="submit" class="btn btn-primary btn-sm" :disabled="submittingConsultation || detailCooldown > 0" style="font-weight: 700; padding: 9px 24px;">
+                <span v-if="detailCooldown > 0">Đã gửi (Đợi {{ detailCooldown }}s)</span>
+                <span v-else>{{ submittingConsultation ? 'Đang gửi...' : 'Gửi thông tin liên hệ' }}</span>
               </button>
             </div>
 
@@ -367,6 +410,26 @@
               Hoặc kết nối trực tiếp Hotline: <a href="tel:0938566700" style="color: #022B9F; font-weight: 700;">0938 566 700</a> • <a href="https://zalo.me/0938566700" target="_blank" rel="noopener" style="color: #022B9F; font-weight: 600;">Zalo</a>
             </div>
           </form>
+        </div>
+      </div>
+    </Transition>
+
+    <!-- Lightbox Modal for Review Image Zoom -->
+    <Transition name="fade">
+      <div 
+        v-if="lightboxImage" 
+        class="review-lightbox-overlay" 
+        @click="lightboxImage = null" 
+        style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(4px); z-index: 999999; display: flex; align-items: center; justify-content: center; padding: 20px;"
+      >
+        <div style="position: relative; max-width: 90vw; max-height: 90vh; text-align: center;" @click.stop>
+          <button 
+            type="button" 
+            @click="lightboxImage = null" 
+            style="position: absolute; top: -38px; right: -8px; background: none; border: none; color: #ffffff; font-size: 30px; cursor: pointer; line-height: 1; font-weight: bold;"
+            aria-label="Đóng"
+          >&times;</button>
+          <img :src="lightboxImage" alt="Phóng to ảnh cảm nhận" style="max-width: 90vw; max-height: 85vh; object-fit: contain; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);" />
         </div>
       </div>
     </Transition>
@@ -381,6 +444,8 @@ import { useTestimonialStore } from '@/stores/testimonials';
 import { stripHtml } from '@/utils/stripHtml';
 import { sanitizeHtml } from '@/utils/sanitize';
 import { formatImageUrl } from '@/utils/imageHelper';
+import { validateVietnamesePhone, validateEmail } from '@/utils/validation';
+import { checkProfanity } from '@/utils/profanity';
 
 const route = useRoute();
 const router = useRouter();
@@ -405,11 +470,6 @@ const plainDescription = computed(() => {
   return clean.length > 220 ? clean.substring(0, 220) + '...' : clean;
 });
 
-// Check if current user already enrolled in this course
-const isAlreadyEnrolled = computed(() => {
-  if (!course.value || !courseStore.token) return false;
-  return courseStore.isEnrolled(course.value.handle) || courseStore.isEnrolled(course.value.id);
-});
 const error = ref(null);
 const activeTab = ref('overview');
 
@@ -474,22 +534,26 @@ const parentProgram = computed(() => {
   return courseStore.programs.find(p => p.id === course.value.programId);
 });
 
-const parsedCurriculum = computed(() => {
-  if (!course.value) return [];
-  const curr = course.value.curriculumData || course.value.curriculum;
-  if (!curr) return [];
-  try {
-    if (typeof curr === 'string') {
-      return JSON.parse(curr);
-    }
-    return curr;
-  } catch (e) {
-    return [curr];
-  }
-});
-
 const showConsultationModal = ref(false);
 const submittingConsultation = ref(false);
+
+// Anti-spam Honeypot & Cooldown state
+const detailHoneypotValue = ref('');
+const detailCooldown = ref(0);
+let detailCooldownTimer = null;
+
+const startDetailCooldown = (seconds = 30) => {
+  detailCooldown.value = seconds;
+  if (detailCooldownTimer) clearInterval(detailCooldownTimer);
+  detailCooldownTimer = setInterval(() => {
+    detailCooldown.value -= 1;
+    if (detailCooldown.value <= 0) {
+      clearInterval(detailCooldownTimer);
+      detailCooldownTimer = null;
+    }
+  }, 1000);
+};
+
 const consultationForm = ref({
   fullname: '',
   phone: '',
@@ -507,27 +571,50 @@ watch(() => courseStore.userMe, (u) => {
 }, { immediate: true });
 
 const submitConsultationForm = async () => {
-  if (!consultationForm.value.fullname || !consultationForm.value.phone || !consultationForm.value.email) {
-    courseStore.showToast('Vui lòng điền đầy đủ các thông tin bắt buộc (*)', 'warning');
+  if (detailCooldown.value > 0) {
+    courseStore.showToast(`Bạn vừa gửi yêu cầu rồi. Vui lòng đợi ${detailCooldown.value} giây trước khi gửi tiếp!`, 'warning');
     return;
   }
+
+  const cleanName = (consultationForm.value.fullname || '').trim();
+  if (!cleanName) {
+    courseStore.showToast('Vui lòng nhập họ và tên của bạn', 'warning');
+    return;
+  }
+  const phoneCheck = validateVietnamesePhone(consultationForm.value.phone);
+  if (!phoneCheck.isValid) {
+    courseStore.showToast(phoneCheck.error, 'warning');
+    return;
+  }
+  const emailCheck = validateEmail(consultationForm.value.email);
+  if (!emailCheck.isValid) {
+    courseStore.showToast(emailCheck.error, 'warning');
+    return;
+  }
+
   submittingConsultation.value = true;
   try {
-    const nameParts = consultationForm.value.fullname.trim().split(' ');
+    const nameParts = cleanName.split(' ');
     const lastName = nameParts.length > 0 ? nameParts[nameParts.length - 1] : '';
-    const firstName = nameParts.length > 1 ? nameParts[0] : consultationForm.value.fullname.trim();
+    const firstName = nameParts.length > 1 ? nameParts[0] : cleanName;
     const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : '';
+
+    const courseTitle = course.value?.title 
+      ? `Khóa học: ${course.value.title}` 
+      : (course.value?.handle || 'Đăng ký tư vấn khóa học');
 
     await courseStore.sendContact(
       firstName,
       middleName,
       lastName,
-      consultationForm.value.email,
-      consultationForm.value.phone,
-      course.value?.handle || 'course-register',
-      consultationForm.value.message || `Đăng ký tư vấn cho khóa học: ${course.value?.title || ''}`
+      emailCheck.email,
+      phoneCheck.normalized,
+      courseTitle,
+      consultationForm.value.message || `Đăng ký nhận tư vấn khóa học: ${course.value?.title || ''}`,
+      detailHoneypotValue.value
     );
     courseStore.showToast('Cảm ơn bạn! Thông tin liên hệ đã được gửi thành công.', 'success');
+    startDetailCooldown(30);
     showConsultationModal.value = false;
     consultationForm.value.message = '';
   } catch (err) {
@@ -579,12 +666,17 @@ const testimonialStore = useTestimonialStore();
 const courseTestimonials = ref([]);
 const showReviewForm = ref(false);
 const submittingReview = ref(false);
+const uploadingReviewImage = ref(false);
+const lightboxImage = ref(null);
 
 const studentReviewForm = ref({
   name: '',
   role: '',
   rating: 5,
-  text: ''
+  text: '',
+  image: '',
+  imagePreview: '',
+  honeypot: ''
 });
 
 const loadCourseTestimonials = async () => {
@@ -600,23 +692,104 @@ const handleOpenResource = (url, label) => {
   }
 };
 
+const handleReviewImageUpload = async (event) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  // Max 8MB
+  if (file.size > 8 * 1024 * 1024) {
+    courseStore.showToast('Kích thước ảnh tối đa là 8MB!', 'warning');
+    event.target.value = '';
+    return;
+  }
+
+  // Type check
+  if (!['image/jpeg', 'image/png', 'image/webp', 'image/gif'].includes(file.type)) {
+    courseStore.showToast('Vui lòng chọn định dạng ảnh JPG, PNG, WEBP hoặc GIF!', 'warning');
+    event.target.value = '';
+    return;
+  }
+
+  studentReviewForm.value.imagePreview = URL.createObjectURL(file);
+  uploadingReviewImage.value = true;
+  try {
+    const res = await testimonialStore.uploadReviewImage(file);
+    if (res && res.url) {
+      studentReviewForm.value.image = res.url;
+      courseStore.showToast('Đã tải ảnh lên thành công!', 'success');
+    }
+  } catch (err) {
+    courseStore.showToast(err.message || 'Tải ảnh lên thất bại. Vui lòng thử lại!', 'error');
+    studentReviewForm.value.imagePreview = '';
+    studentReviewForm.value.image = '';
+  } finally {
+    uploadingReviewImage.value = false;
+    event.target.value = '';
+  }
+};
+
+const removeReviewImage = () => {
+  studentReviewForm.value.image = '';
+  studentReviewForm.value.imagePreview = '';
+};
+
+const openImageLightbox = (imgUrl) => {
+  lightboxImage.value = imgUrl;
+};
+
 const submitReviewNoAuth = async () => {
-  if (!studentReviewForm.value.name.trim() || !studentReviewForm.value.text.trim()) {
+  // 1. Honeypot trap cho bot spam
+  if (studentReviewForm.value.honeypot) {
+    courseStore.showToast('Cảm ơn bạn! Cảm nhận đã được gửi thành công.', 'success');
+    studentReviewForm.value = { name: '', role: '', rating: 5, text: '', image: '', imagePreview: '', honeypot: '' };
+    showReviewForm.value = false;
+    return;
+  }
+
+  const cleanName = (studentReviewForm.value.name || '').trim();
+  const cleanRole = (studentReviewForm.value.role || '').trim();
+  const cleanText = (studentReviewForm.value.text || '').trim();
+
+  if (!cleanName || !cleanText) {
     courseStore.showToast('Vui lòng nhập đầy đủ họ tên và nội dung cảm nhận!', 'warning');
     return;
   }
+
+  // 2. Chặn từ chửi tục, thô tục, xúc phạm
+  const nameCheck = checkProfanity(cleanName);
+  if (nameCheck.isProfane) {
+    courseStore.showToast(`Họ tên chứa từ ngữ không phù hợp ('${nameCheck.word}'). Vui lòng sửa lại!`, 'warning');
+    return;
+  }
+
+  if (cleanRole) {
+    const roleCheck = checkProfanity(cleanRole);
+    if (roleCheck.isProfane) {
+      courseStore.showToast(`Thông tin chức vụ chứa từ ngữ không phù hợp ('${roleCheck.word}'). Vui lòng sửa lại!`, 'warning');
+      return;
+    }
+  }
+
+  const textCheck = checkProfanity(cleanText);
+  if (textCheck.isProfane) {
+    courseStore.showToast(`Nội dung nhận xét chứa từ ngữ không phù hợp ('${textCheck.word}'). Vui lòng sử dụng ngôn từ văn minh!`, 'warning');
+    return;
+  }
+
   submittingReview.value = true;
   try {
     await testimonialStore.submitPublicTestimonial({
-      name: studentReviewForm.value.name.trim(),
-      role: studentReviewForm.value.role.trim(),
+      name: cleanName,
+      role: cleanRole,
       rating: studentReviewForm.value.rating,
-      text: studentReviewForm.value.text.trim(),
+      text: cleanText,
+      image: studentReviewForm.value.image || undefined,
+      honeypot: studentReviewForm.value.honeypot || undefined,
       courseId: course.value.id,
       courseName: course.value.title
     });
     courseStore.showToast('Cảm ơn bạn! Cảm nhận đã được gửi thành công và sẽ hiển thị sau khi Ban quản trị kiểm duyệt.', 'success');
-    studentReviewForm.value = { name: '', role: '', rating: 5, text: '' };
+    studentReviewForm.value = { name: '', role: '', rating: 5, text: '', image: '', imagePreview: '', honeypot: '' };
     showReviewForm.value = false;
   } catch (err) {
     courseStore.showToast(err.message || 'Không thể gửi cảm nhận. Vui lòng thử lại!', 'error');
@@ -657,15 +830,24 @@ const loadReviews = async () => {
 };
 
 const submitReview = async () => {
-  if (!newReview.value.comment.trim()) {
+  const cleanComment = (newReview.value.comment || '').trim();
+  if (!cleanComment) {
     courseStore.showToast('Vui lòng viết lời nhận xét trước khi gửi!', 'warning');
     return;
   }
+
+  // Chặn từ chửi tục
+  const commentCheck = checkProfanity(cleanComment);
+  if (commentCheck.isProfane) {
+    courseStore.showToast(`Nội dung đánh giá chứa từ ngữ không phù hợp ('${commentCheck.word}'). Vui lòng dùng ngôn từ văn minh!`, 'warning');
+    return;
+  }
+
   submittingReview.value = true;
   try {
     const rev = await courseStore.addCourseReview(course.value.handle, {
       rating: newReview.value.rating,
-      comment: newReview.value.comment
+      comment: cleanComment
     });
     reviews.value.unshift(rev);
     newReview.value.comment = '';

@@ -35,15 +35,15 @@
             </button>
           </div>
 
-          <!-- Nhóm 1: Kinh doanh & Khách hàng -->
+          <!-- Nhóm 1: Học viên & Tuyển sinh -->
           <div class="accordion-group">
-            <button class="accordion-header" :class="{ 'has-active': businessTabs.some(t => t.id === activeTab) }" @click="toggleGroup('business')">
-              <span class="accordion-title">Kinh doanh & Khách hàng</span>
-              <span class="accordion-arrow" :class="{ open: openGroups.business }">▾</span>
+            <button class="accordion-header" :class="{ 'has-active': studentTabs.some(t => t.id === activeTab) }" @click="toggleGroup('students')">
+              <span class="accordion-title">Học viên & Tuyển sinh</span>
+              <span class="accordion-arrow" :class="{ open: openGroups.students }">▾</span>
             </button>
-            <div v-show="openGroups.business" class="accordion-body">
+            <div v-show="openGroups.students" class="accordion-body">
               <button 
-                v-for="tab in businessTabs" 
+                v-for="tab in studentTabs" 
                 :key="tab.id"
                 class="sidebar-menu-item sub-item"
                 :class="{ active: activeTab === tab.id }"
@@ -54,10 +54,7 @@
             </div>
           </div>
 
-      
-      
-
-          <!-- Nhóm 2: Đào tạo & Học thuật -->
+          <!-- Nhóm 2: Đào tạo & Khóa học -->
           <div class="accordion-group">
             <button class="accordion-header" :class="{ 'has-active': educationTabs.some(t => t.id === activeTab) }" @click="toggleGroup('education')">
               <span class="accordion-title">Đào tạo & Khóa học</span>
@@ -85,6 +82,25 @@
             <div v-show="openGroups.marketing" class="accordion-body">
               <button 
                 v-for="tab in marketingTabs" 
+                :key="tab.id"
+                class="sidebar-menu-item sub-item"
+                :class="{ active: activeTab === tab.id }"
+                @click="selectTab(tab.id)"
+              >
+                <span class="menu-label">{{ tab.name }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Nhóm 4: Giao dịch & Đơn hàng (Lưu trữ) -->
+          <div class="accordion-group">
+            <button class="accordion-header" :class="{ 'has-active': transactionTabs.some(t => t.id === activeTab) }" @click="toggleGroup('transactions')">
+              <span class="accordion-title">Đơn hàng & Giao dịch</span>
+              <span class="accordion-arrow" :class="{ open: openGroups.transactions }">▾</span>
+            </button>
+            <div v-show="openGroups.transactions" class="accordion-body">
+              <button 
+                v-for="tab in transactionTabs" 
                 :key="tab.id"
                 class="sidebar-menu-item sub-item"
                 :class="{ active: activeTab === tab.id }"
@@ -138,18 +154,15 @@ const router = useRouter();
 const courseStore = useCourseStore();
 
 // Tab navigation phân theo nhóm logic
-const businessTabs = [
-  { id: 'orders', name: 'Đơn hàng' },
-  { id: 'users', name: 'Học viên & Người dùng' },
+const studentTabs = [
   { id: 'contacts', name: 'Liên hệ tư vấn' },
-  { id: 'coupons', name: 'Mã giảm giá' },
-  { id: 'commissions', name: 'Hoa hồng Affiliate' }
+  { id: 'users', name: 'Học viên & Người dùng' }
 ];
 
 const educationTabs = [
   { id: 'categories', name: 'Chuyên mục' },
   { id: 'courses', name: 'Khóa học' },
-      { id: 'lecturers', name: 'Giảng viên & Chuyên gia' },
+  { id: 'lecturers', name: 'Giảng viên & Chuyên gia' },
   { id: 'board-members', name: 'Ban điều hành & Cố vấn' },
   { id: 'admissions', name: 'Bài viết Tuyển sinh' }
 ];
@@ -161,11 +174,17 @@ const marketingTabs = [
   { id: 'partners', name: 'Doanh nghiệp hợp tác' }
 ];
 
+const transactionTabs = [
+  { id: 'orders', name: 'Lịch sử đơn cũ' },
+  { id: 'coupons', name: 'Mã giảm giá' },
+];
+
 const tabs = [
   { id: 'overview', name: 'Tổng quan' },
-  ...businessTabs,
+  ...studentTabs,
   ...educationTabs,
-  ...marketingTabs
+  ...marketingTabs,
+  ...transactionTabs
 ];
 
 const getInitialTab = () => {
@@ -193,9 +212,10 @@ const isTabSwitching = ref(false);
 let tabSwitchTimer = null;
 
 const openGroups = ref({
-  business: businessTabs.some(t => t.id === activeTab.value),
+  students: studentTabs.some(t => t.id === activeTab.value),
   education: educationTabs.some(t => t.id === activeTab.value),
-  marketing: marketingTabs.some(t => t.id === activeTab.value)
+  marketing: marketingTabs.some(t => t.id === activeTab.value),
+  transactions: transactionTabs.some(t => t.id === activeTab.value)
 });
 
 const toggleGroup = (group) => {
@@ -203,9 +223,16 @@ const toggleGroup = (group) => {
 };
 
 watch(activeTab, (newTab) => {
-  if (businessTabs.some(t => t.id === newTab)) openGroups.value.business = true;
+  if (studentTabs.some(t => t.id === newTab)) openGroups.value.students = true;
   if (educationTabs.some(t => t.id === newTab)) openGroups.value.education = true;
   if (marketingTabs.some(t => t.id === newTab)) openGroups.value.marketing = true;
+  if (transactionTabs.some(t => t.id === newTab)) openGroups.value.transactions = true;
+});
+
+watch(() => route.query.tab, (newTab) => {
+  if (newTab && tabs.some(t => t.id === newTab) && newTab !== activeTab.value) {
+    activeTab.value = newTab;
+  }
 });
 
 watch(activeTab, (newTab) => {

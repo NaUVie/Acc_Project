@@ -88,7 +88,6 @@
               <th>Chuyên mục</th>
               <th>Trạng thái</th>
               <th>Thời lượng</th>
-              <th>Giá bán</th>
               <th>Hành động</th>
             </tr>
           </thead>
@@ -118,22 +117,15 @@
                 </select>
               </td>
               <td data-label="Thời lượng">{{ c.duration || 'N/A' }}</td>
-              <td data-label="Giá bán">
-                <span class="font-bold text-success">{{ formatCurrency(c.price) }}</span>
-                <span v-if="c.originalPrice > c.price" class="text-xs text-muted" style="text-decoration: line-through; margin-left: 6px;">
-                  {{ formatCurrency(c.originalPrice) }}
-                </span>
-              </td>
               <td data-label="Hành động">
                 <div class="action-buttons">
-                  <button @click="openCurriculum(c)" class="btn-action edit" title="Quản lý giáo trình & bài giảng">📚</button>
                   <button @click="editCourse(c)" class="btn-action edit" title="Sửa thông tin">✏️</button>
                   <button @click="deleteCourse(c.id)" class="btn-action delete" title="Xóa">🗑️</button>
                 </div>
               </td>
             </tr>
             <tr v-if="isLoadingCourses && filteredCourses.length === 0">
-              <td colspan="7">
+              <td colspan="6">
                 <div class="admin-center-loader" style="padding: 40px 0; min-height: 160px;">
                   <div class="admin-spinner"></div>
                   <p class="admin-loader-text">Đang nạp danh sách khóa học...</p>

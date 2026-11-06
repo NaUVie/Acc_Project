@@ -554,28 +554,41 @@
               />
             </div>
 
-            <div class="card-input-wrap">
+            <div class="card-input-wrap" :class="{ 'has-error': homePhoneError }">
               <input 
                 v-model="contactForm.phone" 
                 type="tel" 
                 class="card-input" 
                 :placeholder="$t('home.popupPhonePlaceholder')" 
                 required 
+                @blur="validateHomePhone"
+                @input="homePhoneError = ''"
               />
+              <span v-if="homePhoneError" class="modal-field-error">{{ homePhoneError }}</span>
             </div>
 
-            <div class="card-input-wrap">
+            <div class="card-input-wrap" :class="{ 'has-error': homeEmailError }">
               <input 
                 v-model="contactForm.email" 
                 type="email" 
                 class="card-input" 
                 :placeholder="$t('home.popupEmailPlaceholder')" 
                 required 
+                @blur="validateHomeEmail"
+                @input="homeEmailError = ''"
               />
+              <span v-if="homeEmailError" class="modal-field-error">{{ homeEmailError }}</span>
             </div>
 
-            <button type="submit" class="card-submit-btn" :disabled="isSubmittingContact">
-              <span v-if="!isSubmittingContact" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+            <!-- Anti-spam Honeypot field (hidden from real users, bots will auto-fill) -->
+            <div class="ohnohoney" aria-hidden="true">
+              <label for="fax_number_modal">Do not fill this</label>
+              <input type="text" id="fax_number_modal" v-model="homeHoneypotValue" autocomplete="off" tabindex="-1" />
+            </div>
+
+            <button type="submit" class="card-submit-btn" :disabled="isSubmittingContact || homeCooldown > 0">
+              <span v-if="homeCooldown > 0">Đã gửi (Đợi {{ homeCooldown }}s)</span>
+              <span v-else-if="!isSubmittingContact" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                 <span>{{ $t('home.popupSubmit') }}</span>
                 <svg class="block-arrow-glow" width="34" height="15" viewBox="0 0 52 24" fill="none">
                   <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#ffffff" />
@@ -603,6 +616,7 @@ import { useCourseStore } from '@/stores/courses';
 import { useTestimonialStore } from '@/stores/testimonials';
 import { stripHtml } from '@/utils/stripHtml';
 import { formatImageUrl } from '@/utils/imageHelper';
+import { validateVietnamesePhone, validateEmail } from '@/utils/validation';
 
 const courseStore = useCourseStore();
 const testimonialStore = useTestimonialStore();
@@ -1075,6 +1089,26 @@ const homeStudentFeedbacks = computed(() => {
 // 11. Consultation Auto Pop-up Modal State & Handler
 const isContactModalOpen = ref(false);
 const isSubmittingContact = ref(false);
+const homePhoneError = ref('');
+const homeEmailError = ref('');
+
+// Anti-spam Honeypot & Cooldown state
+const homeHoneypotValue = ref('');
+const homeCooldown = ref(0);
+let homeCooldownTimer = null;
+
+const startHomeCooldown = (seconds = 30) => {
+  homeCooldown.value = seconds;
+  if (homeCooldownTimer) clearInterval(homeCooldownTimer);
+  homeCooldownTimer = setInterval(() => {
+    homeCooldown.value -= 1;
+    if (homeCooldown.value <= 0) {
+      clearInterval(homeCooldownTimer);
+      homeCooldownTimer = null;
+    }
+  }, 1000);
+};
+
 const contactForm = ref({
   fullname: '',
   phone: '',
@@ -1082,6 +1116,24 @@ const contactForm = ref({
   courseHandle: '',
   message: ''
 });
+
+const validateHomePhone = () => {
+  if (!contactForm.value.phone) {
+    homePhoneError.value = '';
+    return;
+  }
+  const check = validateVietnamesePhone(contactForm.value.phone);
+  homePhoneError.value = check.isValid ? '' : check.error;
+};
+
+const validateHomeEmail = () => {
+  if (!contactForm.value.email) {
+    homeEmailError.value = '';
+    return;
+  }
+  const check = validateEmail(contactForm.value.email);
+  homeEmailError.value = check.isValid ? '' : check.error;
+};
 
 const MODAL_STORAGE_KEY = 'acc_home_consult_modal_date';
 let modalTimer = null;
@@ -1111,32 +1163,58 @@ const checkAndShowContactModal = () => {
 
 const closeContactModal = () => {
   isContactModalOpen.value = false;
+  homePhoneError.value = '';
+  homeEmailError.value = '';
 };
 
 const submitContactModal = async () => {
-  if (!contactForm.value.fullname || !contactForm.value.phone || !contactForm.value.email) {
-    courseStore.showToast('Vui lòng điền đầy đủ các thông tin bắt buộc (*)', 'warning');
+  if (homeCooldown.value > 0) {
+    courseStore.showToast(`Bạn vừa gửi yêu cầu rồi. Vui lòng đợi ${homeCooldown.value} giây trước khi gửi tiếp!`, 'warning');
     return;
   }
 
+  const cleanName = (contactForm.value.fullname || '').trim();
+  if (!cleanName) {
+    courseStore.showToast('Vui lòng nhập họ và tên của bạn', 'warning');
+    return;
+  }
+
+  const phoneCheck = validateVietnamesePhone(contactForm.value.phone);
+  if (!phoneCheck.isValid) {
+    homePhoneError.value = phoneCheck.error;
+    courseStore.showToast(phoneCheck.error, 'warning');
+    return;
+  }
+  homePhoneError.value = '';
+
+  const emailCheck = validateEmail(contactForm.value.email);
+  if (!emailCheck.isValid) {
+    homeEmailError.value = emailCheck.error;
+    courseStore.showToast(emailCheck.error, 'warning');
+    return;
+  }
+  homeEmailError.value = '';
+
   isSubmittingContact.value = true;
   try {
-    const nameParts = contactForm.value.fullname.trim().split(' ');
+    const nameParts = cleanName.split(' ');
     const lastName = nameParts.length > 0 ? nameParts[nameParts.length - 1] : '';
-    const firstName = nameParts.length > 1 ? nameParts[0] : contactForm.value.fullname.trim();
+    const firstName = nameParts.length > 1 ? nameParts[0] : cleanName;
     const middleName = nameParts.length > 2 ? nameParts.slice(1, -1).join(' ') : '';
 
     await courseStore.sendContact(
       firstName,
       middleName,
       lastName,
-      contactForm.value.email,
-      contactForm.value.phone,
-      contactForm.value.courseHandle || 'consultation-popup',
-      contactForm.value.message || 'Đăng ký tư vấn từ Popup Trang Chủ'
+      emailCheck.email,
+      phoneCheck.normalized,
+      contactForm.value.courseHandle || 'Tư vấn thông tin (Popup Trang Chủ)',
+      contactForm.value.message || 'Khách hàng đăng ký tư vấn từ Popup Trang Chủ',
+      homeHoneypotValue.value
     );
 
     courseStore.showToast(t('home.popupSuccess'), 'success');
+    startHomeCooldown(30);
     closeContactModal();
     contactForm.value = {
       fullname: '',

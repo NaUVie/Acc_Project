@@ -25,12 +25,24 @@ export function clearGoogleTranslate() {
       const dAttr = d ? `domain=${d};` : '';
       const pAttr = p ? `path=${p};` : '';
       document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; ${pAttr} ${dAttr}`;
+      document.cookie = `googtrans=/vi/vi; ${pAttr} ${dAttr}`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; ${pAttr} ${dAttr}`;
     });
   });
 
   try {
     localStorage.removeItem('googtrans');
     sessionStorage.removeItem('googtrans');
+    localStorage.setItem('acc_lang', 'vi');
+  } catch (e) {}
+
+  // Reset Google Translate combo dropdown if present
+  try {
+    const select = document.querySelector('.goog-te-combo');
+    if (select) {
+      select.value = '';
+      select.dispatchEvent(new Event('change'));
+    }
   } catch (e) {}
 
   // Remove styling classes and inline styles added by Google Translate
@@ -73,6 +85,10 @@ export function applyGoogleTranslate(lang) {
       const dAttr = d ? `domain=${d};` : '';
       document.cookie = `googtrans=${target}; path=/; ${dAttr}`;
     });
+
+    try {
+      localStorage.setItem('acc_lang', 'en');
+    } catch (e) {}
 
     // Trigger Google Translate combo dropdown to 'en'
     const triggerSelect = () => {

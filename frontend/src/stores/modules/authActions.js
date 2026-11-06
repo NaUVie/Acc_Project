@@ -54,14 +54,15 @@ export const authActions = {
     }
   },
 
-  async requestPasswordReset(email, phone = null, note = null) {
+  async requestPasswordReset(email, phone = null, note = null, honeypot = '') {
     try {
       const result = await this.apiRequest('/auth/forgot-password', {
         method: 'POST',
         body: JSON.stringify({
           email,
           phone: phone || null,
-          note: note || null
+          note: note || null,
+          honeypot
         })
       });
       return result;

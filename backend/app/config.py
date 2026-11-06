@@ -41,3 +41,14 @@ VNPAY_TMN_CODE = os.getenv("VNPAY_TMN_CODE", "2QXUI4J4")
 VNPAY_HASH_SECRET = os.getenv("VNPAY_HASH_SECRET", "KASJDKASJDKASJDKASJDKASJDKASJDKA")
 VNPAY_PAYMENT_URL = os.getenv("VNPAY_PAYMENT_URL", "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html")
 VNPAY_RETURN_URL = os.getenv("VNPAY_RETURN_URL", "http://localhost:5173/payment/vnpay-return")
+
+# Resend Email API settings
+RESEND_API_KEY = os.getenv("RESEND_API_KEY", "")
+RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL", "ACC Academy <onboarding@resend.dev>")
+
+# Email notification settings (SMTP)
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.gmail.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER", "")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
+ADMIN_NOTIFICATION_EMAIL = os.getenv("ADMIN_NOTIFICATION_EMAIL", "")

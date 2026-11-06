@@ -118,11 +118,6 @@
               <span>{{ formatCurrency(currentSubtotal) }}</span>
             </div>
 
-            <div class="summary-row discount" v-if="referralDiscountAmount > 0">
-              <span>Ưu đãi Giới thiệu (10%)</span>
-              <span>-{{ formatCurrency(referralDiscountAmount) }}</span>
-            </div>
-
             <div class="summary-row discount" v-if="couponDiscount > 0">
               <span>Mã giảm giá ({{ couponCodeApplied }})</span>
               <span>-{{ formatCurrency(couponDiscount) }}</span>
@@ -235,25 +230,14 @@ const isFirstPurchase = computed(() => {
   return (courseStore.orders || []).filter(o => o.status === 'paid').length === 0
 })
 
-const isReferredUser = computed(() => {
-  return Boolean(courseStore.userMe?.referredById || courseStore.userMe?.referred_by_id)
-})
-
-const referralDiscountAmount = computed(() => {
-  if (isReferredUser.value && isFirstPurchase.value) {
-    return Math.floor(currentSubtotal.value * 0.10)
-  }
-  return 0
-})
-
 const storeCreditDiscount = computed(() => {
   if (!useStoreCredit.value) return 0;
-  const afterPrior = Math.max(0, currentSubtotal.value - referralDiscountAmount.value - couponDiscount.value);
+  const afterPrior = Math.max(0, currentSubtotal.value - couponDiscount.value);
   return Math.min(userStoreCredit.value, afterPrior);
 })
 
 const finalTotal = computed(() => {
-  const total = currentSubtotal.value - referralDiscountAmount.value - couponDiscount.value - storeCreditDiscount.value;
+  const total = currentSubtotal.value - couponDiscount.value - storeCreditDiscount.value;
   return Math.max(0, total);
 })
 

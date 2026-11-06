@@ -11,7 +11,7 @@ router = APIRouter()
 
 @router.get("/contacts", response_model=List[schemas.ContactResponse])
 def get_all_contacts(db: Session = Depends(get_db)):
-    return db.query(models.Contact).all()
+    return db.query(models.Contact).order_by(models.Contact.created_at.desc()).all()
 
 @router.put("/contacts/{id}/resolve", response_model=schemas.ContactResponse)
 def toggle_contact_resolved(id: int, db: Session = Depends(get_db)):

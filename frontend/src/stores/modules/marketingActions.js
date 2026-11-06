@@ -329,7 +329,7 @@ export const marketingActions = {
     return data;
   },
 
-  async sendContact(firstName, middleName, lastName, email, phone, courseHandle, message) {
+  async sendContact(firstName, middleName, lastName, email, phone, courseHandle, message, honeypot = '') {
     try {
       const res = await this.apiRequest('/contacts', {
         method: 'POST',
@@ -340,7 +340,8 @@ export const marketingActions = {
           email,
           phone,
           course_handle: courseHandle,
-          message
+          message,
+          honeypot
         })
       });
       return res;
@@ -385,7 +386,8 @@ export const marketingActions = {
         ...item,
         courseId: item.course_id || null,
         courseName: item.course_name || '',
-        isApproved: item.is_approved !== false
+        isApproved: item.is_approved !== false,
+        isSpam: item.testimonial_type === 'spam'
       }));
       return this.adminTestimonials;
     } catch (err) {
@@ -428,6 +430,13 @@ export const marketingActions = {
   async updateAdminTestimonial(id, testimonial) {
     if (!this.token) return;
     try {
+      const courseIdVal = testimonial.courseId !== undefined ? testimonial.courseId : testimonial.course_id;
+      const courseNameVal = testimonial.courseName !== undefined ? testimonial.courseName : testimonial.course_name;
+      const isApprovedVal = testimonial.isApproved !== undefined ? testimonial.isApproved : testimonial.is_approved;
+      const typeVal = testimonial.testimonialType !== undefined ? testimonial.testimonialType : testimonial.testimonial_type;
+      const youtubeVal = testimonial.youtubeId !== undefined ? testimonial.youtubeId : testimonial.youtube_id;
+      const videoUrlVal = testimonial.videoUrl !== undefined ? testimonial.videoUrl : testimonial.video_url;
+
       const payload = {
         name: testimonial.name,
         role: testimonial.role,
@@ -436,13 +445,13 @@ export const marketingActions = {
         image: testimonial.image,
         rating: Number(testimonial.rating) || 5,
         quote: testimonial.quote,
-        course_name: testimonial.courseName,
-        course_id: testimonial.courseId !== undefined ? (testimonial.courseId ? Number(testimonial.courseId) : null) : undefined,
-        is_approved: testimonial.isApproved !== undefined ? testimonial.isApproved : undefined,
-        testimonial_type: testimonial.testimonialType,
-        youtube_id: testimonial.youtubeId,
+        course_name: courseNameVal !== undefined ? courseNameVal : undefined,
+        course_id: (courseIdVal !== null && courseIdVal !== undefined && courseIdVal !== '') ? Number(courseIdVal) : (courseIdVal === null ? null : undefined),
+        is_approved: isApprovedVal !== undefined ? isApprovedVal : undefined,
+        testimonial_type: typeVal !== undefined ? typeVal : undefined,
+        youtube_id: youtubeVal,
         thumbnail: testimonial.thumbnail,
-        video_url: testimonial.videoUrl
+        video_url: videoUrlVal
       };
       await this.apiRequest(`/admin/testimonials/${id}`, {
         method: 'PUT',
@@ -470,6 +479,22 @@ export const marketingActions = {
     } catch (err) {
       console.error("Failed to delete admin testimonial:", err);
       this.showToast(err.message || 'Không thể xóa cảm nhận', 'error');
+      throw err;
+    }
+  },
+
+  async cleanupSpamTestimonials(days = 0) {
+    if (!this.token) return;
+    try {
+      const res = await this.apiRequest(`/admin/testimonials/cleanup-spam?days=${days}`, {
+        method: 'DELETE'
+      });
+      await this.fetchAdminTestimonials(true);
+      this.showToast(res.message || 'Đã dọn dẹp nhận xét rác thành công!', 'success');
+      return res;
+    } catch (err) {
+      console.error("Failed to cleanup spam testimonials:", err);
+      this.showToast(err.message || 'Không thể dọn dẹp nhận xét rác', 'error');
       throw err;
     }
   }

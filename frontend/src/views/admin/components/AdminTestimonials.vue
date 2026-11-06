@@ -43,6 +43,15 @@
             🟢 Đã duyệt ({{ approvedCount }})
           </button>
           <button 
+            @click="filterType = 'spam'" 
+            class="btn btn-sm"
+            :class="filterType === 'spam' ? 'btn-danger' : 'btn-secondary'"
+            style="font-weight: 700;"
+            :style="filterType !== 'spam' && spamCount > 0 ? 'color: #dc2626; border-color: #fca5a5; background: #fff1f2;' : ''"
+          >
+            ⚠️ Nghi ngờ spam ({{ spamCount }})
+          </button>
+          <button 
             @click="filterType = 'video'" 
             class="btn btn-sm"
             :class="filterType === 'video' ? 'btn-primary' : 'btn-secondary'"
@@ -67,6 +76,24 @@
             style="padding-left: 14px; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"
           />
         </div>
+      </div>
+
+      <!-- Spam Notice & Cleanup Action Banner -->
+      <div v-if="filterType === 'spam'" class="mb-4 p-3 flex-between" style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; flex-wrap: wrap; gap: 12px; align-items: center;">
+        <div style="font-size: 13.5px; color: #991b1b; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 18px;">ℹ️</span>
+          <span>Hệ thống có cơ chế tự động xóa vĩnh viễn các nhận xét rác sau <strong>30 ngày</strong>. Bạn cũng có thể chủ động dọn dẹp ngay bây giờ.</span>
+        </div>
+        <button 
+          v-if="spamCount > 0"
+          type="button" 
+          class="btn btn-danger btn-sm" 
+          @click="handlePurgeAllSpam" 
+          :disabled="isPurgingSpam"
+          style="font-weight: 700; white-space: nowrap; padding: 6px 14px;"
+        >
+          <span>{{ isPurgingSpam ? 'Đang dọn dẹp...' : '🗑️ Dọn sạch tất cả nhận xét rác' }}</span>
+        </button>
       </div>
 
       <!-- Testimonials Table -->
@@ -121,15 +148,51 @@
                 <span v-else class="text-muted" style="font-size: 12px;">(Tất cả)</span>
               </td>
               <td data-label="Trạng thái">
-                <button 
-                  type="button" 
-                  class="badge" 
-                  :style="t.isApproved ? 'background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; cursor: pointer;' : 'background: #fef3c7; color: #b45309; border: 1px solid #fde68a; cursor: pointer; font-weight: 800;'"
-                  @click="toggleApproval(t)"
-                  :title="t.isApproved ? 'Nhấp để ẩn cảm nhận này' : 'Nhấp để duyệt hiển thị công khai cảm nhận này'"
-                >
-                  {{ t.isApproved ? '🟢 Đã duyệt' : '⏳ Chờ duyệt' }}
-                </button>
+                <div v-if="t.testimonial_type === 'spam' || t.isSpam" style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                  <span class="badge" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; font-weight: 800; font-size: 11.5px;">
+                    ⚠️ Nghi ngờ spam
+                  </span>
+                  <div style="display: flex; gap: 4px; margin-top: 2px;">
+                    <button 
+                      type="button" 
+                      @click="setStatus(t, 'approved')" 
+                      class="btn btn-xs" 
+                      style="padding: 2px 7px; font-size: 11px; background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; border-radius: 4px; font-weight: 600; cursor: pointer;"
+                      title="Duyệt hiển thị (Không phải spam)"
+                    >
+                      Duyệt
+                    </button>
+                    <button 
+                      type="button" 
+                      @click="setStatus(t, 'pending')" 
+                      class="btn btn-xs" 
+                      style="padding: 2px 7px; font-size: 11px; background: #fef3c7; color: #b45309; border: 1px solid #fde68a; border-radius: 4px; font-weight: 600; cursor: pointer;"
+                      title="Bỏ nhãn spam, chuyển sang chờ duyệt"
+                    >
+                      Chờ duyệt
+                    </button>
+                  </div>
+                </div>
+
+                <div v-else style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                  <button 
+                    type="button" 
+                    class="badge" 
+                    :style="t.isApproved ? 'background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; cursor: pointer;' : 'background: #fef3c7; color: #b45309; border: 1px solid #fde68a; cursor: pointer; font-weight: 800;'"
+                    @click="toggleApproval(t)"
+                    :title="t.isApproved ? 'Nhấp để ẩn cảm nhận này' : 'Nhấp để duyệt hiển thị công khai cảm nhận này'"
+                  >
+                    {{ t.isApproved ? '🟢 Đã duyệt' : '⏳ Chờ duyệt' }}
+                  </button>
+                  <button 
+                    type="button" 
+                    @click="setStatus(t, 'spam')" 
+                    style="background: #fff1f2; border: 1px solid #fecdd3; border-radius: 4px; cursor: pointer; color: #e11d48; font-size: 11px; padding: 2px 6px; font-weight: 700;"
+                    title="Đánh dấu nghi ngờ spam"
+                  >
+                    🚩 Spam
+                  </button>
+                </div>
               </td>
               <td class="wrap-cell" data-label="Nội dung / Trích dẫn">
                 <div style="max-width: 280px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; font-size: 13.5px; color: #334155;">
@@ -228,9 +291,10 @@
         <div class="grid grid-2 gap-4 mt-3">
           <div class="form-group">
             <label style="color: #1e293b; font-weight: 600;">Trạng thái kiểm duyệt</label>
-            <select v-model="form.isApproved" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 600;">
-              <option :value="true">🟢 Đã duyệt (Hiển thị công khai)</option>
-              <option :value="false">⏳ Chờ duyệt (Tạm ẩn)</option>
+            <select v-model="form.statusMode" class="admin-input-style" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; font-weight: 600;">
+              <option value="approved">🟢 Đã duyệt (Hiển thị công khai)</option>
+              <option value="pending">⏳ Chờ duyệt (Tạm ẩn)</option>
+              <option value="spam">⚠️ Nghi ngờ spam (Gắn cờ cảnh báo & Ẩn)</option>
             </select>
           </div>
         </div>
@@ -396,19 +460,42 @@ const onCourseSelectChange = () => {
   }
 };
 
-const toggleApproval = async (item) => {
-  const newStatus = !item.isApproved;
+const setStatus = async (item, status) => {
   try {
-    await courseStore.updateAdminTestimonial(item.id, {
-      ...item,
-      isApproved: newStatus
-    });
-    item.isApproved = newStatus;
-    courseStore.showToast(`Đã ${newStatus ? 'duyệt hiển thị' : 'chuyển sang chờ duyệt'} cảm nhận của ${item.name}!`, 'success');
+    let payload = { ...item };
+    if (status === 'approved') {
+      payload.isApproved = true;
+      payload.testimonialType = item.image ? 'photo' : (item.youtube_id || item.youtubeId ? 'video' : 'text');
+    } else if (status === 'pending') {
+      payload.isApproved = false;
+      payload.testimonialType = item.image ? 'photo' : (item.youtube_id || item.youtubeId ? 'video' : 'text');
+    } else if (status === 'spam') {
+      payload.isApproved = false;
+      payload.testimonialType = 'spam';
+    }
+
+    payload.courseId = item.course_id || item.courseId || null;
+    payload.courseName = item.course_name || item.courseName || '';
+
+    await courseStore.updateAdminTestimonial(item.id, payload);
+    item.isApproved = payload.isApproved;
+    item.testimonial_type = payload.testimonialType;
+    item.testimonialType = payload.testimonialType;
+    item.isSpam = payload.testimonialType === 'spam';
+
+    const msg = status === 'approved' 
+      ? 'Đã duyệt hiển thị' 
+      : (status === 'spam' ? 'Đã đánh dấu nghi ngờ spam' : 'Đã chuyển về chờ duyệt');
+    courseStore.showToast(`${msg} cho nhận xét của ${item.name}!`, 'success');
   } catch (err) {
     courseStore.showToast('Lỗi khi đổi trạng thái: ' + (err.message || err), 'error');
   }
 };
+
+const toggleApproval = async (item) => {
+  await setStatus(item, item.isApproved ? 'pending' : 'approved');
+};
+
 const isEditing = ref(false);
 const editingId = ref(null);
 const saving = ref(false);
@@ -423,6 +510,7 @@ const form = ref({
   courseName: '',
   courseId: null,
   isApproved: true,
+  statusMode: 'approved',
   testimonialType: 'video',
   youtubeId: '',
   thumbnail: '',
@@ -433,19 +521,28 @@ const form = ref({
 
 const testimonials = computed(() => courseStore.adminTestimonials || []);
 
+const spamCount = computed(() => testimonials.value.filter(t => t.testimonial_type === 'spam' || t.isSpam).length);
 const videoCount = computed(() => testimonials.value.filter(t => t.testimonial_type === 'video').length);
 const photoCount = computed(() => testimonials.value.filter(t => t.testimonial_type === 'photo' || t.testimonial_type === 'text').length);
-const pendingCount = computed(() => testimonials.value.filter(t => t.isApproved === false).length);
-const approvedCount = computed(() => testimonials.value.filter(t => t.isApproved !== false).length);
+const pendingCount = computed(() => testimonials.value.filter(t => t.isApproved === false && t.testimonial_type !== 'spam' && !t.isSpam).length);
+const approvedCount = computed(() => testimonials.value.filter(t => t.isApproved !== false && t.testimonial_type !== 'spam' && !t.isSpam).length);
 
 const filteredTestimonials = computed(() => {
   return testimonials.value.filter(t => {
-    // Approval Filter
-    if (filterType.value === 'pending' && t.isApproved !== false) return false;
-    if (filterType.value === 'approved' && t.isApproved === false) return false;
-    // Type Filter
-    if (filterType.value === 'video' && t.testimonial_type !== 'video') return false;
-    if (filterType.value === 'photo' && t.testimonial_type !== 'photo' && t.testimonial_type !== 'text') return false;
+    const isSpam = t.testimonial_type === 'spam' || t.isSpam;
+
+    // Filter by Spam / Approval / Type
+    if (filterType.value === 'spam') {
+      if (!isSpam) return false;
+    } else if (filterType.value === 'pending') {
+      if (t.isApproved !== false || isSpam) return false;
+    } else if (filterType.value === 'approved') {
+      if (!t.isApproved || isSpam) return false;
+    } else if (filterType.value === 'video') {
+      if (t.testimonial_type !== 'video') return false;
+    } else if (filterType.value === 'photo') {
+      if (t.testimonial_type !== 'photo' && t.testimonial_type !== 'text') return false;
+    }
 
     // Search Query
     if (searchQuery.value.trim()) {
@@ -453,8 +550,9 @@ const filteredTestimonials = computed(() => {
       const matchName = t.name && t.name.toLowerCase().includes(q);
       const matchRole = t.role && t.role.toLowerCase().includes(q);
       const matchCompany = t.company && t.company.toLowerCase().includes(q);
-      const matchCourse = t.course_name && t.course_name.toLowerCase().includes(q);
-      return matchName || matchRole || matchCompany || matchCourse;
+      const matchCourse = (t.course_name || t.courseName) && (t.course_name || t.courseName).toLowerCase().includes(q);
+      const matchText = (t.quote || t.text) && (t.quote || t.text).toLowerCase().includes(q);
+      return matchName || matchRole || matchCompany || matchCourse || matchText;
     }
     return true;
   });
@@ -509,6 +607,7 @@ const openAddModal = () => {
     courseName: '',
     courseId: null,
     isApproved: true,
+    statusMode: 'approved',
     testimonialType: 'video',
     youtubeId: '',
     thumbnail: '',
@@ -523,6 +622,9 @@ const editTestimonial = (t) => {
   isEditing.value = true;
   editingId.value = t.id;
   youtubeInput.value = t.youtube_id || t.video_url || '';
+  const isSpam = t.testimonial_type === 'spam' || t.isSpam;
+  const statusMode = isSpam ? 'spam' : (t.isApproved ? 'approved' : 'pending');
+
   form.value = {
     name: t.name || '',
     role: t.role || '',
@@ -532,7 +634,8 @@ const editTestimonial = (t) => {
     courseName: t.course_name || t.courseName || '',
     courseId: t.course_id || t.courseId || null,
     isApproved: t.isApproved !== undefined ? t.isApproved : (t.is_approved !== false),
-    testimonialType: t.testimonial_type || 'text',
+    statusMode,
+    testimonialType: isSpam ? (t.image ? 'photo' : 'text') : (t.testimonial_type || 'text'),
     youtubeId: t.youtube_id || '',
     thumbnail: t.thumbnail || '',
     videoUrl: t.video_url || '',
@@ -572,8 +675,19 @@ const saveTestimonial = async () => {
 
   saving.value = true;
   try {
+    let resolvedType = form.value.testimonialType;
+    let resolvedApproved = form.value.statusMode === 'approved';
+    if (form.value.statusMode === 'spam') {
+      resolvedType = 'spam';
+      resolvedApproved = false;
+    } else if (resolvedType === 'spam') {
+      resolvedType = form.value.image ? 'photo' : (form.value.youtubeId ? 'video' : 'text');
+    }
+
     const payload = {
       ...form.value,
+      isApproved: resolvedApproved,
+      testimonialType: resolvedType,
       thumbnail: formatImageUrl(form.value.thumbnail),
       image: formatImageUrl(form.value.image)
     };
@@ -604,6 +718,30 @@ const deleteItem = async (id) => {
       await courseStore.deleteAdminTestimonial(id);
     } catch (err) {
       console.error("Delete testimonial error:", err);
+    }
+  }
+};
+
+const isPurgingSpam = ref(false);
+
+const handlePurgeAllSpam = async () => {
+  if (spamCount.value === 0) return;
+  const isConfirmed = await courseStore.showConfirm({
+    title: 'Xác nhận dọn dẹp nhận xét rác',
+    message: `Bạn có chắc chắn muốn xóa vĩnh viễn toàn bộ ${spamCount.value} nhận xét rác/spam đang có trong hệ thống? Thao tác này sẽ xóa hoàn toàn và không thể khôi phục.`,
+    confirmText: 'Đồng ý dọn sạch',
+    cancelText: 'Hủy bỏ',
+    type: 'danger'
+  });
+
+  if (isConfirmed) {
+    isPurgingSpam.value = true;
+    try {
+      await courseStore.cleanupSpamTestimonials(0);
+    } catch (err) {
+      console.error("Purge spam error:", err);
+    } finally {
+      isPurgingSpam.value = false;
     }
   }
 };

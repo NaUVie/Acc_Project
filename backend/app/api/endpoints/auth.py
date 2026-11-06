@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 from ...database import get_db
 from ... import models, schemas, crud, auth
 from ...rate_limit import rate_limit
+from ...email_service import send_admin_contact_notification, resolve_admin_recipient
 
 router = APIRouter()
 
@@ -125,12 +126,21 @@ def read_user_referrals(
 
 @router.post(
     "/forgot-password",
-    dependencies=[Depends(rate_limit(max_requests=5, window_seconds=60, scope="auth_forgot_pwd"))]
+    dependencies=[Depends(rate_limit(max_requests=3, window_seconds=60, scope="auth_forgot_pwd"))]
 )
 def request_password_reset(
     req: schemas.PasswordResetRequestCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db)
 ):
+    # Honeypot trap check
+    if getattr(req, "honeypot", None) and req.honeypot.strip():
+        return {
+            "success": True,
+            "message": "Yêu cầu cấp lại mật khẩu đã được gửi đến Ban quản trị thành công.",
+            "email": req.email.strip()
+        }
+
     user = crud.get_user_by_email(db, email=req.email)
 
     phone_clean = req.phone.strip() if req.phone and req.phone.strip() else (user.phone if user and user.phone else "0900000000")
@@ -144,11 +154,11 @@ def request_password_reset(
 
     inquiry_msg = (
         f"[YÊU CẦU CẤP LẠI MẬT KHẨU]\n"
-        f"- Email: {req.email.strip()}\n"
-        f"- Họ tên: {fullname}\n"
-        f"- Số điện thoại: {req.phone.strip() if req.phone else (user.phone if user and user.phone else 'Chưa cung cấp')}\n"
-        f"- Ghi chú: {note}\n"
-        f"- Hệ thống: {user_status}"
+        f"• Email tài khoản: {req.email.strip()}\n"
+        f"• Họ và tên: {fullname}\n"
+        f"• Số điện thoại: {req.phone.strip() if req.phone else (user.phone if user and user.phone else 'Chưa cung cấp')}\n"
+        f"• Ghi chú của học viên: {note}\n"
+        f"• Tình trạng trong hệ thống: {user_status}"
     )
 
     contact_in = schemas.ContactCreate(
@@ -159,10 +169,18 @@ def request_password_reset(
         course_handle="forgot_password",
         message=inquiry_msg
     )
-    crud.create_contact(db, contact_in=contact_in)
+    contact = crud.create_contact(db, contact_in=contact_in)
+
+    # Gửi email cảnh báo khẩn cấp đến Quản trị viên
+    try:
+        recipient_email = resolve_admin_recipient(db)
+        background_tasks.add_task(send_admin_contact_notification, contact, recipient_email)
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error(f"Error queueing admin notification for forgot password: {e}")
 
     return {
         "success": True,
-        "message": "Yêu cầu cấp lại mật khẩu đã được gửi đến Ban quản trị thành công.",
+        "message": "Yêu cầu cấp lại mật khẩu đã được gửi đến Ban quản trị thành công. Chúng tôi sẽ liên hệ bạn sớm nhất!",
         "email": req.email.strip()
     }

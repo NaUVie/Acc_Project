@@ -185,32 +185,8 @@
             </div>
           </div>
 
-          <!-- Col 2: Tiếp thị liên kết & Tín dụng -->
-          <div class="detail-info-col">
-            <h4 class="detail-section-title">Hệ thống &amp; Giới thiệu</h4>
-            <div class="detail-info-row">
-              <span class="detail-label">Mã giới thiệu:</span>
-              <span class="detail-value flex-align-center">
-                <span class="code-tag">{{ selectedUser.referralCode }}</span>
-                <button @click="copyReferral(selectedUser.referralCode)" class="btn-copy-code" title="Sao chép">
-                  📋
-                </button>
-              </span>
-            </div>
-            <div class="detail-info-row">
-              <span class="detail-label">Người giới thiệu:</span>
-              <span class="detail-value">{{ getReferrerName(selectedUser.referredById) }}</span>
-            </div>
-            <div class="detail-info-row">
-              <span class="detail-label">Số dư ví tín dụng:</span>
-              <span class="detail-value highlight-balance">
-                {{ formatCurrency(selectedUser.storeCreditBalance) }}
-              </span>
-            </div>
           </div>
-        </div>
-
-        <!-- ==================== KHÓA HỌC ĐÃ CẤP QUYỀN ==================== -->
+<!-- ==================== KHÓA HỌC ĐÃ CẤP QUYỀN ==================== -->
         <div class="user-courses-section mt-5" style="border-top: 1px solid #e2e8f0; padding-top: 18px;">
           <div class="user-courses-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
             <div>
@@ -244,7 +220,7 @@
                   :key="c.id" 
                   :value="c.id"
                 >
-                  {{ c.title }} ({{ formatCurrency(c.price) }})
+                  {{ c.title }}
                 </option>
               </select>
               <button 
@@ -389,15 +365,7 @@
               </select>
             </div>
 
-            <div class="form-group">
-              <label class="form-label-custom">Người giới thiệu (Referrer)</label>
-              <select v-model="userForm.referredById" class="admin-input-style">
-                <option :value="null">-- Không có --</option>
-                <option v-for="u in users.filter(usr => usr.id !== editingUserId)" :key="u.id" :value="u.id">
-                  {{ u.fullname }} ({{ u.email }})
-                </option>
-              </select>
-            </div>
+            
           </div>
 
           <div class="modal-actions mt-5 pt-3 border-top">

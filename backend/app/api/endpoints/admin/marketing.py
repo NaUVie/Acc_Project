@@ -1,5 +1,6 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from datetime import datetime, timezone, timedelta
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from ....database import get_db
@@ -86,13 +87,54 @@ def delete_banner_admin(id: int, db: Session = Depends(get_db)):
 
 # ==================== TESTIMONIAL MANAGEMENT ====================
 
+def cleanup_expired_spam_testimonials(db: Session, days: int = 30) -> int:
+    """
+    Tự động dọn dẹp và xóa vĩnh viễn các nhận xét rác/spam đã tồn tại quá số ngày quy định (mặc định 30 ngày).
+    """
+    try:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        deleted = db.query(models.Testimonial).filter(
+            models.Testimonial.testimonial_type == "spam",
+            models.Testimonial.created_at < cutoff
+        ).delete(synchronize_session=False)
+        if deleted > 0:
+            db.commit()
+        return deleted
+    except Exception:
+        db.rollback()
+        return 0
+
 @router.get("/testimonials", response_model=List[schemas.TestimonialResponse])
 def get_all_testimonials_admin(db: Session = Depends(get_db)):
+    # Tự động dọn dẹp các nhận xét spam cũ hơn 30 ngày
+    cleanup_expired_spam_testimonials(db, days=30)
     return crud.get_testimonials(db, only_approved=False)
 
 @router.post("/testimonials", response_model=schemas.TestimonialResponse, status_code=status.HTTP_201_CREATED)
 def create_testimonial_admin(test_in: schemas.TestimonialCreate, db: Session = Depends(get_db)):
     return crud.create_testimonial(db, test_in)
+
+@router.delete("/testimonials/cleanup-spam", status_code=status.HTTP_200_OK)
+def purge_spam_testimonials_admin(
+    days: int = Query(0, description="Xóa các nhận xét spam cũ hơn số ngày này (0 = xóa toàn bộ nhận xét spam hiện tại)"),
+    db: Session = Depends(get_db)
+):
+    """
+    Chủ động dọn sạch các nhận xét rác/spam.
+    days = 0: Xóa toàn bộ nhận xét spam ngay lập tức.
+    days > 0: Chỉ xóa nhận xét spam đã lưu quá số ngày chỉ định.
+    """
+    query = db.query(models.Testimonial).filter(models.Testimonial.testimonial_type == "spam")
+    if days > 0:
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        query = query.filter(models.Testimonial.created_at < cutoff)
+
+    deleted_count = query.delete(synchronize_session=False)
+    db.commit()
+    return {
+        "message": f"Đã dọn dẹp thành công {deleted_count} nhận xét rác/spam",
+        "deleted_count": deleted_count
+    }
 
 @router.put("/testimonials/{id}", response_model=schemas.TestimonialResponse)
 def update_testimonial_admin(id: int, test_in: schemas.TestimonialUpdate, db: Session = Depends(get_db)):

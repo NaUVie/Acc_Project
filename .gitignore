@@ -48,6 +48,9 @@ Thumbs.db
 *.swp
 *.tmp
 *.local
+~$*
+*.docx
+scratch/
 *.suo
 *.ntvs*
 *.njsproj

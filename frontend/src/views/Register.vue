@@ -211,41 +211,6 @@
             </div>
           </div>
 
-          <!-- Referral Code Field (Optional) -->
-          <div class="auth-field-group">
-            <div class="auth-field-label-row">
-              <label for="reg-ref" class="auth-field-label">
-                Mã giới thiệu (Nếu có)
-              </label>
-              <span style="font-size: 12px; color: #64748b; font-weight: 500;">Không bắt buộc</span>
-            </div>
-            <div class="auth-input-wrapper">
-              <span class="auth-input-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 12 20 22 4 22 4 12"></polyline>
-                  <rect x="2" y="7" width="20" height="5"></rect>
-                  <line x1="12" y1="22" x2="12" y2="7"></line>
-                  <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path>
-                  <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path>
-                </svg>
-              </span>
-              <input
-                id="reg-ref"
-                v-model.trim="registerData.referralCodeUsed"
-                type="text"
-                class="auth-text-input"
-                placeholder="Nhập mã giới thiệu"
-                autocomplete="off"
-              />
-            </div>
-            <span class="auth-field-helper" v-if="registerData.referralCodeUsed">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-              Áp dụng giảm 10% học phí khi đăng ký khóa học
-            </span>
-          </div>
-
           <!-- Terms & Privacy Opt-in Checkbox -->
           <div class="auth-terms-checkbox-wrap">
             <label class="auth-terms-checkbox-label">
@@ -301,18 +266,13 @@ const registerData = ref({
   fullname: '',
   email: '',
   phone: '',
-  password: '',
-  referralCodeUsed: ''
+  password: ''
 });
 
 onMounted(() => {
   if (courseStore.token) {
     router.push('/dashboard');
     return;
-  }
-
-  if (route.query.ref) {
-    registerData.value.referralCodeUsed = String(route.query.ref).trim();
   }
 });
 
@@ -355,7 +315,7 @@ const handleRegister = async () => {
       registerData.value.fullname,
       registerData.value.email,
       registerData.value.password,
-      registerData.value.referralCodeUsed,
+      '',
       registerData.value.phone
     );
 
