@@ -68,10 +68,25 @@ export const useCourseStore = defineStore('courses', {
     boardMembers: [],
     adminBoardMembers: [],
     boardMembersLoaded: false,
-    admissions: [],
-    adminAdmissions: [],
+    admissions: (() => {
+      try {
+        const cached = localStorage.getItem('acc_admissions_cache');
+        return cached ? JSON.parse(cached) : [];
+      } catch {
+        return [];
+      }
+    })(),
+    adminAdmissions: (() => {
+      try {
+        const cached = localStorage.getItem('acc_admin_admissions_cache');
+        return cached ? JSON.parse(cached) : [];
+      } catch {
+        return [];
+      }
+    })(),
     admissionsLoaded: false,
     admissionsLoading: false,
+    adminAdmissionsLoading: false,
     boardMembersLoading: false,
     error: null,
 
