@@ -48,6 +48,16 @@ def update_home_intro_settings_admin(
         settings.poster_url = settings_in.poster_url
     if settings_in.btn_label is not None:
         settings.btn_label = settings_in.btn_label
+    if settings_in.bento_title is not None:
+        settings.bento_title = settings_in.bento_title
+    if settings_in.bento_line1 is not None:
+        settings.bento_line1 = settings_in.bento_line1
+    if settings_in.bento_line2 is not None:
+        settings.bento_line2 = settings_in.bento_line2
+    if settings_in.bento_strong is not None:
+        settings.bento_strong = settings_in.bento_strong
+    if settings_in.bento_line3 is not None:
+        settings.bento_line3 = settings_in.bento_line3
 
     db.commit()
     db.refresh(settings)
@@ -203,6 +213,11 @@ def delete_board_member_admin(id: int, db: Session = Depends(get_db)):
 
 @router.get("/admissions", response_model=List[schemas.AdmissionPostResponse])
 def get_all_admission_posts_admin(db: Session = Depends(get_db)):
+    return crud.get_admission_posts(db, active_only=False)
+
+@router.post("/admissions/seed-defaults", response_model=List[schemas.AdmissionPostResponse])
+def seed_admissions_defaults_admin(db: Session = Depends(get_db)):
+    crud.seed_default_admission_posts(db, force_sync=True)
     return crud.get_admission_posts(db, active_only=False)
 
 @router.post("/admissions", response_model=schemas.AdmissionPostResponse, status_code=status.HTTP_201_CREATED)
