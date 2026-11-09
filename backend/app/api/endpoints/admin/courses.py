@@ -198,18 +198,21 @@ def delete_course_admin(id: int, db: Session = Depends(get_db)):
             detail="Khóa học không tồn tại"
         )
 
-    # Protect student rights & accounting records
-    enrollments_count = db.query(models.Enrollment).filter(models.Enrollment.course_id == id).count()
-    order_items_count = db.query(models.OrderItem).filter(models.OrderItem.course_id == id).count()
-
-    if enrollments_count > 0 or order_items_count > 0:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Không thể xóa khóa học '{db_course.title}' vì đã có {enrollments_count} học viên đăng ký và {order_items_count} đơn hàng trong lịch sử. Vui lòng giữ lại để đảm bảo quyền truy cập học tập của học viên và số liệu kế toán."
-        )
-
-    # Clean up related draft/catalog associations
+    # Clean up all related records & references across the system
     params = {"id": id}
+    try:
+        db.execute(text("UPDATE blog_posts SET course_id = NULL WHERE course_id = :id"), params)
+    except Exception:
+        pass
+    try:
+        db.execute(text("UPDATE testimonials SET course_id = NULL WHERE course_id = :id"), params)
+    except Exception:
+        pass
+    try:
+        db.execute(text("UPDATE admissions SET course_id = NULL WHERE course_id = :id"), params)
+    except Exception:
+        pass
+
     db.execute(text("DELETE FROM course_tags WHERE course_id = :id"), params)
     db.execute(text("DELETE FROM cart_items WHERE course_id = :id"), params)
     db.execute(text("DELETE FROM wishlists WHERE course_id = :id"), params)
@@ -218,6 +221,8 @@ def delete_course_admin(id: int, db: Session = Depends(get_db)):
     db.execute(text("DELETE FROM user_course_commissions WHERE course_id = :id"), params)
     db.execute(text("DELETE FROM bundle_courses WHERE course_id = :id"), params)
     db.execute(text("DELETE FROM bundle_gift_courses WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM enrollments WHERE course_id = :id"), params)
+    db.execute(text("DELETE FROM order_items WHERE course_id = :id"), params)
     db.execute(text("DELETE FROM courses WHERE id = :id"), params)
     db.commit()
     return {"message": "Đã xóa khóa học thành công"}
