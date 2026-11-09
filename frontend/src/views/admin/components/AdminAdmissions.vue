@@ -142,6 +142,9 @@
                 <div style="font-weight: 700; color: #0f172a; font-size: 14.5px; line-height: 1.4; margin-bottom: 4px;">
                   {{ post.title }}
                 </div>
+                <div v-if="post.subtitle" style="font-size: 12px; color: #64748b; margin-bottom: 6px; line-height: 1.4; max-width: 420px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;" :title="post.subtitle">
+                  {{ post.subtitle }}
+                </div>
                 <div style="display: flex; gap: 8px; align-items: center; font-size: 12.5px;">
                   <span style="color: #64748b; font-family: monospace;">/admissions/detail/{{ post.slug }}</span>
                   <router-link :to="`/admissions/detail/${post.slug}`" target="_blank" style="color: #0284c7; text-decoration: none; font-size: 12px; font-weight: 600;">
@@ -196,6 +199,19 @@
                 </div>
               </td>
             </tr>
+            <tr v-if="loading && admissions.length === 0">
+              <td colspan="7" style="text-align: center; padding: 48px 20px; color: #64748b;">
+                <div class="loading-spinner" style="margin: 0 auto 12px; width: 28px; height: 28px; border: 3px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+                <div style="font-size: 14px; font-weight: 600; color: #475569;">Đang tải danh sách bài viết tuyển sinh...</div>
+              </td>
+            </tr>
+            <tr v-else-if="filteredAdmissions.length === 0">
+              <td colspan="7" style="text-align: center; padding: 48px 20px; color: #64748b;">
+                <div style="font-size: 32px; margin-bottom: 8px;">🎓</div>
+                <div style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 6px;">Chưa có bài viết tuyển sinh nào trong hệ thống</div>
+                <p style="margin: 0; font-size: 13.5px;">Bấm nút "+ Thêm Bài viết Tuyển sinh mới" ở góc trên để tạo bài viết đầu tiên.</p>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -204,7 +220,7 @@
     <!-- VIEW 2: ADD / EDIT MODAL (CLEAN 2-COLUMN LAYOUT) -->
     <Teleport to="body">
       <div v-if="isModalOpen" class="admin-modal-overlay" @click.self="closeModal">
-      <div class="admin-modal-card" style="max-width: 900px; width: 95%; max-height: 92vh; overflow-y: auto; padding: 22px 26px;">
+      <div class="admin-modal-card" style="max-width: 1050px; width: 95%; max-height: 92vh; overflow-y: auto; padding: 22px 26px;">
         <div class="modal-header flex-between" style="border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
           <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0;">
             {{ isEditing ? '✏️ Chỉnh sửa Bài viết Tuyển sinh' : '➕ Thêm Bài viết Tuyển sinh mới' }}
@@ -374,22 +390,19 @@
               </label>
             </div>
 
-            <!-- CỘT PHẢI: NỘI DUNG CHI TIẾT BÀI VIẾT (HTML) -->
+            <!-- CỘT PHẢI: NỘI DUNG CHI TIẾT BÀI VIẾT (WYSIWYG Soạn thảo như Word) -->
             <div style="display: flex; flex-direction: column;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                 <label style="font-weight: 600; font-size: 13px; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 6px;">
-                  <span>Nội dung chi tiết bài viết (HTML)</span>
-                  <HelpTooltip desc="Toàn bộ nội dung bài viết chi tiết giới thiệu chương trình, điều kiện tuyển sinh, lộ trình học." impact="Hiển thị trong trang chi tiết /admissions/[slug]." />
+                  <span>Nội dung chi tiết bài viết (Soạn thảo văn bản)</span>
+                  <HelpTooltip desc="Soạn thảo toàn văn bài viết với các công cụ In đậm, Tiêu đề H2-H3, Căn lề, Chèn ảnh, Bảng, Danh sách như Word." impact="Hiển thị trong trang chi tiết /admissions/[slug]." />
                 </label>
-                <span style="font-size: 11.5px; color: #64748b;">Hỗ trợ thẻ &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;&lt;li&gt;</span>
+                <span style="font-size: 11.5px; color: #0284c7; font-weight: 600;">✨ Định dạng như Word & Chèn ảnh</span>
               </div>
-              <textarea 
+              <RichTextEditor 
                 v-model="form.content" 
-                rows="18" 
-                class="admin-input-style" 
-                placeholder="<h2>1. Giới thiệu chương trình</h2>&#10;<p>Nội dung chi tiết giới thiệu về chương trình tuyển sinh...</p>&#10;&#10;<h2>2. Điều kiện tuyển sinh</h2>&#10;<ul>&#10;  <li>Tốt nghiệp Đại học</li>&#10;  <li>Tiếng Anh tương đương IELTS 5.5</li>&#10;</ul>" 
-                style="flex: 1; min-height: 380px; width: 100%; padding: 10px 12px; font-size: 13px; font-family: Consolas, monospace; border: 1px solid #cbd5e1; border-radius: 6px; line-height: 1.5; resize: none;"
-              ></textarea>
+                placeholder="Soạn thảo nội dung bài viết tuyển sinh (In đậm, In nghiêng, H2, H3, Danh sách, Link, Chèn ảnh)..." 
+              />
             </div>
           </div>
 
@@ -420,6 +433,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useCourseStore } from '@/stores/courses';
+import RichTextEditor from '@/components/RichTextEditor.vue';
 import ImageCropperModal from '@/components/ImageCropperModal.vue';
 import HelpTooltip from '@/components/common/HelpTooltip.vue';
 
@@ -427,6 +441,7 @@ const courseStore = useCourseStore();
 
 const activeView = ref('list');
 const isRefreshing = ref(false);
+const loading = computed(() => courseStore.adminAdmissionsLoading);
 const isModalOpen = ref(false);
 const isEditing = ref(false);
 const editingId = ref(null);
