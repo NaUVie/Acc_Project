@@ -210,9 +210,9 @@ const educationTabs = [
 const marketingTabs = [
   { 
     id: 'banners', 
-    name: 'Banner & Video Trang chủ',
-    desc: 'Quản lý slide ảnh bìa, câu slogan, nút CTA và video YouTube.',
-    impact: 'Hiển thị tại Section 1 & Section 3 trên Trang chủ.'
+    name: 'Banner & Nội dung Trang chủ',
+    desc: 'Quản lý slide ảnh bìa, video, thông điệp giới thiệu và năng lực cốt lõi.',
+    impact: 'Hiển thị tại Section 1, Section 3 và Section Bento Grid trên Trang chủ.'
   },
   { 
     id: 'blogs', 
