@@ -139,67 +139,6 @@ export const cartActions = {
     return fetchOrdersPromise;
   },
 
-  async checkout() {
-    if (!this.token) return;
-    try {
-      const order = await this.apiRequest('/orders/checkout', {
-        method: 'POST'
-      });
-      await this.fetchCart();
-      await this.fetchOrders();
-      return order;
-    } catch (err) {
-      throw err;
-    }
-  },
-
-  async payOrder(orderId) {
-    if (!this.token) return;
-    try {
-      const order = await this.apiRequest(`/orders/${orderId}/pay`, {
-        method: 'POST'
-      });
-      await this.fetchOrders();
-      await this.fetchEnrollments();
-      await this.fetchUserMe();
-      await this.fetchCart();
-      return order;
-    } catch (err) {
-      throw err;
-    }
-  },
-
-  async createVnpayPaymentUrl(orderId, bankCode = null) {
-    if (!this.token) return null;
-    try {
-      const query = bankCode ? `?bank_code=${encodeURIComponent(bankCode)}` : '';
-      const res = await this.apiRequest(`/orders/${orderId}/vnpay-url${query}`, {
-        method: 'POST'
-      });
-      return res;
-    } catch (err) {
-      console.error("Failed to create VNPay URL:", err);
-      throw err;
-    }
-  },
-
-  async verifyVnpayReturn(queryParams) {
-    try {
-      const search = new URLSearchParams(queryParams).toString();
-      const res = await this.apiRequest(`/orders/vnpay-return?${search}`);
-      if (this.token) {
-        await this.fetchOrders();
-        await this.fetchEnrollments();
-        await this.fetchUserMe();
-        await this.fetchCart();
-      }
-      return res;
-    } catch (err) {
-      console.error("Failed to verify VNPay return:", err);
-      throw err;
-    }
-  },
-
   async checkEnrollment(courseId) {
     if (!this.token) return false;
     try {
