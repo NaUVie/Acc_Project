@@ -35,7 +35,7 @@
       >
         <div class="program-grid" :class="{ reverse: idx % 2 === 1 }">
           <div class="program-media">
-            <img :src="prog.image || '/images/andrew.jpg'" :alt="prog.title" class="program-img" />
+            <img :src="prog.image || '/images/andrew.jpg'" :alt="prog.title" class="program-img" loading="lazy" decoding="async" />
             <div v-if="prog.tag" class="program-tag-overlay" :class="idx % 2 === 1 ? 'badge-gold' : ''">
               {{ prog.tag }}
             </div>
