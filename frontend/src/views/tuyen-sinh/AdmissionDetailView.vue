@@ -45,7 +45,7 @@
         </div>
 
         <!-- Call to Action Banner inside article -->
-        <div class="article-cta-box">
+        <!-- <div class="article-cta-box">
           <h3>Sẵn sàng trở thành nhà Lãnh đạo tương lai?</h3>
           <p>Nhận thông báo tuyển sinh, bộ đề thi mẫu và tư vấn học bổng trực tiếp từ Ban Tuyển sinh.</p>
           <div class="cta-actions">
@@ -56,7 +56,7 @@
               Tư vấn qua Zalo Hotline
             </a>
           </div>
-        </div>
+        </div> -->
       </main>
 
       <!-- Sidebar Sticky Widget -->
@@ -114,7 +114,7 @@ const programsData = {
     id: 'mba',
     title: 'MBA Andrews Hoa Kỳ: Học quản trị theo chuẩn Mỹ, phát triển sự nghiệp tại Việt Nam',
     category: 'BẰNG QUỐC TẾ HOA KỲ',
-    subtitle: 'Bạn muốn nâng cao năng lực quản trị, mở rộng tư duy kinh doanh và sẵn sàng cho bước tiến mới trong sự nghiệp? Chương trình Thạc sĩ Quản trị Kinh doanh (MBA) của Đại học Andrews, Hoa Kỳ mang đến cơ hội học tập chương trình quốc tế ngay tại Việt Nam.',
+    subtitle: 'Chương trình Thạc sĩ Quản trị Kinh doanh Đại học Andrews Hoa Kỳ được bảo chứng học thuật toàn cầu, học tại Việt Nam, cấp bằng chính quy từ Hoa Kỳ.',
     image: '/images/andrew.jpg',
     officialLink: 'https://andrews.edu.vn/',
     meta: {
@@ -138,34 +138,11 @@ const programsData = {
       }
     ]
   },
-  'mini-mba': {
-    id: 'mini-mba',
-    title: 'Chương trình Mini MBA Practical – Quản trị Tinh gọn Thực chiến',
-    category: 'QUẢN TRỊ TINH GỌN',
-    subtitle: 'Cô đọng tinh hoa quản trị MBA trong 3-6 tháng dành cho Quản lý cấp trung và Chủ doanh nghiệp SMEs.',
-    image: '/images/mba.jpg',
-    meta: {
-      target: 'Quản lý phòng ban, Giám đốc chức năng & SMEs',
-      duration: '3 - 6 tháng',
-      format: 'Thực chiến 100% tại lớp',
-      degree: 'Chứng nhận hoàn thành chương trình Mini MBA'
-    },
-    sections: [
-      {
-        heading: '1. Tại sao lựa chọn Mini MBA Practical?',
-        content: '<p>Mini MBA Practical là mô hình đào tạo tinh gọn được tối ưu hóa nhằm giải quyết trực tiếp các điểm nghẽn trong vận hành, nhân sự và tài chính của doanh nghiệp Việt Nam.</p>'
-      },
-      {
-        heading: '2. Nội dung huấn luyện trọng tâm',
-        content: '<p>Học viên sẽ làm chủ 5 trụ cột: Xây dựng Ma trận Năng lực phòng ban, Tối ưu Dòng tiền, Ứng dụng AI trong vận hành tự động, Thiết lập KPI/OKR thực chiến và Tư duy Lãnh đạo tạo tác động.</p>'
-      }
-    ]
-  },
   'gei': {
     id: 'gei',
     title: 'Global Executive Institute (GEI): Chương trình phát triển năng lực lãnh đạo trong thời đại AI',
     category: 'LÃNH ĐẠO TOÀN CẦU',
-    subtitle: 'Trong bối cảnh trí tuệ nhân tạo đang tác động sâu rộng đến hoạt động của doanh nghiệp và cơ quan công quyền, nhà lãnh đạo cần nhiều hơn khả năng tiếp cận công nghệ. Họ cần biết cách kết nối AI với chiến lược tổ chức, đánh giá cơ hội và rủi ro, đồng thời dẫn dắt quá trình đổi mới theo hướng tạo ra giá trị bền vững.',
+    subtitle: 'Chương trình lãnh đạo cấp cao gắn kết AI với chiến lược quản trị, thực thi ESG và tối ưu hóa vận hành tổ chức bền vững.',
     image: '/images/GEL.jpg',
     meta: {
       target: 'Lãnh đạo doanh nghiệp & Khu vực công',
@@ -191,7 +168,11 @@ const programId = computed(() => {
   return param || 'mba';
 });
 
+const currentPost = ref(null);
+const loading = ref(false);
+
 const program = computed(() => {
+  if (currentPost.value) return currentPost.value;
   if (courseStore.admissions && courseStore.admissions.length > 0) {
     const found = courseStore.admissions.find(p => p.slug === programId.value);
     if (found) return found;
@@ -206,13 +187,38 @@ const otherPrograms = computed(() => {
   return Object.values(programsData).filter(p => p.id !== programId.value);
 });
 
+const loadAdmissionDetail = async () => {
+  loading.value = true;
+  try {
+    // 1. Nạp tức thì từ store / cache nếu có
+    if (courseStore.admissions && courseStore.admissions.length > 0) {
+      const found = courseStore.admissions.find(p => p.slug === programId.value);
+      if (found) currentPost.value = found;
+    }
+    // 2. Gọi API lấy bài viết thật mới nhất từ Database theo slug
+    const post = await courseStore.fetchAdmissionBySlug(programId.value);
+    if (post) {
+      currentPost.value = post;
+    }
+    // 3. Đảm bảo danh sách các bài viết khác được nạp đủ từ Database
+    if (!courseStore.admissions || courseStore.admissions.length === 0) {
+      await courseStore.fetchAdmissions();
+    }
+  } catch (err) {
+    console.error("Failed to load admission detail:", err);
+  } finally {
+    loading.value = false;
+  }
+};
+
 onMounted(() => {
   window.scrollTo(0, 0);
-  courseStore.fetchAdmissions().catch(() => {});
+  loadAdmissionDetail();
 });
 
 watch(programId, () => {
   window.scrollTo(0, 0);
+  loadAdmissionDetail();
 });
 </script>
 
