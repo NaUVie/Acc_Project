@@ -794,6 +794,11 @@ class HomeIntroSettingUpdate(BaseModel):
     video_url: Optional[str] = None
     poster_url: Optional[str] = None
     btn_label: Optional[str] = None
+    bento_title: Optional[str] = None
+    bento_line1: Optional[str] = None
+    bento_line2: Optional[str] = None
+    bento_strong: Optional[str] = None
+    bento_line3: Optional[str] = None
 
 class HomeIntroSettingResponse(BaseModel):
     id: int
@@ -805,6 +810,11 @@ class HomeIntroSettingResponse(BaseModel):
     video_url: str
     poster_url: str
     btn_label: str
+    bento_title: Optional[str] = "Năng lực cốt lõi của ACC Academy"
+    bento_line1: Optional[str] = "ACC — Học viện Cổ phần Kết nối Tri thức — là đơn vị giáo dục chuyên biệt dành cho cá nhân và doanh nghiệp,"
+    bento_line2: Optional[str] = "được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ)."
+    bento_strong: Optional[str] = "Chúng tôi không bán khóa học."
+    bento_line3: Optional[str] = "Chúng tôi kiến tạo năng lực có thể đo lường, đi cùng tổ chức của bạn đến kết quả thực."
 
     class Config:
         from_attributes = True
