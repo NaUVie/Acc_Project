@@ -74,19 +74,37 @@ export const marketingActions = {
   },
 
   async fetchPartners(force = false) {
+    const now = Date.now();
+    const PARTNERS_TTL = 3 * 60 * 1000; // 3 phút tự động kiểm tra lại ngầm
+
+    // Nếu đã có dữ liệu cache và không force:
     if (!force && this.partners && this.partners.length > 0) {
+      const lastFetch = Number(localStorage.getItem('acc_partners_cache_time') || 0);
+      // Nếu chưa hết hạn TTL thì trả về ngay tức thì (0ms)
+      if (now - lastFetch < PARTNERS_TTL) {
+        return this.partners;
+      }
+      // Nếu đã quá TTL: vẫn trả về ngay tức thì để hiển thị mượt mà, nhưng chạy ngầm revalidate
+      this._revalidatePartners().catch(() => {});
       return this.partners;
     }
+
+    return this._revalidatePartners(force);
+  },
+
+  async _revalidatePartners(force = false) {
     if (fetchPartnersPromise) {
       return fetchPartnersPromise;
     }
     fetchPartnersPromise = (async () => {
       try {
-        const data = await this.apiRequest('/courses/partners');
-        if (Array.isArray(data) && data.length > 0) {
+        const url = force ? `/courses/partners?_t=${Date.now()}` : '/courses/partners';
+        const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
+        if (Array.isArray(data)) {
           this.partners = data;
           try {
             localStorage.setItem('acc_partners_cache', JSON.stringify(data));
+            localStorage.setItem('acc_partners_cache_time', String(Date.now()));
           } catch (e) {}
         }
         return this.partners;
@@ -117,7 +135,7 @@ export const marketingActions = {
       method: 'POST',
       body: JSON.stringify(partnerData)
     });
-    await Promise.all([this.fetchAdminPartners().catch(() => {}), this.fetchPartners().catch(() => {})]);
+    await Promise.all([this.fetchAdminPartners(true).catch(() => {}), this.fetchPartners(true).catch(() => {})]);
     this.showToast('Thêm đối tác thành công!', 'success');
     return data;
   },
@@ -127,7 +145,7 @@ export const marketingActions = {
       method: 'PUT',
       body: JSON.stringify(partnerData)
     });
-    await Promise.all([this.fetchAdminPartners().catch(() => {}), this.fetchPartners().catch(() => {})]);
+    await Promise.all([this.fetchAdminPartners(true).catch(() => {}), this.fetchPartners(true).catch(() => {})]);
     this.showToast('Cập nhật đối tác thành công!', 'success');
     return data;
   },
@@ -142,6 +160,11 @@ export const marketingActions = {
     if (this.partners) {
       this.partners = this.partners.filter(p => p.id !== partnerId);
     }
+    try {
+      localStorage.setItem('acc_partners_cache', JSON.stringify(this.partners || []));
+      localStorage.setItem('acc_partners_cache_time', String(Date.now()));
+    } catch (e) {}
+    this.fetchPartners(true).catch(() => {});
     this.showToast('Xóa đối tác thành công!', 'success');
     return data;
   },
@@ -223,21 +246,36 @@ export const marketingActions = {
   },
 
     async fetchAdmissions(force = false) {
+    const now = Date.now();
+    const ADMISSIONS_TTL = 3 * 60 * 1000; // 3 phút
+
     if (!force && this.admissions && this.admissions.length > 0) {
+      const lastFetch = Number(localStorage.getItem('acc_admissions_cache_time') || 0);
+      if (now - lastFetch < ADMISSIONS_TTL) {
+        return this.admissions;
+      }
+      this._revalidateAdmissions().catch(() => {});
       return this.admissions;
     }
+
+    return this._revalidateAdmissions(force);
+  },
+
+  async _revalidateAdmissions(force = false) {
     if (fetchAdmissionsPromise) {
       return fetchAdmissionsPromise;
     }
     this.admissionsLoading = true;
     fetchAdmissionsPromise = (async () => {
       try {
-        const data = await this.apiRequest('/courses/admissions');
+        const url = force ? `/courses/admissions?_t=${Date.now()}` : '/courses/admissions';
+        const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
         if (Array.isArray(data)) {
           this.admissions = data;
           this.admissionsLoaded = true;
           try {
             localStorage.setItem('acc_admissions_cache', JSON.stringify(data));
+            localStorage.setItem('acc_admissions_cache_time', String(Date.now()));
           } catch (e) {}
         }
         return this.admissions;
@@ -254,7 +292,8 @@ export const marketingActions = {
 
   async fetchAdmissionBySlug(slug, force = false) {
     try {
-      const data = await this.apiRequest(`/courses/admissions/${slug}`);
+      const url = force ? `/courses/admissions/${slug}?_t=${Date.now()}` : `/courses/admissions/${slug}`;
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       return data;
     } catch (err) {
       console.error(`Failed to fetch admission post ${slug}:`, err);
@@ -262,15 +301,37 @@ export const marketingActions = {
     }
   },
 
+  async seedDefaultAdmissions() {
+    try {
+      const data = await this.apiRequest('/admin/admissions/seed-defaults', {
+        method: 'POST'
+      });
+      this.adminAdmissions = data || [];
+      await this.fetchAdmissions(true);
+      return data;
+    } catch (err) {
+      console.error("Failed to seed default admissions:", err);
+      throw err;
+    }
+  },
+
   async fetchAdminAdmissions(force = false) {
+    this.adminAdmissionsLoading = true;
     try {
       const url = force ? `/admin/admissions?_t=${Date.now()}` : '/admin/admissions';
       const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
-      this.adminAdmissions = data || [];
+      if (Array.isArray(data)) {
+        this.adminAdmissions = data;
+        try {
+          localStorage.setItem('acc_admin_admissions_cache', JSON.stringify(data));
+        } catch (e) {}
+      }
       return this.adminAdmissions;
     } catch (err) {
       console.error("Failed to fetch admin admissions:", err);
-      throw err;
+      return this.adminAdmissions || [];
+    } finally {
+      this.adminAdmissionsLoading = false;
     }
   },
 
@@ -304,6 +365,12 @@ export const marketingActions = {
     if (this.admissions) {
       this.admissions = this.admissions.filter(p => p.id !== id);
     }
+    try {
+      localStorage.setItem('acc_admin_admissions_cache', JSON.stringify(this.adminAdmissions || []));
+      localStorage.setItem('acc_admissions_cache', JSON.stringify(this.admissions || []));
+      localStorage.setItem('acc_admissions_cache_time', String(Date.now()));
+    } catch (e) {}
+    this.fetchAdmissions(true).catch(() => {});
     this.showToast('Xóa bài viết tuyển sinh thành công!', 'success');
     return data;
   },
@@ -354,7 +421,8 @@ export const marketingActions = {
   async fetchHomeIntroSettings(force = false) {
     if (!force && this.homeIntroSettings) return this.homeIntroSettings;
     try {
-      const data = await this.apiRequest('/contacts/home-intro');
+      const url = force ? `/contacts/home-intro?_t=${Date.now()}` : '/contacts/home-intro';
+      const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       this.homeIntroSettings = data;
       return data;
     } catch (err) {
