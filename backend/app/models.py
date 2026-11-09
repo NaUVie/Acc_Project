@@ -345,6 +345,13 @@ class HomeIntroSetting(Base):
     poster_url = Column(String(500), default="/images/CoE-Thumb.png")
     btn_label = Column(String(255), default="XEM VIDEO GIỚI THIỆU ACC ACADEMY")
 
+    # Bento Grid Section Header (Năng lực cốt lõi)
+    bento_title = Column(String(255), default="Năng lực cốt lõi của ACC Academy")
+    bento_line1 = Column(Text, default="ACC — Học viện Cổ phần Kết nối Tri thức — là đơn vị giáo dục chuyên biệt dành cho cá nhân và doanh nghiệp,")
+    bento_line2 = Column(Text, default="được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ).")
+    bento_strong = Column(Text, default="Chúng tôi không bán khóa học.")
+    bento_line3 = Column(Text, default="Chúng tôi kiến tạo năng lực có thể đo lường, đi cùng tổ chức của bạn đến kết quả thực.")
+
 
 class CourseReview(Base):
     __tablename__ = "course_reviews"
