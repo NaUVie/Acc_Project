@@ -29,9 +29,6 @@
               </p>
             </div>
 
-            <!-- Vertical Divider -->
-            <div class="vm-divider"></div>
-
             <!-- Column 2: Sự khác biệt của ACC -->
             <div class="vm-col">
               <span class="vm-tag">{{ $t('about.tagPractical') }}</span>
