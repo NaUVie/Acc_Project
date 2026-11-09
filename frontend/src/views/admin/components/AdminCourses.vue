@@ -309,7 +309,7 @@ const deleteCourse = async (courseId) => {
 
   const isConfirmed = await courseStore.showConfirm({
     title: 'Xác nhận xóa khóa học',
-    message: `Bạn có chắc chắn muốn xóa khóa học "${title}" khỏi hệ thống?\n\nHệ thống sẽ đồng thời dọn dẹp các dữ liệu liên quan (học viên, đánh giá, ghi chú, giỏ hàng...).`,
+    message: `Bạn có chắc chắn muốn xóa khóa học "${title}" khỏi hệ thống?\n\nHệ thống sẽ đồng thời dọn dẹp toàn bộ dữ liệu liên quan (học viên đăng ký, đơn hàng, đánh giá, ghi chú, giỏ hàng...).`,
     confirmText: 'Đồng ý xóa',
     cancelText: 'Hủy bỏ',
     type: 'danger'
