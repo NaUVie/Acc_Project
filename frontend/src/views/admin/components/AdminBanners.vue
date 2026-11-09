@@ -18,10 +18,10 @@
         :class="subTab === 'home_intro' ? 'btn-primary' : 'btn-secondary'"
         style="font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;"
       >
-        <span>Video & Giới thiệu Kiến tạo năng lực</span>
+        <span>Cấu hình Nội dung Trang chủ (Video, Giới thiệu & Bento)</span>
         <HelpTooltip 
-          desc="Tùy chỉnh video YouTube và nội dung 4 gạch đầu dòng giới thiệu sứ mệnh ACC." 
-          impact="Hiển thị tại Section 3 (Video & Giới thiệu) ở Trang chủ." 
+          desc="Tùy chỉnh video giới thiệu, nội dung Kiến tạo năng lực và phần Năng lực cốt lõi (Bento Grid) ở Trang chủ." 
+          impact="Hiển thị tại Section Video/Giới thiệu và Section Năng lực cốt lõi ở Trang chủ." 
         />
       </button>
     </div>
@@ -387,6 +387,91 @@
           </div>
         </div>
 
+        <!-- Bento Grid Header Configuration Section -->
+        <div class="p-4 mb-4" style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px;">
+          <h4 style="margin: 0 0 8px 0; color: #1e40af; font-size: 15px; font-weight: 800;">
+            Cấu hình Tiêu đề Phần "Năng lực cốt lõi của ACC Academy" (Bento Grid)
+          </h4>
+          <p style="color: #475569; margin: 0 0 16px 0; font-size: 13px;">
+            Tùy chỉnh tiêu đề chính và các dòng thông điệp giới thiệu sứ mệnh đào tạo ở đầu Section Năng lực cốt lõi trên Trang chủ.
+          </p>
+
+          <div class="form-group mb-3">
+            <label style="color: #1e3a8a; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+              <span>Tiêu đề Section (H2) <span style="color: #e11d48;">*</span></span>
+              <HelpTooltip desc="Tiêu đề lớn của Section Năng lực cốt lõi Trang chủ." />
+            </label>
+            <input 
+              v-model="introForm.bento_title" 
+              type="text" 
+              required 
+              class="admin-input-style" 
+              placeholder="Năng lực cốt lõi của ACC Academy" 
+              style="background: #ffffff; color: #0f172a; border: 1px solid #93c5fd; font-weight: 700;" 
+            />
+          </div>
+
+          <div class="grid grid-2 gap-4 mb-3">
+            <div class="form-group">
+              <label style="color: #1e3a8a; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+                <span>Dòng mô tả 1</span>
+                <HelpTooltip desc="Dòng chữ đầu tiên giới thiệu về đơn vị giáo dục ACC." />
+              </label>
+              <textarea 
+                v-model="introForm.bento_line1" 
+                rows="2" 
+                class="admin-input-style" 
+                placeholder="ACC — Học viện Cổ phần Kết nối Tri thức — là đơn vị giáo dục chuyên biệt dành cho cá nhân và doanh nghiệp," 
+                style="background: #ffffff; color: #0f172a; border: 1px solid #93c5fd;"
+              ></textarea>
+            </div>
+
+            <div class="form-group">
+              <label style="color: #1e3a8a; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+                <span>Dòng mô tả 2</span>
+                <HelpTooltip desc="Dòng chữ tiếp theo về bảo chứng học thuật (Đại học Andrews)." />
+              </label>
+              <textarea 
+                v-model="introForm.bento_line2" 
+                rows="2" 
+                class="admin-input-style" 
+                placeholder="được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ)." 
+                style="background: #ffffff; color: #0f172a; border: 1px solid #93c5fd;"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="grid grid-2 gap-4">
+            <div class="form-group">
+              <label style="color: #1e3a8a; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+                <span>Dòng chữ in đậm / Tuyên ngôn</span>
+                <HelpTooltip desc="Dòng chữ in đậm nhấn mạnh triết lý đào tạo (Ví dụ: Chúng tôi không bán khóa học.)." />
+              </label>
+              <input 
+                v-model="introForm.bento_strong" 
+                type="text" 
+                class="admin-input-style" 
+                placeholder="Chúng tôi không bán khóa học." 
+                style="background: #ffffff; color: #0f172a; border: 1px solid #93c5fd; font-weight: 700;" 
+              />
+            </div>
+
+            <div class="form-group">
+              <label style="color: #1e3a8a; font-weight: 700; font-size: 13.5px; display: flex; align-items: center; gap: 6px;">
+                <span>Dòng kết luận / Cam kết kết quả</span>
+                <HelpTooltip desc="Dòng thông điệp cam kết kết quả đo lường được đi cùng doanh nghiệp." />
+              </label>
+              <input 
+                v-model="introForm.bento_line3" 
+                type="text" 
+                class="admin-input-style" 
+                placeholder="Chúng tôi kiến tạo năng lực có thể đo lường, đi cùng tổ chức của bạn đến kết quả thực." 
+                style="background: #ffffff; color: #0f172a; border: 1px solid #93c5fd;" 
+              />
+            </div>
+          </div>
+        </div>
+
         <div class="flex-end" style="gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 20px;">
           <button type="submit" class="btn btn-primary" :disabled="savingIntro" style="padding: 10px 24px; font-weight: 700;">
             {{ savingIntro ? 'Đang lưu cài đặt...' : 'Lưu Thay Đổi Trang Chủ' }}
@@ -489,7 +574,12 @@ const introForm = ref({
   counter_label: 'CHƯƠNG TRÌNH & DỰ ÁN ĐÀO TẠO – TƯ VẤN ĐÃ TRIỂN KHAI',
   video_url: '/videos/intro.mp4',
   poster_url: '/images/CoE-Thumb.png',
-  btn_label: 'XEM VIDEO GIỚI THIỆU ACC ACADEMY'
+  btn_label: 'XEM VIDEO GIỚI THIỆU ACC ACADEMY',
+  bento_title: 'Năng lực cốt lõi của ACC Academy',
+  bento_line1: 'ACC — Học viện Cổ phần Kết nối Tri thức — là đơn vị giáo dục chuyên biệt dành cho cá nhân và doanh nghiệp,',
+  bento_line2: 'được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ).',
+  bento_strong: 'Chúng tôi không bán khóa học.',
+  bento_line3: 'Chúng tôi kiến tạo năng lực có thể đo lường, đi cùng tổ chức của bạn đến kết quả thực.'
 });
 
 const banners = computed(() => courseStore.adminBanners);
@@ -615,7 +705,12 @@ const loadHomeIntroSettings = async () => {
         counter_label: res.counter_label || 'CHƯƠNG TRÌNH & DỰ ÁN ĐÀO TẠO – TƯ VẤN ĐÃ TRIỂN KHAI',
         video_url: res.video_url || '/videos/intro.mp4',
         poster_url: res.poster_url || '/images/CoE-Thumb.png',
-        btn_label: res.btn_label || 'XEM VIDEO GIỚI THIỆU ACC ACADEMY'
+        btn_label: res.btn_label || 'XEM VIDEO GIỚI THIỆU ACC ACADEMY',
+        bento_title: res.bento_title || 'Năng lực cốt lõi của ACC Academy',
+        bento_line1: res.bento_line1 || 'ACC — Học viện Cổ phần Kết nối Tri thức — là đơn vị giáo dục chuyên biệt dành cho cá nhân và doanh nghiệp,',
+        bento_line2: res.bento_line2 || 'được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ).',
+        bento_strong: res.bento_strong || 'Chúng tôi không bán khóa học.',
+        bento_line3: res.bento_line3 || 'Chúng tôi kiến tạo năng lực có thể đo lường, đi cùng tổ chức của bạn đến kết quả thực.'
       };
     }
   } catch (err) {
