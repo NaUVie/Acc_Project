@@ -255,12 +255,12 @@
     <section class="bento-grid-section">
       <div class="container">
         <div class="bento-header">
-          <h2 class="bento-title">{{ $t('home.bentoTitle') }}</h2>
+          <h2 class="bento-title">{{ bentoHeaderData.title }}</h2>
           <p class="bento-subtitle">
-            <span class="bento-line-1">{{ $t('home.bentoLine1') }}</span>
-            <span class="bento-line-2">{{ $t('home.bentoLine2') }}</span><br />
-            <strong>{{ $t('home.bentoStrong') }}</strong><br />
-            {{ $t('home.bentoLine3') }}
+            <span class="bento-line-1">{{ bentoHeaderData.line1 }}</span>
+            <span class="bento-line-2">{{ bentoHeaderData.line2 }}</span><br />
+            <strong>{{ bentoHeaderData.strong }}</strong><br />
+            {{ bentoHeaderData.line3 }}
           </p>
         </div>
 
@@ -650,6 +650,26 @@ const homeIntroData = computed(() => {
     desc2: d.desc2,
     counter_label: d.counter_label,
     btn_label: d.btn_label
+  };
+});
+
+const bentoHeaderData = computed(() => {
+  const admin = courseStore.homeIntroSettings;
+  if (locale.value === 'vi' && admin) {
+    return {
+      title: admin.bento_title || t('home.bentoTitle'),
+      line1: admin.bento_line1 || t('home.bentoLine1'),
+      line2: admin.bento_line2 || t('home.bentoLine2'),
+      strong: admin.bento_strong || t('home.bentoStrong'),
+      line3: admin.bento_line3 || t('home.bentoLine3')
+    };
+  }
+  return {
+    title: t('home.bentoTitle'),
+    line1: t('home.bentoLine1'),
+    line2: t('home.bentoLine2'),
+    strong: t('home.bentoStrong'),
+    line3: t('home.bentoLine3')
   };
 });
 
