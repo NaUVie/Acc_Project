@@ -152,6 +152,23 @@ def perform_startup_tasks():
                         print("Added column course_id to blog_posts table.")
                     except Exception as ex:
                         print(f"Error adding course_id to blog_posts: {ex}")
+
+            if inspector.has_table("home_intro_settings"):
+                intro_cols = [c["name"] for c in inspector.get_columns("home_intro_settings")]
+                intro_migrations = [
+                    ("bento_title", "VARCHAR(255) DEFAULT 'Năng lực cốt lõi của ACC Academy'"),
+                    ("bento_line1", "TEXT NULL"),
+                    ("bento_line2", "TEXT NULL"),
+                    ("bento_strong", "TEXT NULL"),
+                    ("bento_line3", "TEXT NULL"),
+                ]
+                for col_name, col_def in intro_migrations:
+                    if col_name not in intro_cols:
+                        try:
+                            conn.execute(text(f"ALTER TABLE home_intro_settings ADD COLUMN {col_name} {col_def}"))
+                            print(f"Added column {col_name} to home_intro_settings table.")
+                        except Exception as ex:
+                            print(f"Migration column error for home_intro_settings.{col_name}: {ex}")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
 
@@ -306,85 +323,8 @@ def perform_startup_tasks():
                 db.commit()
                 print(f"Seeded {len(initial_board)} initial board members.")
 
-            # Seed default admission posts if empty
-            admission_count = db.query(models.AdmissionPost).count()
-            if admission_count == 0:
-                initial_admissions = [
-                    {
-                        "slug": "mba",
-                        "title": "MBA Andrews Hoa Kỳ: Học quản trị theo chuẩn Mỹ, phát triển sự nghiệp tại Việt Nam",
-                        "subtitle": "Bạn muốn nâng cao năng lực quản trị, mở rộng tư duy kinh doanh và sẵn sàng cho bước tiến mới trong sự nghiệp? Chương trình Thạc sĩ Quản trị Kinh doanh (MBA) của Đại học Andrews, Hoa Kỳ mang đến cơ hội học tập chương trình quốc tế ngay tại Việt Nam.",
-                        "category": "BẰNG QUỐC TẾ HOA KỲ",
-                        "tag": "Đại học Andrews Hoa Kỳ",
-                        "image": "/images/andrew.jpg",
-                        "highlights": json.dumps([
-                            "Bằng Thạc sĩ do ĐH Andrews (Hoa Kỳ) trực tiếp cấp",
-                            "Được Bộ Giáo dục & Đào tạo Việt Nam chính thức công nhận",
-                            "Chương trình kiểm định kép IACBE & HLC Hoa Kỳ",
-                            "Lịch học cuối tuần linh hoạt, phù hợp lãnh đạo bận rộn"
-                        ], ensure_ascii=False),
-                        "content": """<h2>1. Vì sao chọn Đại học Andrews?</h2>
-<p>Được thành lập năm 1874 tại bang Michigan, Đại học Andrews là một trường đại học lâu đời của Hoa Kỳ với cộng đồng sinh viên và cựu học viên quốc tế rộng lớn. Chương trình kinh doanh của trường được kiểm định chuyên ngành bởi IACBE; Đại học Andrews được kiểm định vùng bởi Higher Learning Commission (HLC) và được Bộ Giáo dục — Đào tạo Việt Nam chính thức công nhận.</p>
-<h2>2. Cấu trúc Chương trình Đào tạo</h2>
-<p>Chương trình học tinh gọn, phù hợp người đi làm kéo dài khoảng 18–20 tháng, với lịch học tập trung vào cuối tuần. Học viên được trang bị kiến thức từ nền tảng đến chuyên sâu về quản trị kinh doanh, với nội dung đào tạo theo chương trình MBA của Đại học Andrews.</p>
-<p>Các môn học có thể bao gồm lãnh đạo và hành vi tổ chức, quản trị tài chính, marketing chiến lược, quản trị nguồn nhân lực, kinh doanh quốc tế và quản trị chiến lược.</p>
-<h2>3. Điều kiện tuyển sinh tham khảo</h2>
-<ul>
-  <li>Tốt nghiệp đại học; đáp ứng yêu cầu GPA của chương trình, thường từ 2.6/4.0, hoặc thỏa điều kiện về điểm GPA của ít nhất 50% số môn học.</li>
-  <li>Trình độ tiếng Anh tương đương IELTS 5.5; chứng chỉ VSTEP bậc 4 có thể được xem xét theo quy định tuyển sinh.</li>
-  <li>Điều kiện GMAT có thể được đáp ứng bằng điểm GMAT theo yêu cầu, hoặc theo phương án thay thế dành cho ứng viên đủ kinh nghiệm làm việc và hoàn thành các môn Thống kê, Đại số theo yêu cầu của chương trình.</li>
-  <li>Bằng Cử nhân Ngôn ngữ Anh được giảng dạy hoàn toàn bằng tiếng Anh có thể thuộc diện xét miễn chứng chỉ tiếng Anh.</li>
-</ul>
-<p><em>* Điều kiện cụ thể có thể khác theo hồ sơ và đợt tuyển sinh. Ứng viên nên liên hệ chương trình để được xác nhận yêu cầu hiện hành.</em></p>""",
-                        "position": 1,
-                        "is_active": True
-                    },
-                    {
-                        "slug": "mini-mba",
-                        "title": "Chương trình Mini MBA Practical – Quản trị Tinh gọn Thực chiến",
-                        "subtitle": "Cô đọng tinh hoa quản trị MBA trong 3-6 tháng dành cho Quản lý cấp trung và Chủ doanh nghiệp SMEs.",
-                        "category": "QUẢN TRỊ TINH GỌN",
-                        "tag": "Quản trị Tinh gọn",
-                        "image": "/images/mba.jpg",
-                        "highlights": json.dumps([
-                            "Tập trung 100% vào bài tập & case study thực tế",
-                            "Giảng dạy bởi đội ngũ Chuyên gia & C-Level thực chiến",
-                            "Áp dụng ngay giải pháp vào tối ưu doanh nghiệp của học viên"
-                        ], ensure_ascii=False),
-                        "content": """<h2>1. Tại sao lựa chọn Mini MBA Practical?</h2>
-<p>Mini MBA Practical là mô hình đào tạo tinh gọn được tối ưu hóa nhằm giải quyết trực tiếp các điểm nghẽn trong vận hành, nhân sự và tài chính của doanh nghiệp Việt Nam.</p>
-<h2>2. Nội dung huấn luyện trọng tâm</h2>
-<p>Học viên sẽ làm chủ 5 trụ cột: Xây dựng Ma trận Năng lực phòng ban, Tối ưu Dòng tiền, Ứng dụng AI trong vận hành tự động, Thiết lập KPI/OKR thực chiến và Tư duy Lãnh đạo tạo tác động.</p>""",
-                        "position": 2,
-                        "is_active": False
-                    },
-                    {
-                        "slug": "gei",
-                        "title": "Global Executive Institute (GEI): Chương trình phát triển năng lực lãnh đạo trong thời đại AI",
-                        "subtitle": "Trong bối cảnh trí tuệ nhân tạo đang tác động sâu rộng đến hoạt động của doanh nghiệp và cơ quan công quyền, nhà lãnh đạo cần nhiều hơn khả năng tiếp cận công nghệ. Họ cần biết cách kết nối AI với chiến lược tổ chức, đánh giá cơ hội và rủi ro, đồng thời dẫn dắt quá trình đổi mới theo hướng tạo ra giá trị bền vững.",
-                        "category": "LÃNH ĐẠO TOÀN CẦU",
-                        "tag": "AUCORE Andrews University",
-                        "image": "/images/GEL.jpg",
-                        "highlights": json.dumps([
-                            "Phát triển năng lực lãnh đạo kết nối AI với chiến lược tổ chức",
-                            "Không gian trao đổi thực chiến giữa các nhà lãnh đạo đa ngành",
-                            "Được chứng nhận bởi AUCORE – Đại học Andrews (Hoa Kỳ)"
-                        ], ensure_ascii=False),
-                        "content": """<h2>1. Giới thiệu về Global Executive Institute (GEI)</h2>
-<p>Global Executive Institute (GEI) là chương trình lãnh đạo cấp cao thuộc AUCORE – Trung tâm Năng lực Tổ chức và Xuất sắc của Đại học Andrews, Hoa Kỳ.</p>
-<p>Chương trình dành cho lãnh đạo doanh nghiệp và khu vực công, tập trung vào các lĩnh vực như phát triển bền vững, ESG, chuyển đổi số, trí tuệ nhân tạo và năng lực tài chính. Thông qua đào tạo, nghiên cứu và hợp tác, GEI hướng đến việc trang bị cho người học tư duy và năng lực cần thiết để điều hành tổ chức trong môi trường kinh doanh biến đổi nhanh chóng.</p>
-<h2>2. Kết nối kiến thức với thực tiễn quản trị</h2>
-<p>GEI không giới hạn việc học trong lớp học. Các hoạt động tham quan thực tế để tìm hiểu các mô hình vận hành trong những lĩnh vực khác nhau mở ra cơ hội quan sát trực tiếp các bài toán quản trị liên quan đến hiệu quả hoạt động, sử dụng nguồn lực, đầu tư, phát triển nhân lực và tính bền vững. Qua đó, người học có thể liên hệ các nội dung được thảo luận với bối cảnh tổ chức và ngành nghề của mình.</p>
-<p>Chương trình cũng tạo không gian trao đổi giữa các nhà lãnh đạo đến từ nhiều lĩnh vực. Việc chia sẻ kinh nghiệm và góc nhìn giúp học viên mở rộng cách tiếp cận trước những thách thức chung, đồng thời xem xét khả năng vận dụng kiến thức vào thực tế điều hành.</p>
-<p>Với sự kết hợp giữa nền tảng học thuật, nội dung quản trị và trải nghiệm thực tế, Global Executive Institute hướng đến việc giúp các nhà lãnh đạo hiểu rõ hơn tiềm năng của công nghệ mới, đưa ra quyết định có cơ sở và dẫn dắt đổi mới gắn với mục tiêu của tổ chức.</p>""",
-                        "position": 3,
-                        "is_active": True
-                    }
-                ]
-                for adm in initial_admissions:
-                    db.add(models.AdmissionPost(**adm))
-                db.commit()
-                print(f"Seeded {len(initial_admissions)} initial admission posts.")
+            # Seed default admission posts if empty or sync default subtitles
+            crud.seed_default_admission_posts(db)
 
             # Clean up any expired pending orders on startup
             crud.cleanup_expired_pending_orders(db, timeout_minutes=30)
@@ -394,28 +334,10 @@ def perform_startup_tasks():
         print(f"Error during startup DB check/seed: {e}")
 
 
-async def _periodic_pending_order_cleanup():
-    """Background task to automatically cancel expired pending orders every 5 minutes."""
-    while True:
-        await asyncio.sleep(300)
-        try:
-            db = next(get_db())
-            try:
-                crud.cleanup_expired_pending_orders(db, timeout_minutes=30)
-            finally:
-                db.close()
-        except Exception as e:
-            print(f"Periodic pending order cleanup error: {e}")
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     perform_startup_tasks()
-    cleanup_task = asyncio.create_task(_periodic_pending_order_cleanup())
-    try:
-        yield
-    finally:
-        cleanup_task.cancel()
+    yield
 
 # Create FastAPI app
 app = FastAPI(
