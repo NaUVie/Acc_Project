@@ -143,10 +143,9 @@
   position: relative;
   border-radius: 24px;
   overflow: hidden;
-  background-color: #061338;
-  box-shadow: 0 24px 60px rgba(2, 43, 159, 0.2), 0 8px 24px rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  min-height: 580px;
+  background: linear-gradient(180deg, #091a48 0%, #022b9f 100%);
+  box-shadow: 0 24px 60px rgba(2, 43, 159, 0.25), 0 8px 24px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   min-height: 520px;
   display: flex;
   align-items: center;
@@ -166,30 +165,16 @@
   position: absolute;
   right: 0;
   top: 0;
-  width: 55%;
   width: 50%;
   height: 100%;
   object-fit: cover;
-  object-position: center center;
   object-position: center top;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.25) 12%, rgba(0, 0, 0, 0.8) 35%, #000 60%);
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.25) 12%, rgba(0, 0, 0, 0.8) 35%, #000 60%);
 }
 
 .vm-gradient-overlay {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to right,
-      #061338 0%,
-      #061338 42%,
-      rgba(6, 19, 56, 0.98) 48%,
-      rgba(6, 19, 56, 0.90) 54%,
-      rgba(6, 19, 56, 0.76) 60%,
-      rgba(6, 19, 56, 0.56) 67%,
-      rgba(6, 19, 56, 0.36) 74%,
-      rgba(6, 19, 56, 0.18) 81%,
-      rgba(6, 19, 56, 0.05) 89%,
-      transparent 100%);
+  display: none;
 }
 
 .vm-inner-content {
@@ -266,14 +251,13 @@
 
 .vm-title {
   font-family: var(--font-display);
-  font-size: 19px;
-  font-size: 17.5px;
+  font-size: clamp(14.5px, 1.3vw, 17.5px);
   font-weight: 800;
   color: #ffffff;
   margin: 0 0 12px 0;
-  line-height: 1.3;
   line-height: 1.35;
   letter-spacing: -0.2px;
+  white-space: nowrap;
 }
 
 .vm-text {
@@ -710,38 +694,6 @@
 /* ==========================================================================
    Responsive Design for AboutUs Page
    ========================================================================== */
-@media (max-width: 1200px) {
-  .vm-inner-content {
-    max-width: 52%;
-    padding: 44px 0 44px 40px;
-    max-width: 60%;
-    padding: 40px 0 40px 36px;
-  }
-
-  .vm-columns-grid {
-    gap: 20px;
-  }
-
-  .vm-bg-img {
-    width: 50%;
-    width: 46%;
-  }
-
-  .vm-gradient-overlay {
-    background: linear-gradient(to right,
-        #061338 0%,
-        #061338 45%,
-        rgba(6, 19, 56, 0.98) 50%,
-        rgba(6, 19, 56, 0.90) 56%,
-        rgba(6, 19, 56, 0.76) 62%,
-        rgba(6, 19, 56, 0.56) 69%,
-        rgba(6, 19, 56, 0.36) 76%,
-        rgba(6, 19, 56, 0.18) 83%,
-        rgba(6, 19, 56, 0.05) 90%,
-        transparent 100%);
-  }
-}
-
 @media (max-width: 991px) {
   .about-us-page {
     padding-top: 80px;
@@ -770,20 +722,17 @@
   }
 
   .vm-inner-content {
+    width: 100%;
     max-width: 100%;
+    margin-left: 0;
     padding: 36px 24px;
   }
 
   .vm-bg-img {
     width: 100%;
     opacity: 0.22;
-  }
-
-  .vm-gradient-overlay {
-    background: linear-gradient(to bottom,
-        #061338 0%,
-        rgba(6, 19, 56, 0.95) 55%,
-        rgba(2, 43, 159, 0.8) 100%);
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 
   .vm-columns-grid {
