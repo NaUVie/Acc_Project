@@ -81,7 +81,7 @@
             <!-- Selected Course Banner if navigated from Course Detail -->
             <div v-if="selectedCourseTitle" class="selected-course-banner">
               <div class="selected-course-left">
-                <span class="selected-course-icon">🎓</span>
+                <!-- <span class="selected-course-icon">🎓</span> -->
                 <div class="selected-course-info">
                   <span class="selected-course-label">Khóa học quan tâm tư vấn</span>
                   <strong class="selected-course-title">{{ selectedCourseTitle }}</strong>
