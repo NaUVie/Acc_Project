@@ -295,10 +295,14 @@
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 20px 50px rgba(2, 43, 159, 0.12);
-  background-color: #0f172a;
+  background-color: #f1f5f9;
   aspect-ratio: 16 / 9;
   border: 1px solid rgba(2, 43, 159, 0.15);
   transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.eco-video-card.is-playing {
+  background-color: #0f172a;
 }
 
 .eco-video-card:hover {

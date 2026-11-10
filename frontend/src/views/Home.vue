@@ -129,7 +129,8 @@
                     :src="formatImageUrl(homeIntroData.poster_url) || '/images/CoE-Thumb.png'" 
                     alt="Video Poster" 
                     class="eco-video-element" 
-                    loading="lazy"
+                    loading="eager"
+                    fetchpriority="high"
                     decoding="async"
                   />
 
@@ -151,7 +152,8 @@
                     :src="formatImageUrl(homeIntroData.poster_url) || '/images/CoE-Thumb.png'" 
                     alt="ACC Academy" 
                     class="eco-video-element" 
-                    loading="lazy"
+                    loading="eager"
+                    fetchpriority="high"
                     decoding="async"
                   />
                 </template>
@@ -654,7 +656,7 @@ const defaultHomeIntro = computed(() => ({
   desc2: t('home.introDesc2'),
   counter_number: 500,
   counter_label: t('home.introCounterLabel'),
-  video_url: '/videos/intro.mp4',
+  video_url: '',
   poster_url: '/images/CoE-Thumb.png',
   btn_label: t('home.introBtnLabel')
 }));
@@ -1340,7 +1342,7 @@ onMounted(() => {
 
   courseStore.fetchCourses();
   courseStore.fetchLecturers();
-  courseStore.fetchHomeIntroSettings();
+  courseStore.fetchHomeIntroSettings(true);
   courseStore.fetchPartners();
   testimonialStore.fetchTestimonials();
 });
