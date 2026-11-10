@@ -182,7 +182,11 @@
           <p class="section-subtitle">{{ $t('about.leadershipSubtitle') }}</p>
         </div>
 
-        <div class="leadership-grid">
+        <div 
+          class="leadership-grid"
+          :class="`grid-cols-${boardColumns}`"
+          :style="{ '--board-cols': boardColumns }"
+        >
           <div 
             v-for="(member, idx) in displayedBoardMembers" 
             :key="member.id || idx" 
@@ -220,6 +224,9 @@ const courseStore = useCourseStore();
 let scrollObserver = null;
 
 onMounted(() => {
+  if (!courseStore.contactSettings) {
+    courseStore.fetchContactSettings().catch(() => {});
+  }
   courseStore.fetchBoardMembers().catch(() => {}).finally(() => {
     nextTick(() => {
       if (scrollObserver) {
@@ -267,6 +274,12 @@ const displayedBoardMembers = computed(() => {
     return [...courseStore.boardMembers].sort((a, b) => (Number(a.position) || 0) - (Number(b.position) || 0));
   }
   return defaultBoardMembers;
+});
+
+const boardColumns = computed(() => {
+  return Number(courseStore.contactSettings?.board_columns_desktop) 
+    || Number(localStorage.getItem('acc_board_cols_cache')) 
+    || 4;
 });
 
 const defaultBoardMembers = [

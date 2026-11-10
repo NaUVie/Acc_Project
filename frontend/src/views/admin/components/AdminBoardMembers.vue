@@ -18,6 +18,41 @@
         </div>
       </div>
 
+      <!-- DISPLAY LAYOUT SETTING: COLUMNS PER ROW -->
+      <div class="board-layout-config-card mt-3 mb-4 p-3" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 10px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+            👥
+          </div>
+          <div>
+            <div style="font-weight: 700; color: #0f172a; font-size: 14.5px; display: flex; align-items: center; gap: 8px;">
+              <span>Bố cục hiển thị trên trang "Về chúng tôi" (Desktop)</span>
+              <span class="badge" style="background: #e0f2fe; color: #0369a1; font-size: 11.5px; font-weight: 700; border: 1px solid #bae6fd;">
+                Hiện tại: {{ currentCols }} người / hàng
+              </span>
+            </div>
+            <div style="font-size: 13px; color: #64748b; margin-top: 2px;">
+              Chọn số lượng người tối đa trên một hàng. <em>(Mặc định <strong>4 người / hàng</strong>: giữ chuẩn kích thước card gọn gàng, thành viên lẻ ở hàng cuối sẽ tự động căn giữa trang trọng)</em>.
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button 
+            type="button" 
+            v-for="c in [3, 4, 5]" 
+            :key="c"
+            @click="updateColumnsSetting(c)"
+            class="btn btn-sm"
+            :style="currentCols === c 
+              ? 'background: #022b9f; color: #ffffff; border: 1px solid #022b9f; font-weight: 700; padding: 7px 16px; border-radius: 8px; box-shadow: 0 2px 6px rgba(2, 43, 159, 0.25);' 
+              : 'background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; font-weight: 600; padding: 7px 16px; border-radius: 8px;'"
+            :disabled="isUpdatingCols"
+          >
+            {{ c }} người / hàng {{ c === 4 ? '⭐ (Mặc định - Căn giữa)' : '' }}
+          </button>
+        </div>
+      </div>
+
       <!-- SEARCH & FILTER BAR -->
       <div class="table-search-bar mt-4 mb-4" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
         <input 
@@ -331,11 +366,35 @@ const courseStore = useCourseStore();
 
 const activeView = ref('list');
 const isRefreshing = ref(false);
+const isUpdatingCols = ref(false);
 const isModalOpen = ref(false);
 const isEditing = ref(false);
 const editingId = ref(null);
 const saving = ref(false);
 const avatarFileRef = ref(null);
+
+const currentCols = computed(() => {
+  return Number(courseStore.contactSettings?.board_columns_desktop) 
+    || Number(localStorage.getItem('acc_board_cols_cache')) 
+    || 4;
+});
+
+const updateColumnsSetting = async (cols) => {
+  isUpdatingCols.value = true;
+  try {
+    localStorage.setItem('acc_board_cols_cache', String(cols));
+    if (courseStore.contactSettings) {
+      courseStore.contactSettings.board_columns_desktop = cols;
+    }
+    await courseStore.updateContactSettings({ board_columns_desktop: cols });
+    courseStore.showToast(`Đã lưu bố cục hiển thị: ${cols} người / hàng`, 'success');
+  } catch (err) {
+    console.error('Error updating board columns setting:', err);
+    courseStore.showToast('Lỗi khi lưu cài đặt bố cục', 'error');
+  } finally {
+    isUpdatingCols.value = false;
+  }
+};
 
 // Cropper States
 const isCropperOpen = ref(false);
@@ -552,6 +611,9 @@ const saveMember = async () => {
 
 onMounted(() => {
   courseStore.fetchAdminBoardMembers().catch(() => {});
+  if (!courseStore.contactSettings) {
+    courseStore.fetchContactSettings().catch(() => {});
+  }
 });
 </script>
 

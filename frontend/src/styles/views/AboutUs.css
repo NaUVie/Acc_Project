@@ -144,7 +144,7 @@
   border-radius: 28px;
   overflow: hidden;
   background: linear-gradient(135deg, rgba(9, 26, 72, 0.65) 0%, rgba(2, 43, 159, 0.55) 100%), 
-              url('/images/TamNhinSuMenh.jpg') center 65%/cover no-repeat;
+              url('/images/TamNhinSuMenh.jpg') center 25%/cover no-repeat;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.16);
   padding: 72px 64px;
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -486,24 +486,16 @@
 }
 
 .leadership-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 32px;
-}
-
-@media (min-width: 768px) {
-  .leadership-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1200px) {
-  .leadership-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 28px;
+  width: 100%;
 }
 
 .leader-card {
+  width: 100%;
+  max-width: 360px;
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
@@ -521,6 +513,32 @@
   background: rgba(255, 255, 255, 0.95);
   border-color: rgba(2, 43, 159, 0.3);
   box-shadow: 0 20px 40px rgba(2, 43, 159, 0.1);
+}
+
+@media (min-width: 640px) {
+  .leader-card {
+    width: calc(50% - 14px);
+    max-width: 340px;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* Mặc định chuẩn 4 cột: Mỗi card giữ nguyên kích thước nhỏ gọn ~280px cũ, người lẻ ở hàng cuối tự động căn giữa */
+  .leadership-grid.grid-cols-4 .leader-card,
+  .leadership-grid:not(.grid-cols-3):not(.grid-cols-5) .leader-card {
+    width: calc(25% - 21px);
+    max-width: 295px;
+  }
+
+  .leadership-grid.grid-cols-3 .leader-card {
+    width: calc(33.333% - 19px);
+    max-width: 310px;
+  }
+
+  .leadership-grid.grid-cols-5 .leader-card {
+    width: calc(20% - 23px);
+    max-width: 250px;
+  }
 }
 
 .leader-avatar-wrapper {
@@ -619,6 +637,7 @@
   .vm-banner-card {
     padding: 44px 28px;
     border-radius: 22px;
+    background-position: 60% center;
   }
 
   .vm-columns-grid {
@@ -670,6 +689,7 @@
   .vm-banner-card {
     padding: 32px 18px;
     border-radius: 18px;
+    background-position: 55% center;
   }
 
   .vm-title {
