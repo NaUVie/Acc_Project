@@ -513,8 +513,10 @@
 }
 
 .skeleton-btn {
-  width: 110px;
+  width: 48px;
   height: 20px;
+  margin-top: auto;
+  align-self: flex-end;
 }
 
 @keyframes blogShimmer {

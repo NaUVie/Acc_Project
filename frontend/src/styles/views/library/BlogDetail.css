@@ -158,6 +158,23 @@
   margin: 20px 0;
 }
 
+/* Article Footer Meta (Ngày đăng góc phải cuối bài, in nghiêng) */
+.article-footer-meta {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.publish-date-bottom {
+  font-size: 14px;
+  color: #64748b;
+  font-style: italic;
+  font-weight: 500;
+  text-align: right;
+}
+
 /* Sidebar Styles */
 .article-sidebar {
   width: 100%;

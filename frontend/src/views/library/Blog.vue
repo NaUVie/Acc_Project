@@ -5,9 +5,6 @@
       <div class="hero-backdrop-glow"></div>
       <div class="container hero-inner">
         <h1 class="hero-title animate-fade-in">Tin tức, Kiến thức</h1>
-        <!-- <p class="hero-subtitle animate-fade-in">
-          Cập nhật xu hướng công nghệ AI, tự động hóa và phương pháp quản trị hiện đại cùng chuyên gia ACC
-        </p> -->
 
         <!-- Search Box -->
         <div class="search-filter-wrapper animate-fade-in">
@@ -27,27 +24,14 @@
             </button>
           </div>
         </div>
-
-        <!-- Category Filter Tabs -->
-        <div class="category-tabs animate-fade-in">
-          <button 
-            v-for="cat in availableCategories" 
-            :key="cat"
-            class="cat-tab-btn"
-            :class="{ active: selectedCategory === cat }"
-            @click="changeCategory(cat)"
-          >
-            {{ cat === 'All posts' ? 'Tất cả bài viết' : cat }}
-          </button>
-        </div>
       </div>
     </section>
 
     <div class="container blog-content-container">
-      <!-- Result Counter (nếu có tìm kiếm hoặc lọc) -->
-      <div class="results-header" v-if="filteredPosts.length > 0">
+      <!-- Result Counter (nếu có tìm kiếm) -->
+      <div class="results-header" v-if="searchQuery && filteredPosts.length > 0">
         <span class="results-count">
-          Hiển thị <strong>{{ paginatedPosts.length }}</strong> trên tổng số <strong>{{ filteredPosts.length }}</strong> bài viết
+          Hiển thị <strong>{{ paginatedPosts.length }}</strong> trên tổng số <strong>{{ filteredPosts.length }}</strong> bài viết tìm thấy
         </span>
       </div>
 
@@ -98,29 +82,24 @@
               <span class="meta-dot">•</span>
               <span class="meta-author">ACC Editorial</span>
               <span v-if="getLinkedCourseTitle(post.course_id)" class="linked-course-pill">
-                📚 {{ getLinkedCourseTitle(post.course_id) }}
+                🎓 {{ getLinkedCourseTitle(post.course_id) }}
               </span>
             </div>
 
-            <h3 class="strip-title">
-              <router-link :to="post.link || '/blog/' + post.handle" class="strip-title-link">
+            <h2 class="strip-title">
+              <router-link :to="post.link || '/blog/' + post.handle">
                 {{ post.title }}
               </router-link>
-            </h3>
+            </h2>
 
-            <p class="strip-excerpt" v-if="post.excerpt">{{ post.excerpt }}</p>
+            <p class="strip-desc" v-if="post.excerpt || post.description">
+              {{ post.excerpt || post.description }}
+            </p>
 
             <div class="strip-footer">
-              <router-link :to="post.link || '/blog/' + post.handle" class="arrow-container" aria-label="Xem chi tiết bài viết" title="Xem chi tiết">
+              <router-link :to="post.link || '/blog/' + post.handle" class="arrow-container" aria-label="Đọc bài viết">
                 <svg class="block-arrow-glow" width="46" height="20" viewBox="0 0 52 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <defs>
-                    <linearGradient id="blogArrowBlue" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stop-color="#022B9F"/>
-                      <stop offset="100%" stop-color="#2563eb"/>
-                    </linearGradient>
-                  </defs>
-                  <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" 
-                        fill="url(#blogArrowBlue)" />
+                  <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#022B9F" />
                 </svg>
               </router-link>
             </div>
@@ -140,7 +119,7 @@
       <!-- Empty State -->
       <div v-else-if="!isLoading && filteredPosts.length === 0" class="empty-state">
         <h3 class="empty-title">Không tìm thấy bài viết phù hợp</h3>
-        <p class="empty-desc">Thử tìm kiếm với từ khóa khác hoặc chuyển danh mục hiển thị.</p>
+        <p class="empty-desc">Thử tìm kiếm với từ khóa khác.</p>
         <button @click="resetFilters" class="btn-reset">
           Xem tất cả bài viết
         </button>
@@ -160,7 +139,6 @@ const blogGridRef = ref(null);
 const isLoading = ref(courseStore.blogPosts.length === 0);
 
 onMounted(async () => {
-  courseStore.fetchBlogCategories().catch(() => {});
   if (!courseStore.blogPosts || courseStore.blogPosts.length === 0) {
     isLoading.value = true;
     try {
@@ -174,7 +152,6 @@ onMounted(async () => {
   }
 });
 
-const selectedCategory = ref('All posts');
 const searchQuery = ref('');
 const currentPage = ref(1);
 const pageSize = ref(8); // 8 bài viết mỗi trang dạng danh sách ngang
@@ -198,31 +175,13 @@ const getLinkedCourseTitle = (courseId) => {
 
 const posts = computed(() => courseStore.getBlogPosts || []);
 
-// Tự động nạp động các danh mục từ DB & danh sách bài viết thực tế
-const availableCategories = computed(() => {
-  const cats = ['All posts'];
-  if (courseStore.blogCategories && courseStore.blogCategories.length > 0) {
-    courseStore.blogCategories.forEach(c => {
-      if (c.name && !cats.includes(c.name)) cats.push(c.name);
-    });
-  }
-  posts.value.forEach(p => {
-    if (p.category && !cats.includes(p.category)) {
-      cats.push(p.category);
-    }
-  });
-  return cats;
-});
-
 const filteredPosts = computed(() => {
+  const q = searchQuery.value.toLowerCase().trim();
+  if (!q) return posts.value;
   return posts.value.filter(post => {
-    const matchesCategory = selectedCategory.value === 'All posts' || post.category === selectedCategory.value;
-    const q = searchQuery.value.toLowerCase().trim();
-    const matchesSearch = !q || 
-      (post.title && post.title.toLowerCase().includes(q)) || 
+    return (post.title && post.title.toLowerCase().includes(q)) || 
       (post.excerpt && post.excerpt.toLowerCase().includes(q)) ||
       (post.category && post.category.toLowerCase().includes(q));
-    return matchesCategory && matchesSearch;
   });
 });
 
@@ -233,15 +192,10 @@ const paginatedPosts = computed(() => {
   return filteredPosts.value.slice(start, end);
 });
 
-// Reset về trang 1 khi người dùng đổi từ khóa hoặc đổi danh mục
-watch([searchQuery, selectedCategory], () => {
+// Reset về trang 1 khi người dùng đổi từ khóa
+watch(searchQuery, () => {
   currentPage.value = 1;
 });
-
-const changeCategory = (cat) => {
-  selectedCategory.value = cat;
-  currentPage.value = 1;
-};
 
 const onPageChange = () => {
   nextTick(() => {
@@ -256,7 +210,6 @@ const onPageChange = () => {
 };
 
 const resetFilters = () => {
-  selectedCategory.value = 'All posts';
   searchQuery.value = '';
   currentPage.value = 1;
 };

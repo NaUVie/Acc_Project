@@ -15,10 +15,6 @@
           <div class="article-main-column">
             <!-- Skeleton Header -->
             <div class="article-header">
-              <div class="header-badges" style="display: flex; gap: 12px; margin-bottom: 16px;">
-                <div class="skeleton-block" style="width: 90px; height: 26px; border-radius: 20px;"></div>
-                <div class="skeleton-block" style="width: 140px; height: 18px; border-radius: 4px;"></div>
-              </div>
               <div class="skeleton-block" style="width: 95%; height: 38px; border-radius: 8px; margin-bottom: 12px;"></div>
               <div class="skeleton-block" style="width: 75%; height: 38px; border-radius: 8px; margin-bottom: 16px;"></div>
               <div class="skeleton-block" style="width: 85%; height: 20px; border-radius: 4px;"></div>
@@ -75,14 +71,8 @@
         <div class="article-layout-grid">
           <!-- Main Content Area (Left Side) -->
           <div class="article-main-column">
-            <!-- Article Header -->
+            <!-- Article Header (Đã loại bỏ danh mục và ngày đăng ở đầu bài) -->
             <div class="article-header">
-              <div class="header-badges">
-                <span class="category-badge">
-                  {{ post.category }}
-                </span>
-                <span class="publish-date">📅 Đăng ngày {{ post.date }}</span>
-              </div>
               <h1 class="article-title">{{ post.title }}</h1>
               <p class="article-lead" v-if="post.excerpt">{{ post.excerpt }}</p>
             </div>
@@ -108,6 +98,11 @@
               <div v-else class="content-html-wrapper">
                 <p>{{ post.excerpt }}</p>
               </div>
+
+              <!-- Ngày đăng ở góc phải cuối bài viết, in nghiêng, không icon -->
+              <div class="article-footer-meta" v-if="post.date">
+                <span class="publish-date-bottom">Ngày đăng: {{ post.date }}</span>
+              </div>
             </div>
           </div>
 
@@ -123,7 +118,7 @@
                         <img :src="rel.image" :alt="rel.title" />
                       </div>
                       <div class="sidebar-rel-info">
-                        <span class="sidebar-rel-cat">{{ rel.category }}</span>
+                        <!-- <span class="sidebar-rel-cat">{{ rel.category }}</span> -->
                         <h4 class="sidebar-rel-title">{{ rel.title }}</h4>
                         <span class="sidebar-rel-date">{{ rel.date }}</span>
                       </div>
