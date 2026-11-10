@@ -1,15 +1,75 @@
 <template>
   <div class="admissions-view">
-    <!-- Hero Banner Section -->
+    <!-- Hero Banner Section (Luxury Corporate Presentation Slide Style) -->
     <section class="admissions-hero">
-      <div class="container hero-container">
-        <h1 class="hero-title animate-fade-in">
-          {{ $t('admissions.heroTitle1') }} <br />
-          <span class="gradient-text">{{ $t('admissions.heroTitle2') }}</span>
+      <div class="hero-bg-media">
+        <img src="/images/TuyenSinh.jpg" alt="Tuyển sinh ACC & Andrews" class="hero-bg-img" loading="eager" decoding="async" />
+        <div class="hero-gradient-overlay"></div>
+      </div>
+
+      <div class="container hero-inner-container">
+        <!-- 1. Top Co-Branding: ACC | Andrews University -->
+        <div class="hero-brand-row animate-fade-in">
+          <div class="brand-acc">
+            <img src="/images/logo3.png" alt="ACC Kết Nối Tri Thức" class="hero-acc-logo" />
+          </div>
+          <div class="brand-divider"></div>
+          <div class="brand-partner">
+            <div class="partner-crest-svg">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 2L2 7h20L12 2z"/>
+              </svg>
+            </div>
+            <!-- <div class="partner-text">
+              <span class="partner-title">ANDREWS UNIVERSITY</span>
+              <span class="partner-sub">MICHIGAN, USA • EST. 1874</span>
+            </div> -->
+          </div>
+        </div>
+
+        <!-- 2. Overline Tag -->
+        <div class="hero-tagline animate-fade-in">
+          {{ $t('admissions.heroTagline') }}
+        </div>
+
+        <!-- 3. Two-Tone Main Title -->
+        <h1 class="hero-main-title animate-fade-in">
+          <span class="title-primary">{{ $t('admissions.heroTitle1') }}</span>
+          <span class="title-accent">{{ $t('admissions.heroTitle2') }}</span>
         </h1>
-        <p class="hero-subtitle animate-fade-in">
+
+        <!-- 4. Subtitle / Description -->
+        <p class="hero-description animate-fade-in">
           {{ $t('admissions.heroSubtitle') }}
         </p>
+
+        <!-- 5. Program Badges / Capsules -->
+        <!-- <div class="hero-programs-list animate-fade-in">
+          <a 
+            href="#mba" 
+            @click.prevent="scrollToProgram('mba')" 
+            class="program-pill-row"
+            title="Xem chi tiết chương trình MBA Andrews"
+          >
+            <span class="pill-badge">CHƯƠNG TRÌNH 1</span>
+            <span class="pill-text">18 tháng • Thạc sĩ QTKD Đại học Andrews (Hoa Kỳ)</span>
+          </a>
+
+          <a 
+            href="#gei" 
+            @click.prevent="scrollToProgram('gei')" 
+            class="program-pill-row"
+            title="Xem chi tiết chương trình Lãnh đạo cấp cao GEI"
+          >
+            <span class="pill-badge">CHƯƠNG TRÌNH 2</span>
+            <span class="pill-text">Lãnh đạo Cấp cao • Study Tour Michigan (Hoa Kỳ)</span>
+          </a>
+        </div> -->
+
+        <!-- 6. Corporate Footnote -->
+        <!-- <div class="hero-footer-note animate-fade-in">
+          <span>Hội đồng Tuyển sinh ACC Academy & Đại học Andrews (Hoa Kỳ) | TP. Hồ Chí Minh, Việt Nam</span>
+        </div> -->
       </div>
     </section>
 
@@ -114,6 +174,13 @@ const getHighlights = (prog) => {
     }
   }
   return [];
+};
+
+const scrollToProgram = (id) => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 };
 
 onMounted(() => {

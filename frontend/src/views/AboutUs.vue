@@ -15,27 +15,40 @@
       </div>
     </section>
 
-    <!-- Vision & Mission + ACC Difference (2 Columns with Background Image) -->
+    <!-- Vision & Mission + ACC Difference (Clean Minimalist Slide Style) -->
     <section class="vision-mission-section reveal-on-scroll">
       <div class="container">
         <div class="vm-banner-card">
-          <div class="vm-columns-grid">
-            <!-- Column 1: Tầm nhìn & Sứ mệnh -->
-            <div class="vm-col">
-              <span class="vm-tag">{{ $t('about.tagOrientation') }}</span>
-              <h2 class="vm-title">{{ $t('about.visionTitle') }}</h2>
-              <p class="vm-text">
-                {{ $t('about.visionText1') }} <strong>{{ $t('about.visionTextStrong1') }}</strong>{{ $t('about.visionText2') }} <strong>{{ $t('about.visionTextStrong2') }}</strong>
-              </p>
-            </div>
+          <!-- Right Media: Photo with people -->
+          <div class="vm-bg-media">
+            <img src="/images/TamNhinSuMenh.jpg" alt="Tầm nhìn & Sứ mệnh ACC" class="vm-bg-img" loading="lazy" decoding="async" />
+            <div class="vm-gradient-overlay"></div>
+          </div>
 
-            <!-- Column 2: Sự khác biệt của ACC -->
-            <div class="vm-col">
-              <span class="vm-tag">{{ $t('about.tagPractical') }}</span>
-              <h2 class="vm-title">{{ $t('about.diffTitle') }}</h2>
-              <p class="vm-text">
-                {{ $t('about.diffText1') }} <strong>{{ $t('about.diffTextStrong1') }}</strong>{{ $t('about.diffText2') }}
-              </p>
+          <!-- Left Content: 2 Columns side-by-side matching reference image -->
+          <div class="vm-inner-content">
+            <div class="vm-columns-grid">
+              <!-- Column 1: Logo ACC + Tầm nhìn & Sứ mệnh -->
+              <div class="vm-col">
+                <div class="vm-brand-top">
+                  <img src="/images/logo3.png" alt="ACC Kết Nối Tri Thức" class="vm-acc-logo" />
+                </div>
+                <span class="vm-tag">{{ $t('about.tagOrientation') }}</span>
+                <h3 class="vm-title">{{ $t('about.visionTitle') }}</h3>
+                <p class="vm-text">
+                  {{ $t('about.visionText1') }} <strong>{{ $t('about.visionTextStrong1') }}</strong>{{ $t('about.visionText2') }} <strong>{{ $t('about.visionTextStrong2') }}</strong>
+                </p>
+              </div>
+
+              <!-- Column 2: Sự khác biệt của ACC (aligned with Column 1) -->
+              <div class="vm-col">
+                <div class="vm-brand-spacer" aria-hidden="true"></div>
+                <span class="vm-tag">{{ $t('about.tagPractical') }}</span>
+                <h3 class="vm-title">{{ $t('about.diffTitle') }}</h3>
+                <p class="vm-text">
+                  {{ $t('about.diffText1') }} <strong>{{ $t('about.diffTextStrong1') }}</strong>{{ $t('about.diffText2') }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -182,32 +195,36 @@
           <p class="section-subtitle">{{ $t('about.leadershipSubtitle') }}</p>
         </div>
 
-        <div 
-          class="leadership-grid"
-          :class="`grid-cols-${boardColumns}`"
-          :style="{ '--board-cols': boardColumns }"
-        >
+        <div class="leadership-rows-wrapper">
           <div 
-            v-for="(member, idx) in displayedBoardMembers" 
-            :key="member.id || idx" 
-            class="leader-card reveal-on-scroll"
-            :style="{ '--reveal-delay': `${(idx % 4) * 0.12}s` }"
+            v-for="(row, rIdx) in boardRows" 
+            :key="rIdx"
+            class="leadership-grid"
+            :class="`grid-cols-${boardColumns}`"
+            :style="{ '--board-cols': boardColumns }"
           >
-            <div class="leader-avatar-wrapper">
-              <img 
-                :src="member.avatar || '/images/1_6.png'" 
-                :alt="member.name" 
-                class="leader-avatar" loading="lazy" decoding="async" width="280" height="280"
-                @error="(e) => e.target.src = '/images/1_6.png'"
-                referrerpolicy="no-referrer"
-              />
-            </div>
-            <div class="leader-info">
-              <h3 class="leader-name">{{ member.name }}</h3>
-              <p class="leader-main-role">{{ member.main_role || member.mainRole }}</p>
-              <ul class="leader-bio-list">
-                <li v-for="(bio, bIdx) in parseBioList(member)" :key="bIdx">{{ bio }}</li>
-              </ul>
+            <div 
+              v-for="(member, idx) in row" 
+              :key="member.id || `${rIdx}-${idx}`" 
+              class="leader-card reveal-on-scroll"
+              :style="{ '--reveal-delay': `${(idx % 5) * 0.1}s` }"
+            >
+              <div class="leader-avatar-wrapper">
+                <img 
+                  :src="member.avatar || '/images/1_6.png'" 
+                  :alt="member.name" 
+                  class="leader-avatar" loading="lazy" decoding="async" width="280" height="280"
+                  @error="(e) => e.target.src = '/images/1_6.png'"
+                  referrerpolicy="no-referrer"
+                />
+              </div>
+              <div class="leader-info">
+                <h3 class="leader-name">{{ member.name }}</h3>
+                <p class="leader-main-role">{{ member.main_role || member.mainRole }}</p>
+                <ul class="leader-bio-list">
+                  <li v-for="(bio, bIdx) in parseBioList(member)" :key="bIdx">{{ bio }}</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
@@ -277,9 +294,38 @@ const displayedBoardMembers = computed(() => {
 });
 
 const boardColumns = computed(() => {
-  return Number(courseStore.contactSettings?.board_columns_desktop) 
-    || Number(localStorage.getItem('acc_board_cols_cache')) 
-    || 4;
+  const custom = Number(courseStore.contactSettings?.board_columns_desktop) 
+    || Number(localStorage.getItem('acc_board_cols_cache'));
+  if (custom) return custom;
+  // Nếu có từ 9 người trở lên và chưa lưu cấu hình riêng thì mặc định 5 cột (để xếp 4 người trên, 5 người dưới)
+  if (displayedBoardMembers.value && displayedBoardMembers.value.length >= 9) {
+    return 5;
+  }
+  return 4;
+});
+
+const boardRows = computed(() => {
+  const list = displayedBoardMembers.value;
+  const cols = boardColumns.value;
+  if (!list || list.length === 0) return [];
+  if (list.length <= cols) return [list];
+
+  const remainder = list.length % cols;
+  if (remainder > 0) {
+    const rows = [];
+    // Hàng trên cùng chứa nhóm ít người hơn (phần dư) để xếp tầng kim tự tháp (ví dụ 9 người: 4 người hàng 1, 5 người hàng 2)
+    rows.push(list.slice(0, remainder));
+    for (let i = remainder; i < list.length; i += cols) {
+      rows.push(list.slice(i, i + cols));
+    }
+    return rows;
+  }
+
+  const rows = [];
+  for (let i = 0; i < list.length; i += cols) {
+    rows.push(list.slice(i, i + cols));
+  }
+  return rows;
 });
 
 const defaultBoardMembers = [
