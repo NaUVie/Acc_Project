@@ -10,18 +10,6 @@
         <p class="hero-subtitle animate-fade-in">
           {{ $t('admissions.heroSubtitle') }}
         </p>
-
-        <!-- Quick Jump Pills -->
-        <div class="jump-pills" v-if="displayedPrograms.length > 0">
-          <button 
-            v-for="prog in displayedPrograms" 
-            :key="prog.slug || prog.id"
-            @click="scrollToSection(prog.slug || prog.id)" 
-            class="jump-pill"
-          >
-            {{ getShortPillTitle(prog) }}
-          </button>
-        </div>
       </div>
     </section>
 
@@ -115,13 +103,6 @@ const displayedPrograms = computed(() => {
   return defaultPrograms;
 });
 
-const getShortPillTitle = (prog) => {
-  if (prog.tag) return prog.tag;
-  if (prog.slug === 'mba') return '🎓 MBA Andrews';
-  if (prog.slug === 'gei') return '🌐 Viện Lãnh đạo GEI';
-  return prog.title?.split(':')[0] || prog.title;
-};
-
 const getHighlights = (prog) => {
   if (Array.isArray(prog.highlights)) return prog.highlights;
   if (typeof prog.highlights === 'string') {
@@ -133,13 +114,6 @@ const getHighlights = (prog) => {
     }
   }
   return [];
-};
-
-const scrollToSection = (id) => {
-  const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
 };
 
 onMounted(() => {

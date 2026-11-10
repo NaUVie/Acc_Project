@@ -22,7 +22,7 @@
           />
         </div>
         <div class="lecturer-info-col">
-          <span class="badge-tag">Giảng viên ACC Academy</span>
+          <!-- <span class="badge-tag">Giảng viên ACC Academy</span> -->
           <h1 class="lecturer-name">{{ lecturer.name }}</h1>
           <p class="lecturer-title">{{ lecturer.title }}</p>
           <p class="lecturer-tagline">{{ lecturer.tagline }}</p>
