@@ -207,7 +207,6 @@
             </tr>
             <tr v-else-if="filteredAdmissions.length === 0">
               <td colspan="7" style="text-align: center; padding: 48px 20px; color: #64748b;">
-                <div style="font-size: 32px; margin-bottom: 8px;">🎓</div>
                 <div style="font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 6px;">Chưa có bài viết tuyển sinh nào trong hệ thống</div>
                 <p style="margin: 0; font-size: 13.5px;">Bấm nút "+ Thêm Bài viết Tuyển sinh mới" ở góc trên để tạo bài viết đầu tiên.</p>
               </td>
