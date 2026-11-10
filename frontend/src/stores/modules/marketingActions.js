@@ -424,6 +424,9 @@ export const marketingActions = {
       const url = force ? `/contacts/home-intro?_t=${Date.now()}` : '/contacts/home-intro';
       const data = await this.apiRequest(url, force ? { cache: 'no-store' } : {});
       this.homeIntroSettings = data;
+      try {
+        localStorage.setItem('acc_home_intro_cache', JSON.stringify(data));
+      } catch {}
       return data;
     } catch (err) {
       console.error("Failed to fetch home intro settings:", err);
@@ -438,6 +441,9 @@ export const marketingActions = {
         body: JSON.stringify(settings)
       });
       this.homeIntroSettings = data;
+      try {
+        localStorage.setItem('acc_home_intro_cache', JSON.stringify(data));
+      } catch {}
       return data;
     } catch (err) {
       console.error("Failed to update home intro settings:", err);

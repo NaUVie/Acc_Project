@@ -177,7 +177,14 @@ export const useCourseStore = defineStore('courses', {
         return [];
       }
     })(),
-    homeIntroSettings: null
+    homeIntroSettings: (() => {
+      try {
+        const cached = localStorage.getItem('acc_home_intro_cache');
+        return cached ? JSON.parse(cached) : null;
+      } catch {
+        return null;
+      }
+    })()
   }),
 
   getters: {
