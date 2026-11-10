@@ -26,7 +26,7 @@ def get_contact_settings(response: Response, db: Session = Depends(get_db)):
 
 @router.get("/home-intro", response_model=schemas.HomeIntroSettingResponse)
 def get_public_home_intro_settings(response: Response, db: Session = Depends(get_db)):
-    response.headers["Cache-Control"] = "public, max-age=180, stale-while-revalidate=60"
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
     settings = db.query(models.HomeIntroSetting).first()
     if not settings:
         settings = models.HomeIntroSetting()
