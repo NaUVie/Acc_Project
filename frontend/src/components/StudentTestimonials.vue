@@ -43,34 +43,42 @@
         
         <template v-if="videoTestimonialsData.length > 0">
           <div class="video-grid">
-            <div 
+            <a 
               v-for="(v, idx) in paginatedVideoData" 
               :key="v.id" 
               class="video-card"
-              @click="openVideo(v.videoUrl)"
+              :href="getYoutubeUrl(v)"
+              target="_blank"
+              rel="noopener noreferrer"
+              :title="'Xem video ' + v.title + ' trên YouTube'"
             >
               <div class="video-thumb-wrapper">
                 <img :src="formatImageUrl(v.thumbnail)" :alt="v.title" class="video-thumb-img" referrerpolicy="no-referrer" />
                 <div class="play-overlay">
-                  <div class="play-btn-circle">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  <div class="arrow-btn-circle" aria-label="Xem video trên YouTube">
+                    <svg class="block-arrow-glow" width="30" height="14" viewBox="0 0 52 24" fill="none">
+                      <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#ffffff" />
                     </svg>
                   </div>
                 </div>
               </div>
               <div class="video-card-body">
-                <span class="program-tag-badge" v-if="v.courseName">📚 Khóa học: {{ v.courseName }}</span>
+                <span class="program-tag-badge" v-if="v.courseName">Khóa học: {{ v.courseName }}</span>
                 <h4 class="video-card-title">{{ v.title }}</h4>
                 <div class="student-profile-info">
-                  <span class="s-name"> {{ v.studentName || v.name }}</span>
+                  <span class="s-name">{{ v.studentName || v.name }}</span>
                   <span class="s-role" v-if="v.role || v.company">{{ v.role }} <span v-if="v.company">• {{ v.company }}</span></span>
                 </div>
-                <span class="yt-link-small">
-                  Bấm để xem video ngay ;
-                </span>
+                <div class="video-card-footer">
+                  <span class="yt-link-action">Xem trên YouTube</span>
+                  <div class="arrow-container">
+                    <svg class="block-arrow-glow" width="40" height="18" viewBox="0 0 52 24" fill="none">
+                      <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#022B9F" />
+                    </svg>
+                  </div>
+                </div>
               </div>
-            </div>
+            </a>
           </div>
 
           <!-- Video Pagination Component -->
@@ -135,7 +143,7 @@
 
                 <div class="stars">★★★★★</div>
                 <p class="quote-text">"{{ p.quote }}"</p>
-                <span class="course-badge" v-if="p.courseName">📚 Khóa học: {{ p.courseName }}</span><span class="course-badge" v-else>📚 Học viên ACC Academy</span>
+                <span class="course-badge" v-if="p.courseName">Khóa học: {{ p.courseName }}</span><span class="course-badge" v-else>📚 Học viên ACC Academy</span>
               </div>
             </div>
           </div>
@@ -155,23 +163,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Video Modal Player -->
-    <Teleport to="body">
-      <div v-if="activeVideoUrl" class="video-modal-backdrop" @click="closeVideo">
-        <div class="video-modal-container" @click.stop>
-          <button class="video-close-btn" @click="closeVideo" aria-label="Đóng video">&times;</button>
-          <div class="iframe-wrapper">
-            <iframe 
-              :src="activeVideoUrl" 
-              title="YouTube Feedback Video ACC Academy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-              allowfullscreen
-            ></iframe>
-          </div>
-        </div>
-      </div>
-    </Teleport>
   </div>
 </template>
 
@@ -181,11 +172,10 @@ import { useTestimonialStore } from '@/stores/testimonials';
 import { formatImageUrl } from '@/utils/imageHelper';
 import Pagination from '@/components/Pagination.vue';
 
-const youtubePlaylistUrl = 'https://www.youtube.com/playlist?list=PLB-PopIBDBXk';
+const youtubePlaylistUrl = 'https://www.youtube.com/@accacademy-o9f';
 const testimonialStore = useTestimonialStore();
 
 const activeTab = ref('all');
-const activeVideoUrl = ref('');
 
 const videoPage = ref(1);
 const videoPageSize = ref(6);
@@ -220,18 +210,28 @@ const onPhotoPageChange = () => {
   window.scrollTo({ top: 450, behavior: 'smooth' });
 };
 
+const getYoutubeUrl = (item) => {
+  if (!item) return youtubePlaylistUrl;
+  const rawId = item.youtubeId || item.youtube_id;
+  if (rawId && /^[a-zA-Z0-9_-]{11}$/.test(rawId)) {
+    return `https://www.youtube.com/watch?v=${rawId}`;
+  }
+  const url = item.videoUrl || item.video_url || '';
+  if (url) {
+    const match = url.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
+    if (match && match[1]) {
+      return `https://www.youtube.com/watch?v=${match[1]}`;
+    }
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+  }
+  return youtubePlaylistUrl;
+};
+
 onMounted(() => {
   testimonialStore.fetchTestimonials();
 });
-
-const openVideo = (url) => {
-  if (!url) return;
-  activeVideoUrl.value = url;
-};
-
-const closeVideo = () => {
-  activeVideoUrl.value = '';
-};
 </script>
 
 <style scoped src="@/styles/components/StudentTestimonials.css"></style>
