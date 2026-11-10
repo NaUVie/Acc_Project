@@ -47,7 +47,7 @@
               >
                 {{ course.status === 'upcoming' ? '⏳ Sắp diễn ra' : (course.status === 'completed' ? '🏁 Đã diễn ra' : '🟢 Đang diễn ra') }}
               </span>
-              <span v-if="parentProgram" class="program-badge-pill">🎓 {{ parentProgram.title }}</span>
+              <span v-if="parentProgram" class="program-badge-pill"> {{ parentProgram.title }}</span>
             </div>
             
             <h1 class="article-main-title">{{ course.title }}</h1>
