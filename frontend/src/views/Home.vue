@@ -126,7 +126,7 @@
                   <!-- Poster Image (when not playing yet) -->
                   <img 
                     v-if="!isVideoPlaying" 
-                    :src="formatImageUrl(homeIntroData.poster_url) || '/images/CoE-Thumb.png'" 
+                    :src="formatImageUrl(homeIntroData.poster_url, 'w1200') || '/images/CoE-Thumb.png'" 
                     alt="Video Poster" 
                     class="eco-video-element" 
                     loading="eager"
@@ -149,7 +149,7 @@
                 <!-- 2. Pure Image Mode (Khi để trống link video) -->
                 <template v-else>
                   <img 
-                    :src="formatImageUrl(homeIntroData.poster_url) || '/images/CoE-Thumb.png'" 
+                    :src="formatImageUrl(homeIntroData.poster_url, 'w1200') || '/images/CoE-Thumb.png'" 
                     alt="ACC Academy" 
                     class="eco-video-element" 
                     loading="eager"
