@@ -4,18 +4,63 @@
     <div class="mega-style-layout glass-card">
       <!-- Left Sidebar: Dynamic Categories Navigation -->
       <aside class="mega-menu-sidebar" aria-label="Danh mục khóa học">
-        <button 
-          v-for="cat in availableCategories" 
-          :key="cat.id"
-          type="button"
-          class="mega-sidebar-item"
-          :class="{ active: selectedCategory === cat.id }"
-          @click="scrollToCategory(cat.id)"
-        >
-          <span class="indicator-bar"></span>
-          <span class="sidebar-item-label">{{ cat.name }}</span>
-          <span class="cat-count-badge">{{ cat.count }}</span>
-        </button>
+        <template v-for="cat in availableCategories" :key="cat.id">
+          <!-- Standard Category without Children -->
+          <div v-if="cat.id !== 'dao-tao-inhouse'" class="sidebar-category-group">
+            <button 
+              type="button"
+              class="mega-sidebar-item"
+              :class="{ active: selectedCategory === cat.id }"
+              @click="scrollToCategory(cat.id)"
+            >
+              <span class="indicator-bar"></span>
+              <span class="sidebar-item-label">{{ cat.name }}</span>
+            </button>
+          </div>
+
+          <!-- ĐÀO TẠO INHOUSE: Có các mục con (Hiệp hội, Doanh nghiệp, Khối cơ quan nhà nước, Khối trường học) - Mặc định sổ ra -->
+          <div v-else class="sidebar-category-group is-inhouse-group">
+            <div 
+              class="mega-sidebar-item has-children"
+              :class="{ active: selectedCategory === cat.id || isInhouseChildActive }"
+              @click="selectCategory('dao-tao-inhouse')"
+            >
+              <span class="indicator-bar"></span>
+              <span class="sidebar-item-label">{{ cat.name }}</span>
+              <button 
+                type="button" 
+                class="submenu-toggle-btn"
+                @click.stop="isInhouseExpanded = !isInhouseExpanded"
+                :title="isInhouseExpanded ? 'Thu gọn danh mục con' : 'Sổ ra danh mục con'"
+                aria-label="Toggle inhouse submenu"
+              >
+                <svg class="chevron-arrow" :class="{ 'rotate': isInhouseExpanded }" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- CÁC MỤC CON CỦA ĐÀO TẠO INHOUSE (MẶC ĐỊNH SỔ RA - KHÔNG ICON) -->
+            <transition name="accordion-slide">
+              <div 
+                v-show="isInhouseExpanded" 
+                class="sidebar-submenu"
+              >
+                <button 
+                  v-for="sub in inhouseSubCategories" 
+                  :key="sub.id"
+                  type="button"
+                  class="mega-sidebar-subitem"
+                  :class="{ active: activeInhouseSub === sub.id && selectedCategory === sub.id }"
+                  @click="selectInhouseSubCategory(sub.id)"
+                >
+                  <span class="subitem-dot"></span>
+                  <span class="sidebar-subitem-label">{{ sub.name }}</span>
+                </button>
+              </div>
+            </transition>
+          </div>
+        </template>
       </aside>
 
       <!-- Right Content: Dynamic Category Sections with Course Cards -->
@@ -33,19 +78,56 @@
             :key="cat.slug" 
             :id="'category-' + cat.slug"
             class="category-group-section"
+            :class="{ 'is-inhouse-section': cat.slug === 'dao-tao-inhouse' }"
           >
+            <!-- CATEGORY HEADER -->
             <div class="category-section-header">
               <div class="category-header-info">
                 <span class="cat-badge-small">CHƯƠNG TRÌNH ĐÀO TẠO</span>
-                <h3 class="category-section-title">{{ cat.name }}</h3>
+                <h3 class="category-section-title">
+                  {{ cat.name }}
+                  <span v-if="cat.slug === 'dao-tao-inhouse' && activeInhouseSubName" class="sub-title-tag">
+                    / {{ activeInhouseSubName }}
+                  </span>
+                </h3>
               </div>
-              <span class="category-count-pill">{{ cat.courses.length }} khóa học</span>
+              <div class="category-header-actions" v-if="cat.slug === 'dao-tao-inhouse' && activeInhouseSub !== 'all'">
+                <button 
+                  type="button" 
+                  class="btn-reset-inhouse"
+                  @click="selectCategory('dao-tao-inhouse')"
+                >
+                  ← Xem tất cả Inhouse
+                </button>
+              </div>
             </div>
 
-            <!-- Course Cards Grid -->
-            <div v-if="cat.courses.length > 0" class="mega-programs-grid">
+            <!-- THANH LỌC NHANH CHO INHOUSE (TẤT CẢ, HIỆP HỘI, DOANH NGHIỆP, CƠ QUAN NHÀ NƯỚC, TRƯỜNG HỌC) -->
+            <div v-if="cat.slug === 'dao-tao-inhouse'" class="inhouse-filter-pills">
+              <button 
+                type="button" 
+                class="inhouse-pill-btn" 
+                :class="{ active: activeInhouseSub === 'all' }"
+                @click="selectCategory('dao-tao-inhouse')"
+              >
+                Tất cả Inhouse
+              </button>
+              <button 
+                v-for="sub in inhouseSubCategories" 
+                :key="sub.id"
+                type="button" 
+                class="inhouse-pill-btn" 
+                :class="{ active: activeInhouseSub === sub.id }"
+                @click="selectInhouseSubCategory(sub.id)"
+              >
+                {{ sub.name }}
+              </button>
+            </div>
+
+            <!-- COURSE CARDS GRID -->
+            <div v-if="displayedCoursesForCat(cat).length > 0" class="mega-programs-grid">
               <div 
-                v-for="course in cat.courses" 
+                v-for="course in displayedCoursesForCat(cat)" 
                 :key="course.id"
                 class="mega-program-card"
               >
@@ -85,9 +167,9 @@
               </div>
             </div>
 
-            <!-- Empty category state if no courses exist yet in this category -->
+            <!-- Empty category / subgroup state -->
             <div v-else class="empty-category-notice">
-              <p>Chưa có khóa học nào trong danh mục này.</p>
+              <p>Chưa có khóa học nào trong khối này.</p>
             </div>
           </section>
         </template>
@@ -112,7 +194,89 @@ const route = useRoute();
 const courseStore = useCourseStore();
 
 const selectedCategory = ref('all');
+const activeInhouseSub = ref('all'); // 'all' = hiển thị toàn bộ Inhouse bình thường, hoặc 'inhouse-hiep-hoi', 'inhouse-doanh-nghiep', etc.
+const isInhouseExpanded = ref(true); // Mặc định sổ ra theo yêu cầu người dùng
 let isProgrammaticScroll = false;
+
+// Hàm phân loại các khóa học Inhouse vào 4 khối con
+const classifyInhouseCourse = (course) => {
+  const text = `${course.title || ''} ${course.description || ''} ${course.category || ''} ${course.category_slug || ''}`.toLowerCase();
+  
+  // 1. Hiệp hội
+  if (text.includes('saca') || text.includes('hiệp hội') || text.includes('hiep hoi') || text.includes('hiep-hoi') || text.includes('association')) {
+    return 'inhouse-hiep-hoi';
+  }
+  // 2. Khối trường học
+  if (text.includes('giáo dục') || text.includes('giao duc') || text.includes('trường học') || text.includes('truong hoc') || text.includes('truong-hoc') || text.includes('school') || text.includes('đại học')) {
+    return 'inhouse-truong-hoc';
+  }
+  // 3. Khối cơ quan nhà nước
+  if (text.includes('nhà nước') || text.includes('nha nuoc') || text.includes('cơ quan') || text.includes('co quan') || text.includes('ubnd') || text.includes('phường') || text.includes('xã') || text.includes('quận') || text.includes('chính phủ')) {
+    return 'inhouse-co-quan-nha-nuoc';
+  }
+  // 4. Doanh nghiệp (mặc định cho inhouse)
+  return 'inhouse-doanh-nghiep';
+};
+
+// 4 mục con của Đào tạo INHOUSE (Hiệp hội, Doanh nghiệp, Khối cơ quan nhà nước, Khối trường học) - KHÔNG icon emoji
+const inhouseSubCategories = computed(() => {
+  const inhouseCourses = courseStore.getCoursesByCategory('dao-tao-inhouse') || [];
+  
+  const hiephoiCourses = inhouseCourses.filter(c => classifyInhouseCourse(c) === 'inhouse-hiep-hoi');
+  const doanhnghiepCourses = inhouseCourses.filter(c => classifyInhouseCourse(c) === 'inhouse-doanh-nghiep');
+  const nhanuocCourses = inhouseCourses.filter(c => classifyInhouseCourse(c) === 'inhouse-co-quan-nha-nuoc');
+  const truonghocCourses = inhouseCourses.filter(c => classifyInhouseCourse(c) === 'inhouse-truong-hoc');
+
+  return [
+    { 
+      id: 'inhouse-hiep-hoi', 
+      name: 'Hiệp hội', 
+      count: hiephoiCourses.length, 
+      courses: hiephoiCourses 
+    },
+    { 
+      id: 'inhouse-doanh-nghiep', 
+      name: 'Doanh nghiệp', 
+      count: doanhnghiepCourses.length, 
+      courses: doanhnghiepCourses 
+    },
+    { 
+      id: 'inhouse-co-quan-nha-nuoc', 
+      name: 'Khối cơ quan nhà nước', 
+      count: nhanuocCourses.length, 
+      courses: nhanuocCourses 
+    },
+    { 
+      id: 'inhouse-truong-hoc', 
+      name: 'Khối trường học', 
+      count: truonghocCourses.length, 
+      courses: truonghocCourses 
+    }
+  ];
+});
+
+// Tên khối con Inhouse đang chọn
+const activeInhouseSubName = computed(() => {
+  if (activeInhouseSub.value === 'all') return '';
+  const sub = inhouseSubCategories.value.find(s => s.id === activeInhouseSub.value);
+  return sub ? sub.name : '';
+});
+
+// Kiểm tra xem một trong các mục con của Inhouse có đang active không
+const isInhouseChildActive = computed(() => {
+  return inhouseSubCategories.value.some(sub => sub.id === selectedCategory.value);
+});
+
+// Danh sách khóa học hiển thị cho từng chuyên mục
+const displayedCoursesForCat = (cat) => {
+  if (cat.slug === 'dao-tao-inhouse') {
+    if (activeInhouseSub.value && activeInhouseSub.value !== 'all') {
+      return cat.courses.filter(c => classifyInhouseCourse(c) === activeInhouseSub.value);
+    }
+    return cat.courses; // Ấn vào inhouse hiển thị toàn bộ bình thường
+  }
+  return cat.courses;
+};
 
 // Dynamic categories with courses grouped directly from store (API / DB)
 const dynamicCategories = computed(() => {
@@ -163,6 +327,22 @@ const availableCategories = computed(() => {
   return list;
 });
 
+// Khi ấn vào danh mục cha (Inhouse -> hiển thị toàn bộ bình thường)
+const selectCategory = (id) => {
+  if (id === 'dao-tao-inhouse') {
+    activeInhouseSub.value = 'all'; // Hiển thị toàn bộ inhouse bình thường
+  }
+  scrollToCategory(id);
+};
+
+// Khi ấn riêng từng khối con của Inhouse -> mới lọc riêng khối đó
+const selectInhouseSubCategory = (subId) => {
+  activeInhouseSub.value = subId;
+  selectedCategory.value = subId;
+  isInhouseExpanded.value = true;
+  scrollToCategory('dao-tao-inhouse');
+};
+
 const scrollToCategory = (id, smooth = true) => {
   selectedCategory.value = id;
   isProgrammaticScroll = true;
@@ -180,7 +360,8 @@ const scrollToCategory = (id, smooth = true) => {
       history.replaceState(null, '', '/courses');
     }
   } else {
-    const el = document.getElementById(`category-${id}`);
+    const targetAnchor = id.startsWith('inhouse-') ? 'dao-tao-inhouse' : id;
+    const el = document.getElementById(`category-${targetAnchor}`);
     if (el) {
       const headerOffset = 90;
       const targetY = el.getBoundingClientRect().top + window.pageYOffset - headerOffset;
@@ -197,9 +378,6 @@ const scrollToCategory = (id, smooth = true) => {
 const handleScroll = () => {
   if (isProgrammaticScroll) return;
 
-  const sections = dynamicCategories.value;
-  if (!sections.length) return;
-
   const headerOffset = 130;
   const scrollY = window.pageYOffset;
   const layoutEl = document.querySelector('.mega-style-layout');
@@ -212,6 +390,9 @@ const handleScroll = () => {
     }
   }
 
+  const sections = dynamicCategories.value;
+  if (!sections.length) return;
+
   let currentActive = 'all';
   for (const cat of sections) {
     const el = document.getElementById(`category-${cat.slug}`);
@@ -223,8 +404,10 @@ const handleScroll = () => {
     }
   }
 
-  if (selectedCategory.value !== currentActive) {
-    selectedCategory.value = currentActive;
+  if (currentActive !== 'dao-tao-inhouse' || activeInhouseSub.value === 'all') {
+    if (selectedCategory.value !== currentActive) {
+      selectedCategory.value = currentActive;
+    }
   }
 };
 
@@ -244,9 +427,22 @@ onMounted(async () => {
 
   const paramSlug = route.params.categorySlug;
   if (paramSlug) {
+    const ALIAS_MAP = {
+      'hiep-hoi': 'inhouse-hiep-hoi',
+      'doanh-nghiep': 'inhouse-doanh-nghiep',
+      'co-quan-nha-nuoc': 'inhouse-co-quan-nha-nuoc',
+      'nha-nuoc': 'inhouse-co-quan-nha-nuoc',
+      'truong-hoc': 'inhouse-truong-hoc',
+      'inhouse': 'dao-tao-inhouse'
+    };
+    const target = ALIAS_MAP[paramSlug] || paramSlug;
     await nextTick();
     setTimeout(() => {
-      scrollToCategory(paramSlug, true);
+      if (target.startsWith('inhouse-')) {
+        selectInhouseSubCategory(target);
+      } else {
+        scrollToCategory(target, true);
+      }
     }, 200);
   }
 });
@@ -257,9 +453,22 @@ onUnmounted(() => {
 
 watch(() => route.params.categorySlug, (newSlug) => {
   if (newSlug) {
-    scrollToCategory(newSlug, true);
+    const ALIAS_MAP = {
+      'hiep-hoi': 'inhouse-hiep-hoi',
+      'doanh-nghiep': 'inhouse-doanh-nghiep',
+      'co-quan-nha-nuoc': 'inhouse-co-quan-nha-nuoc',
+      'nha-nuoc': 'inhouse-co-quan-nha-nuoc',
+      'truong-hoc': 'inhouse-truong-hoc',
+      'inhouse': 'dao-tao-inhouse'
+    };
+    const target = ALIAS_MAP[newSlug] || newSlug;
+    if (target.startsWith('inhouse-')) {
+      selectInhouseSubCategory(target);
+    } else {
+      selectCategory(target);
+    }
   } else {
-    scrollToCategory('all', true);
+    selectCategory('all');
   }
 });
 

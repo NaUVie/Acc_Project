@@ -187,6 +187,17 @@ export const useCourseStore = defineStore('courses', {
       if (['all', 'courses', 'dao-tao'].includes(targetSlug)) {
         return state.courses;
       }
+      const SUB_ALIASES = {
+        'hiep-hoi': 'inhouse-hiep-hoi',
+        'inhouse-hiep-hoi': 'inhouse-hiep-hoi',
+        'truong-hoc': 'inhouse-truong-hoc',
+        'inhouse-truong-hoc': 'inhouse-truong-hoc',
+        'inhouse-doanh-nghiep': 'inhouse-doanh-nghiep',
+        'co-quan-nha-nuoc': 'inhouse-co-quan-nha-nuoc',
+        'nha-nuoc': 'inhouse-co-quan-nha-nuoc',
+        'inhouse-co-quan-nha-nuoc': 'inhouse-co-quan-nha-nuoc'
+      };
+
       const ALIASES = {
         'doanh-nghiep': 'dao-tao-inhouse',
         'dao-tao-doanh-nghiep': 'dao-tao-inhouse',
@@ -194,8 +205,6 @@ export const useCourseStore = defineStore('courses', {
         'dao-tao-inhouse': 'dao-tao-inhouse',
         'ca-nhan': 'dao-tao-ca-nhan',
         'dao-tao-ca-nhan': 'dao-tao-ca-nhan',
-        'nha-nuoc': 'dao-tao-co-quan-nha-nuoc',
-        'co-quan-nha-nuoc': 'dao-tao-co-quan-nha-nuoc',
         'ai': 'dao-tao-inhouse',
         'ky-nang-ai': 'dao-tao-inhouse',
         'mem': 'dao-tao-ca-nhan',
@@ -203,6 +212,31 @@ export const useCourseStore = defineStore('courses', {
         'chuyen-mon': 'dao-tao-ca-nhan',
         'ky-nang-chuyen-mon': 'dao-tao-ca-nhan'
       };
+
+      if (SUB_ALIASES[targetSlug]) {
+        const subSlug = SUB_ALIASES[targetSlug];
+        return state.courses.filter(course => {
+          if (!course.category) return false;
+          const cCat = String(course.category).toLowerCase();
+          const mappedCCat = ALIASES[cCat] || cCat;
+          if (mappedCCat !== 'dao-tao-inhouse' && mappedCCat !== subSlug) return false;
+          const text = `${course.title || ''} ${course.description || ''} ${course.category || ''}`.toLowerCase();
+          if (subSlug === 'inhouse-hiep-hoi') {
+            return text.includes('saca') || text.includes('hiệp hội') || text.includes('hiep hoi');
+          }
+          if (subSlug === 'inhouse-truong-hoc') {
+            return text.includes('giáo dục') || text.includes('trường học') || text.includes('truong hoc');
+          }
+          if (subSlug === 'inhouse-co-quan-nha-nuoc') {
+            return text.includes('nhà nước') || text.includes('cơ quan') || text.includes('ubnd');
+          }
+          if (subSlug === 'inhouse-doanh-nghiep') {
+            return (!text.includes('saca') && !text.includes('hiệp hội') && !text.includes('giáo dục') && !text.includes('trường học') && !text.includes('nhà nước') && !text.includes('cơ quan') && !text.includes('ubnd')) || text.includes('doanh nghiệp');
+          }
+          return false;
+        });
+      }
+
       if (ALIASES[targetSlug]) {
         targetSlug = ALIASES[targetSlug];
       }

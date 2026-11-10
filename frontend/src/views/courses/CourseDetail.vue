@@ -332,7 +332,7 @@
                     />
                   </router-link>
                   <div class="sidebar-rel-info">
-                    <span class="sidebar-rel-cat">{{ blog.category }}</span>
+                    <!-- <span class="sidebar-rel-cat">{{ blog.category }}</span> -->
                     <h4 class="sidebar-rel-name">
                       <router-link :to="'/blog/' + blog.handle">
                         {{ blog.title }}
