@@ -82,7 +82,7 @@
               <span class="meta-dot">•</span>
               <span class="meta-author">ACC Editorial</span>
               <span v-if="getLinkedCourseTitle(post.course_id)" class="linked-course-pill">
-                🎓 {{ getLinkedCourseTitle(post.course_id) }}
+                {{ getLinkedCourseTitle(post.course_id) }}
               </span>
             </div>
 
