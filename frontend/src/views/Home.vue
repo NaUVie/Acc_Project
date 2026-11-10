@@ -87,52 +87,74 @@
             </div>
 
             <!-- Video Player Section (Replaces eco-center image & eco-right services list) -->
-            <div class="eco-video-wrapper">
-              <div class="eco-video-card" :class="{ 'is-playing': isVideoPlaying }">
-                <!-- 1. Iframe Embed (YouTube / Google Drive) -->
-                <iframe 
-                  v-if="videoEmbedUrl && isVideoPlaying"
-                  :src="videoEmbedUrl"
-                  class="eco-video-element"
-                  :title="$t('home.introVideoTitle')"
-                  frameborder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowfullscreen
-                ></iframe>
+            <div 
+              class="eco-video-wrapper"
+              @mouseenter="hasVideo && handleWarmup()"
+              @touchstart.passive="hasVideo && handleWarmup()"
+            >
+              <div class="eco-video-card" :class="{ 'is-playing': isVideoPlaying, 'is-image-only': !hasVideo }">
+                <!-- 1. Video Mode -->
+                <template v-if="hasVideo">
+                  <!-- Iframe Embed (YouTube / Google Drive) -->
+                  <iframe 
+                    v-if="videoEmbedUrl && isVideoPlaying"
+                    :src="videoEmbedUrl"
+                    class="eco-video-element eco-video-iframe"
+                    :title="$t('home.introVideoTitle')"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen
+                    loading="eager"
+                  ></iframe>
 
-                <!-- 2. HTML5 Video (Direct .mp4 / local file) -->
-                <video 
-                  v-else-if="!videoEmbedUrl"
-                  ref="ecoVideoRef" 
-                  class="eco-video-element" 
-                  :poster="formatImageUrl(homeIntroData.poster_url)"
-                  controls
-                  playsinline
-                  preload="none"
-                  :src="homeIntroData.video_url"
-                  @play="isVideoPlaying = true"
-                  @pause="isVideoPlaying = false"
-                  @ended="isVideoPlaying = false"
-                ></video>
+                  <!-- HTML5 Video (Direct .mp4 / local file) -->
+                  <video 
+                    v-else-if="!videoEmbedUrl && isVideoPlaying"
+                    ref="ecoVideoRef" 
+                    class="eco-video-element" 
+                    :poster="formatImageUrl(homeIntroData.poster_url)"
+                    controls
+                    playsinline
+                    muted
+                    preload="metadata"
+                    :src="homeIntroData.video_url"
+                    @play="isVideoPlaying = true"
+                    @pause="isVideoPlaying = false"
+                    @ended="isVideoPlaying = false"
+                  ></video>
 
-                <!-- Poster Image for Embed (when not playing yet) -->
-                <img 
-                  v-if="videoEmbedUrl && !isVideoPlaying" 
-                  :src="formatImageUrl(homeIntroData.poster_url) || '/images/CoE-Thumb.png'" 
-                  alt="Video Poster" 
-                  class="eco-video-element" 
-                />
+                  <!-- Poster Image (when not playing yet) -->
+                  <img 
+                    v-if="!isVideoPlaying" 
+                    :src="formatImageUrl(homeIntroData.poster_url) || '/images/CoE-Thumb.png'" 
+                    alt="Video Poster" 
+                    class="eco-video-element" 
+                    loading="lazy"
+                    decoding="async"
+                  />
 
-                <!-- Play Overlay Button -->
-                <div v-if="!isVideoPlaying" class="video-play-overlay" @click="handlePlayVideo">
-                  <div class="play-pulse-ring"></div>
-                  <button class="play-btn-circle" :aria-label="$t('home.playVideo')">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
-                      <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
-                  </button>
-                  <span class="play-btn-label">{{ homeIntroData.btn_label }}</span>
-                </div>
+                  <!-- Play Overlay Button -->
+                  <div v-if="!isVideoPlaying" class="video-play-overlay" @click="handlePlayVideo">
+                    <div class="play-pulse-ring"></div>
+                    <button class="play-btn-circle" :aria-label="$t('home.playVideo')">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                      </svg>
+                    </button>
+                    <span class="play-btn-label">{{ homeIntroData.btn_label }}</span>
+                  </div>
+                </template>
+
+                <!-- 2. Pure Image Mode (Khi để trống link video) -->
+                <template v-else>
+                  <img 
+                    :src="formatImageUrl(homeIntroData.poster_url) || '/images/CoE-Thumb.png'" 
+                    alt="ACC Academy" 
+                    class="eco-video-element" 
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </template>
               </div>
             </div>
           </div>
@@ -682,7 +704,9 @@ const convertToEmbedUrl = (url) => {
   // Matches: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID, youtube.com/shorts/ID
   const ytMatch = cleanUrl.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/i);
   if (ytMatch && ytMatch[1]) {
-    return `https://www.youtube.com/embed/${ytMatch[1]}?autoplay=1&rel=0`;
+    // youtube-nocookie: Loads faster (less tracking overhead)
+    // mute=1: Muted by default as requested & bypasses browser autoplay restrictions for instant start
+    return `https://www.youtube-nocookie.com/embed/${ytMatch[1]}?autoplay=1&mute=1&rel=0&playsinline=1&modestbranding=1&enablejsapi=1`;
   }
 
   // 2. Google Drive
@@ -703,9 +727,49 @@ const videoEmbedUrl = computed(() => {
   return convertToEmbedUrl(url);
 });
 
+const hasVideo = computed(() => {
+  const url = homeIntroData.value?.video_url;
+  return Boolean(url && typeof url === 'string' && url.trim().length > 0);
+});
+
+const isWarmedUp = ref(false);
+const handleWarmup = () => {
+  if (isWarmedUp.value) return;
+  isWarmedUp.value = true;
+  if (videoEmbedUrl.value) {
+    // Prefetch YouTube player document ahead of time for instant playback
+    const existing = document.querySelector('link[data-warmup-video]');
+    if (!existing) {
+      const link = document.createElement('link');
+      link.rel = 'prefetch';
+      link.as = 'document';
+      link.href = videoEmbedUrl.value;
+      link.setAttribute('data-warmup-video', 'true');
+      document.head.appendChild(link);
+    }
+  } else if (ecoVideoRef.value) {
+    ecoVideoRef.value.preload = 'auto';
+  }
+};
+
+const setupVideoWarmupObserver = () => {
+  if (typeof window === 'undefined') return;
+  const ecoWrapper = document.querySelector('.eco-video-wrapper');
+  if (ecoWrapper && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0] && entries[0].isIntersecting) {
+        handleWarmup();
+        observer.disconnect();
+      }
+    }, { rootMargin: '300px' });
+    observer.observe(ecoWrapper);
+  }
+};
+
 const handlePlayVideo = () => {
   isVideoPlaying.value = true;
   if (!videoEmbedUrl.value && ecoVideoRef.value) {
+    ecoVideoRef.value.muted = true;
     ecoVideoRef.value.play().catch(() => {});
   }
 };
@@ -1269,6 +1333,7 @@ onMounted(() => {
   setupEcoTitleObserver();
   setupCountersObserver();
   setupPartnerObserver();
+  setupVideoWarmupObserver();
 
   // Auto pop-up consultation modal (at most once per day)
   checkAndShowContactModal();
