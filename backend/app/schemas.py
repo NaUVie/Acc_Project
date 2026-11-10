@@ -772,6 +772,7 @@ class ContactSettingUpdate(BaseModel):
     email: Optional[str] = None
     zalo: Optional[str] = None
     viber: Optional[str] = None
+    board_columns_desktop: Optional[int] = None
 
 class ContactSettingResponse(BaseModel):
     id: int
@@ -780,6 +781,7 @@ class ContactSettingResponse(BaseModel):
     email: str
     zalo: str
     viber: str
+    board_columns_desktop: Optional[int] = 4
 
     class Config:
         from_attributes = True
@@ -807,9 +809,9 @@ class HomeIntroSettingResponse(BaseModel):
     desc2: str
     counter_number: int
     counter_label: str
-    video_url: str
-    poster_url: str
-    btn_label: str
+    video_url: Optional[str] = ""
+    poster_url: Optional[str] = ""
+    btn_label: Optional[str] = ""
     bento_title: Optional[str] = "Năng lực cốt lõi của ACC Academy"
     bento_line1: Optional[str] = "ACC — Học viện Cổ phần Kết nối Tri thức — là đơn vị giáo dục chuyên biệt dành cho cá nhân và doanh nghiệp,"
     bento_line2: Optional[str] = "được bảo chứng học thuật bởi Đại học Andrews (Hoa Kỳ)."

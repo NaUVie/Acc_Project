@@ -60,6 +60,8 @@ def update_contact_settings(
         db_settings.zalo = settings_in.zalo
     if settings_in.viber is not None:
         db_settings.viber = settings_in.viber
+    if settings_in.board_columns_desktop is not None:
+        db_settings.board_columns_desktop = settings_in.board_columns_desktop
         
     db.commit()
     db.refresh(db_settings)

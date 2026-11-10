@@ -169,6 +169,15 @@ def perform_startup_tasks():
                             print(f"Added column {col_name} to home_intro_settings table.")
                         except Exception as ex:
                             print(f"Migration column error for home_intro_settings.{col_name}: {ex}")
+
+            if inspector.has_table("contact_settings"):
+                cs_cols = [c["name"] for c in inspector.get_columns("contact_settings")]
+                if "board_columns_desktop" not in cs_cols:
+                    try:
+                        conn.execute(text("ALTER TABLE contact_settings ADD COLUMN board_columns_desktop INT DEFAULT 4"))
+                        print("Added column board_columns_desktop to contact_settings table.")
+                    except Exception as ex:
+                        print(f"Error adding board_columns_desktop to contact_settings: {ex}")
     except Exception as e:
         print(f"Error checking/adding migration columns: {e}")
 

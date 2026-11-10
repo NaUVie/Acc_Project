@@ -318,6 +318,7 @@ class ContactSetting(Base):
     email = Column(String(150), default="support@accacademy.vn")
     zalo = Column(String(150), default="https://zalo.me/0901234567")
     viber = Column(String(150), default="https://viber.click/0901234567")
+    board_columns_desktop = Column(Integer, default=4)
 
 class Banner(Base):
     __tablename__ = "banners"
