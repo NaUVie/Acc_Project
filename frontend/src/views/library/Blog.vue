@@ -64,7 +64,7 @@
                 loading="lazy"
                 decoding="async"
               />
-              <span class="category-badge" v-if="post.category">{{ post.category }}</span>
+              <!-- <span class="category-badge" v-if="post.category">{{ post.category }}</span> -->
             </div>
           </router-link>
 
