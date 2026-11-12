@@ -977,7 +977,9 @@ def get_testimonial_by_id(db: Session, testimonial_id: int):
     return db.query(models.Testimonial).filter(models.Testimonial.id == testimonial_id).first()
 
 def create_testimonial(db: Session, test_in: schemas.TestimonialCreate):
-    db_test = models.Testimonial(**test_in.model_dump())
+    data = test_in.model_dump()
+    data.pop("honeypot", None)  # trường chống spam, không phải cột trong DB
+    db_test = models.Testimonial(**data)
     db.add(db_test)
     db.commit()
     db.refresh(db_test)
