@@ -13,18 +13,7 @@
           <div class="brand-acc">
             <img src="/images/logo3.png" alt="ACC Kết Nối Tri Thức" class="hero-acc-logo" />
           </div>
-          <div class="brand-divider"></div>
-          <div class="brand-partner">
-            <div class="partner-crest-svg">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 2L2 7h20L12 2z"/>
-              </svg>
-            </div>
-            <!-- <div class="partner-text">
-              <span class="partner-title">ANDREWS UNIVERSITY</span>
-              <span class="partner-sub">MICHIGAN, USA • EST. 1874</span>
-            </div> -->
-          </div>
+  
         </div>
 
         <!-- 2. Overline Tag -->
