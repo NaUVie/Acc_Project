@@ -54,13 +54,6 @@
             >
               <div class="video-thumb-wrapper">
                 <img :src="formatImageUrl(v.thumbnail)" :alt="v.title" class="video-thumb-img" referrerpolicy="no-referrer" />
-                <div class="play-overlay">
-                  <div class="arrow-btn-circle" aria-label="Xem video trên YouTube">
-                    <svg class="block-arrow-glow" width="30" height="14" viewBox="0 0 52 24" fill="none">
-                      <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#ffffff" />
-                    </svg>
-                  </div>
-                </div>
               </div>
               <div class="video-card-body">
                 <span class="program-tag-badge" v-if="v.courseName">Khóa học: {{ v.courseName }}</span>
@@ -70,7 +63,6 @@
                   <span class="s-role" v-if="v.role || v.company">{{ v.role }} <span v-if="v.company">• {{ v.company }}</span></span>
                 </div>
                 <div class="video-card-footer">
-                  <span class="yt-link-action">Xem trên YouTube</span>
                   <div class="arrow-container">
                     <svg class="block-arrow-glow" width="40" height="18" viewBox="0 0 52 24" fill="none">
                       <path d="M 2 7 L 34 7 L 34 2 L 50 12 L 34 22 L 34 17 L 2 17 Z" fill="#022B9F" />
