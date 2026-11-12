@@ -19,13 +19,13 @@
     <section class="vision-mission-section reveal-on-scroll">
       <div class="container">
         <div class="vm-banner-card">
-          <!-- Right Media: Photo with people -->
+          <!-- Left Media: Photo with people -->
           <div class="vm-bg-media">
             <img src="/images/TamNhinSuMenh.jpg" alt="Tầm nhìn & Sứ mệnh ACC" class="vm-bg-img" loading="lazy" decoding="async" />
             <div class="vm-gradient-overlay"></div>
           </div>
 
-          <!-- Left Content: 2 Columns side-by-side matching reference image -->
+          <!-- Right Content: 2 Columns side-by-side matching reference image -->
           <div class="vm-inner-content">
             <div class="vm-columns-grid">
               <!-- Column 1: Logo ACC + Tầm nhìn & Sứ mệnh -->
@@ -36,7 +36,7 @@
                 <span class="vm-tag">{{ $t('about.tagOrientation') }}</span>
                 <h3 class="vm-title">{{ $t('about.visionTitle') }}</h3>
                 <p class="vm-text">
-                  {{ $t('about.visionText1') }} <strong>{{ $t('about.visionTextStrong1') }}</strong>{{ $t('about.visionText2') }} <strong>{{ $t('about.visionTextStrong2') }}</strong>
+                  {{ $t('about.visionText') }}
                 </p>
               </div>
 
@@ -46,7 +46,7 @@
                 <span class="vm-tag">{{ $t('about.tagPractical') }}</span>
                 <h3 class="vm-title">{{ $t('about.diffTitle') }}</h3>
                 <p class="vm-text">
-                  {{ $t('about.diffText1') }} <strong>{{ $t('about.diffTextStrong1') }}</strong>{{ $t('about.diffText2') }}
+                  {{ $t('about.diffText') }}
                 </p>
               </div>
             </div>
