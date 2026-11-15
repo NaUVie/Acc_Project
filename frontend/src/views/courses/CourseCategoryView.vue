@@ -145,7 +145,6 @@
                     </span>
                   </div>
                   <div class="mega-card-info">
-                    <span class="mega-school-name">{{ course.level || 'Khóa học' }}</span>
                     <h4 class="mega-program-title" :title="course.title">{{ course.title }}</h4>
                     <p class="mega-program-desc">{{ stripHtml(course.description) }}</p>
                     <div class="mega-card-footer">
