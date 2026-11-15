@@ -401,8 +401,6 @@
                   
                   <div class="wishlist-course-meta">
                     <span>{{ item.course?.duration || 'Lộ trình thực chiến' }}</span>
-                    <span>•</span>
-                    <span>{{ item.course?.level || 'Chuyên sâu' }}</span>
                   </div>
 
                   <div class="wishlist-action-row">
