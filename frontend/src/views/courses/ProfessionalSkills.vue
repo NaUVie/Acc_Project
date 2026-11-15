@@ -68,17 +68,6 @@
               </button>
             </div>
             
-            <!-- Level Filter -->
-            <div class="filter-group">
-              <h4 class="filter-group-title">Cấp độ</h4>
-              <div class="filter-options">
-                <label v-for="level in levels" :key="level" class="filter-checkbox-label">
-                  <input type="checkbox" :value="level" v-model="selectedLevels" />
-                  <span class="checkbox-text">{{ level }}</span>
-                </label>
-              </div>
-            </div>
-
             <!-- Product Type Filter -->
             <div class="filter-group">
               <h4 class="filter-group-title">Loại sản phẩm</h4>
@@ -183,17 +172,6 @@
         </div>
         
         <div class="drawer-body">
-          <!-- Level Filter -->
-          <div class="filter-group">
-            <h4 class="filter-group-title">Cấp độ</h4>
-            <div class="filter-options">
-              <label v-for="level in levels" :key="level" class="filter-checkbox-label">
-                <input type="checkbox" :value="level" v-model="selectedLevels" />
-                <span class="checkbox-text">{{ level }}</span>
-              </label>
-            </div>
-          </div>
-
           <!-- Product Type Filter -->
           <div class="filter-group">
             <h4 class="filter-group-title">Loại sản phẩm</h4>
@@ -300,11 +278,6 @@ const specialistCourses = computed(() => {
 // Dynamic filtering & sorting
 const filteredCourses = computed(() => {
   let list = [...specialistCourses.value];
-
-  // Filter by level
-  if (selectedLevels.value.length > 0) {
-    list = list.filter(course => selectedLevels.value.includes(course.level));
-  }
 
   // Filter by product type
   if (selectedTypes.value.length > 0) {

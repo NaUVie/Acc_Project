@@ -20,7 +20,6 @@
             <span class="course-badge" :class="{ 'best-seller': course.price > 3000000 }">
               {{ course.price > 3000000 ? 'Chuyên sâu' : 'Hot' }}
             </span>
-            <span class="level-badge">{{ course.level }}</span>
           </div>
           <h3>
             <router-link :to="'/course/' + course.handle" class="course-title-link">
