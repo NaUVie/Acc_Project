@@ -113,15 +113,9 @@
         </div>
       </div>
 
-      <div class="grid-2 mt-3">
-        <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Thời lượng</label>
-          <input v-model="courseForm.duration" type="text" required class="admin-input-style" placeholder="12 tuần, 24 giờ học..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-        </div>
-        <div class="form-group">
-          <label style="color: #1e293b; font-weight: 600;">Trình độ</label>
-          <input v-model="courseForm.level" type="text" required class="admin-input-style" placeholder="Cơ bản, Trung cấp, Nâng cao" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
-        </div>
+      <div class="form-group mt-3">
+        <label style="color: #1e293b; font-weight: 600;">Thời lượng</label>
+        <input v-model="courseForm.duration" type="text" class="admin-input-style" placeholder="Ví dụ: 12 tuần, 24 giờ học..." style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
       </div>
 
       <!-- Course Resource Links (Học liệu, Link ảnh, Video Youtube) -->
@@ -257,8 +251,8 @@ const courseForm = ref({
   coverImage: '',
   price: 0,
   originalPrice: 0,
-  duration: '12 tuần',
-  level: 'Trung cấp',
+  duration: '',
+  level: '',
   status: 'ongoing',
   materialsLink: '',
   photosLink: '',
@@ -324,8 +318,8 @@ onMounted(() => {
       coverImage: '',
       price: 0,
       originalPrice: 0,
-      duration: '12 tuần',
-      level: 'Trung cấp',
+      duration: '',
+      level: '',
       status: 'ongoing',
       materialsLink: '',
       photosLink: '',
