@@ -31,7 +31,7 @@ def get_courses(db: Session, category_slug: str = None, include_details: bool = 
     if category_slug:
         clean_slug = category_slug.strip().lower()
         query = query.filter(func.lower(models.Course.category_slug) == clean_slug)
-    return query.all()
+    return query.order_by(models.Course.id.desc()).all()
 
 def get_course_by_handle(db: Session, handle: str):
     return db.query(models.Course).options(selectinload(models.Course.tags)).filter(models.Course.handle == handle).first()
