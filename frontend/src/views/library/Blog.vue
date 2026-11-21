@@ -87,7 +87,7 @@
             </div>
 
             <h2 class="strip-title">
-              <router-link :to="post.link || '/blog/' + post.handle">
+              <router-link :to="post.link || '/blog/' + post.handle" class="strip-title-link">
                 {{ post.title }}
               </router-link>
             </h2>
