@@ -267,6 +267,22 @@
   margin: 20px 0;
 }
 
+.rich-article-html :deep(a) {
+  color: #0066cc !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rich-article-html :deep(a:hover) {
+  color: #022b9f !important;
+}
+
+.rich-article-html :deep(a *) {
+  color: inherit !important;
+}
+
 .article-section-block {
   padding-top: 28px;
   border-top: 1px solid #f1f5f9;

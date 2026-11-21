@@ -57,6 +57,14 @@ export function sanitizeHtml(dirtyHtml) {
       continue;
     }
 
+    if (tag === 'A') {
+      const href = el.getAttribute('href') || '';
+      if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('//')) {
+        el.setAttribute('target', '_blank');
+        el.setAttribute('rel', 'noopener noreferrer');
+      }
+    }
+
     if (tag === 'IFRAME') {
       const src = el.getAttribute('src') || '';
       try {

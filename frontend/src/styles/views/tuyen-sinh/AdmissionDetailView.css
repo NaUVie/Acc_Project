@@ -162,6 +162,25 @@
   line-height: 1.5;
 }
 
+:deep(.section-text a),
+.section-text :deep(a) {
+  color: #0066cc !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+:deep(.section-text a:hover),
+.section-text :deep(a:hover) {
+  color: #022b9f !important;
+}
+
+:deep(.section-text a *),
+.section-text :deep(a *) {
+  color: inherit !important;
+}
+
 .article-cta-box {
   margin-top: 48px;
   background: linear-gradient(135deg, #022B9F 0%, #0369a1 100%);

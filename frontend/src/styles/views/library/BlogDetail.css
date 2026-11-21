@@ -158,6 +158,24 @@
   margin: 20px 0;
 }
 
+.content-html-wrapper :deep(a) {
+  color: #0066cc !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.content-html-wrapper :deep(a:hover) {
+  color: #022b9f !important;
+  text-decoration-color: #022b9f !important;
+}
+
+.content-html-wrapper :deep(a *) {
+  color: inherit !important;
+}
+
 /* Article Footer Meta (Ngày đăng góc phải cuối bài, in nghiêng) */
 .article-footer-meta {
   display: flex;

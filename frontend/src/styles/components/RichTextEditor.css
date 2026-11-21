@@ -126,6 +126,20 @@
   outline: 3px solid #0284c7;
 }
 
+.rich-editor-content :deep(a),
+.rich-editor-content a {
+  color: #0066cc !important;
+  text-decoration: underline !important;
+  text-underline-offset: 3px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rich-editor-content :deep(a *),
+.rich-editor-content a * {
+  color: inherit !important;
+}
+
 /* Status & Size Bar */
 .editor-status-bar {
   display: flex;
