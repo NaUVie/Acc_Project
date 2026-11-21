@@ -947,7 +947,10 @@ def get_blog_by_id_or_handle(db: Session, identifier: str):
     return db.query(models.BlogPost).filter(models.BlogPost.handle == identifier).first()
 
 def create_blog_post(db: Session, blog_in: schemas.BlogPostCreate):
-    db_blog = models.BlogPost(**blog_in.model_dump())
+    data = blog_in.model_dump()
+    if not data.get("category"):
+        data["category"] = "Tin tức"
+    db_blog = models.BlogPost(**data)
     db.add(db_blog)
     db.commit()
     db.refresh(db_blog)

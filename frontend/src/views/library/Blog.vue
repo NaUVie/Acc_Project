@@ -79,11 +79,6 @@
                 </svg>
                 {{ formatDate(post.date || post.created_at || post.createdAt) }}
               </span>
-              <span class="meta-dot">•</span>
-              <span class="meta-author">ACC Editorial</span>
-              <span v-if="getLinkedCourseTitle(post.course_id)" class="linked-course-pill">
-                {{ getLinkedCourseTitle(post.course_id) }}
-              </span>
             </div>
 
             <h2 class="strip-title">

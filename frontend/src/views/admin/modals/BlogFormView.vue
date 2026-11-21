@@ -47,80 +47,15 @@
         </div>
 
         <div class="form-group">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label style="color: #1e293b; font-weight: 600; margin: 0; display: flex; align-items: center; gap: 6px;">
-              <span>Chuyên mục Bài viết <span style="color: #e11d48;">*</span></span>
-              <HelpTooltip desc="Nhóm chủ đề bài viết giúp phân loại tại Thư viện Cẩm nang." impact="Hiển thị badge chuyên mục trên card bài viết." />
-            </label>
-            <button 
-              type="button" 
-              @click="$emit('open-category-modal')" 
-              style="font-size: 12px; color: #0284c7; background: none; border: none; cursor: pointer; font-weight: 600; padding: 0; text-decoration: underline;"
-            >
-              ⚙️ Quản lý Chuyên mục
-            </button>
-          </div>
-          <div style="display: flex; gap: 8px;">
-            <select 
-              v-model="form.category" 
-              class="admin-input-style" 
-              required
-              style="flex: 1; background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;"
-            >
-              <option value="" disabled>-- Chọn chuyên mục bài viết --</option>
-              <option v-for="cat in availableCategories" :key="cat.id || cat.name" :value="cat.name">
-                {{ cat.name }}
-              </option>
-            </select>
-            <button 
-              type="button" 
-              class="btn btn-secondary btn-sm" 
-              @click="showQuickAddCat = !showQuickAddCat"
-              title="Tạo nhanh một chuyên mục mới ngay tại đây"
-              style="white-space: nowrap; font-weight: 600;"
-            >
-              {{ showQuickAddCat ? 'Đóng' : '+ Thêm mới' }}
-            </button>
-          </div>
-
-          <!-- Quick Add Category inline box -->
-          <div v-if="showQuickAddCat" class="quick-add-cat-box mt-2" style="display: flex; gap: 8px; background: #f0fdf4; padding: 10px; border-radius: 8px; border: 1px solid #bbf7d0; align-items: center;">
-            <input 
-              v-model="quickCatName" 
-              type="text" 
-              placeholder="Nhập tên chuyên mục mới (VD: Case Study AI)..." 
-              class="admin-input-style"
-              style="flex: 1; background: #ffffff; border: 1px solid #86efac; font-size: 13px; padding: 8px 12px;"
-              @keydown.enter.prevent="handleQuickAddCategory"
-            />
-            <button 
-              type="button" 
-              @click="handleQuickAddCategory" 
-              class="btn btn-primary btn-sm"
-              :disabled="!quickCatName.trim() || isSubmittingCat"
-            >
-              {{ isSubmittingCat ? 'Đang tạo...' : 'Tạo & Chọn' }}
-            </button>
-            <button 
-              type="button" 
-              @click="showQuickAddCat = false; quickCatName = ''" 
-              class="btn btn-secondary btn-sm"
-            >
-              Hủy
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-2 gap-4 mt-4">
-        <div class="form-group">
           <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
             <span>Ngày hiển thị (Công khai)</span>
             <HelpTooltip desc="Ngày xuất bản hiển thị cho độc giả (ví dụ: 15/08/2026)." />
           </label>
           <input v-model="form.date" type="text" class="admin-input-style" placeholder="Ví dụ: 15/08/2026" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
         </div>
+      </div>
 
+      <div class="grid grid-2 gap-4 mt-4">
         <div class="form-group">
           <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
             <span>Khóa học liên kết</span>
@@ -134,14 +69,14 @@
           </select>
           <small class="text-muted" style="display: block; margin-top: 2px;">Bài viết sẽ tự động xuất hiện ở mục "Bài viết liên quan" trên trang chi tiết khóa học này.</small>
         </div>
-      </div>
 
-      <div class="form-group mt-4">
-        <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
-          <span>Link liên kết ngoài (Tùy chọn)</span>
-          <HelpTooltip desc="Điền link nếu muốn người đọc nhấp vào bài viết sẽ nhảy sang một trang web hoặc tài liệu khác." />
-        </label>
-        <input v-model="form.link" type="text" class="admin-input-style" placeholder="/blog/... hoặc URL ngoài" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+        <div class="form-group">
+          <label style="color: #1e293b; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+            <span>Link liên kết ngoài (Tùy chọn)</span>
+            <HelpTooltip desc="Điền link nếu muốn người đọc nhấp vào bài viết sẽ nhảy sang một trang web hoặc tài liệu khác." />
+          </label>
+          <input v-model="form.link" type="text" class="admin-input-style" placeholder="/blog/... hoặc URL ngoài" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1;" />
+        </div>
       </div>
 
       <div class="form-group mt-4">
@@ -228,10 +163,6 @@ const savingBlog = ref(false);
 const uploadingImage = ref(false);
 const imageFileRef = ref(null);
 
-const showQuickAddCat = ref(false);
-const quickCatName = ref('');
-const isSubmittingCat = ref(false);
-
 // Cropper States
 const isCropperOpen = ref(false);
 const cropTargetUrl = ref('');
@@ -292,7 +223,7 @@ onMounted(async () => {
       id: '',
       title: '',
       handle: '',
-      category: props.availableCategories.length > 0 ? props.availableCategories[0].name : 'AI 2026',
+      category: (props.availableCategories && props.availableCategories.length > 0) ? props.availableCategories[0].name : 'Tin tức',
       date: new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
       image: '',
       excerpt: '',
@@ -320,25 +251,6 @@ const generateSlug = () => {
   slug = slug.replace(/[^a-z0-9\s-]/g, '');
   slug = slug.replace(/\s+/g, '-').replace(/-+/g, '-');
   form.value.handle = slug.substring(0, 70);
-};
-
-const handleQuickAddCategory = async () => {
-  const name = quickCatName.value.trim();
-  if (!name) return;
-  isSubmittingCat.value = true;
-  try {
-    const created = await courseStore.addBlogCategory({ name });
-    if (created) {
-      form.value.category = created.name;
-      quickCatName.value = '';
-      showQuickAddCat.value = false;
-      await courseStore.fetchBlogCategories(true);
-    }
-  } catch (err) {
-    // Toast handled in store
-  } finally {
-    isSubmittingCat.value = false;
-  }
 };
 
 const openCropper = (url, callback, ratio = 'wide', title = '✂ Cắt Thumbnail Bài Viết') => {
@@ -377,6 +289,10 @@ const saveBlog = async () => {
 
   if (!form.value.link) {
     form.value.link = `/blog/${form.value.handle}`;
+  }
+
+  if (!form.value.category) {
+    form.value.category = (props.availableCategories && props.availableCategories.length > 0) ? props.availableCategories[0].name : 'Tin tức';
   }
 
   savingBlog.value = true;

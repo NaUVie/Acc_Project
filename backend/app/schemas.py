@@ -168,7 +168,7 @@ class BlogPostBase(BaseModel):
 class BlogPostCreate(BaseModel):
     title: str
     handle: str
-    category: str
+    category: Optional[str] = "Tin tức"
     excerpt: Optional[str] = None
     image: Optional[str] = None
     date: Optional[str] = None
